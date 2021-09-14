@@ -52,6 +52,7 @@ public class TimerConfigBuilder extends AbstractMeterConfigBuilder<
     @Override
     protected TimerConfig buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -61,6 +62,7 @@ public class TimerConfigBuilder extends AbstractMeterConfigBuilder<
 
         return new DefaultTimerConfig(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

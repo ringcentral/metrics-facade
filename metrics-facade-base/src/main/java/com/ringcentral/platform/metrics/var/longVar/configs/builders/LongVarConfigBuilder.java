@@ -1,10 +1,11 @@
 package com.ringcentral.platform.metrics.var.longVar.configs.builders;
 
-import java.util.List;
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.dimensions.*;
 import com.ringcentral.platform.metrics.var.configs.builders.AbstractVarConfigBuilder;
 import com.ringcentral.platform.metrics.var.longVar.configs.*;
+
+import java.util.List;
 
 public class LongVarConfigBuilder extends AbstractVarConfigBuilder<LongVarConfig, LongVarConfigBuilder> {
 
@@ -23,14 +24,18 @@ public class LongVarConfigBuilder extends AbstractVarConfigBuilder<LongVarConfig
     @Override
     protected LongVarConfig buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
+        boolean nonDecreasing,
         MetricContext context) {
 
         return new DefaultLongVarConfig(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
+            nonDecreasing,
             context);
     }
 }

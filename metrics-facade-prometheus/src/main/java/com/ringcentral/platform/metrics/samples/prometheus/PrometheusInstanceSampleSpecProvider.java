@@ -63,6 +63,7 @@ public class PrometheusInstanceSampleSpecProvider implements InstanceSampleSpecP
             Boolean.TRUE,
             instance,
             instance.name(),
+            metric.hasDescription() ? metric.description() : null,
             instance.dimensionValues());
     }
 }

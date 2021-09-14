@@ -815,6 +815,7 @@ public abstract class AbstractMeterConfigBuilder<
 
         return buildImpl(
             hasEnabled() ? getEnabled() : DEFAULT_ENABLED,
+            description(),
             prefixDimensionValues(),
             dimensions,
             exclusionPredicate,
@@ -849,6 +850,7 @@ public abstract class AbstractMeterConfigBuilder<
 
     protected abstract C buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,

@@ -6,10 +6,13 @@ import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
 import com.ringcentral.platform.metrics.var.VarInstance;
+import com.ringcentral.platform.metrics.var.doubleVar.DoubleVarInstance;
+import com.ringcentral.platform.metrics.var.longVar.LongVarInstance;
 import io.prometheus.client.Collector;
 import org.junit.Test;
 
 import static com.ringcentral.platform.metrics.names.MetricName.name;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.*;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,25 +21,28 @@ import static org.mockito.Mockito.*;
 
 public class PrometheusInstanceSampleMakerTest {
 
+    PrometheusInstanceSampleMaker maker = new PrometheusInstanceSampleMaker();
+
     @Test
     public void makingInstanceSample() {
-        PrometheusInstanceSampleMaker maker = new PrometheusInstanceSampleMaker();
-
         assertNull(maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
             false,
             mock(MetricInstance.class),
             name("a"),
+            "Description for " + name("a"),
             emptyList())));
 
         assertNull(maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
             true,
             null,
             name("a"),
+            "Description for " + name("a"),
             emptyList())));
 
         assertNull(maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
             true,
             mock(MetricInstance.class),
+            null,
             null,
             emptyList())));
 
@@ -49,6 +55,7 @@ public class PrometheusInstanceSampleMakerTest {
         PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.GAUGE);
 
         check(
@@ -56,6 +63,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -67,6 +75,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "all"),
+            "Description for " + name("a", "b"),
             Collector.Type.GAUGE);
 
         check(
@@ -74,6 +83,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -85,6 +95,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.GAUGE);
 
         check(
@@ -92,6 +103,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -104,6 +116,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.GAUGE);
 
         check(
@@ -111,6 +124,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -122,6 +136,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "all"),
+            "Description for " + name("a", "b"),
             Collector.Type.GAUGE);
 
         check(
@@ -129,6 +144,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -140,6 +156,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.GAUGE);
 
         check(
@@ -147,6 +164,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -159,6 +177,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "total"),
+            "Description for " + name("a", "b"),
             Collector.Type.COUNTER);
 
         check(
@@ -166,6 +185,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -177,6 +197,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "all", "total"),
+            "Description for " + name("a", "b"),
             Collector.Type.COUNTER);
 
         check(
@@ -184,6 +205,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -195,6 +217,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "total"),
+            "Description for " + name("a", "b"),
             Collector.Type.COUNTER);
 
         check(
@@ -202,6 +225,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -214,6 +238,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.SUMMARY);
 
         check(
@@ -221,6 +246,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -232,6 +258,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "all"),
+            "Description for " + name("a", "b"),
             Collector.Type.SUMMARY);
 
         check(
@@ -239,6 +266,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -250,6 +278,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.SUMMARY);
 
         check(
@@ -257,6 +286,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -269,6 +299,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.SUMMARY);
 
         check(
@@ -276,6 +307,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -287,6 +319,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "all"),
+            "Description for " + name("a", "b"),
             Collector.Type.SUMMARY);
 
         check(
@@ -294,6 +327,7 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
 
@@ -305,6 +339,7 @@ public class PrometheusInstanceSampleMakerTest {
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             Collector.Type.SUMMARY);
 
         check(
@@ -312,14 +347,82 @@ public class PrometheusInstanceSampleMakerTest {
                 true,
                 instance,
                 name("a", "b"),
+                "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
     }
 
-    public void check(PrometheusInstanceSample actual, PrometheusInstanceSample expected) {
+    void check(PrometheusInstanceSample actual, PrometheusInstanceSample expected) {
         assertThat(actual.instanceName(), is(expected.instanceName()));
         assertThat(actual.name(), is(expected.name()));
+        assertThat(actual.description(), is(expected.description()));
         assertThat(actual.type(), is(expected.type()));
         assertThat(actual.children(), is(expected.children()));
+    }
+
+    @Test
+    public void exportNonDecreasingLongVarAsCounter() {
+        LongVarInstance instance = mock(LongVarInstance.class);
+        when(instance.name()).thenReturn(name("a", "b"));
+        when(instance.isTotalInstance()).thenReturn(true);
+        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isNonDecreasing()).thenReturn(true);
+
+        PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
+            name("a", "b"),
+            name("a", "b"),
+            "Description for " + name("a", "b"),
+            Collector.Type.COUNTER);
+
+        check(
+            maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
+                true,
+                instance,
+                name("a", "b"),
+                "Description for " + name("a", "b"),
+                emptyList())),
+            expectedInstanceSample);
+
+        maker = new PrometheusInstanceSampleMaker(
+            DEFAULT_TOTAL_INSTANCE_NAME_SUFFIX,
+            DEFAULT_DIMENSIONAL_TOTAL_INSTANCE_NAME_SUFFIX,
+            false);
+
+        expectedInstanceSample = new PrometheusInstanceSample(
+            name("a", "b"),
+            name("a", "b"),
+            "Description for " + name("a", "b"),
+            Collector.Type.GAUGE);
+
+        check(
+            maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
+                true,
+                instance,
+                name("a", "b"),
+                "Description for " + name("a", "b"),
+                emptyList())),
+            expectedInstanceSample);
+
+        maker = new PrometheusInstanceSampleMaker();
+        DoubleVarInstance doubleVarInstance = mock(DoubleVarInstance.class);
+        when(doubleVarInstance.name()).thenReturn(name("a", "b"));
+        when(doubleVarInstance.isTotalInstance()).thenReturn(true);
+        when(doubleVarInstance.isDimensionalTotalInstance()).thenReturn(false);
+        when(doubleVarInstance.isNonDecreasing()).thenReturn(true);
+
+        expectedInstanceSample = new PrometheusInstanceSample(
+            name("a", "b"),
+            name("a", "b"),
+            "Description for " + name("a", "b"),
+            Collector.Type.GAUGE);
+
+        check(
+            maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
+                true,
+                doubleVarInstance,
+                name("a", "b"),
+                "Description for " + name("a", "b"),
+                emptyList())),
+            expectedInstanceSample);
     }
 }

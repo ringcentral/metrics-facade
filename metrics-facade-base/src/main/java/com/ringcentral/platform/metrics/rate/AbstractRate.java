@@ -1,14 +1,16 @@
 package com.ringcentral.platform.metrics.rate;
 
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
 import com.ringcentral.platform.metrics.AbstractMeter;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.configs.*;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
-import static com.ringcentral.platform.metrics.counter.Counter.*;
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
+
+import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
 public abstract class AbstractRate<MI> extends AbstractMeter<
     MI,

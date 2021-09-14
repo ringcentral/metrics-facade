@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.ringcentral.platform.metrics.spring.prometheus.MfPrometheusAutoConfiguration

@@ -52,6 +52,7 @@ public class RateConfigBuilder extends AbstractMeterConfigBuilder<
     @Override
     protected RateConfig buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -61,6 +62,7 @@ public class RateConfigBuilder extends AbstractMeterConfigBuilder<
 
         return new DefaultRateConfig(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

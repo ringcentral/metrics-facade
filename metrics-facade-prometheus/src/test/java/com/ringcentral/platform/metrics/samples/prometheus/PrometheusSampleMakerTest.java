@@ -37,6 +37,7 @@ public class PrometheusSampleMakerTest {
             false,
             mock(CounterInstance.class),
             name("a", "b"),
+            "Description for " + name("a", "b"),
             emptyList());
 
         PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(false, COUNT, 1.0);
@@ -55,6 +56,7 @@ public class PrometheusSampleMakerTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         sampleSpec = new PrometheusSampleSpec(true, LONG_VALUE, 1.0);
@@ -76,6 +78,7 @@ public class PrometheusSampleMakerTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
@@ -97,6 +100,7 @@ public class PrometheusSampleMakerTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
@@ -178,6 +182,7 @@ public class PrometheusSampleMakerTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
@@ -271,6 +276,7 @@ public class PrometheusSampleMakerTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);

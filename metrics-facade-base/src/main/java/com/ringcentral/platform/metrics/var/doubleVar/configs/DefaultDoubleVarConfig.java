@@ -10,14 +10,18 @@ public class DefaultDoubleVarConfig extends AbstractVarConfig implements DoubleV
 
     public DefaultDoubleVarConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
+        boolean nonDecreasing,
         MetricContext context) {
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
+            nonDecreasing,
             context);
     }
 }

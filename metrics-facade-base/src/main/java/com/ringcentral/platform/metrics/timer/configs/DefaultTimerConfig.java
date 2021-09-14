@@ -10,6 +10,7 @@ public class DefaultTimerConfig extends AbstractMeterConfig<TimerInstanceConfig,
 
     public DefaultTimerConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -19,6 +20,7 @@ public class DefaultTimerConfig extends AbstractMeterConfig<TimerInstanceConfig,
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

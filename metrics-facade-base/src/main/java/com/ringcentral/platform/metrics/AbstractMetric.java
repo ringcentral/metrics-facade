@@ -10,12 +10,18 @@ public abstract class AbstractMetric implements Metric {
 
     private final boolean enabled;
     private final MetricName name;
+    private final String description;
 
     private static final Logger logger = getLogger(AbstractMetric.class);
 
-    protected AbstractMetric(boolean enabled, MetricName name) {
+    protected AbstractMetric(
+        boolean enabled,
+        MetricName name,
+        String description) {
+
         this.enabled = enabled;
         this.name = requireNonNull(name);
+        this.description = description;
     }
 
     @Override
@@ -26,6 +32,11 @@ public abstract class AbstractMetric implements Metric {
     @Override
     public MetricName name() {
         return name;
+    }
+
+    @Override
+    public String description() {
+        return description;
     }
 
     protected static void notifyListener(MetricListener listener, Consumer<MetricListener> notification) {

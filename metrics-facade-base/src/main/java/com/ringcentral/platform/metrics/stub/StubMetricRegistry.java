@@ -26,6 +26,10 @@ public class StubMetricRegistry extends AbstractMetricRegistry {
         super(new StubMetricMaker());
     }
 
+    public StubMetricRegistry(ScheduledExecutorService executor) {
+        super(new StubMetricMaker(), executor);
+    }
+
     private static class StubMetricMaker implements MetricMaker {
 
         @Override

@@ -25,6 +25,8 @@ public class BaseCachingVarConfigBuilderTest {
     public void minConfig() {
         BaseCachingVarConfig config = new BaseCachingVarConfigBuilder().build();
         assertTrue(config.isEnabled());
+        assertFalse(config.hasDescription());
+        assertNull(config.description());
         assertTrue(config.prefixDimensionValues().isEmpty());
         assertTrue(config.context().isEmpty());
         assertTrue(config.dimensions().isEmpty());
@@ -36,6 +38,7 @@ public class BaseCachingVarConfigBuilderTest {
     public void maxConfig() {
         BaseCachingVarConfig config = cachingVar()
             .disable()
+            .description("description")
             .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1").put("k_2", "v_2")
             .dimensions(DIMENSION_3)
@@ -43,6 +46,8 @@ public class BaseCachingVarConfigBuilderTest {
             .build();
 
         assertFalse(config.isEnabled());
+        assertTrue(config.hasDescription());
+        assertThat(config.description(), is("description"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -57,6 +62,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         builder.rebase(withCachingVar()
             .disable()
+            .description("description")
             .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .dimensions(DIMENSION_3)
@@ -64,6 +70,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         BaseCachingVarConfig config = builder.build();
         assertFalse(config.isEnabled());
+        assertThat(config.description(), is("description"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1_2"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -73,6 +80,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         builder = cachingVar()
             .enable()
+            .description("description_1")
             .prefix(dimensionValues(DIMENSION_3.value("v_3")))
             .put("k_1", "v_1_1")
             .dimensions(DIMENSION_1, DIMENSION_2)
@@ -80,6 +88,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         builder.rebase(cachingVar()
             .disable()
+            .description("description_2")
             .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .dimensions(DIMENSION_3)
@@ -87,6 +96,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         config = builder.build();
         assertTrue(config.isEnabled());
+        assertThat(config.description(), is("description_1"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_3.value("v_3"))));
         assertThat(config.context().get("k_1"), is("v_1_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -107,6 +117,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         builder.modify(withCachingVar()
             .disable()
+            .description("description")
             .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .dimensions(DIMENSION_3)
@@ -114,6 +125,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         BaseCachingVarConfig config = builder.build();
         assertFalse(config.isEnabled());
+        assertThat(config.description(), is("description"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1_2"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -123,6 +135,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         builder = cachingVar()
             .enable()
+            .description("description_1")
             .prefix(dimensionValues(DIMENSION_3.value("v_3")))
             .put("k_1", "v_1_1")
             .dimensions(DIMENSION_1, DIMENSION_2)
@@ -130,6 +143,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         builder.modify(cachingVar()
             .disable()
+            .description("description_2")
             .prefix(dimensionValues(DIMENSION_4.value("v_4")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .dimensions(DIMENSION_3)
@@ -137,6 +151,7 @@ public class BaseCachingVarConfigBuilderTest {
 
         config = builder.build();
         assertFalse(config.isEnabled());
+        assertThat(config.description(), is("description_2"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_4.value("v_4"))));
         assertThat(config.context().get("k_1"), is("v_1_2"));
         assertThat(config.context().get("k_2"), is("v_2"));

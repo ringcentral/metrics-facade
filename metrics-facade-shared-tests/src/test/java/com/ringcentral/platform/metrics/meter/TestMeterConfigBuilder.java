@@ -52,6 +52,7 @@ public class TestMeterConfigBuilder extends AbstractMeterConfigBuilder<
     @Override
     protected BaseMeterConfig buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -61,6 +62,7 @@ public class TestMeterConfigBuilder extends AbstractMeterConfigBuilder<
 
         return new BaseMeterConfig(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

@@ -5,7 +5,7 @@ import com.ringcentral.platform.metrics.names.MetricNamed;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 import static java.util.stream.Collectors.*;
 
-public class DefaultMetricNamedInfoProvider<I> implements PredicativeMetricNamedInfoProvider<I>, ConcurrentMetricNamedInfoProvider<I> {
+public class DefaultMetricNamedInfoProvider<I> implements PredicativeMetricNamedInfoProvider<I> {
 
     private final List<Entry<I>> entries;
 

@@ -16,6 +16,12 @@ public class MetricName implements MetricKey, Iterable<String> {
 
     /* ****************************** */
 
+    public static MetricName fromDotSeparated(String name) {
+        return metricName(name.split("\\.", -1));
+    }
+
+    /* ****************************** */
+
     public static MetricName of(String part) {
         return metricName(part);
     }
@@ -210,6 +216,24 @@ public class MetricName implements MetricKey, Iterable<String> {
         String[] resultParts = parts.toArray(new String[size()]);
         resultParts[pos1] = replacement1;
         resultParts[pos2] = replacement2;
+        return new MetricName(asList(resultParts));
+    }
+
+    public MetricName lowerCase() {
+        return lowerCase(Locale.ENGLISH);
+    }
+
+    public MetricName lowerCase(Locale locale) {
+        if (isEmpty()) {
+            return this;
+        }
+
+        String[] resultParts = new String[size()];
+
+        for (int i = 0; i < size(); ++i) {
+            resultParts[i] = part(i).toLowerCase(locale);
+        }
+
         return new MetricName(asList(resultParts));
     }
 

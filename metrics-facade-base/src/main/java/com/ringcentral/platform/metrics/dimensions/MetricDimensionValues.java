@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.dimensions;
 
-import java.util.List;
+import java.util.*;
 
 public class MetricDimensionValues {
 
@@ -16,8 +16,20 @@ public class MetricDimensionValues {
         return dimensionValues(values);
     }
 
+    public static MetricDimensionValues forDimensionValues(List<MetricDimensionValue> values) {
+        return dimensionValues(values);
+    }
+
     public static MetricDimensionValues dimensionValues(MetricDimensionValue... values) {
         return new MetricDimensionValues(values);
+    }
+
+    public static MetricDimensionValues dimensionValues(List<MetricDimensionValue> values) {
+        return new MetricDimensionValues(values);
+    }
+
+    private MetricDimensionValues(Collection<? extends MetricDimensionValue> values) {
+        this.list = List.copyOf(values);
     }
 
     private MetricDimensionValues(MetricDimensionValue[] values) {

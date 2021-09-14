@@ -5,7 +5,9 @@ import java.util.concurrent.locks.*;
 import com.ringcentral.platform.metrics.names.MetricNamed;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 
-public class ConcurrentMaskTreeMetricNamedInfoProvider<I> extends MaskTreeMetricNamedInfoProvider<I> {
+public class ConcurrentMaskTreeMetricNamedInfoProvider<I>
+    extends MaskTreeMetricNamedInfoProvider<I>
+    implements ConcurrentMetricNamedInfoProvider<I> {
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 

@@ -8,13 +8,14 @@ import com.ringcentral.platform.metrics.samples.InstanceSampleSpec;
 import java.util.List;
 
 import static java.lang.Boolean.*;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
 
 public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
 
     private Boolean enabled;
     private final MetricInstance instance;
     private MetricName name;
+    private String description;
     private List<MetricDimensionValue> dimensionValues;
 
     public static PrometheusInstanceSampleSpec prometheusInstanceSampleSpec() {
@@ -33,11 +34,13 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
         Boolean enabled,
         MetricInstance instance,
         MetricName name,
+        String description,
         List<MetricDimensionValue> dimensionValues) {
 
         this.enabled = enabled;
         this.instance = instance;
         this.name = name;
+        this.description = description;
         this.dimensionValues = dimensionValues;
     }
 
@@ -87,6 +90,15 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
         return name;
     }
 
+    public PrometheusInstanceSampleSpec description(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public String description() {
+        return description;
+    }
+
     public boolean hasDimensionValues() {
         return dimensionValues != null && !dimensionValues.isEmpty();
     }
@@ -118,6 +130,10 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
 
         if (prometheusMod.name != null) {
             name = prometheusMod.name;
+        }
+
+        if (prometheusMod.description != null) {
+            description = prometheusMod.description;
         }
 
         if (prometheusMod.dimensionValues != null) {

@@ -10,6 +10,7 @@ public class DefaultCounterConfig extends AbstractMeterConfig<CounterInstanceCon
 
     public DefaultCounterConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -19,6 +20,7 @@ public class DefaultCounterConfig extends AbstractMeterConfig<CounterInstanceCon
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

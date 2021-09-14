@@ -1,3 +1,7 @@
 package com.ringcentral.platform.metrics;
 
-public interface Meter extends Metric {}
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+
+public interface Meter extends Metric {
+    void removeInstancesFor(MetricDimensionValues dimensionValues);
+}

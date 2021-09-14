@@ -102,7 +102,7 @@ public abstract class AbstractMeter<
         TimeMsProvider timeMsProvider,
         ScheduledExecutorService executor) {
 
-        super(config.isEnabled(), name);
+        super(config.isEnabled(), name, config.description());
         this.timeMsProvider = timeMsProvider;
 
         if (!config.isEnabled()) {
@@ -385,6 +385,32 @@ public abstract class AbstractMeter<
 
     private boolean areExcluded(MetricDimensionValues dimensionValues) {
         return exclusionPredicate != null && exclusionPredicate.matches(dimensionValues);
+    }
+
+    @Override
+    public void removeInstancesFor(MetricDimensionValues dimensionValues) {
+        if (!isEnabled() || isRemoved()) {
+            return;
+        }
+
+        List<MetricDimensionValue> valueList = dimensionValues.list();
+        checkDimensionValues(valueList);
+
+        if (areExcluded(dimensionValues)) {
+            return;
+        }
+
+        if (allSlice != null) {
+            allSlice.removeInstancesFor(dimensionValues);
+        }
+
+        if (slices != null) {
+            for (Slice<MI, IC, SC, C> slice : slices) {
+                if (slice.matches(dimensionValues)) {
+                    slice.removeInstancesFor(dimensionValues);
+                }
+            }
+        }
     }
 
     public static abstract class AbstractMeterInstance<MI> implements MeterInstance {
@@ -1022,6 +1048,15 @@ public abstract class AbstractMeter<
             if (instance != null) {
                 AbstractMeterInstance<MI> instanceRef = instance;
                 context.forEachListener(l -> l.metricInstanceRemoved(instanceRef));
+            }
+        }
+
+        public void removeInstancesFor(MetricDimensionValues dimensionValues) {
+            if (dimensionsMask != null) {
+                context.execute(() -> {
+                    InstanceKey key = new InstanceKey(dimensionValues.list(), dimensionsMask);
+                    removeInstance(key);
+                });
             }
         }
 

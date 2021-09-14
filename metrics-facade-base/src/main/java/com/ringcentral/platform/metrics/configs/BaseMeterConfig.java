@@ -9,6 +9,7 @@ public class BaseMeterConfig extends AbstractMeterConfig<BaseMeterInstanceConfig
 
     public BaseMeterConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -18,6 +19,7 @@ public class BaseMeterConfig extends AbstractMeterConfig<BaseMeterInstanceConfig
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

@@ -8,9 +8,9 @@ import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
-import static java.util.Objects.*;
-import static java.util.concurrent.TimeUnit.*;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public abstract class AbstractCachingVarConfigBuilder<C extends CachingVarConfig, CB extends CachingVarConfigBuilder<C, CB>>
     extends AbstractVarConfigBuilder<C, CB> implements CachingVarConfigBuilder<C, CB> {
@@ -60,14 +60,18 @@ public abstract class AbstractCachingVarConfigBuilder<C extends CachingVarConfig
     @Override
     protected C buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
+        boolean nonDecreasing,
         MetricContext context) {
 
         return buildImpl(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
+            nonDecreasing,
             context,
             DEFAULT_TTL_SEC,
             SECONDS);
@@ -77,8 +81,10 @@ public abstract class AbstractCachingVarConfigBuilder<C extends CachingVarConfig
     public C build() {
         return buildImpl(
             hasEnabled() ? getEnabled() : DEFAULT_ENABLED,
+            description(),
             prefixDimensionValues(),
             dimensions(),
+            hasNonDecreasing() ? getNonDecreasing() : DEFAULT_NON_DECREASING,
             context().unmodifiable(),
             hasTtl() ? ttl : DEFAULT_TTL_SEC,
             hasTtl() ? ttlUnit : SECONDS);
@@ -86,8 +92,10 @@ public abstract class AbstractCachingVarConfigBuilder<C extends CachingVarConfig
 
     protected abstract C buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
+        boolean nonDecreasing,
         MetricContext context,
         long ttl,
         TimeUnit ttlUnit);

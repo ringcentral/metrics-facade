@@ -17,6 +17,7 @@ public class PrometheusInstanceSampleTest {
         PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "c"),
+            "Description for " + name("a", "b"),
             Collector.Type.UNKNOWN);
 
         instanceSample.add(new PrometheusSample(

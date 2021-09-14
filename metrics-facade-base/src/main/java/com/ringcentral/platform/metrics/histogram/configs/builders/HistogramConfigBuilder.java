@@ -52,6 +52,7 @@ public class HistogramConfigBuilder extends AbstractMeterConfigBuilder<
     @Override
     protected HistogramConfig buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -61,6 +62,7 @@ public class HistogramConfigBuilder extends AbstractMeterConfigBuilder<
 
         return new DefaultHistogramConfig(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

@@ -8,21 +8,25 @@ import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusSample> {
 
     private final MetricName instanceName;
     private final MetricName name;
+    private final String description;
     private final Collector.Type type;
     private List<PrometheusInstanceSample> children;
 
     public PrometheusInstanceSample(
         MetricName instanceName,
         MetricName name,
+        String description,
         Collector.Type type) {
 
         this.instanceName = requireNonNull(instanceName);
         this.name = requireNonNull(name);
+        this.description = description;
         this.type = requireNonNull(type);
     }
 
@@ -32,6 +36,14 @@ public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusS
 
     public MetricName name() {
         return name;
+    }
+
+    public boolean hasDescription() {
+        return !isBlank(description);
+    }
+
+    public String description() {
+        return description;
     }
 
     public Collector.Type type() {
@@ -60,6 +72,7 @@ public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusS
             PrometheusInstanceSample child = new PrometheusInstanceSample(
                 instanceName,
                 childName,
+                description,
                 sample.childInstanceSampleType());
 
             child.add(sample.notBelongingToChildInstanceSample());

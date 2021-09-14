@@ -7,15 +7,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>metrics-facade</artifactId>
         <groupId>com.ringcentral.platform.metrics</groupId>
-        <version>1.0.4-RELEASE</version>
+        <artifactId>metrics-facade</artifactId>
+        <version>1.0.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>metrics-facade-samples</artifactId>
 
     <properties>
         <prometheus.version>0.10.0</prometheus.version>
+        <micrometer-registry-metrics-facade.version>1.7.3-SNAPSHOT</micrometer-registry-metrics-facade.version>
+        <micrometer.version>1.7.3</micrometer.version>
     </properties>
 
     <dependencies>
@@ -29,6 +31,24 @@
             <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-prometheus</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ringcentral.platform.metrics</groupId>
+            <artifactId>micrometer-registry-metrics-facade</artifactId>
+            <version>${micrometer-registry-metrics-facade.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-jmx</artifactId>
+            <version>${micrometer.version}</version>
         </dependency>
 
         <dependency>

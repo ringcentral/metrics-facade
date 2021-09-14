@@ -52,6 +52,7 @@ public class CounterConfigBuilder extends AbstractMeterConfigBuilder<
     @Override
     protected CounterConfig buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -61,6 +62,7 @@ public class CounterConfigBuilder extends AbstractMeterConfigBuilder<
 
         return new DefaultCounterConfig(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

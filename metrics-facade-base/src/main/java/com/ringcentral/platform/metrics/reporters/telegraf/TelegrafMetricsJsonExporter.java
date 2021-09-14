@@ -9,6 +9,8 @@ import java.util.*;
 
 public class TelegrafMetricsJsonExporter implements MetricsJsonExporter {
 
+    public static final boolean DEFAULT_GROUP_BY_TYPE = false;
+
     private final boolean groupByType;
     private final InstanceSamplesProvider<? extends DefaultSample, ? extends InstanceSample<DefaultSample>> instanceSamplesProvider;
 

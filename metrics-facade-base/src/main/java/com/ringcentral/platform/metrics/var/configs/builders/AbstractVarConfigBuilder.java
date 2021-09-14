@@ -13,7 +13,10 @@ import static com.ringcentral.platform.metrics.utils.Preconditions.*;
 public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends VarConfigBuilder<C, CB>>
     extends AbstractMetricConfigBuilder<C, CB> implements VarConfigBuilder<C, CB> {
 
+    public static final boolean DEFAULT_NON_DECREASING = false;
+
     private List<MetricDimension> dimensions;
+    private Boolean nonDecreasing;
 
     @Override
     public void rebase(MetricConfigBuilder<?> base) {
@@ -26,6 +29,10 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
 
                 checkDimensionsUnique(varBase.prefixDimensionValues(), dimensions);
             }
+
+            if (varBase.hasNonDecreasing() && !hasNonDecreasing()) {
+                nonDecreasing(varBase.getNonDecreasing());
+            }
         }
 
         super.rebase(base);
@@ -34,10 +41,14 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
     @Override
     public void modify(MetricConfigBuilder<?> mod) {
         if (mod instanceof AbstractVarConfigBuilder) {
-            AbstractVarConfigBuilder<?, ?> modBase = (AbstractVarConfigBuilder<?, ?>)mod;
+            AbstractVarConfigBuilder<?, ?> varMod = (AbstractVarConfigBuilder<?, ?>)mod;
 
-            if (modBase.prefixDimensionValues() != null && dimensions != null) {
-                checkDimensionsUnique(modBase.prefixDimensionValues(), dimensions);
+            if (varMod.prefixDimensionValues() != null && dimensions != null) {
+                checkDimensionsUnique(varMod.prefixDimensionValues(), dimensions);
+            }
+
+            if (varMod.hasNonDecreasing()) {
+                nonDecreasing(varMod.getNonDecreasing());
             }
         }
 
@@ -66,19 +77,40 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
         return dimensions;
     }
 
+    public boolean hasNonDecreasing() {
+        return nonDecreasing != null;
+    }
+
+    public CB nonDecreasing() {
+        return nonDecreasing(true);
+    }
+
+    public CB nonDecreasing(boolean nonDecreasing) {
+        this.nonDecreasing = nonDecreasing;
+        return builder();
+    }
+
+    protected Boolean getNonDecreasing() {
+        return nonDecreasing;
+    }
+
     @Override
     public C build() {
         return buildImpl(
             hasEnabled() ? getEnabled() : DEFAULT_ENABLED,
+            description(),
             prefixDimensionValues(),
             dimensions,
+            hasNonDecreasing() ? getNonDecreasing() : DEFAULT_NON_DECREASING,
             context().unmodifiable());
     }
 
     protected abstract C buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
+        boolean nonDecreasing,
         MetricContext context);
 
     @Override

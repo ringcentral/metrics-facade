@@ -1,10 +1,11 @@
 package com.ringcentral.platform.metrics.var.doubleVar.configs.builders;
 
-import java.util.List;
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.dimensions.*;
-import com.ringcentral.platform.metrics.var.configs.builders.*;
+import com.ringcentral.platform.metrics.var.configs.builders.AbstractVarConfigBuilder;
 import com.ringcentral.platform.metrics.var.doubleVar.configs.*;
+
+import java.util.List;
 
 public class DoubleVarConfigBuilder extends AbstractVarConfigBuilder<DoubleVarConfig, DoubleVarConfigBuilder> {
 
@@ -23,14 +24,18 @@ public class DoubleVarConfigBuilder extends AbstractVarConfigBuilder<DoubleVarCo
     @Override
     protected DoubleVarConfig buildImpl(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
+        boolean nonDecreasing,
         MetricContext context) {
 
         return new DefaultDoubleVarConfig(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
+            nonDecreasing,
             context);
     }
 }

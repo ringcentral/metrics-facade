@@ -12,6 +12,7 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
     public static final boolean DEFAULT_ENABLED = true;
 
     private Boolean enabled;
+    private String description;
     private MetricDimensionValues prefixDimensionValues;
     private final ModifiableMetricContext context = new ModifiableMetricContext();
 
@@ -22,6 +23,10 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
 
             if (metricBase.hasEnabled() && !hasEnabled()) {
                 enabled(metricBase.getEnabled());
+            }
+
+            if (metricBase.hasDescription() && !hasDescription()) {
+                description = metricBase.description;
             }
 
             if (metricBase.prefixDimensionValues != null && prefixDimensionValues == null) {
@@ -41,6 +46,10 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
 
             if (metricMod.hasEnabled()) {
                 enabled(metricMod.getEnabled());
+            }
+
+            if (metricMod.hasDescription()) {
+                description = metricMod.description;
             }
 
             if (metricMod.prefixDimensionValues != null) {
@@ -72,6 +81,19 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
 
     protected Boolean getEnabled() {
         return enabled;
+    }
+
+    protected boolean hasDescription() {
+        return description != null;
+    }
+
+    public CB description(String description) {
+        this.description = description;
+        return builder();
+    }
+
+    protected String description() {
+        return description;
     }
 
     public CB prefix(MetricDimensionValues dimensionValues) {

@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.names;
 
-import org.junit.*;
+import org.junit.Test;
 
 import static com.ringcentral.platform.metrics.names.MetricName.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -11,6 +11,32 @@ public class MetricNameTest {
 
     @Test
     public void making() {
+        MetricName name = fromDotSeparated("A.B.C");
+        assertThat(name.size(), is(3));
+        assertThat(name.part(0), is("A"));
+        assertThat(name.part(1), is("B"));
+        assertThat(name.part(2), is("C"));
+
+        name = fromDotSeparated(".A.B.C.");
+        assertThat(name.size(), is(5));
+        assertThat(name.part(0), is(""));
+        assertThat(name.part(1), is("A"));
+        assertThat(name.part(2), is("B"));
+        assertThat(name.part(3), is("C"));
+        assertThat(name.part(4), is(""));
+
+        name = fromDotSeparated("..A..B..C..");
+        assertThat(name.size(), is(9));
+        assertThat(name.part(0), is(""));
+        assertThat(name.part(1), is(""));
+        assertThat(name.part(2), is("A"));
+        assertThat(name.part(3), is(""));
+        assertThat(name.part(4), is("B"));
+        assertThat(name.part(5), is(""));
+        assertThat(name.part(6), is("C"));
+        assertThat(name.part(7), is(""));
+        assertThat(name.part(8), is(""));
+
         assertThat(MetricName.of("A").toString(), is("A"));
         assertThat(withName("A").toString(), is("A"));
         assertThat(name("A").toString(), is("A"));
@@ -50,12 +76,12 @@ public class MetricNameTest {
         assertThat(metricName(metricName("A", "B"), metricName()).toString(), is("A.B"));
         assertThat(metricName(metricName(), metricName("C")).toString(), is("C"));
 
-        Assert.assertTrue(emptyMetricName().isEmpty());
+        assertTrue(emptyMetricName().isEmpty());
     }
 
     @Test
     public void lastPart() {
-        Assert.assertNull(emptyMetricName().lastPart());
+        assertNull(emptyMetricName().lastPart());
         assertThat(metricName("A").lastPart(), is("A"));
         assertThat(metricName("A", "B").lastPart(), is("B"));
     }
@@ -78,6 +104,12 @@ public class MetricNameTest {
         assertThat(metricName("A", "B").replace("C", 1, "D", 0), is(name("D", "C")));
         assertThat(metricName("A", "B", "C").replace("D", 0, "E", 2), is(name("D", "B", "E")));
         assertThat(metricName("A", "B", "C").replace("D", 2, "E", 0), is(name("E", "B", "D")));
+    }
+
+    @Test
+    public void lowerCase() {
+        assertThat(emptyMetricName().lowerCase(), is(emptyMetricName()));
+        assertThat(metricName("A", "B").lowerCase(), is(metricName("a", "b")));
     }
 
     @Test

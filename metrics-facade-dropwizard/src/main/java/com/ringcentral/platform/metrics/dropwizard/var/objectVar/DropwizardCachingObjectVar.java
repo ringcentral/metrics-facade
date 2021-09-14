@@ -1,13 +1,15 @@
 package com.ringcentral.platform.metrics.dropwizard.var.objectVar;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Supplier;
-import com.ringcentral.platform.metrics.dropwizard.var.DropwizardCachingVar;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.dropwizard.var.DropwizardCachingValueSupplier;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
-import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.*;
 
-public class DropwizardCachingObjectVar extends DropwizardCachingVar<Object> implements CachingObjectVar {
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Supplier;
+
+public class DropwizardCachingObjectVar extends AbstractObjectVar implements CachingObjectVar {
 
     public DropwizardCachingObjectVar(
         MetricName name,
@@ -19,7 +21,15 @@ public class DropwizardCachingObjectVar extends DropwizardCachingVar<Object> imp
             name,
             config,
             OBJECT_VALUE,
-            valueSupplier,
+            valueSupplier != null ? new DropwizardCachingValueSupplier<>(config, valueSupplier) : null,
+            DefaultObjectVarInstanceMaker.INSTANCE,
             executor);
+    }
+
+    @Override
+    public void register(Supplier<Object> valueSupplier, MetricDimensionValues dimensionValues) {
+        super.register(
+            new DropwizardCachingValueSupplier<>((CachingVarConfig)config(), valueSupplier),
+            dimensionValues);
     }
 }

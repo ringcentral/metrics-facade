@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.var;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.VarConfig;
+import com.ringcentral.platform.metrics.var.longVar.AbstractLongVar;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -12,7 +13,7 @@ import static com.ringcentral.platform.metrics.var.longVar.LongVar.LONG_VALUE;
 
 public class DefaultVarTest extends AbstractVarTest<Long, AbstractVar<Long>> {
 
-    protected static class TestVar extends AbstractVar<Long> {
+    protected static class TestVar extends AbstractLongVar {
 
         protected TestVar(
             MetricName name,

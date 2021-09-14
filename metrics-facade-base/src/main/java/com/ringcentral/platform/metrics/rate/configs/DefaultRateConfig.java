@@ -10,6 +10,7 @@ public class DefaultRateConfig extends AbstractMeterConfig<RateInstanceConfig, R
 
     public DefaultRateConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -19,6 +20,7 @@ public class DefaultRateConfig extends AbstractMeterConfig<RateInstanceConfig, R
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

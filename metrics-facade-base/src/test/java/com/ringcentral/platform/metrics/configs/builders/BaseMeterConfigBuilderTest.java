@@ -71,6 +71,8 @@ public class BaseMeterConfigBuilderTest {
     public void minConfig() {
         BaseMeterConfig config = new BaseMeterConfigBuilder().build();
         assertTrue(config.isEnabled());
+        assertFalse(config.hasDescription());
+        assertNull(config.description());
         assertTrue(config.prefixDimensionValues().isEmpty());
         assertTrue(config.context().isEmpty());
         assertFalse(config.hasExclusionPredicate());
@@ -109,6 +111,7 @@ public class BaseMeterConfigBuilderTest {
     public void maxConfig() {
         BaseMeterConfig config = new BaseMeterConfigBuilder()
             .disable()
+            .description("description")
             .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_1)
@@ -182,6 +185,8 @@ public class BaseMeterConfigBuilderTest {
             .builder().build();
 
         assertFalse(config.isEnabled());
+        assertTrue(config.hasDescription());
+        assertThat(config.description(), is("description"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -329,6 +334,7 @@ public class BaseMeterConfigBuilderTest {
 
         builder.rebase(withMeter()
             .disable()
+            .description("description_1")
             .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_1)
@@ -403,6 +409,7 @@ public class BaseMeterConfigBuilderTest {
         BaseMeterConfig config = builder.build();
 
         assertFalse(config.isEnabled());
+        assertThat(config.description(), is("description_1"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -545,6 +552,7 @@ public class BaseMeterConfigBuilderTest {
 
         builder.rebase(withMeter()
             .disable()
+            .description("description_2")
             .prefix(dimensionValues(DIMENSION_1.value("v_1_2"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_2)
@@ -619,6 +627,7 @@ public class BaseMeterConfigBuilderTest {
         config = builder.build();
 
         assertFalse(config.isEnabled());
+        assertThat(config.description(), is("description_1"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -818,6 +827,7 @@ public class BaseMeterConfigBuilderTest {
 
         builder.modify(withMeter()
             .disable()
+            .description("description_1")
             .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_1)
@@ -892,6 +902,7 @@ public class BaseMeterConfigBuilderTest {
         BaseMeterConfig config = builder.build();
 
         assertFalse(config.isEnabled());
+        assertThat(config.description(), is("description_1"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
@@ -1034,6 +1045,7 @@ public class BaseMeterConfigBuilderTest {
 
         builder.modify(withMeter()
             .disable()
+            .description("description_2")
             .prefix(dimensionValues(DIMENSION_1.value("v_1_2"), DIMENSION_2.value("v_2")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_2)
@@ -1108,6 +1120,7 @@ public class BaseMeterConfigBuilderTest {
         config = builder.build();
 
         assertFalse(config.isEnabled());
+        assertThat(config.description(), is("description_2"));
         assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1_2"), DIMENSION_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1_2"));
         assertThat(config.context().get("k_2"), is("v_2"));

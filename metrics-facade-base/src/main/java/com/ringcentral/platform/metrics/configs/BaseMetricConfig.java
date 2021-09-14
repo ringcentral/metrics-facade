@@ -7,11 +7,13 @@ public class BaseMetricConfig extends AbstractMetricConfig {
 
     public BaseMetricConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         MetricContext context) {
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             context);
     }

@@ -10,6 +10,7 @@ public class DefaultHistogramConfig extends AbstractMeterConfig<HistogramInstanc
 
     public DefaultHistogramConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -19,6 +20,7 @@ public class DefaultHistogramConfig extends AbstractMeterConfig<HistogramInstanc
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
             exclusionPredicate,

@@ -1,13 +1,13 @@
 package com.ringcentral.platform.metrics.dropwizard.var.stringVar;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Supplier;
-import com.ringcentral.platform.metrics.var.AbstractVar;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.VarConfig;
-import com.ringcentral.platform.metrics.var.stringVar.StringVar;
+import com.ringcentral.platform.metrics.var.stringVar.AbstractStringVar;
 
-public class DropwizardStringVar extends AbstractVar<String> implements StringVar {
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Supplier;
+
+public class DropwizardStringVar extends AbstractStringVar {
 
     public DropwizardStringVar(
         MetricName name,

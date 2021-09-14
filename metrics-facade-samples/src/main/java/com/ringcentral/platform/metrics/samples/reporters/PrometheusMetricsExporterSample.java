@@ -8,6 +8,8 @@ import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsEx
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 import com.ringcentral.platform.metrics.samples.prometheus.*;
 
+import java.util.Locale;
+
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
@@ -35,12 +37,12 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
 
         miSampleSpecModsProvider.addMod(
             forMetricInstancesMatching(
-                nameMask("histogram.**"),
+                nameMask("Histogram.**"),
                 instance -> "service_2".equals(instance.valueOf(SERVICE))),
             (metric, instance) -> instanceSampleSpec().disable());
 
         miSampleSpecModsProvider.addMod(
-            forMetricWithName("histogram"),
+            forMetricWithName("Histogram"),
             (metric, instance) -> instanceSampleSpec()
                 .name(instance.name().withNewPart(instance.valueOf(SERVICE)))
                 .dimensionValues(instance.dimensionValuesWithout(SERVICE)));
@@ -54,7 +56,7 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
 
         sampleSpecModsProvider.addMod(
             forMetricInstancesMatching(
-                nameMask("histogram.**"),
+                nameMask("Histogram.**"),
                 instance -> instance instanceof HistogramInstance),
             (instanceSampleSpec, instance, measurableValues, measurable) ->
                 measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
@@ -70,11 +72,15 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             sampleMaker,
             registry);
 
-        PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(miSamplesProvider);
+        PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(
+            true,
+            Locale.ENGLISH,
+            miSamplesProvider);
 
         Histogram h = registry.histogram(
-            withName("histogram"),
+            withName("Histogram"),
             () -> withHistogram()
+                .description("Histogram for " + PrometheusMetricsExporterSample.class.getSimpleName())
                 .dimensions(SERVICE, SERVER, PORT)
                 .measurables(MAX, MEAN));
 

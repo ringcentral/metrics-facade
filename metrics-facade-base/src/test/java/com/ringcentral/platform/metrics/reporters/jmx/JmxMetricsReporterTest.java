@@ -63,7 +63,16 @@ public class JmxMetricsReporterTest {
             ObjectVar objectVar = mock(ObjectVar.class);
             Supplier<Object> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn(1L, "2");
-            DefaultVarInstance<Object> instance = new DefaultVarInstance<>(withName("objectVar", "a", "b"), emptyList(), true, false, OBJECT_VALUE, valueSupplier);
+
+            DefaultVarInstance<Object> instance = new DefaultVarInstance<>(
+                withName("objectVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                OBJECT_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {
@@ -87,7 +96,16 @@ public class JmxMetricsReporterTest {
             CachingObjectVar cachingObjectVar = mock(CachingObjectVar.class);
             Supplier<Object> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn(1L, "2");
-            DefaultVarInstance<Object> instance = new DefaultVarInstance<>(withName("cachingObjectVar", "a", "b"), emptyList(), true, false, OBJECT_VALUE, valueSupplier);
+
+            DefaultVarInstance<Object> instance = new DefaultVarInstance<>(
+                withName("cachingObjectVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                OBJECT_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {
@@ -111,7 +129,16 @@ public class JmxMetricsReporterTest {
             LongVar longVar = mock(LongVar.class);
             Supplier<Long> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn(1L, 2L);
-            DefaultVarInstance<Long> instance = new DefaultVarInstance<>(withName("longVar", "a", "b"), emptyList(), true, false, LONG_VALUE, valueSupplier);
+
+            DefaultVarInstance<Long> instance = new DefaultVarInstance<>(
+                withName("longVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                LONG_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {
@@ -135,7 +162,16 @@ public class JmxMetricsReporterTest {
             CachingLongVar cachingLongVar = mock(CachingLongVar.class);
             Supplier<Long> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn(1L, 2L);
-            DefaultVarInstance<Long> instance = new DefaultVarInstance<>(withName("cachingLongVar", "a", "b"), emptyList(), true, false, LONG_VALUE, valueSupplier);
+
+            DefaultVarInstance<Long> instance = new DefaultVarInstance<>(
+                withName("cachingLongVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                LONG_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {
@@ -159,7 +195,16 @@ public class JmxMetricsReporterTest {
             DoubleVar doubleVar = mock(DoubleVar.class);
             Supplier<Double> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn(1.0, 2.0);
-            DefaultVarInstance<Double> instance = new DefaultVarInstance<>(withName("doubleVar", "a", "b"), emptyList(), true, false, DOUBLE_VALUE, valueSupplier);
+
+            DefaultVarInstance<Double> instance = new DefaultVarInstance<>(
+                withName("doubleVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                DOUBLE_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {
@@ -183,7 +228,16 @@ public class JmxMetricsReporterTest {
             CachingDoubleVar cachingDoubleVar = mock(CachingDoubleVar.class);
             Supplier<Double> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn(1.0, 2.0);
-            DefaultVarInstance<Double> instance = new DefaultVarInstance<>(withName("cachingDoubleVar", "a", "b"), emptyList(), true, false, DOUBLE_VALUE, valueSupplier);
+
+            DefaultVarInstance<Double> instance = new DefaultVarInstance<>(
+                withName("cachingDoubleVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                DOUBLE_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {
@@ -207,7 +261,16 @@ public class JmxMetricsReporterTest {
             StringVar stringVar = mock(StringVar.class);
             Supplier<String> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn("V_1", "V_2");
-            DefaultVarInstance<String> instance = new DefaultVarInstance<>(withName("stringVar", "a", "b"), emptyList(), true, false, STRING_VALUE, valueSupplier);
+
+            DefaultVarInstance<String> instance = new DefaultVarInstance<>(
+                withName("stringVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                STRING_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {
@@ -231,7 +294,16 @@ public class JmxMetricsReporterTest {
             CachingStringVar cachingStringVar = mock(CachingStringVar.class);
             Supplier<String> valueSupplier = mock(Supplier.class);
             when(valueSupplier.get()).thenReturn("V_1", "V_2");
-            DefaultVarInstance<String> instance = new DefaultVarInstance<>(withName("cachingStringVar", "a", "b"), emptyList(), true, false, STRING_VALUE, valueSupplier);
+
+            DefaultVarInstance<String> instance = new DefaultVarInstance<>(
+                withName("cachingStringVar", "a", "b"),
+                emptyList(),
+                true,
+                false,
+                false,
+                STRING_VALUE,
+                valueSupplier);
+
             Ref<MetricListener> listenerRef = new Ref<>();
 
             doAnswer(invocation -> {

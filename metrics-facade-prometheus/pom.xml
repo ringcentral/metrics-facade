@@ -7,9 +7,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>metrics-facade</artifactId>
         <groupId>com.ringcentral.platform.metrics</groupId>
-        <version>1.0.4-RELEASE</version>
+        <artifactId>metrics-facade</artifactId>
+        <version>1.0.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>metrics-facade-prometheus</artifactId>

@@ -1,8 +1,9 @@
 package com.ringcentral.platform.metrics.var.configs;
 
-import java.util.List;
 import com.ringcentral.platform.metrics.configs.MetricConfig;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+
+import java.util.List;
 
 public interface VarConfig extends MetricConfig {
     default boolean hasDimensions() {
@@ -10,4 +11,6 @@ public interface VarConfig extends MetricConfig {
     }
 
     List<MetricDimension> dimensions();
+
+    boolean isNonDecreasing();
 }

@@ -18,6 +18,7 @@ public abstract class AbstractMeterConfig<IC extends MeterInstanceConfig, SC ext
 
     protected AbstractMeterConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
         MetricDimensionValuesPredicate exclusionPredicate,
@@ -25,7 +26,11 @@ public abstract class AbstractMeterConfig<IC extends MeterInstanceConfig, SC ext
         Set<SC> sliceConfigs,
         MetricContext context) {
 
-        super(enabled, prefixDimensionValues, context);
+        super(
+            enabled,
+            description,
+            prefixDimensionValues,
+            context);
 
         this.dimensions = dimensions != null ? dimensions : emptyList();
         this.exclusionPredicate = exclusionPredicate;

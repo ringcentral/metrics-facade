@@ -10,14 +10,18 @@ public class DefaultObjectVarConfig extends AbstractVarConfig implements ObjectV
 
     public DefaultObjectVarConfig(
         boolean enabled,
+        String description,
         MetricDimensionValues prefixDimensionValues,
         List<MetricDimension> dimensions,
+        boolean nonDecreasing,
         MetricContext context) {
 
         super(
             enabled,
+            description,
             prefixDimensionValues,
             dimensions,
+            nonDecreasing,
             context);
     }
 }

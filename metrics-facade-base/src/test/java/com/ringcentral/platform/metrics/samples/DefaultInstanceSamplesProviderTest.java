@@ -33,7 +33,7 @@ import static com.ringcentral.platform.metrics.timer.Timer.DURATION_UNIT;
 import static com.ringcentral.platform.metrics.utils.CollectionUtils.linkedHashMapOf;
 import static com.ringcentral.platform.metrics.var.longVar.LongVar.LONG_VALUE;
 import static com.ringcentral.platform.metrics.var.objectVar.ObjectVar.OBJECT_VALUE;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
@@ -67,6 +67,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             false,
+            false,
             OBJECT_VALUE,
             valueSupplier);
 
@@ -87,6 +88,7 @@ public class DefaultInstanceSamplesProviderTest {
             withName("objectVar", "a", "b"),
             emptyList(),
             true,
+            false,
             false,
             OBJECT_VALUE,
             valueSupplier);
@@ -130,6 +132,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             false,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -137,6 +140,7 @@ public class DefaultInstanceSamplesProviderTest {
             withName("longVar", "a", "b", "c"),
             dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
             true,
+            false,
             false,
             LONG_VALUE,
             valueSupplier);
@@ -146,6 +150,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             true,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -157,6 +162,7 @@ public class DefaultInstanceSamplesProviderTest {
                 DIMENSION_3.value("3")).list(),
             false,
             false,
+            true,
             LONG_VALUE,
             valueSupplier);
 
@@ -231,6 +237,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             false,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -238,6 +245,7 @@ public class DefaultInstanceSamplesProviderTest {
             withName("cachingLongVar", "a", "b", "c"),
             dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
             true,
+            false,
             false,
             LONG_VALUE,
             valueSupplier);
@@ -247,6 +255,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             true,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -256,6 +265,7 @@ public class DefaultInstanceSamplesProviderTest {
                 DIMENSION_1.value("1"),
                 DIMENSION_2.value("2"),
                 DIMENSION_3.value("3")).list(),
+            false,
             false,
             false,
             LONG_VALUE,
@@ -290,6 +300,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             false,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -297,6 +308,7 @@ public class DefaultInstanceSamplesProviderTest {
             withName("doubleVar", "a", "b", "c"),
             dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
             true,
+            false,
             false,
             LONG_VALUE,
             valueSupplier);
@@ -306,6 +318,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             true,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -315,6 +328,7 @@ public class DefaultInstanceSamplesProviderTest {
                 DIMENSION_1.value("1"),
                 DIMENSION_2.value("2"),
                 DIMENSION_3.value("3")).list(),
+            false,
             false,
             false,
             LONG_VALUE,
@@ -373,6 +387,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             false,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -380,6 +395,7 @@ public class DefaultInstanceSamplesProviderTest {
             withName("cachingDoubleVar", "a", "b", "c"),
             dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
             true,
+            false,
             false,
             LONG_VALUE,
             valueSupplier);
@@ -389,6 +405,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             true,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -398,6 +415,7 @@ public class DefaultInstanceSamplesProviderTest {
                 DIMENSION_1.value("1"),
                 DIMENSION_2.value("2"),
                 DIMENSION_3.value("3")).list(),
+            false,
             false,
             false,
             LONG_VALUE,
@@ -456,6 +474,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             false,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -463,6 +482,7 @@ public class DefaultInstanceSamplesProviderTest {
             withName("stringVar", "a", "b", "c"),
             dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
             true,
+            false,
             false,
             LONG_VALUE,
             valueSupplier);
@@ -472,6 +492,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             true,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -481,6 +502,7 @@ public class DefaultInstanceSamplesProviderTest {
                 DIMENSION_1.value("1"),
                 DIMENSION_2.value("2"),
                 DIMENSION_3.value("3")).list(),
+            false,
             false,
             false,
             LONG_VALUE,
@@ -539,6 +561,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             false,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -546,6 +569,7 @@ public class DefaultInstanceSamplesProviderTest {
             withName("cachingStringVar", "a", "b", "c"),
             dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
             true,
+            false,
             false,
             LONG_VALUE,
             valueSupplier);
@@ -555,6 +579,7 @@ public class DefaultInstanceSamplesProviderTest {
             emptyList(),
             true,
             true,
+            false,
             LONG_VALUE,
             valueSupplier);
 
@@ -564,6 +589,7 @@ public class DefaultInstanceSamplesProviderTest {
                 DIMENSION_1.value("1"),
                 DIMENSION_2.value("2"),
                 DIMENSION_3.value("3")).list(),
+            false,
             false,
             false,
             LONG_VALUE,

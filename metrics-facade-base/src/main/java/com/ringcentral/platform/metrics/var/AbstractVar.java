@@ -16,6 +16,20 @@ import static java.util.Collections.emptyList;
 
 public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
 
+    public interface InstanceMaker<V> {
+        VarInstance<V> makeInstance(
+            MetricName name,
+            List<MetricDimensionValue> dimensionValues,
+            boolean totalInstance,
+            boolean dimensionalTotalInstance,
+            boolean nonDecreasing,
+            Measurable valueMeasurable,
+            Supplier<V> valueSupplier);
+    }
+
+    private final VarConfig config;
+    private final boolean nonDecreasing;
+
     private volatile boolean removed;
     private final List<MetricListener> listeners = new ArrayList<>();
 
@@ -25,6 +39,8 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
     private final ConcurrentHashMap<InstanceKey, VarInstance<V>> instances;
 
     private final Measurable valueMeasurable;
+
+    private final InstanceMaker<V> instanceMaker;
     private final ScheduledExecutorService executor;
 
     protected AbstractVar(
@@ -32,9 +48,16 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
         VarConfig config,
         Measurable valueMeasurable,
         Supplier<V> valueSupplier,
+        InstanceMaker<V> instanceMaker,
         ScheduledExecutorService executor) {
 
-        super(config.isEnabled(), name);
+        super(
+            config.isEnabled(),
+            name,
+            config.description());
+
+        this.config = config;
+        this.nonDecreasing = config.isNonDecreasing();
 
         if (config.isEnabled()) {
             this.prefixDimensionValues =
@@ -51,11 +74,12 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
             }
 
             if (valueSupplier != null) {
-                this.totalInstance = new DefaultVarInstance<>(
+                this.totalInstance = instanceMaker.makeInstance(
                     name,
                     this.prefixDimensionValues.list(),
                     true,
                     !this.dimensions.isEmpty(),
+                    config.isNonDecreasing(),
                     valueMeasurable,
                     valueSupplier);
             } else {
@@ -63,15 +87,21 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
             }
 
             this.valueMeasurable = valueMeasurable;
+            this.instanceMaker = instanceMaker;
         } else {
             this.prefixDimensionValues = null;
             this.dimensions = null;
             this.totalInstance = null;
             this.instances = null;
             this.valueMeasurable = null;
+            this.instanceMaker = null;
         }
 
         this.executor = executor;
+    }
+
+    protected VarConfig config() {
+        return config;
     }
 
     public Measurable valueMeasurable() {
@@ -155,11 +185,12 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
                 instanceDimensionValues = dimensionValues.list();
             }
 
-            DefaultVarInstance<V> instance = new DefaultVarInstance<>(
+            VarInstance<V> instance = instanceMaker.makeInstance(
                 name(),
                 instanceDimensionValues,
                 false,
                 false,
+                nonDecreasing,
                 valueMeasurable,
                 valueSupplier);
 

@@ -41,6 +41,7 @@ public class PrometheusSampleSpecProviderTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, LONG_VALUE, 1.0);
@@ -60,6 +61,7 @@ public class PrometheusSampleSpecProviderTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
@@ -79,6 +81,7 @@ public class PrometheusSampleSpecProviderTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
@@ -128,6 +131,7 @@ public class PrometheusSampleSpecProviderTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
@@ -199,6 +203,7 @@ public class PrometheusSampleSpecProviderTest {
             true,
             instance,
             name("a", "b"),
+            "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
         expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);

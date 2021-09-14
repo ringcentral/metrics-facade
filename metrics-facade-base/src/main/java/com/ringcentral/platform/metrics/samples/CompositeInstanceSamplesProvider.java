@@ -1,0 +1,22 @@
+package com.ringcentral.platform.metrics.samples;
+
+import java.util.*;
+
+public class CompositeInstanceSamplesProvider<
+    S extends Sample,
+    IS extends InstanceSample<S>,
+    ISP extends InstanceSamplesProvider<? extends S, ? extends IS>> implements InstanceSamplesProvider<S, IS> {
+
+    private final Collection<ISP> children;
+
+    public CompositeInstanceSamplesProvider(Collection<ISP> children) {
+        this.children = children;
+    }
+
+    @Override
+    public Set<IS> instanceSamples() {
+        Set<IS> result = new LinkedHashSet<>();
+        children.forEach(child -> result.addAll(child.instanceSamples()));
+        return result;
+    }
+}

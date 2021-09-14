@@ -1,0 +1,12 @@
+syntax: regexp
+\.classpath
+\.idea
+target
+test-output
+tl_export
+\.project
+*.iml
+*/target/
+.project
+.DS_Store
+.DS_Store?

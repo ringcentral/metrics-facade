@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples.micrometer;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
-import com.ringcentral.platform.metrics.micrometer.MetricsFacadeMeterRegistry;
+import com.ringcentral.platform.metrics.micrometer.MfMeterRegistry;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 import io.micrometer.core.instrument.*;
 
@@ -18,7 +18,7 @@ public class MicrometerSample extends AbstractSample {
         MetricRegistry registry = new DropwizardMetricRegistry();
         export(registry);
 
-        MetricsFacadeMeterRegistry mmRegistry = new MetricsFacadeMeterRegistry(registry, Clock.SYSTEM);
+        MfMeterRegistry mmRegistry = new MfMeterRegistry(registry, Clock.SYSTEM);
 
         // Gauge
         AtomicLong gaugeValueSupplier = new AtomicLong();

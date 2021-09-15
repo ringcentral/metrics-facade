@@ -16,7 +16,7 @@
 
     <properties>
         <prometheus.version>0.10.0</prometheus.version>
-        <micrometer-registry-metrics-facade.version>1.7.3-SNAPSHOT</micrometer-registry-metrics-facade.version>
+        <micrometer-registry-metrics-facade.version>2.5.4-SNAPSHOT</micrometer-registry-metrics-facade.version>
         <micrometer.version>1.7.3</micrometer.version>
     </properties>
 

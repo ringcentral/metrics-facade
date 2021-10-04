@@ -82,9 +82,10 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             () -> withHistogram()
                 .description("Histogram for " + PrometheusMetricsExporterSample.class.getSimpleName())
                 .dimensions(SERVICE, SERVER, PORT)
-                .measurables(MAX, MEAN));
+                .measurables(MIN, MAX, MEAN));
 
         h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        h.update(-1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
         h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
         h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 

@@ -22,6 +22,7 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
 
         if (instance instanceof TimerInstance || instance instanceof HistogramInstance) {
             if (!(measurable instanceof Counter.Count
+                || measurable instanceof Histogram.Min
                 || measurable instanceof Histogram.Max
                 || measurable instanceof Histogram.Mean
                 || measurable instanceof Histogram.Percentile)) {

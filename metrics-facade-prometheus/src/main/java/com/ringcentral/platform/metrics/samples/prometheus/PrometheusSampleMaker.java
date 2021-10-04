@@ -21,6 +21,7 @@ public class PrometheusSampleMaker implements SampleMaker<
     PrometheusSampleSpec,
     PrometheusInstanceSampleSpec> {
 
+    public static final MetricName DEFAULT_MIN_CHILD_NAME_SUFFIX = MetricName.of("min");
     public static final MetricName DEFAULT_MAX_CHILD_NAME_SUFFIX = MetricName.of("max");
     public static final MetricName DEFAULT_MEAN_CHILD_NAME_SUFFIX = MetricName.of("mean");
 
@@ -34,8 +35,12 @@ public class PrometheusSampleMaker implements SampleMaker<
         MetricName childInstanceSampleNameSuffix = null;
         Collector.Type childInstanceSampleType = null;
 
-        // TODO: support exporting Histogram.Max/Mean as a regular sample with a special name suffix.
-        if (spec.measurable() instanceof Histogram.Max) {
+        // TODO: support exporting Histogram.Min/Max/Mean as a regular sample with a special name suffix.
+        if (spec.measurable() instanceof Histogram.Min) {
+            // TODO: support customizing the suffix.
+            childInstanceSampleNameSuffix = DEFAULT_MIN_CHILD_NAME_SUFFIX;
+            childInstanceSampleType = GAUGE;
+        } else if (spec.measurable() instanceof Histogram.Max) {
             // TODO: support customizing the suffix.
             childInstanceSampleNameSuffix = DEFAULT_MAX_CHILD_NAME_SUFFIX;
             childInstanceSampleType = GAUGE;

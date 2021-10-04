@@ -200,8 +200,8 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         expectedSample = new PrometheusSample(
-            null,
-            null,
+            name("min"),
+            Collector.Type.GAUGE,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
@@ -354,8 +354,8 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         expectedSample = new PrometheusSample(
-            null,
-            null,
+            name("min"),
+            Collector.Type.GAUGE,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),

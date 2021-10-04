@@ -144,6 +144,16 @@ public class PrometheusSampleSpecProviderTest {
                 COUNT),
             expectedSampleSpec);
 
+        expectedSampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
+
+        check(
+            provider.sampleSpecFor(
+                instanceSampleSpec,
+                instance,
+                measurableValues,
+                MIN),
+            expectedSampleSpec);
+
         expectedSampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
 
         check(
@@ -188,12 +198,6 @@ public class PrometheusSampleSpecProviderTest {
             instanceSampleSpec,
             instance,
             measurableValues,
-            MIN));
-
-        assertNull(provider.sampleSpecFor(
-            instanceSampleSpec,
-            instance,
-            measurableValues,
             STANDARD_DEVIATION));
 
         // timer
@@ -214,6 +218,16 @@ public class PrometheusSampleSpecProviderTest {
                 instance,
                 measurableValues,
                 COUNT),
+            expectedSampleSpec);
+
+        expectedSampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
+
+        check(
+            provider.sampleSpecFor(
+                instanceSampleSpec,
+                instance,
+                measurableValues,
+                MIN),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
@@ -285,12 +299,6 @@ public class PrometheusSampleSpecProviderTest {
             instance,
             measurableValues,
             RATE_UNIT));
-
-        assertNull(provider.sampleSpecFor(
-            instanceSampleSpec,
-            instance,
-            measurableValues,
-            MIN));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,

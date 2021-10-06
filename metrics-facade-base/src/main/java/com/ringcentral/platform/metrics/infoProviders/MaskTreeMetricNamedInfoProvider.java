@@ -86,7 +86,7 @@ public class MaskTreeMetricNamedInfoProvider<I> implements PredicativeMetricName
                     addMaskEntry((MetricNameMask)inPredicate, null, info, infoOrderNum, true);
                 } else if (inPredicate instanceof DefaultMetricNamedPredicate) {
                     DefaultMetricNamedPredicate dp = (DefaultMetricNamedPredicate)inPredicate;
-                    addMaskEntry(dp.nameMask(), dp.additionalPredicate(), info, nextInfoOrderNum(), true);
+                    addMaskEntry(dp.nameMask(), dp.additionalPredicate(), info, infoOrderNum, true);
                 } else {
                     addNotMaskEntry(inPredicate, info, infoOrderNum, true);
                 }
@@ -101,7 +101,7 @@ public class MaskTreeMetricNamedInfoProvider<I> implements PredicativeMetricName
                     addMaskEntry((MetricNameMask)exPredicate, null, info, infoOrderNum, false);
                 } else if (exPredicate instanceof DefaultMetricNamedPredicate) {
                     DefaultMetricNamedPredicate dp = (DefaultMetricNamedPredicate)exPredicate;
-                    addMaskEntry(dp.nameMask(), dp.additionalPredicate(), info, nextInfoOrderNum(), false);
+                    addMaskEntry(dp.nameMask(), dp.additionalPredicate(), info, infoOrderNum, false);
                 } else {
                     addNotMaskEntry(exPredicate, info, infoOrderNum, false);
                 }
@@ -121,7 +121,7 @@ public class MaskTreeMetricNamedInfoProvider<I> implements PredicativeMetricName
 
         if (!notMaskInEntries.isEmpty()) {
             for (Entry<I> e : notMaskInEntries) {
-                if (e.predicate.matches(named.name())) {
+                if (e.predicate.matches(named)) {
                     resultBuilder.add(e);
                 }
             }
@@ -146,7 +146,7 @@ public class MaskTreeMetricNamedInfoProvider<I> implements PredicativeMetricName
 
             if (i < nameSize) {
                 for (Entry<I> e : node.nameSuffixMaskEntries) {
-                    if (e.predicate.matches(name)) {
+                    if (e.predicate.matches(named)) {
                         resultBuilder.add(e);
                     }
                 }
@@ -159,7 +159,7 @@ public class MaskTreeMetricNamedInfoProvider<I> implements PredicativeMetricName
 
         if (!notMaskExEntries.isEmpty()) {
             for (Entry<I> e : notMaskExEntries) {
-                if (e.predicate.matches(name)) {
+                if (e.predicate.matches(named)) {
                     resultBuilder.remove(e.infoOrderNum);
                 }
             }
@@ -184,7 +184,7 @@ public class MaskTreeMetricNamedInfoProvider<I> implements PredicativeMetricName
 
             if (i < nameSize) {
                 for (Entry<I> e : node.nameSuffixMaskEntries) {
-                    if (e.predicate.matches(name)) {
+                    if (e.predicate.matches(named)) {
                         resultBuilder.remove(e.infoOrderNum);
                     }
                 }

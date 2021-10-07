@@ -35,7 +35,7 @@ public interface Timer extends Meter {
     void update(long duration, MetricDimensionValues dimensionValues);
 
     default Stopwatch stopwatch() {
-        return stopwatch(NO_DIMENSION_VALUES);
+        return stopwatch(null);
     }
 
     Stopwatch stopwatch(MetricDimensionValues dimensionValues);

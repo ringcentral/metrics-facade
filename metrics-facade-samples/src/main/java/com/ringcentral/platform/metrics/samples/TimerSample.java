@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
-import com.ringcentral.platform.metrics.timer.Timer;
+import com.ringcentral.platform.metrics.timer.*;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
@@ -13,7 +13,9 @@ import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.rate.Rate.MEAN_RATE;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerInstanceConfigBuilder.timerInstance;
+import static java.lang.Thread.sleep;
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @SuppressWarnings("ALL")
 public class TimerSample extends AbstractSample {
@@ -195,11 +197,25 @@ public class TimerSample extends AbstractSample {
                         .put("key_2", "value_2_2")) // overrides "key_2" -> "value_2_1"
         );
 
-        fullConfigTimer.update(25, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        fullConfigTimer.update(50, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-        fullConfigTimer.update(25, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
-        fullConfigTimer.update(75, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_2"), PORT.value("221")));
-        fullConfigTimer.update(100, forDimensionValues(SERVICE.value("service_3"), SERVER.value("server_3_1"), PORT.value("311")));
+        fullConfigTimer.update(
+            25, MILLISECONDS,
+            forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+
+        fullConfigTimer.update(
+            50, MILLISECONDS,
+            forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+
+        Stopwatch stopwatch = fullConfigTimer.stopwatch(forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+        sleep(25);
+        stopwatch.stop();
+
+        stopwatch = fullConfigTimer.stopwatch();
+        sleep(75);
+        stopwatch.stop(forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_2"), PORT.value("221")));
+
+        stopwatch = fullConfigTimer.stopwatch();
+        sleep(100);
+        stopwatch.stop(forDimensionValues(SERVICE.value("service_3"), SERVER.value("server_3_1"), PORT.value("311")));
 
         export(registry);
         hang();

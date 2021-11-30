@@ -42,11 +42,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-spring-boot-starter</artifactId>
             <version>${project.version}</version>

@@ -8,7 +8,7 @@
 
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5-RELEASE</version>
 
     <name>RingCentral Metrics Facade</name>
     <url>https://github.com/ringcentral/metrics-facade</url>

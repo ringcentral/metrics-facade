@@ -369,7 +369,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -378,7 +378,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-dropwizard</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -387,7 +387,7 @@ Metrics reporter(s) (for example, ```PrometheusMetricsExporter```):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -712,7 +712,7 @@ You can find the complete sample ```GettingStartedSample.java``` in the followin
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-samples</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -1671,7 +1671,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -1792,7 +1792,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -1958,7 +1958,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -2060,7 +2060,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 

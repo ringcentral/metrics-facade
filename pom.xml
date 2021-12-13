@@ -62,6 +62,7 @@
     <modules>
         <module>metrics-facade-base</module>
         <module>metrics-facade-dropwizard</module>
+        <module>metrics-facade-x</module>
         <module>metrics-facade-prometheus</module>
         <module>metrics-facade-samples</module>
         <module>metrics-facade-test-support</module>

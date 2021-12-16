@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.x.rate;
 
-import com.ringcentral.platform.metrics.NotMeasuredException;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.measurables.*;
@@ -42,11 +42,11 @@ public class XRate extends AbstractRate<XRateImpl> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
-        public static final MeasurableValueProvider<XRateImpl> COUNT_VALUE_PROVIDER = r -> 1L; // Meter::getCount;
-        public static final MeasurableValueProvider<XRateImpl> MEAN_RATE_VALUE_PROVIDER = r -> 1L; // Meter::getMeanRate;
-        public static final MeasurableValueProvider<XRateImpl> ONE_MINUTE_RATE_VALUE_PROVIDER = r -> 1L; // Meter::getOneMinuteRate;
-        public static final MeasurableValueProvider<XRateImpl> FIVE_MINUTES_RATE_VALUE_PROVIDER = r -> 1L; // Meter::getFiveMinuteRate;
-        public static final MeasurableValueProvider<XRateImpl> FIFTEEN_MINUTES_RATE_VALUE_PROVIDER = r -> 1L; // Meter::getFifteenMinuteRate;
+        public static final MeasurableValueProvider<XRateImpl> COUNT_VALUE_PROVIDER = XRateImpl::count;
+        public static final MeasurableValueProvider<XRateImpl> MEAN_RATE_VALUE_PROVIDER = XRateImpl::meanRate;
+        public static final MeasurableValueProvider<XRateImpl> ONE_MINUTE_RATE_VALUE_PROVIDER = XRateImpl::oneMinuteRate;
+        public static final MeasurableValueProvider<XRateImpl> FIVE_MINUTES_RATE_VALUE_PROVIDER = XRateImpl::fiveMinutesRate;
+        public static final MeasurableValueProvider<XRateImpl> FIFTEEN_MINUTES_RATE_VALUE_PROVIDER = XRateImpl::fifteenMinutesRate;
         public static final MeasurableValueProvider<XRateImpl> RATE_UNIT_VALUE_PROVIDER = m -> "events/seconds";
         private static final Map<Measurable, MeasurableValueProvider<XRateImpl>> DEFAULT_MEASURABLE_VALUE_PROVIDERS;
 
@@ -120,23 +120,46 @@ public class XRate extends AbstractRate<XRateImpl> {
         public XRateImpl makeMeterImpl(
             RateInstanceConfig instanceConfig,
             RateSliceConfig sliceConfig,
-            RateConfig config) {
+            RateConfig config,
+            Set<? extends Measurable> measurables) {
 
-//            if (instanceConfig != null && instanceConfig.context().has(Meter.class)) {
-//                return instanceConfig.context().get(Meter.class);
-//            }
-//
-//            MovingAverages movingAverages = null;
-//
-//            if (instanceConfig != null && instanceConfig.context().has(MovingAverages.class)) {
-//                movingAverages = instanceConfig.context().get(MovingAverages.class);
-//            } else if (sliceConfig != null && sliceConfig.context().has(MovingAverages.class)) {
-//                movingAverages = sliceConfig.context().get(MovingAverages.class);
-//            } else if (config != null && config.context().has(MovingAverages.class)) {
-//                movingAverages = config.context().get(MovingAverages.class);
-//            }
-//
-//            return movingAverages != null ? new Meter(movingAverages) : new Meter();
+            XRateImplConfig implConfig = null;
+
+            if (instanceConfig != null) {
+                implConfig = xRateImplConfig(instanceConfig.context());
+            }
+
+            if (implConfig == null && sliceConfig != null) {
+                implConfig = xRateImplConfig(sliceConfig.context());
+            }
+
+            if (implConfig == null && config != null) {
+                implConfig = xRateImplConfig(config.context());
+            }
+
+            if (implConfig == null) {
+                implConfig = ExpMovingAverageXRateImplConfig.DEFAULT;
+            }
+
+            if (implConfig instanceof ExpMovingAverageXRateImplConfig) {
+                return new ExpMovingAverageXRateImpl((ExpMovingAverageXRateImplConfig)implConfig, measurables);
+            }
+
+            throw new IllegalArgumentException(
+                "Unsupported " + XRateImplConfig.class.getSimpleName()
+                + ": " + implConfig.getClass().getName());
+        }
+
+        private XRateImplConfig xRateImplConfig(MetricContext context) {
+            if (context.has(XRateImplConfig.class)) {
+                return context.getForClass(XRateImplConfig.class);
+            } else if (context.has(ExpMovingAverageXRateImplConfig.class)) {
+                return context.getForClass(ExpMovingAverageXRateImplConfig.class);
+            } else if (context.has(XRateImplConfigBuilder.class)) {
+                return context.getForClass(XRateImplConfigBuilder.class).build();
+            } else if (context.has(ExpMovingAverageXRateImplConfigBuilder.class)) {
+                return context.getForClass(ExpMovingAverageXRateImplConfigBuilder.class).build();
+            }
 
             return null;
         }
@@ -206,7 +229,7 @@ public class XRate extends AbstractRate<XRateImpl> {
             config,
             MeasurableValueProvidersProviderImpl.INSTANCE,
             MeterImplMakerImpl.INSTANCE,
-            null, // Meter::mark,
+            XRateImpl::mark,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
             executor);

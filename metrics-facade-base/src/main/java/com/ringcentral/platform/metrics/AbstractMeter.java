@@ -44,7 +44,11 @@ public abstract class AbstractMeter<
         SC extends MeterSliceConfig<IC>,
         C extends MeterConfig<IC, SC>> {
 
-        MI makeMeterImpl(IC instanceConfig, SC sliceConfig, C config);
+        MI makeMeterImpl(
+            IC instanceConfig,
+            SC sliceConfig,
+            C config,
+            Set<? extends Measurable> measurables);
     }
 
     public interface InstanceMaker<MI> {
@@ -765,17 +769,32 @@ public abstract class AbstractMeter<
                     emptyList();
 
                 if (totalInstanceConfig != null) {
+                    Map<Measurable, MeasurableValueProvider<MI>> mvps =
+                        totalInstanceConfig.hasMeasurables() ?
+                        context.measurableValueProvidersProvider.valueProvidersFor(totalInstanceConfig.measurables()) :
+                        this.measurableValueProviders;
+
+                    MI meterImpl = context.meterImplMaker.makeMeterImpl(
+                        totalInstanceConfig,
+                        config,
+                        context.parentConfig,
+                        mvps.keySet());
+
                     this.totalInstance = context.instanceMaker.makeInstance(
                         totalInstanceConfig.hasName() ? MetricName.of(this.name, totalInstanceConfig.name()) : this.name,
                         dimensionValues,
                         true,
                         !this.dimensions.isEmpty(),
                         false,
-                        totalInstanceConfig.hasMeasurables() ?
-                            context.measurableValueProvidersProvider.valueProvidersFor(totalInstanceConfig.measurables()) :
-                            this.measurableValueProviders,
-                        context.meterImplMaker.makeMeterImpl(totalInstanceConfig, config, context.parentConfig));
+                        mvps,
+                        meterImpl);
                 } else {
+                    MI meterImpl = context.meterImplMaker.makeMeterImpl(
+                        null,
+                        config,
+                        context.parentConfig,
+                        this.measurableValueProviders.keySet());
+
                     this.totalInstance = context.instanceMaker.makeInstance(
                         this.name,
                         dimensionValues,
@@ -783,7 +802,7 @@ public abstract class AbstractMeter<
                         !this.dimensions.isEmpty(),
                         false,
                         this.measurableValueProviders,
-                        context.meterImplMaker.makeMeterImpl(null, config, context.parentConfig));
+                        meterImpl);
                 }
             } else {
                 this.totalInstance = null;
@@ -904,26 +923,29 @@ public abstract class AbstractMeter<
                                 }
 
                                 AbstractMeterInstance<MI> newInstance;
+                                MetricName instanceName = nameSuffix != null ? MetricName.of(name, nameSuffix) : name;
+                                Map<Measurable, MeasurableValueProvider<MI>> mvps = levelsMeasurableValueProviders.get(i2);
+                                MI meterImpl = context.meterImplMaker.makeMeterImpl(instanceConfig, config, context.parentConfig, mvps.keySet());
 
                                 if (dimensionalInstanceAutoRemovalEnabled) {
                                     newInstance = context.instanceMaker.makeExpirableInstance(
-                                        nameSuffix != null ? MetricName.of(name, nameSuffix) : name,
+                                        instanceName,
                                         instanceDimensionValues,
                                         false,
                                         false,
                                         true,
-                                        levelsMeasurableValueProviders.get(i2),
-                                        context.meterImplMaker.makeMeterImpl(instanceConfig, config, context.parentConfig),
+                                        mvps,
+                                        meterImpl,
                                         updateTimeMs);
                                 } else {
                                     newInstance = context.instanceMaker.makeInstance(
-                                        nameSuffix != null ? MetricName.of(name, nameSuffix) : name,
+                                        instanceName,
                                         instanceDimensionValues,
                                         false,
                                         false,
                                         true,
-                                        levelsMeasurableValueProviders.get(i2),
-                                        context.meterImplMaker.makeMeterImpl(instanceConfig, config, context.parentConfig));
+                                        mvps,
+                                        meterImpl);
                                 }
 
                                 addInstance(instanceKey, newInstance, value, updateTimeMs, levelsInstances);
@@ -968,6 +990,12 @@ public abstract class AbstractMeter<
 
                             AbstractMeterInstance<MI> newInstance;
 
+                            MI meterImpl = context.meterImplMaker.makeMeterImpl(
+                                null,
+                                config,
+                                context.parentConfig,
+                                measurableValueProviders.keySet());
+
                             if (dimensionalInstanceAutoRemovalEnabled) {
                                 newInstance = context.instanceMaker.makeExpirableInstance(
                                     name,
@@ -976,7 +1004,7 @@ public abstract class AbstractMeter<
                                     false,
                                     false,
                                     measurableValueProviders,
-                                    context.meterImplMaker.makeMeterImpl(null, config, context.parentConfig),
+                                    meterImpl,
                                     updateTimeMs);
                             } else {
                                 newInstance = context.instanceMaker.makeInstance(
@@ -986,7 +1014,7 @@ public abstract class AbstractMeter<
                                     false,
                                     false,
                                     measurableValueProviders,
-                                    context.meterImplMaker.makeMeterImpl(null, config, context.parentConfig));
+                                    meterImpl);
                             }
 
                             addInstance(instanceKey, newInstance, value, updateTimeMs, instances);

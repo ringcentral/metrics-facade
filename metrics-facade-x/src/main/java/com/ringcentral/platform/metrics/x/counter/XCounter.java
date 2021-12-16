@@ -58,7 +58,8 @@ public class XCounter extends AbstractCounter<LongAdder> {
         public LongAdder makeMeterImpl(
             CounterInstanceConfig instanceConfig,
             CounterSliceConfig sliceConfig,
-            CounterConfig config) {
+            CounterConfig config,
+            Set<? extends Measurable> measurables) {
 
             return
                 instanceConfig != null ?

@@ -222,7 +222,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
         public XTimerImpl makeMeterImpl(
             TimerInstanceConfig instanceConfig,
             TimerSliceConfig sliceConfig,
-            TimerConfig config) {
+            TimerConfig config,
+            Set<? extends Measurable> measurables) {
 
 //            if (instanceConfig != null && instanceConfig.context().has(XTimerImpl.class)) {
 //                return instanceConfig.context().get(XTimerImpl.class);

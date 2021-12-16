@@ -68,6 +68,7 @@
         <module>metrics-facade-test-support</module>
         <module>metrics-facade-shared-tests</module>
         <module>metrics-facade-spring</module>
+        <module>metrics-facade-benchmark</module>
     </modules>
 
     <packaging>pom</packaging>

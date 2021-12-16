@@ -1,26 +1,17 @@
 package com.ringcentral.platform.metrics.dropwizard.histogram;
 
-import com.codahale.metrics.ExponentiallyDecayingReservoir;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Reservoir;
-import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.*;
 import com.ringcentral.platform.metrics.NotMeasuredException;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.histogram.AbstractHistogram;
-import com.ringcentral.platform.metrics.histogram.configs.HistogramConfig;
-import com.ringcentral.platform.metrics.histogram.configs.HistogramInstanceConfig;
-import com.ringcentral.platform.metrics.histogram.configs.HistogramSliceConfig;
-import com.ringcentral.platform.metrics.measurables.AbstractMeasurableValues;
-import com.ringcentral.platform.metrics.measurables.Measurable;
+import com.ringcentral.platform.metrics.histogram.configs.*;
+import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -171,7 +162,8 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
         public Histogram makeMeterImpl(
             HistogramInstanceConfig instanceConfig,
             HistogramSliceConfig sliceConfig,
-            HistogramConfig config) {
+            HistogramConfig config,
+            Set<? extends Measurable> measurables) {
 
             if (instanceConfig != null && instanceConfig.context().has(Histogram.class)) {
                 return instanceConfig.context().get(Histogram.class);

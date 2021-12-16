@@ -1,16 +1,9 @@
 package com.ringcentral.platform.metrics.x.var;
 
-import com.ringcentral.platform.metrics.UnmodifiableMetricContext;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.test.time.TestTimeNanosProvider;
-import com.ringcentral.platform.metrics.utils.TimeNanosProvider;
 import com.ringcentral.platform.metrics.var.configs.BaseCachingVarConfig;
-import org.hamcrest.CoreMatchers;
-import org.junit.*;
-import org.mockito.Mockito;
+import org.junit.Test;
 
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static com.ringcentral.platform.metrics.UnmodifiableMetricContext.emptyUnmodifiableMetricContext;
@@ -18,7 +11,6 @@ import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
 import static org.junit.Assume.assumeThat;
 import static org.mockito.Mockito.*;
 

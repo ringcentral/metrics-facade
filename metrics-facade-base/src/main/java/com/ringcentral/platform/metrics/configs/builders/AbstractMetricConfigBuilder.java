@@ -105,6 +105,10 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
         return prefixDimensionValues;
     }
 
+    public CB with(Object value) {
+        return put(value.getClass(), value);
+    }
+
     public CB put(Object key, Object value) {
         context.put(key, value);
         return builder();

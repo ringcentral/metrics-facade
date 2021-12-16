@@ -1,19 +1,14 @@
 package com.ringcentral.platform.metrics.stub;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.dimensions.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.timer.AbstractTimer;
-import com.ringcentral.platform.metrics.timer.Stopwatch;
 import com.ringcentral.platform.metrics.timer.Timer;
-import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
-import com.ringcentral.platform.metrics.timer.configs.TimerInstanceConfig;
-import com.ringcentral.platform.metrics.timer.configs.TimerSliceConfig;
+import com.ringcentral.platform.metrics.timer.*;
+import com.ringcentral.platform.metrics.timer.configs.*;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.Collections.emptyMap;
@@ -25,7 +20,7 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
     static final Object stubTimerImplInstance = new Object();
 
     static final MeterImplMaker<Object, TimerInstanceConfig, TimerSliceConfig, TimerConfig> stubTimerImplMaker =
-        (instanceConfig, sliceConfig, config) -> stubTimerImplInstance;
+        (instanceConfig, sliceConfig, config, measurables) -> stubTimerImplInstance;
 
     public StubTimer(
         MetricName name,

@@ -2,17 +2,13 @@ package com.ringcentral.platform.metrics.stub;
 
 import com.ringcentral.platform.metrics.AbstractMeter;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
-import com.ringcentral.platform.metrics.histogram.AbstractHistogram;
-import com.ringcentral.platform.metrics.histogram.Histogram;
-import com.ringcentral.platform.metrics.histogram.configs.HistogramConfig;
-import com.ringcentral.platform.metrics.histogram.configs.HistogramInstanceConfig;
-import com.ringcentral.platform.metrics.histogram.configs.HistogramSliceConfig;
+import com.ringcentral.platform.metrics.histogram.*;
+import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.Collections.emptyMap;
@@ -24,7 +20,7 @@ public class StubHistogram extends AbstractHistogram<Object> implements Histogra
     static final Object stubHistogramImplInstance = new Object();
 
     static final MeterImplMaker<Object, HistogramInstanceConfig, HistogramSliceConfig, HistogramConfig> stubHistogramImplMaker =
-        (instanceConfig, sliceConfig, config) -> stubHistogramImplInstance;
+        (instanceConfig, sliceConfig, config, measurables) -> stubHistogramImplInstance;
 
     public StubHistogram(
         MetricName name,

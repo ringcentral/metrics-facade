@@ -335,6 +335,10 @@ public abstract class AbstractMeterConfigBuilder<
             return (Impl)this;
         }
 
+        public Impl with(Object value) {
+            return put(value.getClass(), value);
+        }
+
         public Impl put(Object key, Object value) {
             context.put(key, value);
             return (Impl)this;
@@ -508,6 +512,10 @@ public abstract class AbstractMeterConfigBuilder<
         public ICB measurables(Set<M> measurables) {
             this.measurables = measurables;
             return (ICB)this;
+        }
+
+        public ICB with(Object value) {
+            return put(value.getClass(), value);
         }
 
         public ICB put(Object key, Object value) {

@@ -3,19 +3,13 @@ package com.ringcentral.platform.metrics.dropwizard.counter;
 import com.codahale.metrics.Counter;
 import com.ringcentral.platform.metrics.NotMeasuredException;
 import com.ringcentral.platform.metrics.counter.AbstractCounter;
-import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
-import com.ringcentral.platform.metrics.counter.configs.CounterInstanceConfig;
-import com.ringcentral.platform.metrics.counter.configs.CounterSliceConfig;
+import com.ringcentral.platform.metrics.counter.configs.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
-import com.ringcentral.platform.metrics.measurables.AbstractMeasurableValues;
-import com.ringcentral.platform.metrics.measurables.Measurable;
-import com.ringcentral.platform.metrics.measurables.MeasurableValues;
+import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class DropwizardCounter extends AbstractCounter<Counter> {
@@ -64,7 +58,8 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
         public Counter makeMeterImpl(
             CounterInstanceConfig instanceConfig,
             CounterSliceConfig sliceConfig,
-            CounterConfig config) {
+            CounterConfig config,
+            Set<? extends Measurable> measurables) {
 
             return
                 instanceConfig != null ?

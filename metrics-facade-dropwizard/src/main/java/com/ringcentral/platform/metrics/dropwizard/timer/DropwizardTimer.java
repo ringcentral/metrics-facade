@@ -1,34 +1,23 @@
 package com.ringcentral.platform.metrics.dropwizard.timer;
 
-import com.codahale.metrics.ExponentiallyDecayingReservoir;
-import com.codahale.metrics.Reservoir;
-import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
+import com.codahale.metrics.*;
 import com.ringcentral.platform.metrics.NotMeasuredException;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.dimensions.*;
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
-import com.ringcentral.platform.metrics.measurables.AbstractMeasurableValues;
-import com.ringcentral.platform.metrics.measurables.Measurable;
+import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
-import com.ringcentral.platform.metrics.timer.AbstractTimer;
-import com.ringcentral.platform.metrics.timer.Stopwatch;
-import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
-import com.ringcentral.platform.metrics.timer.configs.TimerInstanceConfig;
-import com.ringcentral.platform.metrics.timer.configs.TimerSliceConfig;
+import com.ringcentral.platform.metrics.timer.*;
+import com.ringcentral.platform.metrics.timer.configs.*;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class DropwizardTimer extends AbstractTimer<Timer> {
@@ -235,7 +224,8 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
         public Timer makeMeterImpl(
             TimerInstanceConfig instanceConfig,
             TimerSliceConfig sliceConfig,
-            TimerConfig config) {
+            TimerConfig config,
+            Set<? extends Measurable> measurables) {
 
             if (instanceConfig != null && instanceConfig.context().has(Timer.class)) {
                 return instanceConfig.context().get(Timer.class);

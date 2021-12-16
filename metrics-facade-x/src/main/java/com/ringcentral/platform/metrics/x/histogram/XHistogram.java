@@ -161,7 +161,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
         public XHistogramImpl makeMeterImpl(
             HistogramInstanceConfig instanceConfig,
             HistogramSliceConfig sliceConfig,
-            HistogramConfig config) {
+            HistogramConfig config,
+            Set<? extends Measurable> measurables) {
 
 //            if (instanceConfig != null && instanceConfig.context().has(XHistogramImpl.class)) {
 //                return instanceConfig.context().get(XHistogramImpl.class);

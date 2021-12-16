@@ -1,17 +1,13 @@
 package com.ringcentral.platform.metrics.stub;
 
-import com.ringcentral.platform.metrics.counter.AbstractCounter;
-import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
-import com.ringcentral.platform.metrics.counter.configs.CounterInstanceConfig;
-import com.ringcentral.platform.metrics.counter.configs.CounterSliceConfig;
+import com.ringcentral.platform.metrics.counter.*;
+import com.ringcentral.platform.metrics.counter.configs.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.Collections.emptyMap;
@@ -23,7 +19,7 @@ public class StubCounter extends AbstractCounter<Object> implements Counter {
     static final Object stubCounterImplInstance = new Object();
 
     static final MeterImplMaker<Object, CounterInstanceConfig, CounterSliceConfig, CounterConfig> stubCounterImplMaker =
-        (instanceConfig, sliceConfig, config) -> stubCounterImplInstance;
+        (instanceConfig, sliceConfig, config, measurables) -> stubCounterImplInstance;
 
     public StubCounter(
         MetricName name,

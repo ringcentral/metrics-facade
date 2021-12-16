@@ -10,6 +10,10 @@ public interface MetricContext {
         return v != null ? v : defaultValue;
     }
 
+    default <V> V getForClass(Class<? extends V> key) {
+        return get(key);
+    }
+
     <V> V get(Object key);
     boolean isEmpty();
 }

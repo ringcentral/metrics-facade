@@ -137,7 +137,7 @@ public class DefaultMeterTest extends AbstractMeterTest<
                 config,
                 measurables -> (measurables.isEmpty() ? SUPPORTED_MEASURABLES : measurables).stream()
                     .collect(toMap(m -> m, m -> meterImpl -> 1L)),
-                (instanceConfig, sliceConfig, meterConfig) -> new TestMeterImpl(),
+                (instanceConfig, sliceConfig, meterConfig, measurables) -> new TestMeterImpl(),
                 TestMeterImpl::update,
                 new InstanceMaker<>() {
 

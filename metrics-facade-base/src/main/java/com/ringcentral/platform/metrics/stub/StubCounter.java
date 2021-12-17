@@ -14,7 +14,9 @@ import static java.util.Collections.emptyMap;
 
 public class StubCounter extends AbstractCounter<Object> implements Counter {
 
-    static final MeasurableValueProvidersProvider<Object> stubMeasurableValueProvidersProviderInstance = measures -> emptyMap();
+    static final MeasurableValueProvidersProvider<Object, CounterInstanceConfig, CounterSliceConfig, CounterConfig> stubMeasurableValueProvidersProviderInstance =
+        (ic, sc, c, m) -> emptyMap();
+
     static final MeterImplUpdater<Object> stubMeterImplUpdaterInstance = (meterImpl, value) -> {};
     static final Object stubCounterImplInstance = new Object();
 

@@ -39,7 +39,11 @@ public class DropwizardRate extends AbstractRate<Meter> {
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<Meter> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        Meter,
+        RateInstanceConfig,
+        RateSliceConfig,
+        RateConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
@@ -80,7 +84,12 @@ public class DropwizardRate extends AbstractRate<Meter> {
         }
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<Meter>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<Meter>> valueProvidersFor(
+            RateInstanceConfig instanceConfig,
+            RateSliceConfig sliceConfig,
+            RateConfig config,
+            Set<? extends Measurable> measurables) {
+
             if (measurables == null || measurables.isEmpty()) {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }

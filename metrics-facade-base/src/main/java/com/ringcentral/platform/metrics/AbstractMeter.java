@@ -34,8 +34,17 @@ public abstract class AbstractMeter<
         Object valueFor(MI meterImpl);
     }
 
-    public interface MeasurableValueProvidersProvider<MI> {
-        Map<Measurable, MeasurableValueProvider<MI>> valueProvidersFor(Set<? extends Measurable> measurables);
+    public interface MeasurableValueProvidersProvider<
+        MI,
+        IC extends MeterInstanceConfig,
+        SC extends MeterSliceConfig<IC>,
+        C extends MeterConfig<IC, SC>> {
+
+        Map<Measurable, MeasurableValueProvider<MI>> valueProvidersFor(
+            IC instanceConfig,
+            SC sliceConfig,
+            C config,
+            Set<? extends Measurable> measurables);
     }
 
     public interface MeterImplMaker<
@@ -99,7 +108,7 @@ public abstract class AbstractMeter<
     protected AbstractMeter(
         MetricName name,
         C config,
-        MeasurableValueProvidersProvider<MI> measurableValueProvidersProvider,
+        MeasurableValueProvidersProvider<MI, IC, SC, C> measurableValueProvidersProvider,
         MeterImplMaker<MI, IC, SC, C> meterImplMaker,
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,
@@ -631,7 +640,7 @@ public abstract class AbstractMeter<
         final List<MetricListener> listeners;
         final MetricDimension[] parentDimensions;
         final int parentDimensionCount;
-        final MeasurableValueProvidersProvider<MI> measurableValueProvidersProvider;
+        final MeasurableValueProvidersProvider<MI, IC, SC, C> measurableValueProvidersProvider;
         final MeterImplMaker<MI, IC, SC, C> meterImplMaker;
         final InstanceMaker<MI> instanceMaker;
         final MeterImplUpdater<MI> meterImplUpdater;
@@ -645,7 +654,7 @@ public abstract class AbstractMeter<
             List<MetricListener> listeners,
             MetricDimension[] parentDimensions,
             int parentDimensionCount,
-            MeasurableValueProvidersProvider<MI> measurableValueProvidersProvider,
+            MeasurableValueProvidersProvider<MI, IC, SC, C> measurableValueProvidersProvider,
             MeterImplMaker<MI, IC, SC, C> meterImplMaker,
             InstanceMaker<MI> instanceMaker,
             MeterImplUpdater<MI> meterImplUpdater,
@@ -758,7 +767,11 @@ public abstract class AbstractMeter<
                 this.dimensionsMask = null;
             }
 
-            this.measurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(config.measurables());
+            this.measurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(
+                null,
+                config,
+                context.parentConfig,
+                config.measurables());
 
             if (config.isTotalEnabled()) {
                 IC totalInstanceConfig = config.totalInstanceConfig();
@@ -771,7 +784,11 @@ public abstract class AbstractMeter<
                 if (totalInstanceConfig != null) {
                     Map<Measurable, MeasurableValueProvider<MI>> mvps =
                         totalInstanceConfig.hasMeasurables() ?
-                        context.measurableValueProvidersProvider.valueProvidersFor(totalInstanceConfig.measurables()) :
+                        context.measurableValueProvidersProvider.valueProvidersFor(
+                            totalInstanceConfig,
+                            config,
+                            context.parentConfig,
+                            totalInstanceConfig.measurables()) :
                         this.measurableValueProviders;
 
                     MI meterImpl = context.meterImplMaker.makeMeterImpl(
@@ -842,9 +859,17 @@ public abstract class AbstractMeter<
                     IC levelInstanceConfig = config.levelInstanceConfigs().get(dimension);
 
                     if (levelInstanceConfig != null && levelInstanceConfig.hasMeasurables()) {
-                        levelMeasurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(levelInstanceConfig.measurables());
+                        levelMeasurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(
+                            levelInstanceConfig,
+                            config,
+                            context.parentConfig,
+                            levelInstanceConfig.measurables());
                     } else if (config.hasDefaultLevelInstanceConfig() && config.defaultLevelInstanceConfig().hasMeasurables()) {
-                        levelMeasurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(config.defaultLevelInstanceConfig().measurables());
+                        levelMeasurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(
+                            config.defaultLevelInstanceConfig(),
+                            config,
+                            context.parentConfig,
+                            config.defaultLevelInstanceConfig().measurables());
                     } else {
                         levelMeasurableValueProviders = this.measurableValueProviders;
                     }

@@ -52,7 +52,11 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<Histogram> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        Histogram,
+        HistogramInstanceConfig,
+        HistogramSliceConfig,
+        HistogramConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
@@ -119,7 +123,12 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
         }
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<Histogram>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<Histogram>> valueProvidersFor(
+            HistogramInstanceConfig instanceConfig,
+            HistogramSliceConfig sliceConfig,
+            HistogramConfig config,
+            Set<? extends Measurable> measurables) {
+
             if (measurables == null || measurables.isEmpty()) {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }

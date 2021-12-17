@@ -9,7 +9,7 @@ import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.counter.Counter.*;
+import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 
 public abstract class AbstractHistogram<MI> extends AbstractMeter<
     MI,
@@ -29,7 +29,7 @@ public abstract class AbstractHistogram<MI> extends AbstractMeter<
     protected AbstractHistogram(
         MetricName name,
         HistogramConfig config,
-        MeasurableValueProvidersProvider<MI> measurableValueProvidersProvider,
+        MeasurableValueProvidersProvider<MI, HistogramInstanceConfig, HistogramSliceConfig, HistogramConfig> measurableValueProvidersProvider,
         MeterImplMaker<MI, HistogramInstanceConfig, HistogramSliceConfig, HistogramConfig> meterImplMaker,
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,

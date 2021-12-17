@@ -10,6 +10,8 @@ import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.timer.*;
 import com.ringcentral.platform.metrics.timer.configs.*;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
+import com.ringcentral.platform.metrics.x.histogram.*;
+import com.ringcentral.platform.metrics.x.rate.*;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -24,16 +26,16 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
 
         @Override
         default Object valueFor(XTimerImpl timer) {
-            return valueFor(timer, null /* timer.getSnapshot() */);
+            return valueFor(timer, timer.histogram().snapshot());
         }
 
-        Object valueFor(XTimerImpl timer, Object snapshot /* Snapshot snapshot */);
+        Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot);
     }
 
     public static class MeasurableValuesImpl extends AbstractMeasurableValues {
 
         private final XTimerImpl timer;
-        // private final Snapshot snapshot;
+        private final XHistogramSnapshot snapshot;
         private final Map<Measurable, MeasurableValueProvider<XTimerImpl>> measurableValueProviders;
 
         public MeasurableValuesImpl(
@@ -42,7 +44,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
 
             super(measurableValueProviders.keySet());
             this.timer = timer;
-            // this.snapshot = timer.getSnapshot();
+            this.snapshot = timer.histogram().snapshot();
             this.measurableValueProviders = measurableValueProviders;
         }
 
@@ -50,11 +52,15 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
         @SuppressWarnings("unchecked")
         public <V> V valueOfImpl(Measurable measurable) throws NotMeasuredException {
             MVP valueProvider = (MVP)measurableValueProviders.get(measurable);
-            return (V)valueProvider.valueFor(timer, null /* snapshot */);
+            return (V)valueProvider.valueFor(timer, snapshot);
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<XTimerImpl> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        XTimerImpl,
+        TimerInstanceConfig,
+        TimerSliceConfig,
+        TimerConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
@@ -64,19 +70,19 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
 
             @Override
             public Object valueFor(XTimerImpl timer) {
-                return 1L; // timer.getCount();
+                return timer.rate().count();
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, Object snapshot /* Snapshot snapshot */) {
-                return 1L; // timer.getCount();
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
+                return timer.rate().count();
             }
         };
 
-        public static final MVP MEAN_RATE_VALUE_PROVIDER = (t, s) -> 1L; // t.getMeanRate();
-        public static final MVP ONE_MINUTE_RATE_VALUE_PROVIDER = (t, s) -> 1L; // t.getOneMinuteRate();
-        public static final MVP FIVE_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> 1L; // t.getFiveMinuteRate();
-        public static final MVP FIFTEEN_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> 1L; // t.getFifteenMinuteRate();
+        public static final MVP MEAN_RATE_VALUE_PROVIDER = (t, s) -> t.rate().meanRate();
+        public static final MVP ONE_MINUTE_RATE_VALUE_PROVIDER = (t, s) -> t.rate().oneMinuteRate();
+        public static final MVP FIVE_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fiveMinutesRate();
+        public static final MVP FIFTEEN_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fiveMinutesRate();
 
         public static final MVP RATE_UNIT_VALUE_PROVIDER = new MVP() {
 
@@ -86,15 +92,15 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, Object snapshot /* Snapshot snapshot */) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return "events/sec";
             }
         };
 
-        public static final MVP MIN_VALUE_PROVIDER = (t, s) -> 1L; // s.getMin() * DURATION_FACTOR;
-        public static final MVP MAX_VALUE_PROVIDER = (t, s) -> 1L; // s.getMax() * DURATION_FACTOR;
-        public static final MVP MEAN_VALUE_PROVIDER = (t, s) -> 1L; // s.getMean() * DURATION_FACTOR;
-        public static final MVP STANDARD_DEVIATION_VALUE_PROVIDER = (t, s) -> 1L; // s.getStdDev() * DURATION_FACTOR;
+        public static final MVP MIN_VALUE_PROVIDER = (t, s) -> s.min() * DURATION_FACTOR;
+        public static final MVP MAX_VALUE_PROVIDER = (t, s) -> s.max() * DURATION_FACTOR;
+        public static final MVP MEAN_VALUE_PROVIDER = (t, s) -> s.mean() * DURATION_FACTOR;
+        public static final MVP STANDARD_DEVIATION_VALUE_PROVIDER = (t, s) -> s.standardDeviation() * DURATION_FACTOR;
 
         public static class PercentileValueProvider implements MVP {
 
@@ -105,8 +111,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, Object snapshot /* Snapshot snapshot */) {
-                return 1L; // snapshot.getValue(quantile) * DURATION_FACTOR;
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
+                return snapshot.percentile(quantile) * DURATION_FACTOR;
             }
         }
 
@@ -118,7 +124,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, Object snapshot /* Snapshot snapshot */) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return "ms";
             }
         };
@@ -167,7 +173,12 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
         }
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<XTimerImpl>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<XTimerImpl>> valueProvidersFor(
+            TimerInstanceConfig instanceConfig,
+            TimerSliceConfig sliceConfig,
+            TimerConfig config,
+            Set<? extends Measurable> measurables) {
+
             if (measurables == null || measurables.isEmpty()) {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
@@ -225,25 +236,27 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             TimerConfig config,
             Set<? extends Measurable> measurables) {
 
-//            if (instanceConfig != null && instanceConfig.context().has(XTimerImpl.class)) {
-//                return instanceConfig.context().get(XTimerImpl.class);
-//            }
-//
-//            Reservoir reservoir;
-//
-//            if (instanceConfig != null && instanceConfig.context().has(Reservoir.class)) {
-//                reservoir = instanceConfig.context().get(Reservoir.class);
-//            } else if (sliceConfig != null && sliceConfig.context().has(Reservoir.class)) {
-//                reservoir = sliceConfig.context().get(Reservoir.class);
-//            } else if (config != null && config.context().has(Reservoir.class)) {
-//                reservoir = config.context().get(Reservoir.class);
-//            } else {
-//                reservoir = new ExponentiallyDecayingReservoir();
-//            }
-//
-//            return new Timer(reservoir);
+            XRateImpl rateImpl = XRate.MeterImplMakerImpl.INSTANCE.makeMeterImpl(
+                instanceConfig != null ? instanceConfig.context() : null,
+                sliceConfig != null ? sliceConfig.context() : null,
+                config != null ? config.context() : null,
+                measurables);
 
-            return null;
+            Set<? extends Measurable> histogramMeasurables = measurables;
+
+            if (measurables.stream().anyMatch(m -> m instanceof Count)) {
+                histogramMeasurables = new HashSet<>(measurables);
+                histogramMeasurables.removeIf(m -> m instanceof Count);
+                histogramMeasurables = Set.copyOf(histogramMeasurables);
+            }
+
+            XHistogramImpl histogramImpl = XHistogram.MeterImplMakerImpl.INSTANCE.makeMeterImpl(
+                instanceConfig != null ? instanceConfig.context() : null,
+                sliceConfig != null ? sliceConfig.context() : null,
+                config != null ? config.context() : null,
+                histogramMeasurables);
+
+            return new DefaultXTimerImpl(rateImpl, histogramImpl);
         }
     }
 
@@ -307,7 +320,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             config,
             MeasurableValueProvidersProviderImpl.INSTANCE,
             MeterImplMakerImpl.INSTANCE,
-            null, // (timer, value) -> timer.update(value, NANOSECONDS),
+            XTimerImpl::update,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
             executor);

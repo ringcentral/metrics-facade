@@ -12,7 +12,7 @@ import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
 public abstract class AbstractTimer<MI> extends AbstractMeter<
     MI,
@@ -41,7 +41,7 @@ public abstract class AbstractTimer<MI> extends AbstractMeter<
     protected AbstractTimer(
         MetricName name,
         TimerConfig config,
-        MeasurableValueProvidersProvider<MI> measurableValueProvidersProvider,
+        MeasurableValueProvidersProvider<MI, TimerInstanceConfig, TimerSliceConfig, TimerConfig> measurableValueProvidersProvider,
         MeterImplMaker<MI, TimerInstanceConfig, TimerSliceConfig, TimerConfig> meterImplMaker,
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,

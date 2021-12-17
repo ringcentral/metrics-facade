@@ -14,7 +14,9 @@ import static java.util.Collections.emptyMap;
 
 public class StubRate extends AbstractRate<Object> implements Rate {
 
-    static final MeasurableValueProvidersProvider<Object> stubMeasurableValueProvidersProviderInstance = measures -> emptyMap();
+    static final MeasurableValueProvidersProvider<Object, RateInstanceConfig, RateSliceConfig, RateConfig> stubMeasurableValueProvidersProviderInstance =
+        (ic, sc, c, m) -> emptyMap();
+
     static final MeterImplUpdater<Object> stubMeterImplUpdaterInstance = (meterImpl, value) -> {};
     static final Object stubRateImplInstance = new Object();
 

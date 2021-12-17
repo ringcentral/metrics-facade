@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.x.histogram;
 
-import com.ringcentral.platform.metrics.NotMeasuredException;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.histogram.AbstractHistogram;
@@ -21,16 +21,16 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
 
         @Override
         default Object valueFor(XHistogramImpl histogram) {
-            return valueFor(histogram, null /* histogram.getSnapshot() */);
+            return valueFor(histogram, histogram.snapshot());
         }
 
-        Object valueFor(XHistogramImpl histogram, Object snapshot /* Snapshot snapshot */);
+        Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot);
     }
 
     public static class MeasurableValuesImpl extends AbstractMeasurableValues {
 
         private final XHistogramImpl histogram;
-        // private final Snapshot snapshot;
+        private final XHistogramSnapshot snapshot;
         private final Map<Measurable, MeasurableValueProvider<XHistogramImpl>> measurableValueProviders;
 
         public MeasurableValuesImpl(
@@ -39,7 +39,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
 
             super(measurableValueProviders.keySet());
             this.histogram = histogram;
-            // this.snapshot = histogram.getSnapshot();
+            this.snapshot = histogram.snapshot();
             this.measurableValueProviders = measurableValueProviders;
         }
 
@@ -47,11 +47,15 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
         @SuppressWarnings("unchecked")
         public <V> V valueOfImpl(Measurable measurable) throws NotMeasuredException {
             MVP valueProvider = (MVP)measurableValueProviders.get(measurable);
-            return (V)valueProvider.valueFor(histogram, null /* snapshot */);
+            return (V)valueProvider.valueFor(histogram, snapshot);
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<XHistogramImpl> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        XHistogramImpl,
+        HistogramInstanceConfig,
+        HistogramSliceConfig,
+        HistogramConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
@@ -59,19 +63,19 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
 
             @Override
             public Object valueFor(XHistogramImpl histogram) {
-                return 1L; // histogram.getCount();
+                return histogram.count();
             }
 
             @Override
-            public Object valueFor(XHistogramImpl histogram, Object snapshot /* Snapshot snapshot */) {
-                return 1L; // histogram.getCount();
+            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
+                return histogram.count();
             }
         };
 
-        public static final MVP MIN_VALUE_PROVIDER = (h, s) -> 1L; // s.getMin();
-        public static final MVP MAX_VALUE_PROVIDER = (h, s) -> 1L; // s.getMax();
-        public static final MVP MEAN_VALUE_PROVIDER = (h, s) -> 1L; // s.getMean();
-        public static final MVP STANDARD_DEVIATION_VALUE_PROVIDER = (h, s) -> 1L; // s.getStdDev();
+        public static final MVP MIN_VALUE_PROVIDER = (h, s) -> s.min();
+        public static final MVP MAX_VALUE_PROVIDER = (h, s) -> s.max();
+        public static final MVP MEAN_VALUE_PROVIDER = (h, s) -> s.mean();
+        public static final MVP STANDARD_DEVIATION_VALUE_PROVIDER = (h, s) -> s.standardDeviation();
 
         public static class PercentileValueProvider implements MVP {
 
@@ -82,8 +86,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
 
             @Override
-            public Object valueFor(XHistogramImpl histogram, Object snapshot /* Snapshot snapshot */) {
-                return 1L; // snapshot.getValue(quantile);
+            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
+                return snapshot.percentile(quantile);
             }
         }
 
@@ -118,7 +122,12 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
         }
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<XHistogramImpl>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<XHistogramImpl>> valueProvidersFor(
+            HistogramInstanceConfig instanceConfig,
+            HistogramSliceConfig sliceConfig,
+            HistogramConfig config,
+            Set<? extends Measurable> measurables) {
+
             if (measurables == null || measurables.isEmpty()) {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
@@ -157,30 +166,63 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
         public static final MeterImplMakerImpl INSTANCE = new MeterImplMakerImpl();
 
         @Override
-        @SuppressWarnings("DuplicatedCode")
         public XHistogramImpl makeMeterImpl(
             HistogramInstanceConfig instanceConfig,
             HistogramSliceConfig sliceConfig,
             HistogramConfig config,
             Set<? extends Measurable> measurables) {
 
-//            if (instanceConfig != null && instanceConfig.context().has(XHistogramImpl.class)) {
-//                return instanceConfig.context().get(XHistogramImpl.class);
-//            }
-//
-//            Reservoir reservoir;
-//
-//            if (instanceConfig != null && instanceConfig.context().has(Reservoir.class)) {
-//                reservoir = instanceConfig.context().get(Reservoir.class);
-//            } else if (sliceConfig != null && sliceConfig.context().has(Reservoir.class)) {
-//                reservoir = sliceConfig.context().get(Reservoir.class);
-//            } else if (config != null && config.context().has(Reservoir.class)) {
-//                reservoir = config.context().get(Reservoir.class);
-//            } else {
-//                reservoir = new ExponentiallyDecayingReservoir();
-//            }
-//
-//            return new XHistogramImpl(reservoir);
+            return makeMeterImpl(
+                instanceConfig != null ? instanceConfig.context() : null,
+                sliceConfig != null ? sliceConfig.context() : null,
+                config != null ? config.context() : null,
+                measurables);
+        }
+
+        public XHistogramImpl makeMeterImpl(
+            MetricContext instanceContext,
+            MetricContext sliceContext,
+            MetricContext context,
+            Set<? extends Measurable> measurables) {
+
+            XHistogramImplConfig implConfig = null;
+
+            if (instanceContext != null) {
+                implConfig = xHistogramImplConfig(instanceContext);
+            }
+
+            if (implConfig == null && sliceContext != null) {
+                implConfig = xHistogramImplConfig(sliceContext);
+            }
+
+            if (implConfig == null && context != null) {
+                implConfig = xHistogramImplConfig(context);
+            }
+
+            if (implConfig == null) {
+                implConfig = HdrHistogramConfig.DEFAULT;
+            }
+
+            if (implConfig instanceof HdrHistogramConfig) {
+                return new HdrHistogram((HdrHistogramConfig)implConfig, measurables);
+            }
+
+            throw new IllegalArgumentException(
+                "Unsupported " + XHistogramImplConfig.class.getSimpleName()
+                + ": " + implConfig.getClass().getName());
+        }
+
+        private XHistogramImplConfig xHistogramImplConfig(MetricContext context) {
+            if (context.has(XHistogramImplConfig.class)) {
+                return context.getForClass(XHistogramImplConfig.class);
+            } else if (context.has(HdrHistogramConfig.class)) {
+                return context.getForClass(HdrHistogramConfig.class);
+            } else if (context.has(XHistogramImplConfigBuilder.class)) {
+                return context.getForClass(XHistogramImplConfigBuilder.class).build();
+            } else if (context.has(HdrHistogramConfigBuilder.class)) {
+                return context.getForClass(HdrHistogramConfigBuilder.class).build();
+            }
+
             return null;
         }
     }
@@ -245,7 +287,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             config,
             MeasurableValueProvidersProviderImpl.INSTANCE,
             MeterImplMakerImpl.INSTANCE,
-            null /* Histogram::update */,
+            XHistogramImpl::update,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
             executor);

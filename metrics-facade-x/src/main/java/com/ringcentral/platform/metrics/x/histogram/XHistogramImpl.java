@@ -1,3 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram;
 
-public class XHistogramImpl {}
+public interface XHistogramImpl {
+    void update(long value);
+    long count();
+    XHistogramSnapshot snapshot();
+}

@@ -35,13 +35,22 @@ public class XCounter extends AbstractCounter<LongAdder> {
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<LongAdder> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        LongAdder,
+        CounterInstanceConfig,
+        CounterSliceConfig,
+        CounterConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
         private static final Map<Measurable, MeasurableValueProvider<LongAdder>> MEASURABLE_VALUE_PROVIDERS = Map.of(COUNT, LongAdder::sum);
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<LongAdder>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<LongAdder>> valueProvidersFor(
+            CounterInstanceConfig instanceConfig,
+            CounterSliceConfig sliceConfig,
+            CounterConfig config,
+            Set<? extends Measurable> measurables) {
+
             return MEASURABLE_VALUE_PROVIDERS;
         }
     }

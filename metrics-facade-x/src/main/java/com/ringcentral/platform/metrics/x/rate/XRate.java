@@ -38,7 +38,11 @@ public class XRate extends AbstractRate<XRateImpl> {
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<XRateImpl> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        XRateImpl,
+        RateInstanceConfig,
+        RateSliceConfig,
+        RateConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
@@ -79,7 +83,12 @@ public class XRate extends AbstractRate<XRateImpl> {
         }
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<XRateImpl>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<XRateImpl>> valueProvidersFor(
+            RateInstanceConfig instanceConfig,
+            RateSliceConfig sliceConfig,
+            RateConfig config,
+            Set<? extends Measurable> measurables) {
+
             if (measurables == null || measurables.isEmpty()) {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
@@ -123,26 +132,39 @@ public class XRate extends AbstractRate<XRateImpl> {
             RateConfig config,
             Set<? extends Measurable> measurables) {
 
+            return makeMeterImpl(
+                instanceConfig != null ? instanceConfig.context() : null,
+                sliceConfig != null ? sliceConfig.context() : null,
+                config != null ? config.context() : null,
+                measurables);
+        }
+
+        public XRateImpl makeMeterImpl(
+            MetricContext instanceContext,
+            MetricContext sliceContext,
+            MetricContext context,
+            Set<? extends Measurable> measurables) {
+
             XRateImplConfig implConfig = null;
 
-            if (instanceConfig != null) {
-                implConfig = xRateImplConfig(instanceConfig.context());
+            if (instanceContext != null) {
+                implConfig = xRateImplConfig(instanceContext);
             }
 
-            if (implConfig == null && sliceConfig != null) {
-                implConfig = xRateImplConfig(sliceConfig.context());
+            if (implConfig == null && sliceContext != null) {
+                implConfig = xRateImplConfig(sliceContext);
             }
 
-            if (implConfig == null && config != null) {
-                implConfig = xRateImplConfig(config.context());
+            if (implConfig == null && context != null) {
+                implConfig = xRateImplConfig(context);
             }
 
             if (implConfig == null) {
-                implConfig = ExpMovingAverageXRateImplConfig.DEFAULT;
+                implConfig = ExpMovingAverageRateConfig.DEFAULT;
             }
 
-            if (implConfig instanceof ExpMovingAverageXRateImplConfig) {
-                return new ExpMovingAverageXRateImpl((ExpMovingAverageXRateImplConfig)implConfig, measurables);
+            if (implConfig instanceof ExpMovingAverageRateConfig) {
+                return new ExpMovingAverageRate((ExpMovingAverageRateConfig)implConfig, measurables);
             }
 
             throw new IllegalArgumentException(
@@ -153,12 +175,12 @@ public class XRate extends AbstractRate<XRateImpl> {
         private XRateImplConfig xRateImplConfig(MetricContext context) {
             if (context.has(XRateImplConfig.class)) {
                 return context.getForClass(XRateImplConfig.class);
-            } else if (context.has(ExpMovingAverageXRateImplConfig.class)) {
-                return context.getForClass(ExpMovingAverageXRateImplConfig.class);
+            } else if (context.has(ExpMovingAverageRateConfig.class)) {
+                return context.getForClass(ExpMovingAverageRateConfig.class);
             } else if (context.has(XRateImplConfigBuilder.class)) {
                 return context.getForClass(XRateImplConfigBuilder.class).build();
-            } else if (context.has(ExpMovingAverageXRateImplConfigBuilder.class)) {
-                return context.getForClass(ExpMovingAverageXRateImplConfigBuilder.class).build();
+            } else if (context.has(ExpMovingAverageRateConfigBuilder.class)) {
+                return context.getForClass(ExpMovingAverageRateConfigBuilder.class).build();
             }
 
             return null;

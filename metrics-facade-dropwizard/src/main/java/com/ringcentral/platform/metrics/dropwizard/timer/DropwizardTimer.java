@@ -56,7 +56,11 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<Timer> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        Timer,
+        TimerInstanceConfig,
+        TimerSliceConfig,
+        TimerConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
@@ -169,7 +173,12 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
         }
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<Timer>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<Timer>> valueProvidersFor(
+            TimerInstanceConfig instanceConfig,
+            TimerSliceConfig sliceConfig,
+            TimerConfig config,
+            Set<? extends Measurable> measurables) {
+
             if (measurables == null || measurables.isEmpty()) {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }

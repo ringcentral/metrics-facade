@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.*;
 import static java.lang.Math.exp;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class ExpMovingAverageXRateImpl extends AbstractXRateImpl {
+public class ExpMovingAverageRate extends AbstractXRateImpl {
 
     private static final long TICK_INTERVAL = SECONDS.toNanos(5);
 
@@ -19,8 +19,8 @@ public class ExpMovingAverageXRateImpl extends AbstractXRateImpl {
     private final ExpMovingAverage m15;
     private final AtomicLong lastTick;
 
-    public ExpMovingAverageXRateImpl(
-        ExpMovingAverageXRateImplConfig config,
+    public ExpMovingAverageRate(
+        ExpMovingAverageRateConfig config,
         Set<? extends Measurable> measurables) {
 
         this(
@@ -29,8 +29,8 @@ public class ExpMovingAverageXRateImpl extends AbstractXRateImpl {
             SystemTimeNanosProvider.INSTANCE);
     }
 
-    protected ExpMovingAverageXRateImpl(
-        ExpMovingAverageXRateImplConfig config,
+    public ExpMovingAverageRate(
+        ExpMovingAverageRateConfig config,
         Set<? extends Measurable> measurables,
         TimeNanosProvider timeNanosProvider) {
 

@@ -17,7 +17,7 @@ public abstract class AbstractCounter<MI> extends AbstractMeter<
     protected AbstractCounter(
         MetricName name,
         CounterConfig config,
-        MeasurableValueProvidersProvider<MI> measurableValueProvidersProvider,
+        MeasurableValueProvidersProvider<MI, CounterInstanceConfig, CounterSliceConfig, CounterConfig> measurableValueProvidersProvider,
         MeterImplMaker<MI, CounterInstanceConfig, CounterSliceConfig, CounterConfig> meterImplMaker,
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,

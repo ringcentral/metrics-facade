@@ -15,7 +15,9 @@ import static java.util.Collections.emptyMap;
 
 public class StubHistogram extends AbstractHistogram<Object> implements Histogram {
 
-    static final MeasurableValueProvidersProvider<Object> stubMeasurableValueProvidersProviderInstance = measures -> emptyMap();
+    static final MeasurableValueProvidersProvider<Object, HistogramInstanceConfig, HistogramSliceConfig, HistogramConfig> stubMeasurableValueProvidersProviderInstance =
+        (ic, sc, c, m) -> emptyMap();
+
     static final MeterImplUpdater<Object> stubMeterImplUpdaterInstance = (meterImpl, value) -> {};
     static final Object stubHistogramImplInstance = new Object();
 

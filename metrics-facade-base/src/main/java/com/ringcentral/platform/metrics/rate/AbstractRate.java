@@ -29,7 +29,7 @@ public abstract class AbstractRate<MI> extends AbstractMeter<
     protected AbstractRate(
         MetricName name,
         RateConfig config,
-        MeasurableValueProvidersProvider<MI> measurableValueProvidersProvider,
+        MeasurableValueProvidersProvider<MI, RateInstanceConfig, RateSliceConfig, RateConfig> measurableValueProvidersProvider,
         MeterImplMaker<MI, RateInstanceConfig, RateSliceConfig, RateConfig> meterImplMaker,
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,

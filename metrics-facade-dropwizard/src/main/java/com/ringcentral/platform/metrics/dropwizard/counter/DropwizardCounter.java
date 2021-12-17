@@ -35,13 +35,22 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
         }
     }
 
-    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<Counter> {
+    public static class MeasurableValueProvidersProviderImpl implements MeasurableValueProvidersProvider<
+        Counter,
+        CounterInstanceConfig,
+        CounterSliceConfig,
+        CounterConfig> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
         private static final Map<Measurable, MeasurableValueProvider<Counter>> MEASURABLE_VALUE_PROVIDERS = Map.of(COUNT, Counter::getCount);
 
         @Override
-        public Map<Measurable, MeasurableValueProvider<Counter>> valueProvidersFor(Set<? extends Measurable> measurables) {
+        public Map<Measurable, MeasurableValueProvider<Counter>> valueProvidersFor(
+            CounterInstanceConfig instanceConfig,
+            CounterSliceConfig sliceConfig,
+            CounterConfig config,
+            Set<? extends Measurable> measurables) {
+
             return MEASURABLE_VALUE_PROVIDERS;
         }
     }

@@ -19,8 +19,8 @@ import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigB
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class RateBenchmark {
 
-    @State(Scope.Benchmark)
-    public static class Rates {
+    @org.openjdk.jmh.annotations.State(Scope.Benchmark)
+    public static class State {
         // dw
         final MetricRegistry dwMetricRegistry = new DropwizardMetricRegistry();
 
@@ -45,31 +45,31 @@ public class RateBenchmark {
     }
 
     @Benchmark
-    @Group("zdwRate")
+    @Group("dwRate")
     // @GroupThreads(16)
-    public void zdwRate_mark(Rates rates) {
+    public void zdwRate_mark(State rates) {
         rates.dwRate.mark();
     }
 
     @Benchmark
     @Group("xRate_allMeasurables")
     // @GroupThreads(16)
-    public void xRate_allMeasurables(Rates rates) {
+    public void xRate_allMeasurables(State rates) {
         rates.xRate_allMeasurables.mark();
     }
 
     @Benchmark
     @Group("xRate_count")
     // @GroupThreads(16)
-    public void xRate_count(Rates rates) {
-        rates.xRate_count.mark();
+    public void xRate_count(State state) {
+        state.xRate_count.mark();
     }
 
     @Benchmark
     @Group("xRate_count_oneMinuteRate")
     // @GroupThreads(16)
-    public void xRate_count_oneMinuteRate(Rates rates) {
-        rates.xRate_count_oneMinuteRate.mark();
+    public void xRate_count_oneMinuteRate(State state) {
+        state.xRate_count_oneMinuteRate.mark();
     }
 
     public static class SixteenThreads {

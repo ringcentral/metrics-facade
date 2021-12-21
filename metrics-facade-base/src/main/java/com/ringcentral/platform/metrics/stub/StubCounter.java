@@ -21,7 +21,7 @@ public class StubCounter extends AbstractCounter<Object> implements Counter {
     static final Object stubCounterImplInstance = new Object();
 
     static final MeterImplMaker<Object, CounterInstanceConfig, CounterSliceConfig, CounterConfig> stubCounterImplMaker =
-        (instanceConfig, sliceConfig, config, measurables) -> stubCounterImplInstance;
+        (ic, sc, c, m, e) -> stubCounterImplInstance;
 
     public StubCounter(
         MetricName name,

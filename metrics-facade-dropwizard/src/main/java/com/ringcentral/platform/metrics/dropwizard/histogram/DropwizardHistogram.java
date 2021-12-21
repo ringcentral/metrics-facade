@@ -172,7 +172,8 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
             HistogramInstanceConfig instanceConfig,
             HistogramSliceConfig sliceConfig,
             HistogramConfig config,
-            Set<? extends Measurable> measurables) {
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor) {
 
             if (instanceConfig != null && instanceConfig.context().has(Histogram.class)) {
                 return instanceConfig.context().get(Histogram.class);

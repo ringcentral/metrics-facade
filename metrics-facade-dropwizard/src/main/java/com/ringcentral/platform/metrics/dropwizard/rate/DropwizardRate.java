@@ -131,7 +131,8 @@ public class DropwizardRate extends AbstractRate<Meter> {
             RateInstanceConfig instanceConfig,
             RateSliceConfig sliceConfig,
             RateConfig config,
-            Set<? extends Measurable> measurables) {
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor) {
 
             if (instanceConfig != null && instanceConfig.context().has(Meter.class)) {
                 return instanceConfig.context().get(Meter.class);

@@ -57,7 +57,8 @@ public abstract class AbstractMeter<
             IC instanceConfig,
             SC sliceConfig,
             C config,
-            Set<? extends Measurable> measurables);
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor);
     }
 
     public interface InstanceMaker<MI> {
@@ -795,7 +796,8 @@ public abstract class AbstractMeter<
                         totalInstanceConfig,
                         config,
                         context.parentConfig,
-                        mvps.keySet());
+                        mvps.keySet(),
+                        context.executor);
 
                     this.totalInstance = context.instanceMaker.makeInstance(
                         totalInstanceConfig.hasName() ? MetricName.of(this.name, totalInstanceConfig.name()) : this.name,
@@ -810,7 +812,8 @@ public abstract class AbstractMeter<
                         null,
                         config,
                         context.parentConfig,
-                        this.measurableValueProviders.keySet());
+                        this.measurableValueProviders.keySet(),
+                        context.executor);
 
                     this.totalInstance = context.instanceMaker.makeInstance(
                         this.name,
@@ -950,7 +953,13 @@ public abstract class AbstractMeter<
                                 AbstractMeterInstance<MI> newInstance;
                                 MetricName instanceName = nameSuffix != null ? MetricName.of(name, nameSuffix) : name;
                                 Map<Measurable, MeasurableValueProvider<MI>> mvps = levelsMeasurableValueProviders.get(i2);
-                                MI meterImpl = context.meterImplMaker.makeMeterImpl(instanceConfig, config, context.parentConfig, mvps.keySet());
+
+                                MI meterImpl = context.meterImplMaker.makeMeterImpl(
+                                    instanceConfig,
+                                    config,
+                                    context.parentConfig,
+                                    mvps.keySet(),
+                                    context.executor);
 
                                 if (dimensionalInstanceAutoRemovalEnabled) {
                                     newInstance = context.instanceMaker.makeExpirableInstance(
@@ -1019,7 +1028,8 @@ public abstract class AbstractMeter<
                                 null,
                                 config,
                                 context.parentConfig,
-                                measurableValueProviders.keySet());
+                                measurableValueProviders.keySet(),
+                                context.executor);
 
                             if (dimensionalInstanceAutoRemovalEnabled) {
                                 newInstance = context.instanceMaker.makeExpirableInstance(

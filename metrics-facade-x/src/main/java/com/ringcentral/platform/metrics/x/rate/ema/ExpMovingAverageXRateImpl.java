@@ -1,8 +1,10 @@
-package com.ringcentral.platform.metrics.x.rate;
+package com.ringcentral.platform.metrics.x.rate.ema;
 
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.rate.Rate.*;
 import com.ringcentral.platform.metrics.utils.*;
+import com.ringcentral.platform.metrics.x.rate.AbstractXRateImpl;
+import com.ringcentral.platform.metrics.x.rate.ema.configs.ExpMovingAverageXRateImplConfig;
 
 import java.util.Set;
 import java.util.concurrent.atomic.*;
@@ -10,7 +12,7 @@ import java.util.concurrent.atomic.*;
 import static java.lang.Math.exp;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class ExpMovingAverageRate extends AbstractXRateImpl {
+public class ExpMovingAverageXRateImpl extends AbstractXRateImpl {
 
     private static final long TICK_INTERVAL = SECONDS.toNanos(5);
 
@@ -19,8 +21,8 @@ public class ExpMovingAverageRate extends AbstractXRateImpl {
     private final ExpMovingAverage m15;
     private final AtomicLong lastTick;
 
-    public ExpMovingAverageRate(
-        ExpMovingAverageRateConfig config,
+    public ExpMovingAverageXRateImpl(
+        ExpMovingAverageXRateImplConfig config,
         Set<? extends Measurable> measurables) {
 
         this(
@@ -29,8 +31,8 @@ public class ExpMovingAverageRate extends AbstractXRateImpl {
             SystemTimeNanosProvider.INSTANCE);
     }
 
-    public ExpMovingAverageRate(
-        ExpMovingAverageRateConfig config,
+    public ExpMovingAverageXRateImpl(
+        ExpMovingAverageXRateImplConfig config,
         Set<? extends Measurable> measurables,
         TimeNanosProvider timeNanosProvider) {
 

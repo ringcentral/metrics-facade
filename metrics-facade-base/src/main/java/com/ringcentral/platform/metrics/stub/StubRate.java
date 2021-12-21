@@ -21,7 +21,7 @@ public class StubRate extends AbstractRate<Object> implements Rate {
     static final Object stubRateImplInstance = new Object();
 
     static final MeterImplMaker<Object, RateInstanceConfig, RateSliceConfig, RateConfig> stubRateImplMaker =
-        (instanceConfig, sliceConfig, config, measurables) -> stubRateImplInstance;
+        (ic, sc, c, m, e) -> stubRateImplInstance;
 
     public StubRate(
         MetricName name,

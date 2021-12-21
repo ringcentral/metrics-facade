@@ -234,7 +234,8 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
             TimerInstanceConfig instanceConfig,
             TimerSliceConfig sliceConfig,
             TimerConfig config,
-            Set<? extends Measurable> measurables) {
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor) {
 
             if (instanceConfig != null && instanceConfig.context().has(Timer.class)) {
                 return instanceConfig.context().get(Timer.class);

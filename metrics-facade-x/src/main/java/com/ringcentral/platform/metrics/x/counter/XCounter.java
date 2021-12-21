@@ -68,7 +68,8 @@ public class XCounter extends AbstractCounter<LongAdder> {
             CounterInstanceConfig instanceConfig,
             CounterSliceConfig sliceConfig,
             CounterConfig config,
-            Set<? extends Measurable> measurables) {
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor) {
 
             return
                 instanceConfig != null ?

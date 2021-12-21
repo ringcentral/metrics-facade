@@ -1,6 +1,8 @@
 package com.ringcentral.platform.metrics.x.rate;
 
 import com.ringcentral.platform.metrics.test.time.TestTimeNanosProvider;
+import com.ringcentral.platform.metrics.x.rate.ema.*;
+import com.ringcentral.platform.metrics.x.rate.ema.configs.ExpMovingAverageXRateImplConfig;
 import org.junit.Test;
 
 import java.util.Set;
@@ -10,12 +12,12 @@ import static com.ringcentral.platform.metrics.rate.Rate.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ExpMovingAverageRateTest {
+public class ExpMovingAverageXRateImplTest {
 
     TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
 
-    ExpMovingAverageRate rate = new ExpMovingAverageRate(
-        ExpMovingAverageRateConfig.DEFAULT,
+    ExpMovingAverageXRateImpl rate = new ExpMovingAverageXRateImpl(
+        ExpMovingAverageXRateImplConfig.DEFAULT,
         Set.of(COUNT, MEAN_RATE, ONE_MINUTE_RATE, FIVE_MINUTES_RATE, FIFTEEN_MINUTES_RATE),
         timeNanosProvider);
 

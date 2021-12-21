@@ -68,7 +68,8 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
             CounterInstanceConfig instanceConfig,
             CounterSliceConfig sliceConfig,
             CounterConfig config,
-            Set<? extends Measurable> measurables) {
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor) {
 
             return
                 instanceConfig != null ?

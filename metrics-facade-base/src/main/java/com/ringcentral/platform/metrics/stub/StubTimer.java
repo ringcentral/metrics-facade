@@ -22,7 +22,7 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
     static final Object stubTimerImplInstance = new Object();
 
     static final MeterImplMaker<Object, TimerInstanceConfig, TimerSliceConfig, TimerConfig> stubTimerImplMaker =
-        (instanceConfig, sliceConfig, config, measurables) -> stubTimerImplInstance;
+        (ic, sc, c, m, e) -> stubTimerImplInstance;
 
     public StubTimer(
         MetricName name,

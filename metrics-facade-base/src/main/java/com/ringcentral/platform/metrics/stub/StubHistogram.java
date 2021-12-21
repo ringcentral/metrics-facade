@@ -22,7 +22,7 @@ public class StubHistogram extends AbstractHistogram<Object> implements Histogra
     static final Object stubHistogramImplInstance = new Object();
 
     static final MeterImplMaker<Object, HistogramInstanceConfig, HistogramSliceConfig, HistogramConfig> stubHistogramImplMaker =
-        (instanceConfig, sliceConfig, config, measurables) -> stubHistogramImplInstance;
+        (ic, sc, c, m, e) -> stubHistogramImplInstance;
 
     public StubHistogram(
         MetricName name,

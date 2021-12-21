@@ -14,11 +14,28 @@
 
     <artifactId>metrics-facade-x</artifactId>
 
+    <properties>
+        <HdrHistogram.version>2.1.12</HdrHistogram.version>
+        <rolling-metrics.version>3.0.0</rolling-metrics.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-base</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.vladimir-bukhtoyarov</groupId>
+            <artifactId>rolling-metrics-core</artifactId>
+            <version>${rolling-metrics.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>${HdrHistogram.version}</version>
         </dependency>
 
         <dependency>

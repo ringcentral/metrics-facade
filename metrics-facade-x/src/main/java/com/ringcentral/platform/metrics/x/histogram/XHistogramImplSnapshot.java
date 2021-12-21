@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram;
 
-public interface XHistogramSnapshot {
+public interface XHistogramImplSnapshot {
+    long size();
     long min();
     long max();
     double mean();

@@ -44,7 +44,7 @@ public class ZabbixReportersSample extends AbstractSample {
                 nameMask("histogram.**"),
                 instance -> instance instanceof HistogramInstance),
             (instanceSampleSpec, instance, measurableValues, measurable) ->
-                measurable instanceof Max ? sampleSpec().disable() :sampleSpec());
+                measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
         DefaultInstanceSamplesProvider miSamplesProvider = new DefaultInstanceSamplesProvider(
             miSampleSpecModsProvider,

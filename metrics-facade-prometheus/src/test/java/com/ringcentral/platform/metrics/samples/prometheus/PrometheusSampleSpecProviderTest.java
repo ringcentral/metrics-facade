@@ -144,6 +144,16 @@ public class PrometheusSampleSpecProviderTest {
                 COUNT),
             expectedSampleSpec);
 
+        expectedSampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
+
+        check(
+            provider.sampleSpecFor(
+                instanceSampleSpec,
+                instance,
+                measurableValues,
+                TOTAL_SUM),
+            expectedSampleSpec);
+
         expectedSampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         check(
@@ -220,7 +230,17 @@ public class PrometheusSampleSpecProviderTest {
                 COUNT),
             expectedSampleSpec);
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
+        expectedSampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 0.001);
+
+        check(
+            provider.sampleSpecFor(
+                instanceSampleSpec,
+                instance,
+                measurableValues,
+                TOTAL_SUM),
+            expectedSampleSpec);
+
+        expectedSampleSpec = new PrometheusSampleSpec(true, MIN, 0.001);
 
         check(
             provider.sampleSpecFor(
@@ -230,7 +250,7 @@ public class PrometheusSampleSpecProviderTest {
                 MIN),
             expectedSampleSpec);
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
+        expectedSampleSpec = new PrometheusSampleSpec(true, MAX, 0.001);
 
         check(
             provider.sampleSpecFor(
@@ -240,7 +260,7 @@ public class PrometheusSampleSpecProviderTest {
                 MAX),
             expectedSampleSpec);
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
+        expectedSampleSpec = new PrometheusSampleSpec(true, MEAN, 0.001);
 
         check(
             provider.sampleSpecFor(
@@ -250,7 +270,7 @@ public class PrometheusSampleSpecProviderTest {
                 MEAN),
             expectedSampleSpec);
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
+        expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 0.001);
 
         check(
             provider.sampleSpecFor(
@@ -260,7 +280,7 @@ public class PrometheusSampleSpecProviderTest {
                 PERCENTILE_50),
             expectedSampleSpec);
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
+        expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 0.001);
 
         check(
             provider.sampleSpecFor(

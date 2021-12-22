@@ -1,9 +1,5 @@
 package com.ringcentral.platform.metrics.reporters.jmx;
 
-import java.io.Closeable;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.management.*;
-import org.slf4j.Logger;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.histogram.Histogram;
@@ -16,10 +12,16 @@ import com.ringcentral.platform.metrics.var.doubleVar.*;
 import com.ringcentral.platform.metrics.var.longVar.*;
 import com.ringcentral.platform.metrics.var.objectVar.*;
 import com.ringcentral.platform.metrics.var.stringVar.*;
-import static java.lang.Boolean.*;
-import static java.lang.management.ManagementFactory.*;
-import static java.util.Objects.*;
-import static org.slf4j.LoggerFactory.*;
+import org.slf4j.Logger;
+
+import javax.management.*;
+import java.io.Closeable;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.lang.Boolean.TRUE;
+import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
+import static java.util.Objects.requireNonNullElse;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class JmxMetricsReporter implements MetricsReporter, MetricRegistryListener, Closeable {
 

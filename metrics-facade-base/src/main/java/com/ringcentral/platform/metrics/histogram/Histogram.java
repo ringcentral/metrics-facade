@@ -4,9 +4,10 @@ import com.ringcentral.platform.metrics.Meter;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
 import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public interface Histogram extends Meter {
     class TotalSum implements HistogramMeasurable {
@@ -119,6 +120,63 @@ public interface Histogram extends Meter {
     Percentile PERCENTILE_95 = Percentile.of(0.95);
     Percentile PERCENTILE_99 = Percentile.of(0.99);
     Percentile PERCENTILE_999 = Percentile.of(0.999);
+
+    class Bucket implements HistogramMeasurable {
+
+        private final double inclusiveUpperBound;
+        private final String inclusiveUpperBoundAsString;
+
+        public Bucket(double inclusiveUpperBound) {
+            this.inclusiveUpperBound = inclusiveUpperBound;
+            this.inclusiveUpperBoundAsString = inclusiveUpperBoundAsString(inclusiveUpperBound);
+        }
+
+        static String inclusiveUpperBoundAsString(double b) {
+            if (b == Double.POSITIVE_INFINITY) {
+                return "+Inf";
+            }
+
+            if (b == Double.NEGATIVE_INFINITY) {
+                return "-Inf";
+            }
+
+            return Double.toString(b);
+        }
+
+        public static Bucket of(double inclusiveUpperBound) {
+            return new Bucket(inclusiveUpperBound);
+        }
+
+        @Override
+        public MeasurableType type() {
+            return LONG;
+        }
+
+        public double inclusiveUpperBound() {
+            return inclusiveUpperBound;
+        }
+
+        public String inclusiveUpperBoundAsString() {
+            return inclusiveUpperBoundAsString;
+        }
+    }
+
+    long NANOS_PER_SEC = SECONDS.toNanos(1L);
+
+    Bucket MS_5_BUCKET = new Bucket(.005 * NANOS_PER_SEC);
+    Bucket MS_10_BUCKET = new Bucket(.01 * NANOS_PER_SEC);
+    Bucket MS_25_BUCKET = new Bucket(.025 * NANOS_PER_SEC);
+    Bucket MS_50_BUCKET = new Bucket(.05 * NANOS_PER_SEC);
+    Bucket MS_75_BUCKET = new Bucket(.075 * NANOS_PER_SEC);
+    Bucket MS_100_BUCKET = new Bucket(.1 * NANOS_PER_SEC);
+    Bucket MS_250_BUCKET = new Bucket(.25 * NANOS_PER_SEC);
+    Bucket MS_500_BUCKET = new Bucket(.5 * NANOS_PER_SEC);
+    Bucket MS_750_BUCKET = new Bucket(.75 * NANOS_PER_SEC);
+    Bucket SEC_1_BUCKET = new Bucket(1.0 * NANOS_PER_SEC);
+    Bucket SEC_2_5_BUCKET = new Bucket(2.5 * NANOS_PER_SEC);
+    Bucket SEC_5_BUCKET = new Bucket(5.0 * NANOS_PER_SEC);
+    Bucket SEC_7_5_BUCKET = new Bucket(7.5 * NANOS_PER_SEC);
+    Bucket SEC_10_BUCKET = new Bucket(10.0 * NANOS_PER_SEC);
 
     default void update(long value) {
         update(value, NO_DIMENSION_VALUES);

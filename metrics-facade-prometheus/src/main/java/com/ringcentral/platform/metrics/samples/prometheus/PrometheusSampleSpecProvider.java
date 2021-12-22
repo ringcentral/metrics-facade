@@ -13,6 +13,19 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
     PrometheusSampleSpec,
     PrometheusInstanceSampleSpec> {
 
+    // ms to sec
+    public static final double DEFAULT_DURATION_FACTOR = 1.0 / 1000.0;
+
+    private final double durationFactor;
+
+    public PrometheusSampleSpecProvider() {
+        this(DEFAULT_DURATION_FACTOR);
+    }
+
+    public PrometheusSampleSpecProvider(double durationFactor) {
+        this.durationFactor = durationFactor;
+    }
+
     @Override
     public PrometheusSampleSpec sampleSpecFor(
         PrometheusInstanceSampleSpec instanceSampleSpec,
@@ -22,10 +35,12 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
 
         if (instance instanceof TimerInstance || instance instanceof HistogramInstance) {
             if (!(measurable instanceof Counter.Count
+                || measurable instanceof Histogram.TotalSum
                 || measurable instanceof Histogram.Min
                 || measurable instanceof Histogram.Max
                 || measurable instanceof Histogram.Mean
-                || measurable instanceof Histogram.Percentile)) {
+                || measurable instanceof Histogram.Percentile
+                || measurable instanceof Histogram.Bucket)) {
 
                 return null;
             }
@@ -47,9 +62,22 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
             return null;
         }
 
+        double value = ((Number)measurableValue).doubleValue();
+
+        if (instance instanceof TimerInstance) {
+            if (measurable instanceof Histogram.TotalSum
+                || measurable instanceof Histogram.Min
+                || measurable instanceof Histogram.Max
+                || measurable instanceof Histogram.Mean
+                || measurable instanceof Histogram.Percentile) {
+
+                value *= durationFactor;
+            }
+        }
+
         return new PrometheusSampleSpec(
             Boolean.TRUE,
             measurable,
-            ((Number)measurableValue).doubleValue());
+            value);
     }
 }

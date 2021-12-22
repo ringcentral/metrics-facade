@@ -25,7 +25,7 @@ public class SnapshotCachingRollingHdrHistogram implements RollingHdrHistogram {
     private final CachingSupplier<RollingSnapshot> cachingSupplier;
     private final RollingHdrHistogram target;
 
-    SnapshotCachingRollingHdrHistogram(RollingHdrHistogram target, Duration cachingDuration, Ticker ticker) {
+    public SnapshotCachingRollingHdrHistogram(RollingHdrHistogram target, Duration cachingDuration, Ticker ticker) {
         this.cachingSupplier = new CachingSupplier<>(cachingDuration, ticker, target::getSnapshot);
         this.target = target;
     }

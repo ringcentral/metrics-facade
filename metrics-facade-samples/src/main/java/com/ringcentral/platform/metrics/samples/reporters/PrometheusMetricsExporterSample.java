@@ -7,6 +7,7 @@ import com.ringcentral.platform.metrics.reporters.jmx.JmxMetricsReporter;
 import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 import com.ringcentral.platform.metrics.samples.prometheus.*;
+import com.ringcentral.platform.metrics.timer.Timer;
 
 import java.util.Locale;
 
@@ -18,6 +19,8 @@ import static com.ringcentral.platform.metrics.names.MetricNameMask.*;
 import static com.ringcentral.platform.metrics.predicates.DefaultMetricInstancePredicate.forMetricInstancesMatching;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleSpec.instanceSampleSpec;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleSpec.sampleSpec;
+import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @SuppressWarnings("ALL")
 public class PrometheusMetricsExporterSample extends AbstractSample {
@@ -88,6 +91,17 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
         h.update(-1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
         h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
         h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+
+        Timer t = registry.timer(
+            withName("Timer"),
+            () -> withTimer()
+                .description("Timer for " + PrometheusMetricsExporterSample.class.getSimpleName())
+                .dimensions(SERVICE, SERVER, PORT)
+                .measurables(MIN, MAX, MEAN));
+
+        t.update(SECONDS.toNanos(1), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        t.update(SECONDS.toNanos(2), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+        t.update(SECONDS.toNanos(3), forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
         new PrometheusHttpServer(PROMETHEUS_PORT, exporter);
         registry.addListener(new JmxMetricsReporter());

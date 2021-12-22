@@ -75,6 +75,19 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
         };
 
+        public static final MVP TOTAL_SUM_VALUE_PROVIDER = new MVP() {
+
+            @Override
+            public Object valueFor(XHistogramImpl histogram) {
+                return histogram.totalSum();
+            }
+
+            @Override
+            public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
+                return histogram.totalSum();
+            }
+        };
+
         public static final MVP MIN_VALUE_PROVIDER = (h, s) -> s.min();
         public static final MVP MAX_VALUE_PROVIDER = (h, s) -> s.max();
         public static final MVP MEAN_VALUE_PROVIDER = (h, s) -> s.mean();
@@ -107,6 +120,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             DEFAULT_HISTOGRAM_MEASURABLES.forEach(m -> {
                 if (m instanceof Count) {
                     result.put(m, COUNT_VALUE_PROVIDER);
+                } else if (m instanceof TotalSum) {
+                    result.put(m, TOTAL_SUM_VALUE_PROVIDER);
                 } else if (m instanceof Min) {
                     result.put(m, MIN_VALUE_PROVIDER);
                 } else if (m instanceof Max) {
@@ -140,6 +155,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             measurables.forEach(m -> {
                 if (m instanceof Count) {
                     result.put(m, COUNT_VALUE_PROVIDER);
+                } else if (m instanceof TotalSum) {
+                    result.put(m, TOTAL_SUM_VALUE_PROVIDER);
                 } else if (m instanceof Min) {
                     result.put(m, MIN_VALUE_PROVIDER);
                 } else if (m instanceof Max) {

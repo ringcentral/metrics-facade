@@ -197,6 +197,18 @@ public class PrometheusSampleMakerTest {
 
         check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
 
+        sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
+
+        expectedSample = new PrometheusSample(
+            null,
+            null,
+            "_sum",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+
         sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -285,6 +297,18 @@ public class PrometheusSampleMakerTest {
             null,
             null,
             "_count",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+
+        sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
+
+        expectedSample = new PrometheusSample(
+            null,
+            null,
+            "_sum",
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
             1.0);

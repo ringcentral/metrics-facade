@@ -9,6 +9,16 @@ import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
 import static com.ringcentral.platform.metrics.utils.Preconditions.*;
 
 public interface Histogram extends Meter {
+    class TotalSum implements HistogramMeasurable {
+
+        @Override
+        public MeasurableType type() {
+            return LONG;
+        }
+    }
+
+    TotalSum TOTAL_SUM = new TotalSum();
+
     class Min implements HistogramMeasurable {
 
         @Override

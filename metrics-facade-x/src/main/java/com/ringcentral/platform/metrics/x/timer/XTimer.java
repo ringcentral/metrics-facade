@@ -79,6 +79,19 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
         };
 
+        public static final MVP TOTAL_SUM_VALUE_PROVIDER = new MVP() {
+
+            @Override
+            public Object valueFor(XTimerImpl timer) {
+                return timer.histogram().totalSum() * DURATION_FACTOR;
+            }
+
+            @Override
+            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+                return timer.histogram().totalSum() * DURATION_FACTOR;
+            }
+        };
+
         public static final MVP MEAN_RATE_VALUE_PROVIDER = (t, s) -> t.rate().meanRate();
         public static final MVP ONE_MINUTE_RATE_VALUE_PROVIDER = (t, s) -> t.rate().oneMinuteRate();
         public static final MVP FIVE_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fiveMinutesRate();
@@ -153,6 +166,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                     result.put(m, FIFTEEN_MINUTES_RATE_VALUE_PROVIDER);
                 } else if (m instanceof Rate.RateUnit) {
                     result.put(m, RATE_UNIT_VALUE_PROVIDER);
+                } else if (m instanceof TotalSum) {
+                    result.put(m, TOTAL_SUM_VALUE_PROVIDER);
                 } else if (m instanceof Min) {
                     result.put(m, MIN_VALUE_PROVIDER);
                 } else if (m instanceof Max) {
@@ -198,6 +213,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                     result.put(m, FIFTEEN_MINUTES_RATE_VALUE_PROVIDER);
                 } else if (m instanceof Rate.RateUnit) {
                     result.put(m, RATE_UNIT_VALUE_PROVIDER);
+                } else if (m instanceof TotalSum) {
+                    result.put(m, TOTAL_SUM_VALUE_PROVIDER);
                 } else if (m instanceof Min) {
                     result.put(m, MIN_VALUE_PROVIDER);
                 } else if (m instanceof Max) {

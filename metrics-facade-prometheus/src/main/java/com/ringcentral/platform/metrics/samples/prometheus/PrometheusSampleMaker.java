@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.histogram.*;
-import com.ringcentral.platform.metrics.histogram.Histogram.Percentile;
+import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.samples.SampleMaker;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
@@ -52,10 +52,12 @@ public class PrometheusSampleMaker implements SampleMaker<
 
         String nameSuffix = null;
 
-        if ((instance instanceof TimerInstance || instance instanceof HistogramInstance)
-            && spec.measurable() instanceof Count) {
-
-            nameSuffix = "_count";
+        if (instance instanceof TimerInstance || instance instanceof HistogramInstance) {
+            if (spec.measurable() instanceof Count) {
+                nameSuffix = "_count";
+            } else if (spec.measurable() instanceof TotalSum) {
+                nameSuffix = "_sum";
+            }
         }
 
         List<String> labelNames;

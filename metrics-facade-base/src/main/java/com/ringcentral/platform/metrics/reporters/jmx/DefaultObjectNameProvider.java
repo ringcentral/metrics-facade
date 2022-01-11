@@ -1,14 +1,14 @@
 package com.ringcentral.platform.metrics.reporters.jmx;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.management.*;
-import org.slf4j.Logger;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.names.MetricName;
-import static java.lang.String.*;
-import static org.slf4j.LoggerFactory.*;
+import org.slf4j.Logger;
+
+import javax.management.*;
+import java.util.*;
+
+import static java.lang.String.join;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class DefaultObjectNameProvider implements ObjectNameProvider {
 
@@ -30,8 +30,10 @@ public class DefaultObjectNameProvider implements ObjectNameProvider {
             } else {
                 Set<String> names = new HashSet<>();
                 StringBuilder builder = new StringBuilder(domainName).append(":name=").append(namePropertyValue);
+
                 for (MetricDimensionValue dv : dimensionValues) {
                     String dname = dv.dimension().name();
+
                     if (!names.contains(dname)) {
                         builder.append(',').append(escapeDimensionName(dname)).append('=').append(escape(dv.value()));
                         names.add(dname);
@@ -45,7 +47,10 @@ public class DefaultObjectNameProvider implements ObjectNameProvider {
 
             return objectName;
         } catch (MalformedObjectNameException e) {
-            logger.warn("Failed to create ObjectName: domain name = '{}', metric name = '{}'", domainName, name, e);
+            logger.warn(
+                "Failed to create ObjectName: domain name = '{}', metric name = '{}'",
+                domainName, name, e);
+
             throw new RuntimeException(e);
         }
     }
@@ -61,6 +66,7 @@ public class DefaultObjectNameProvider implements ObjectNameProvider {
         if (dname.equals("name")) {
             return "_name";
         }
+
         return escape(dname);
     }
 }

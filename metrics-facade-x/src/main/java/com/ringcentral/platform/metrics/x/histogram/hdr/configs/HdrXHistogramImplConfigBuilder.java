@@ -1,23 +1,26 @@
 package com.ringcentral.platform.metrics.x.histogram.hdr.configs;
 
-import com.github.rollingmetrics.histogram.OverflowResolver;
-import com.github.rollingmetrics.histogram.hdr.RecorderSettings;
 import com.ringcentral.platform.metrics.x.histogram.configs.XHistogramImplConfigBuilder;
-import com.ringcentral.platform.metrics.x.histogram.hdr.HdrXHistogramImpl;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
-import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static com.ringcentral.platform.metrics.utils.Preconditions.*;
 import static com.ringcentral.platform.metrics.x.histogram.hdr.configs.HdrXHistogramImplConfig.*;
 
+@SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "FieldMayBeFinal" })
 public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuilder<HdrXHistogramImplConfig> {
 
-    private HdrXHistogramImpl.Type type = DEFAULT_TYPE;
-    private int chunkCount;
-    private long chunkResetPeriodMs;
-    private RecorderSettings recorderSettings = DEFAULT.recorderSettings();
-    private Duration snapshotTtl;
+    private HdrXHistogramType type = DEFAULT.type();
+    private int chunkCount = DEFAULT.chunkCount();
+    private long chunkResetPeriodMs = DEFAULT.chunkResetPeriodMs();
+    private int significantDigitCount = DEFAULT.significantDigitCount();
+    private Optional<Long> lowestDiscernibleValue = DEFAULT.lowestDiscernibleValue();
+    private Optional<Long> highestTrackableValue = DEFAULT.highestTrackableValue();
+    private Optional<OverflowBehavior> overflowBehavior = DEFAULT.overflowBehavior();
+    private Optional<Long> expectedUpdateInterval = DEFAULT.expectedUpdateInterval();
+    private Optional<Duration> snapshotTtl = DEFAULT.snapshotTtl();
 
     public static HdrXHistogramImplConfigBuilder hdr() {
         return hdrXHistogramImplConfigBuilder();
@@ -36,29 +39,33 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
     }
 
     public HdrXHistogramImplConfigBuilder neverReset() {
-        this.type = HdrXHistogramImpl.Type.NEVER_RESET;
+        return uniform();
+    }
+
+    public HdrXHistogramImplConfigBuilder uniform() {
+        this.type = HdrXHistogramType.UNIFORM;
         return this;
     }
 
     public HdrXHistogramImplConfigBuilder resetOnSnapshot() {
-        this.type = HdrXHistogramImpl.Type.RESET_ON_SNAPSHOT;
+        this.type = HdrXHistogramType.RESET_ON_SNAPSHOT;
         return this;
     }
 
     public HdrXHistogramImplConfigBuilder resetPeriodically(Duration period) {
-        this.type = HdrXHistogramImpl.Type.RESET_BY_CHUNKS;
+        this.type = HdrXHistogramType.RESET_BY_CHUNKS;
         return resetByChunks(0, period.toMillis());
     }
 
     private HdrXHistogramImplConfigBuilder resetByChunks(int chunkCount, long chunkResetPeriodMs) {
         checkArgument(chunkCount >= 0, "chunkCount must be >= 0");
         checkArgument(chunkCount <= MAX_CHUNKS, "chunkCount must be <= " + MAX_CHUNKS);
-        this.chunkCount = chunkCount;
 
         checkArgument(
             chunkResetPeriodMs >= MIN_CHUNK_RESET_PERIOD_MS,
             "chunkResetPeriodMs must be >= " + MIN_CHUNK_RESET_PERIOD_MS + " ms");
 
+        this.chunkCount = chunkCount;
         this.chunkResetPeriodMs = chunkResetPeriodMs;
         return this;
     }
@@ -68,53 +75,69 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
         return resetByChunks(chunkCount, allChunksResetPeriod.toMillis() / chunkCount);
     }
 
-    public HdrXHistogramImplConfigBuilder significantDigits(int significantDigits) {
-        this.recorderSettings = recorderSettings.withSignificantDigits(significantDigits);
+    public HdrXHistogramImplConfigBuilder significantDigits(int significantDigitCount) {
+        checkArgument(
+            significantDigitCount >= MIN_SIGNIFICANT_DIGITS && significantDigitCount <= MAX_SIGNIFICANT_DIGITS,
+            "significantDigitCount must be between " + MIN_SIGNIFICANT_DIGITS + " and " + MAX_SIGNIFICANT_DIGITS);
+
+        this.significantDigitCount = significantDigitCount;
         return this;
     }
 
     public HdrXHistogramImplConfigBuilder lowestDiscernibleValue(long lowestDiscernibleValue) {
-        this.recorderSettings = recorderSettings.withLowestDiscernibleValue(lowestDiscernibleValue);
+        checkArgument(
+            lowestDiscernibleValue >= MIN_LOWEST_DISCERNIBLE_VALUE,
+            "lowestDiscernibleValue must be >= " + MIN_LOWEST_DISCERNIBLE_VALUE);
+
+        this.lowestDiscernibleValue = Optional.of(lowestDiscernibleValue);
         return this;
     }
 
     public HdrXHistogramImplConfigBuilder highestTrackableValue(long highestTrackableValue, OverflowBehavior overflowBehavior) {
-        OverflowResolver overflowResolver =
-            overflowBehavior == OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE ?
-            OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE :
-            OverflowResolver.SKIP;
+        checkArgument(
+            highestTrackableValue >= MIN_HIGHEST_TRACKABLE_VALUE,
+            "highestTrackableValue must be >= " + MIN_HIGHEST_TRACKABLE_VALUE);
 
-        this.recorderSettings = recorderSettings.withHighestTrackableValue(
-            highestTrackableValue,
-            overflowResolver);
-
+        this.highestTrackableValue = Optional.of(highestTrackableValue);
+        this.overflowBehavior = Optional.of(overflowBehavior);
         return this;
     }
 
-    public HdrXHistogramImplConfigBuilder expectedIntervalBetweenValueSamples(long expectedIntervalBetweenValueSamples) {
-        this.recorderSettings = recorderSettings.withExpectedIntervalBetweenValueSamples(expectedIntervalBetweenValueSamples);
-        return this;
-    }
-
-    public HdrXHistogramImplConfigBuilder noSnapshotOptimization() {
-        this.recorderSettings = recorderSettings.withoutSnapshotOptimization();
+    public HdrXHistogramImplConfigBuilder expectedUpdateInterval(long expectedUpdateInterval) {
+        this.expectedUpdateInterval = Optional.of(expectedUpdateInterval);
         return this;
     }
 
     public HdrXHistogramImplConfigBuilder snapshotTtl(long ttl, ChronoUnit ttlUnit) {
-        checkArgument(ttl > 0L, "ttl <= 0");
-        this.snapshotTtl = Duration.of(ttl, ttlUnit);
+        checkArgument(ttl > 0L, "ttl must be positive");
+        this.snapshotTtl = Optional.of(Duration.of(ttl, ttlUnit));
         return this;
     }
 
     public HdrXHistogramImplConfig build() {
-        recorderSettings.validateParameters();
+        validate();
 
         return new HdrXHistogramImplConfig(
             type,
             chunkCount,
             chunkResetPeriodMs,
-            recorderSettings,
+            significantDigitCount,
+            lowestDiscernibleValue,
+            highestTrackableValue,
+            overflowBehavior,
+            expectedUpdateInterval,
             snapshotTtl);
+    }
+
+    private void validate() {
+        if (lowestDiscernibleValue.isPresent()) {
+            checkState(
+                highestTrackableValue.isPresent(),
+                "highestTrackableValue must be configured if lowestDiscernibleValue is");
+
+            checkState(
+                highestTrackableValue.get() >= 2L * lowestDiscernibleValue.get(),
+                "highestTrackableValue must be >= 2 * lowestDiscernibleValue");
+        }
     }
 }

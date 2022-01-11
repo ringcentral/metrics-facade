@@ -27,12 +27,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.vladimir-bukhtoyarov</groupId>
-            <artifactId>rolling-metrics-core</artifactId>
-            <version>${rolling-metrics.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.hdrhistogram</groupId>
             <artifactId>HdrHistogram</artifactId>
             <version>${HdrHistogram.version}</version>

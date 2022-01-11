@@ -117,15 +117,15 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
 
         public static class PercentileValueProvider implements MVP {
 
-            final double quantile;
+            final Percentile percentile;
 
-            public PercentileValueProvider(double quantile) {
-                this.quantile = quantile;
+            public PercentileValueProvider(Percentile percentile) {
+                this.percentile = percentile;
             }
 
             @Override
             public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
-                return snapshot.percentile(quantile) * DURATION_FACTOR;
+                return snapshot.percentileValue(percentile) * DURATION_FACTOR;
             }
         }
 
@@ -177,8 +177,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                 } else if (m instanceof StandardDeviation) {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
-                    Percentile p = (Percentile)m;
-                    result.put(m, new PercentileValueProvider(p.quantile()));
+                    result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
                 }
@@ -224,8 +223,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                 } else if (m instanceof StandardDeviation) {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
-                    Percentile p = (Percentile)m;
-                    result.put(m, new PercentileValueProvider(p.quantile()));
+                    result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
                 } else {

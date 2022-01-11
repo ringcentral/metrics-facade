@@ -16,12 +16,14 @@
 
     <properties>
         <benchmark.jar.name>benchmark</benchmark.jar.name>
-        <benchmark.jmh.version>1.23</benchmark.jmh.version>
+        <benchmark.jmh.version>1.32</benchmark.jmh.version>
         <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-        <guava.version>21.0</guava.version>
+        <guava.version>31.0.1-jre</guava.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
         <maven-shade-plugin.version>2.2</maven-shade-plugin.version>
+        <HdrHistogram.version>2.1.12</HdrHistogram.version>
+        <rolling-metrics.version>3.0.0</rolling-metrics.version>
     </properties>
 
     <dependencies>
@@ -50,6 +52,18 @@
             <artifactId>metrics-facade-x</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.vladimir-bukhtoyarov</groupId>
+            <artifactId>rolling-metrics-core</artifactId>
+            <version>${rolling-metrics.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>${HdrHistogram.version}</version>
         </dependency>
 
         <dependency>

@@ -9,6 +9,7 @@ import com.ringcentral.platform.metrics.x.rate.ema.configs.ExpMovingAverageXRate
 import java.util.Set;
 import java.util.concurrent.atomic.*;
 
+import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.NANOS_PER_SEC;
 import static java.lang.Math.exp;
 import static java.util.concurrent.TimeUnit.SECONDS;
 

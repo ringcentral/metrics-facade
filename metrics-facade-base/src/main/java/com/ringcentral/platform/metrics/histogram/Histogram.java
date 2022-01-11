@@ -7,7 +7,8 @@ import com.ringcentral.platform.metrics.measurables.MeasurableType;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
 import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.NANOS_PER_SEC;
+import static java.lang.Math.*;
 
 public interface Histogram extends Meter {
     class TotalSum implements HistogramMeasurable {
@@ -65,6 +66,7 @@ public interface Histogram extends Meter {
         private final double quantile;
         private final String quantileAsString;
         private final String quantileDecimalPartAsString;
+        private final double percentile;
 
         public Percentile(double quantile) {
             checkArgument(
@@ -75,6 +77,7 @@ public interface Histogram extends Meter {
             this.quantileAsString = Double.toString(quantile);
             String afterPoint = this.quantileAsString.substring(this.quantileAsString.indexOf(".") + 1);
             this.quantileDecimalPartAsString = afterPoint.length() > 1 ? afterPoint : afterPoint + "0";
+            this.percentile = min(max(quantile * 100.0, 0.0), 100.0);
         }
 
         public static Percentile of(double quantile) {
@@ -96,6 +99,10 @@ public interface Histogram extends Meter {
 
         public String quantileDecimalPartAsString() {
             return quantileDecimalPartAsString;
+        }
+
+        public double percentile() {
+            return percentile;
         }
     }
 
@@ -123,15 +130,17 @@ public interface Histogram extends Meter {
 
     class Bucket implements HistogramMeasurable {
 
-        private final double inclusiveUpperBound;
-        private final String inclusiveUpperBoundAsString;
+        private final double upperBound;
+        private final long upperBoundAsLong;
+        private final String upperBoundAsString;
 
-        public Bucket(double inclusiveUpperBound) {
-            this.inclusiveUpperBound = inclusiveUpperBound;
-            this.inclusiveUpperBoundAsString = inclusiveUpperBoundAsString(inclusiveUpperBound);
+        public Bucket(double upperBound) {
+            this.upperBound = upperBound;
+            this.upperBoundAsLong = Math.round(upperBound);
+            this.upperBoundAsString = upperBoundAsString(upperBound);
         }
 
-        static String inclusiveUpperBoundAsString(double b) {
+        static String upperBoundAsString(double b) {
             if (b == Double.POSITIVE_INFINITY) {
                 return "+Inf";
             }
@@ -143,8 +152,8 @@ public interface Histogram extends Meter {
             return Double.toString(b);
         }
 
-        public static Bucket of(double inclusiveUpperBound) {
-            return new Bucket(inclusiveUpperBound);
+        public static Bucket of(long upperBound) {
+            return new Bucket(upperBound);
         }
 
         @Override
@@ -152,26 +161,31 @@ public interface Histogram extends Meter {
             return LONG;
         }
 
-        public double inclusiveUpperBound() {
-            return inclusiveUpperBound;
+        /**
+         * @return inclusive upper bound
+         */
+        public double upperBound() {
+            return upperBound;
         }
 
-        public String inclusiveUpperBoundAsString() {
-            return inclusiveUpperBoundAsString;
+        public long upperBoundAsLong() {
+            return upperBoundAsLong;
+        }
+
+        public String upperBoundAsString() {
+            return upperBoundAsString;
         }
     }
 
-    long NANOS_PER_SEC = SECONDS.toNanos(1L);
-
-    Bucket MS_5_BUCKET = new Bucket(.005 * NANOS_PER_SEC);
-    Bucket MS_10_BUCKET = new Bucket(.01 * NANOS_PER_SEC);
+    Bucket MS_5_BUCKET = new Bucket(0.005 * NANOS_PER_SEC);
+    Bucket MS_10_BUCKET = new Bucket(0.01 * NANOS_PER_SEC);
     Bucket MS_25_BUCKET = new Bucket(.025 * NANOS_PER_SEC);
     Bucket MS_50_BUCKET = new Bucket(.05 * NANOS_PER_SEC);
     Bucket MS_75_BUCKET = new Bucket(.075 * NANOS_PER_SEC);
-    Bucket MS_100_BUCKET = new Bucket(.1 * NANOS_PER_SEC);
-    Bucket MS_250_BUCKET = new Bucket(.25 * NANOS_PER_SEC);
-    Bucket MS_500_BUCKET = new Bucket(.5 * NANOS_PER_SEC);
-    Bucket MS_750_BUCKET = new Bucket(.75 * NANOS_PER_SEC);
+    Bucket MS_100_BUCKET = new Bucket(0.1 * NANOS_PER_SEC);
+    Bucket MS_250_BUCKET = new Bucket(0.25 * NANOS_PER_SEC);
+    Bucket MS_500_BUCKET = new Bucket(0.5 * NANOS_PER_SEC);
+    Bucket MS_750_BUCKET = new Bucket(0.75 * NANOS_PER_SEC);
     Bucket SEC_1_BUCKET = new Bucket(1.0 * NANOS_PER_SEC);
     Bucket SEC_2_5_BUCKET = new Bucket(2.5 * NANOS_PER_SEC);
     Bucket SEC_5_BUCKET = new Bucket(5.0 * NANOS_PER_SEC);

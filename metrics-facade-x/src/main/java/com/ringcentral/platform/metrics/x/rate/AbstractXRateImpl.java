@@ -7,11 +7,9 @@ import com.ringcentral.platform.metrics.utils.TimeNanosProvider;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.NANOS_PER_SEC;
 
 public abstract class AbstractXRateImpl implements XRateImpl {
-
-    protected static final long NANOS_PER_SEC = SECONDS.toNanos(1L);
 
     protected final TimeNanosProvider timeNanosProvider;
     protected final long startTime;

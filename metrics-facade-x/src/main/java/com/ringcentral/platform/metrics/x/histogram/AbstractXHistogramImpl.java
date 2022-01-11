@@ -37,7 +37,7 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         updateImpl(value);
     }
 
-    protected abstract void updateImpl(long count);
+    protected abstract void updateImpl(long value);
 
     @Override
     public long count() {

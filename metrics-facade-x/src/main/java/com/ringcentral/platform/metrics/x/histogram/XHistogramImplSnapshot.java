@@ -1,10 +1,12 @@
 package com.ringcentral.platform.metrics.x.histogram;
 
+import com.ringcentral.platform.metrics.histogram.Histogram.*;
+
 public interface XHistogramImplSnapshot {
-    long size();
     long min();
     long max();
     double mean();
     double standardDeviation();
-    double percentile(double quantile);
+    double percentileValue(Percentile percentile);
+    long bucketSize(Bucket bucket);
 }

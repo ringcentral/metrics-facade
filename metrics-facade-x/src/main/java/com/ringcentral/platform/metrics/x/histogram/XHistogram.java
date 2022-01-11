@@ -9,7 +9,7 @@ import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 import com.ringcentral.platform.metrics.x.histogram.configs.*;
-import com.ringcentral.platform.metrics.x.histogram.hdr.HdrXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.hdr.*;
 import com.ringcentral.platform.metrics.x.histogram.hdr.configs.*;
 import org.slf4j.Logger;
 
@@ -95,15 +95,15 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
 
         public static class PercentileValueProvider implements MVP {
 
-            final double quantile;
+            final Percentile percentile;
 
-            public PercentileValueProvider(double quantile) {
-                this.quantile = quantile;
+            public PercentileValueProvider(Percentile percentile) {
+                this.percentile = percentile;
             }
 
             @Override
             public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
-                return snapshot.percentile(quantile);
+                return snapshot.percentileValue(percentile);
             }
         }
 
@@ -131,8 +131,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                 } else if (m instanceof StandardDeviation) {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
-                    Percentile p = (Percentile)m;
-                    result.put(m, new PercentileValueProvider(p.quantile()));
+                    result.put(m, new PercentileValueProvider((Percentile)m));
                 }
             });
 
@@ -166,8 +165,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                 } else if (m instanceof StandardDeviation) {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
-                    Percentile p = (Percentile)m;
-                    result.put(m, new PercentileValueProvider(p.quantile()));
+                    result.put(m, new PercentileValueProvider((Percentile)m));
                 } else {
                     logger.warn("Unsupported measurable {}", m.getClass().getName());
                 }
@@ -201,6 +199,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                 executor);
         }
 
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
         public XHistogramImpl makeMeterImpl(
             MetricContext instanceContext,
             MetricContext sliceContext,
@@ -227,8 +226,26 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
 
             if (implConfig instanceof HdrXHistogramImplConfig) {
-                return new HdrXHistogramImpl((HdrXHistogramImplConfig)implConfig, measurables, executor);
-            }
+                HdrXHistogramImplConfig hdrImplConfig = (HdrXHistogramImplConfig)implConfig;
+                HdrXHistogramImpl hdrImpl;
+
+                if (hdrImplConfig.type() == HdrXHistogramType.UNIFORM) {
+                    hdrImpl = new UniformHdrXHistogramImpl(hdrImplConfig, measurables, executor);
+                } else if (hdrImplConfig.type() == HdrXHistogramType.RESET_ON_SNAPSHOT) {
+                    hdrImpl = new ResetOnSnapshotHdrXHistogramImpl(hdrImplConfig, measurables, executor);
+                } else if (hdrImplConfig.type() == HdrXHistogramType.RESET_BY_CHUNKS) {
+                    hdrImpl = new ResetByChunksHdrXHistogramImpl(hdrImplConfig, measurables, executor);
+                } else {
+                    throw new IllegalArgumentException(
+                        "Unsupported " + HdrXHistogramImplConfig.class.getSimpleName()
+                        + ": " + hdrImplConfig.getClass().getName());
+                }
+
+                return
+                    hdrImplConfig.hasSnapshotTtl() ?
+                    new SnapshotCachingHdrXHistogramImpl(hdrImpl, hdrImplConfig.snapshotTtl().get()) :
+                    hdrImpl;
+             }
 
             throw new IllegalArgumentException(
                 "Unsupported " + XHistogramImplConfig.class.getSimpleName()

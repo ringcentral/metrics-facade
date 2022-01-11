@@ -281,6 +281,18 @@ public class PrometheusSampleMakerTest {
 
         check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
 
+        sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
+
+        expectedSample = new PrometheusSample(
+            name("bucket"),
+            Collector.Type.HISTOGRAM,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of("value_1", "value_2", "1.0"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+
         // timer
         instance = mock(TimerInstance.class);
 
@@ -455,6 +467,18 @@ public class PrometheusSampleMakerTest {
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+
+        sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
+
+        expectedSample = new PrometheusSample(
+            name("bucket"),
+            Collector.Type.HISTOGRAM,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of("value_1", "value_2", "1.0"),
             1.0);
 
         check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);

@@ -4,9 +4,10 @@ import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 
 import java.lang.management.*;
+import java.util.Locale;
 
-import static java.lang.management.ManagementFactory.*;
-import static java.util.Objects.*;
+import static java.lang.management.ManagementFactory.getThreadMXBean;
+import static java.util.Objects.requireNonNull;
 
 public class ThreadsMetricsProducer extends AbstractMetricsProducer {
 
@@ -42,7 +43,9 @@ public class ThreadsMetricsProducer extends AbstractMetricsProducer {
     @Override
     public void produceMetrics(MetricRegistry registry) {
         for (Thread.State state : Thread.State.values()) {
-            registry.longVar(nameWithSuffix(state.toString().toLowerCase(), "count"), () -> (long)threadCountFor(state), longVarConfigBuilderSupplier());
+            registry.longVar(
+                nameWithSuffix(state.toString().toLowerCase(Locale.ENGLISH), "count"),
+                () -> (long)threadCountFor(state), longVarConfigBuilderSupplier());
         }
 
         registry.longVar(nameWithSuffix("count"), () -> (long)threadMxBean.getThreadCount(), longVarConfigBuilderSupplier());

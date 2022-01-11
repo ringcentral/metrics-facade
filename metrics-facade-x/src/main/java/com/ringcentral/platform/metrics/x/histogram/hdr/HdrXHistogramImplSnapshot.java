@@ -13,7 +13,7 @@ public class HdrXHistogramImplSnapshot implements XHistogramImplSnapshot {
     private final double standardDeviation;
     private final double[] quantiles;
     private final double[] percentileValues;
-    private final double[] bucketUpperBounds;
+    private final long[] bucketUpperBounds;
     private final long[] bucketSizes;
 
     public HdrXHistogramImplSnapshot(
@@ -23,7 +23,7 @@ public class HdrXHistogramImplSnapshot implements XHistogramImplSnapshot {
         double standardDeviation,
         double[] quantiles,
         double[] percentileValues,
-        double[] bucketUpperBounds,
+        long[] bucketUpperBounds,
         long[] bucketSizes) {
 
         this.min = min;
@@ -79,7 +79,7 @@ public class HdrXHistogramImplSnapshot implements XHistogramImplSnapshot {
             return NO_VALUE;
         }
 
-        double upperBound = bucket.upperBound();
+        double upperBound = bucket.upperBoundAsLong();
 
         for (int i = 0; i < bucketUpperBounds.length; ++i) {
             if (upperBound <= bucketUpperBounds[i]) {

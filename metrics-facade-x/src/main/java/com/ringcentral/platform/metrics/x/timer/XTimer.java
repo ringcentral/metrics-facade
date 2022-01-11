@@ -129,6 +129,20 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
         }
 
+        public static class BucketValueProvider implements MVP {
+
+            final Bucket bucket;
+
+            public BucketValueProvider(Bucket bucket) {
+                this.bucket = bucket;
+            }
+
+            @Override
+            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+                return snapshot.bucketSize(bucket);
+            }
+        }
+
         public static final MVP DURATION_UNIT_VALUE_PROVIDER = new MVP() {
 
             @Override
@@ -178,6 +192,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
+                } else if (m instanceof Bucket) {
+                    result.put(m, new BucketValueProvider((Bucket)m));
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
                 }
@@ -224,6 +240,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
+                } else if (m instanceof Bucket) {
+                    result.put(m, new BucketValueProvider((Bucket)m));
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
                 } else {

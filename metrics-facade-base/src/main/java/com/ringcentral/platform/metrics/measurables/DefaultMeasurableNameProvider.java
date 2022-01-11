@@ -7,7 +7,7 @@ import com.ringcentral.platform.metrics.rate.*;
 import com.ringcentral.platform.metrics.timer.*;
 import com.ringcentral.platform.metrics.var.*;
 
-import static java.util.Locale.*;
+import static java.util.Locale.ENGLISH;
 
 public class DefaultMeasurableNameProvider implements MeasurableNameProvider {
 
@@ -43,6 +43,8 @@ public class DefaultMeasurableNameProvider implements MeasurableNameProvider {
             return "rate.15_minutes";
         } else if (measurable instanceof Rate.RateUnit) {
             return "rate.unit";
+        } else if (measurable instanceof Histogram.TotalSum) {
+            return "duration.totalSum";
         } else if (measurable instanceof Histogram.Min) {
             return "duration.min";
         } else if (measurable instanceof Histogram.Max) {
@@ -54,6 +56,9 @@ public class DefaultMeasurableNameProvider implements MeasurableNameProvider {
         } else if (measurable instanceof Histogram.Percentile) {
             Histogram.Percentile p = (Histogram.Percentile)measurable;
             return "duration." + p.quantileDecimalPartAsString() + "_percentile";
+        } else if (measurable instanceof Histogram.Bucket) {
+            Histogram.Bucket b = (Histogram.Bucket)measurable;
+            return "duration." + b.upperBoundAsStringWithUnit() + "_bucket";
         } else if (measurable instanceof Timer.DurationUnit) {
             return "duration.unit";
         } else {
@@ -72,6 +77,8 @@ public class DefaultMeasurableNameProvider implements MeasurableNameProvider {
     protected String nameForHistogramInstance(Measurable measurable) {
         if (measurable instanceof Counter.Count) {
             return "count";
+        } else if (measurable instanceof Histogram.TotalSum) {
+            return "totalSum";
         } else if (measurable instanceof Histogram.Min) {
             return "min";
         } else if (measurable instanceof Histogram.Max) {
@@ -83,6 +90,9 @@ public class DefaultMeasurableNameProvider implements MeasurableNameProvider {
         } else if (measurable instanceof Histogram.Percentile) {
             Histogram.Percentile p = (Histogram.Percentile)measurable;
             return p.quantileDecimalPartAsString() + "_percentile";
+        } else if (measurable instanceof Histogram.Bucket) {
+            Histogram.Bucket b = (Histogram.Bucket)measurable;
+            return b.upperBoundAsString() + "_bucket";
         } else {
             return defaultFor(measurable);
         }

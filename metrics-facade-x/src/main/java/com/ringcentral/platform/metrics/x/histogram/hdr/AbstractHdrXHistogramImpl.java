@@ -25,7 +25,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
     private final boolean withStandardDeviation;
     private final double[] quantiles;
     private final double[] percentiles;
-    private final double[] bucketUpperBounds;
+    private final long[] bucketUpperBounds;
 
     protected ScheduledExecutorService executor;
 
@@ -63,16 +63,16 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
         }
 
         if (measurables.stream().anyMatch(m -> m instanceof Histogram.Bucket)) {
-            double[] bounds = measurables.stream()
+            long[] bounds = measurables.stream()
                 .filter(m -> m instanceof Histogram.Bucket)
-                .mapToDouble(m -> ((Histogram.Bucket)m).upperBound())
+                .mapToLong(m -> ((Histogram.Bucket)m).upperBoundAsLong())
                 .sorted()
                 .toArray();
 
-            if (bounds[bounds.length - 1] != Double.POSITIVE_INFINITY) {
-                double[] boundsWithInf = new double[bounds.length + 1];
+            if (bounds[bounds.length - 1] != Long.MAX_VALUE) {
+                long[] boundsWithInf = new long[bounds.length + 1];
                 System.arraycopy(bounds, 0, boundsWithInf, 0, bounds.length);
-                boundsWithInf[bounds.length] = Double.POSITIVE_INFINITY;
+                boundsWithInf[bounds.length] = Long.MAX_VALUE;
                 bounds = boundsWithInf;
             }
 
@@ -161,7 +161,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
 
                 // buckets
                 if (bucketSizes != null) {
-                    double v = iterValue.getValueIteratedTo();
+                    long v = iterValue.getValueIteratedTo();
 
                     while (bucketIndex < bucketSizes.length && bucketUpperBounds[bucketIndex] <= v) {
                         bucketSizes[bucketIndex] = iterValue.getTotalCountToThisValue();

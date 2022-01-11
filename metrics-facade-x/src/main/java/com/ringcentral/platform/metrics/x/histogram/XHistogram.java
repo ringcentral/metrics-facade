@@ -107,6 +107,20 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
         }
 
+        public static class BucketValueProvider implements MVP {
+
+            final Bucket bucket;
+
+            public BucketValueProvider(Bucket bucket) {
+                this.bucket = bucket;
+            }
+
+            @Override
+            public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
+                return snapshot.bucketSize(bucket);
+            }
+        }
+
         private static final Map<Measurable, MeasurableValueProvider<XHistogramImpl>> DEFAULT_MEASURABLE_VALUE_PROVIDERS;
         private static final Logger logger = getLogger(MeasurableValueProvidersProviderImpl.class);
 
@@ -132,6 +146,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
+                } else if (m instanceof Bucket) {
+                    result.put(m, new BucketValueProvider((Bucket)m));
                 }
             });
 
@@ -166,6 +182,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                     result.put(m, STANDARD_DEVIATION_VALUE_PROVIDER);
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
+                } else if (m instanceof Bucket) {
+                    result.put(m, new BucketValueProvider((Bucket)m));
                 } else {
                     logger.warn("Unsupported measurable {}", m.getClass().getName());
                 }

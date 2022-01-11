@@ -1,10 +1,11 @@
 package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
-import com.ringcentral.platform.metrics.counter.Counter.Count;
+import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.histogram.*;
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
+import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.samples.SampleMaker;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
@@ -12,7 +13,7 @@ import io.prometheus.client.Collector;
 
 import java.util.List;
 
-import static io.prometheus.client.Collector.Type.GAUGE;
+import static io.prometheus.client.Collector.Type.*;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 
@@ -21,9 +22,11 @@ public class PrometheusSampleMaker implements SampleMaker<
     PrometheusSampleSpec,
     PrometheusInstanceSampleSpec> {
 
+    // TODO: support customizing the suffixes.
     public static final MetricName DEFAULT_MIN_CHILD_NAME_SUFFIX = MetricName.of("min");
     public static final MetricName DEFAULT_MAX_CHILD_NAME_SUFFIX = MetricName.of("max");
     public static final MetricName DEFAULT_MEAN_CHILD_NAME_SUFFIX = MetricName.of("mean");
+    public static final MetricName DEFAULT_BUCKET_CHILD_NAME_SUFFIX = MetricName.of("bucket");
 
     @Override
     public PrometheusSample makeSample(PrometheusSampleSpec spec, PrometheusInstanceSampleSpec instanceSampleSpec) {
@@ -35,27 +38,29 @@ public class PrometheusSampleMaker implements SampleMaker<
         MetricName childInstanceSampleNameSuffix = null;
         Collector.Type childInstanceSampleType = null;
 
-        // TODO: support exporting Histogram.Min/Max/Mean as a regular sample with a special name suffix.
-        if (spec.measurable() instanceof Histogram.Min) {
-            // TODO: support customizing the suffix.
+        // TODO: support exporting Histogram.Min/Max/Mean/Bucket as a regular sample with a special name suffix.
+        Measurable m = spec.measurable();
+
+        if (m instanceof Histogram.Min) {
             childInstanceSampleNameSuffix = DEFAULT_MIN_CHILD_NAME_SUFFIX;
             childInstanceSampleType = GAUGE;
-        } else if (spec.measurable() instanceof Histogram.Max) {
-            // TODO: support customizing the suffix.
+        } else if (m instanceof Histogram.Max) {
             childInstanceSampleNameSuffix = DEFAULT_MAX_CHILD_NAME_SUFFIX;
             childInstanceSampleType = GAUGE;
-        } else if (spec.measurable() instanceof Histogram.Mean) {
-            // TODO: support customizing the suffix.
+        } else if (m instanceof Histogram.Mean) {
             childInstanceSampleNameSuffix = DEFAULT_MEAN_CHILD_NAME_SUFFIX;
             childInstanceSampleType = GAUGE;
+        } else if (m instanceof Histogram.Bucket) {
+            childInstanceSampleNameSuffix = DEFAULT_BUCKET_CHILD_NAME_SUFFIX;
+            childInstanceSampleType = HISTOGRAM;
         }
 
         String nameSuffix = null;
 
         if (instance instanceof TimerInstance || instance instanceof HistogramInstance) {
-            if (spec.measurable() instanceof Count) {
+            if (m instanceof Counter.Count) {
                 nameSuffix = "_count";
-            } else if (spec.measurable() instanceof TotalSum) {
+            } else if (m instanceof Histogram.TotalSum) {
                 nameSuffix = "_sum";
             }
         }
@@ -67,15 +72,21 @@ public class PrometheusSampleMaker implements SampleMaker<
             labelNames = instanceSampleSpec.dimensionValues().stream().map(dv -> dv.dimension().name()).collect(toList());
             labelValues = instanceSampleSpec.dimensionValues().stream().map(MetricDimensionValue::value).collect(toList());
 
-            if (spec.measurable() instanceof Percentile) {
+            if (m instanceof Histogram.Percentile) {
                 labelNames.add("quantile");
-                Percentile p = (Percentile)spec.measurable();
+                Percentile p = (Histogram.Percentile)m;
                 labelValues.add(p.quantileAsString());
+            } else if (m instanceof Histogram.Bucket) {
+                labelNames.add("le");
+                labelValues.add(leValue((Histogram.Bucket)m));
             }
-        } else if (spec.measurable() instanceof Percentile) {
+        } else if (m instanceof Histogram.Percentile) {
             labelNames = singletonList("quantile");
-            Percentile p = (Percentile)spec.measurable();
+            Percentile p = (Percentile)m;
             labelValues = singletonList(p.quantileAsString());
+        } else if (m instanceof Histogram.Bucket) {
+            labelNames = singletonList("le");
+            labelValues = singletonList(leValue((Histogram.Bucket)m));
         } else {
             labelNames = emptyList();
             labelValues = emptyList();
@@ -88,5 +99,15 @@ public class PrometheusSampleMaker implements SampleMaker<
             labelNames,
             labelValues,
             spec.value());
+    }
+
+    private String leValue(Bucket b) {
+        if (b.upperBoundInUnits() == Double.POSITIVE_INFINITY) {
+            return "+Inf";
+        } else if (b.upperBoundInUnits() == Double.NEGATIVE_INFINITY) {
+            return "-Inf";
+        } else {
+            return b.upperBoundSecAsString();
+        }
     }
 }

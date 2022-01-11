@@ -204,6 +204,16 @@ public class PrometheusSampleSpecProviderTest {
                 PERCENTILE_75),
             expectedSampleSpec);
 
+        expectedSampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
+
+        check(
+            provider.sampleSpecFor(
+                instanceSampleSpec,
+                instance,
+                measurableValues,
+                SEC_1_BUCKET),
+            expectedSampleSpec);
+
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
@@ -288,6 +298,16 @@ public class PrometheusSampleSpecProviderTest {
                 instance,
                 measurableValues,
                 PERCENTILE_75),
+            expectedSampleSpec);
+
+        expectedSampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
+
+        check(
+            provider.sampleSpecFor(
+                instanceSampleSpec,
+                instance,
+                measurableValues,
+                SEC_1_BUCKET),
             expectedSampleSpec);
 
         assertNull(provider.sampleSpecFor(

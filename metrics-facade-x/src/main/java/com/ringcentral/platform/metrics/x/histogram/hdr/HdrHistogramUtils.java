@@ -2,6 +2,12 @@ package com.ringcentral.platform.metrics.x.histogram.hdr;
 
 import org.HdrHistogram.*;
 
+/**
+ * That's just a slightly refactored version of
+ * https://github.com/vladimir-bukhtoyarov/rolling-metrics/blob/3.0/rolling-metrics-core/src/main/java/com/github/rollingmetrics/histogram/hdr/HdrHistogramUtil.java
+ * (Copyright 2017 Vladimir Bukhtoyarov Licensed under the Apache License, Version 2.0)
+ * We thank Vladimir Bukhtoyarov for his great library.
+ */
 public class HdrHistogramUtils {
 
     public static void reset(Histogram histogram) {

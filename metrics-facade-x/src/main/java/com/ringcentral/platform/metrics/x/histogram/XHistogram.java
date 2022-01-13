@@ -263,7 +263,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                     hdrImplConfig.hasSnapshotTtl() ?
                     new SnapshotCachingHdrXHistogramImpl(hdrImpl, hdrImplConfig.snapshotTtl().get()) :
                     hdrImpl;
-             }
+            }
 
             throw new IllegalArgumentException(
                 "Unsupported " + XHistogramImplConfig.class.getSimpleName()

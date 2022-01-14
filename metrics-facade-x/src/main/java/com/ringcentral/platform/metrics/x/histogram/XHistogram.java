@@ -7,7 +7,7 @@ import com.ringcentral.platform.metrics.histogram.AbstractHistogram;
 import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.utils.TimeMsProvider;
+import com.ringcentral.platform.metrics.utils.*;
 import com.ringcentral.platform.metrics.x.histogram.configs.*;
 import com.ringcentral.platform.metrics.x.histogram.hdr.*;
 import com.ringcentral.platform.metrics.x.histogram.hdr.configs.*;
@@ -129,7 +129,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
         }
 
         private static Map<Measurable, MeasurableValueProvider<XHistogramImpl>> makeDefaultMeasurableValueProviders() {
-            Map<Measurable, MeasurableValueProvider<XHistogramImpl>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<XHistogramImpl>> result = new LinkedHashMap<>();
+            Ref<Boolean> infBucketAdded = new Ref<>(false);
 
             DEFAULT_HISTOGRAM_MEASURABLES.forEach(m -> {
                 if (m instanceof Count) {
@@ -147,11 +148,28 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof Bucket) {
-                    result.put(m, new BucketValueProvider((Bucket)m));
+                    addBucketMvp(result, m, infBucketAdded);
                 }
             });
 
             return Map.copyOf(result);
+        }
+
+        private static void addBucketMvp(
+            Map<Measurable, MeasurableValueProvider<XHistogramImpl>> result,
+            Measurable measurable,
+            Ref<Boolean> infBucketAdded) {
+
+            Bucket b = (Bucket)measurable;
+
+            if (!infBucketAdded.value()) {
+                result.put(INF_BUCKET, new BucketValueProvider(INF_BUCKET));
+                infBucketAdded.setValue(true);
+            }
+
+            if (!b.isInf()) {
+                result.put(measurable, new BucketValueProvider(b));
+            }
         }
 
         @Override
@@ -165,7 +183,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
 
-            Map<Measurable, MeasurableValueProvider<XHistogramImpl>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<XHistogramImpl>> result = new LinkedHashMap<>();
+            Ref<Boolean> infBucketAdded = new Ref<>(false);
 
             measurables.forEach(m -> {
                 if (m instanceof Count) {
@@ -183,7 +202,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof Bucket) {
-                    result.put(m, new BucketValueProvider((Bucket)m));
+                    addBucketMvp(result, m, infBucketAdded);
                 } else {
                     logger.warn("Unsupported measurable {}", m.getClass().getName());
                 }

@@ -211,37 +211,37 @@ public class PrometheusMetricsExporterTest {
             "# HELP a Generated from metric instances with name counter.a\n" +
             "# TYPE a gauge\n" +
             "a 1.0\n" +
-            "# HELP a_b_c_total Description for a.b.c.total\n" +
-            "# TYPE a_b_c_total counter\n" +
-            "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 4.0\n" +
-            "# HELP a_b_c_d_e_mean Description for a.b.c.d.e\n" +
-            "# TYPE a_b_c_d_e_mean gauge\n" +
-            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 12.0\n" +
             "# HELP a_b Description for a.b\n" +
             "# TYPE a_b gauge\n" +
             "a_b{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",} 2.0\n" +
-            "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
-            "# TYPE a_b_c_d_e_max gauge\n" +
-            "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 11.0\n" +
+            "# HELP a_b_total Description for a.b.total\n" +
+            "# TYPE a_b_total counter\n" +
+            "a_b_total 3.0\n" +
+            "# HELP a_b_c_total Description for a.b.c.total\n" +
+            "# TYPE a_b_c_total counter\n" +
+            "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 4.0\n" +
             "# HELP a_b_c_d Description for a.b.c.d\n" +
             "# TYPE a_b_c_d summary\n" +
             "a_b_c_d_count 5.0\n" +
             "a_b_c_d{quantile=\"0.50\",} 8.0\n" +
             "a_b_c_d{quantile=\"0.75\",} 9.0\n" +
-            "# HELP a_b_total Description for a.b.total\n" +
-            "# TYPE a_b_total counter\n" +
-            "a_b_total 3.0\n" +
             "# HELP a_b_c_d_max Description for a.b.c.d\n" +
             "# TYPE a_b_c_d_max gauge\n" +
             "a_b_c_d_max 6.0\n" +
+            "# HELP a_b_c_d_mean Description for a.b.c.d\n" +
+            "# TYPE a_b_c_d_mean gauge\n" +
+            "a_b_c_d_mean 7.0\n" +
             "# HELP a_b_c_d_e Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e summary\n" +
             "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 10.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.50\",} 13.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.75\",} 14.0\n" +
-            "# HELP a_b_c_d_mean Description for a.b.c.d\n" +
-            "# TYPE a_b_c_d_mean gauge\n" +
-            "a_b_c_d_mean 7.0\n"));
+            "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
+            "# TYPE a_b_c_d_e_max gauge\n" +
+            "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 11.0\n" +
+            "# HELP a_b_c_d_e_mean Description for a.b.c.d.e\n" +
+            "# TYPE a_b_c_d_e_mean gauge\n" +
+            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 12.0\n"));
 
         exporter = new PrometheusMetricsExporter(OPENMETRICS_TEXT_1_0_0, instanceSamplesProvider);
 
@@ -249,37 +249,37 @@ public class PrometheusMetricsExporterTest {
             "# TYPE a gauge\n" +
             "# HELP a Generated from metric instances with name counter.a\n" +
             "a 1.0\n" +
-            "# TYPE a_b_c counter\n" +
-            "# HELP a_b_c Description for a.b.c.total\n" +
-            "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 4.0\n" +
-            "# TYPE a_b_c_d_e_mean gauge\n" +
-            "# HELP a_b_c_d_e_mean Description for a.b.c.d.e\n" +
-            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 12.0\n" +
             "# TYPE a_b gauge\n" +
             "# HELP a_b Description for a.b\n" +
             "a_b{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\"} 2.0\n" +
-            "# TYPE a_b_c_d_e_max gauge\n" +
-            "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
-            "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 11.0\n" +
+            "# TYPE a_b counter\n" +
+            "# HELP a_b Description for a.b.total\n" +
+            "a_b_total 3.0\n" +
+            "# TYPE a_b_c counter\n" +
+            "# HELP a_b_c Description for a.b.c.total\n" +
+            "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 4.0\n" +
             "# TYPE a_b_c_d summary\n" +
             "# HELP a_b_c_d Description for a.b.c.d\n" +
             "a_b_c_d_count 5.0\n" +
             "a_b_c_d{quantile=\"0.50\"} 8.0\n" +
             "a_b_c_d{quantile=\"0.75\"} 9.0\n" +
-            "# TYPE a_b counter\n" +
-            "# HELP a_b Description for a.b.total\n" +
-            "a_b_total 3.0\n" +
             "# TYPE a_b_c_d_max gauge\n" +
             "# HELP a_b_c_d_max Description for a.b.c.d\n" +
             "a_b_c_d_max 6.0\n" +
+            "# TYPE a_b_c_d_mean gauge\n" +
+            "# HELP a_b_c_d_mean Description for a.b.c.d\n" +
+            "a_b_c_d_mean 7.0\n" +
             "# TYPE a_b_c_d_e summary\n" +
             "# HELP a_b_c_d_e Description for a.b.c.d.e\n" +
             "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 10.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.50\"} 13.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.75\"} 14.0\n" +
-            "# TYPE a_b_c_d_mean gauge\n" +
-            "# HELP a_b_c_d_mean Description for a.b.c.d\n" +
-            "a_b_c_d_mean 7.0\n" +
+            "# TYPE a_b_c_d_e_max gauge\n" +
+            "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
+            "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 11.0\n" +
+            "# TYPE a_b_c_d_e_mean gauge\n" +
+            "# HELP a_b_c_d_e_mean Description for a.b.c.d.e\n" +
+            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 12.0\n" +
             "# EOF\n"));
     }
 }

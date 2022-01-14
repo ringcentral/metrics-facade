@@ -3,13 +3,12 @@ package com.ringcentral.platform.metrics.x.timer;
 import com.ringcentral.platform.metrics.NotMeasuredException;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.*;
-import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.timer.*;
 import com.ringcentral.platform.metrics.timer.configs.*;
-import com.ringcentral.platform.metrics.utils.TimeMsProvider;
+import com.ringcentral.platform.metrics.utils.*;
 import com.ringcentral.platform.metrics.x.histogram.*;
 import com.ringcentral.platform.metrics.x.rate.*;
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import org.slf4j.Logger;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -165,7 +165,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
         }
 
         private static Map<Measurable, MeasurableValueProvider<XTimerImpl>> makeDefaultMeasurableValueProviders() {
-            Map<Measurable, MeasurableValueProvider<XTimerImpl>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<XTimerImpl>> result = new LinkedHashMap<>();
+            Ref<Boolean> infBucketAdded = new Ref<>(false);
 
             DEFAULT_TIMER_MEASURABLES.forEach(m -> {
                 if (m instanceof Count) {
@@ -193,13 +194,30 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof Bucket) {
-                    result.put(m, new BucketValueProvider((Bucket)m));
+                    addBucketMvp(result, m, infBucketAdded);
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
                 }
             });
 
             return Map.copyOf(result);
+        }
+
+        private static void addBucketMvp(
+            Map<Measurable, MeasurableValueProvider<XTimerImpl>> result,
+            Measurable measurable,
+            Ref<Boolean> infBucketAdded) {
+
+            Bucket b = (Bucket)measurable;
+
+            if (!infBucketAdded.value()) {
+                result.put(INF_BUCKET, new BucketValueProvider(INF_BUCKET));
+                infBucketAdded.setValue(true);
+            }
+
+            if (!b.isInf()) {
+                result.put(measurable, new BucketValueProvider(b));
+            }
         }
 
         @Override
@@ -213,7 +231,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
 
-            Map<Measurable, MeasurableValueProvider<XTimerImpl>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<XTimerImpl>> result = new LinkedHashMap<>();
+            Ref<Boolean> infBucketAdded = new Ref<>(false);
 
             measurables.forEach(m -> {
                 if (m instanceof Count) {
@@ -241,7 +260,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                 } else if (m instanceof Percentile) {
                     result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof Bucket) {
-                    result.put(m, new BucketValueProvider((Bucket)m));
+                    addBucketMvp(result, m, infBucketAdded);
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
                 } else {

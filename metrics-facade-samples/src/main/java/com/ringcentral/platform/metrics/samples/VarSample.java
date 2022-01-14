@@ -4,6 +4,7 @@ import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
 import com.ringcentral.platform.metrics.var.longVar.LongVar;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -17,7 +18,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class VarSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new XMetricRegistry();
         AtomicLong valueSupplier_1 = new AtomicLong();
 
         // Supported var types: ObjectVar, LongVar, DoubleVar, StringVar

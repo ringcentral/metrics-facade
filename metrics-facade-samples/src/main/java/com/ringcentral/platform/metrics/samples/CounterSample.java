@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.samples;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.withCounter;
@@ -17,7 +18,8 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class CounterSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new XMetricRegistry();
 
         // Default config:
         //   no dimensions

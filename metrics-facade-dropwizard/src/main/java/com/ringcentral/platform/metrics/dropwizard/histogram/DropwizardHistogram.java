@@ -100,7 +100,7 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
         }
 
         private static Map<Measurable, MeasurableValueProvider<Histogram>> makeDefaultMeasurableValueProviders() {
-            Map<Measurable, MeasurableValueProvider<Histogram>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<Histogram>> result = new LinkedHashMap<>();
 
             DEFAULT_HISTOGRAM_MEASURABLES.forEach(m -> {
                 if (m instanceof Count) {
@@ -133,7 +133,7 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
 
-            Map<Measurable, MeasurableValueProvider<Histogram>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<Histogram>> result = new LinkedHashMap<>();
 
             measurables.forEach(m -> {
                 if (m instanceof Count) {

@@ -4,15 +4,27 @@ import com.ringcentral.platform.metrics.Meter;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
-import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
+import static com.ringcentral.platform.metrics.measurables.MeasurableType.LONG;
 
 public interface Counter extends Meter {
     class Count implements CounterMeasurable {
 
+        static final int HASH_CODE = "Counter.Count".hashCode();
+
         @Override
         public MeasurableType type() {
             return LONG;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other != null && getClass() == other.getClass());
+        }
+
+        @Override
+        public int hashCode() {
+            return HASH_CODE;
         }
     }
 

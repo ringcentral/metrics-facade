@@ -12,9 +12,21 @@ import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
 public interface Timer extends Meter {
     class DurationUnit implements TimerMeasurable {
 
+        static final int HASH_CODE = "Timer.DurationUnit".hashCode();
+
         @Override
         public MeasurableType type() {
             return STRING;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other != null && getClass() == other.getClass());
+        }
+
+        @Override
+        public int hashCode() {
+            return HASH_CODE;
         }
     }
 

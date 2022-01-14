@@ -62,7 +62,7 @@ public class DropwizardRate extends AbstractRate<Meter> {
         }
 
         private static Map<Measurable, MeasurableValueProvider<Meter>> makeDefaultMeasurableValueProviders() {
-            Map<Measurable, MeasurableValueProvider<Meter>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<Meter>> result = new LinkedHashMap<>();
 
             DEFAULT_RATE_MEASURABLES.forEach(m -> {
                 if (m instanceof Count) {
@@ -94,7 +94,7 @@ public class DropwizardRate extends AbstractRate<Meter> {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
 
-            Map<Measurable, MeasurableValueProvider<Meter>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<Meter>> result = new LinkedHashMap<>();
 
             measurables.forEach(m -> {
                 if (m instanceof Count) {

@@ -159,7 +159,7 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
 
     @SuppressWarnings("unchecked")
     private void exportInstanceSamples(Writer writer, Format format) throws IOException {
-        Map<MetricName, MetricFamilySamples> nameToFs = new HashMap<>();
+        Map<MetricName, MetricFamilySamples> nameToFs = new LinkedHashMap<>();
 
         instanceSamplesProvider.instanceSamples().forEach(is -> {
             exportInstanceSample(is, nameToFs);

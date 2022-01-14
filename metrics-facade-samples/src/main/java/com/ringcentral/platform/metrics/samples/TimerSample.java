@@ -1,8 +1,10 @@
 package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.timer.*;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
@@ -21,7 +23,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class TimerSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new XMetricRegistry();
 
         // Default config:
         //   no dimensions
@@ -45,8 +48,9 @@ public class TimerSample extends AbstractSample {
         //  }
         Timer defaultConfigTimer = registry.timer(withName("timer", "defaultConfig"));
 
-        defaultConfigTimer.update(1L);
-        defaultConfigTimer.update(2L);
+        for (int i = 1; i <= 100; ++i) {
+            defaultConfigTimer.update(i, TimeUnit.SECONDS);
+        }
 
         // Full config
         Timer fullConfigTimer = registry.timer(
@@ -168,7 +172,18 @@ public class TimerSample extends AbstractSample {
 
                     // options: noMeasurables()
                     // default: the metric's measurables { COUNT, MEAN_RATE, MAX, MEAN }
-                    .measurables(COUNT, MEAN_RATE, MAX, MEAN, PERCENTILE_75)
+                    .measurables(
+                        COUNT,
+                        MEAN_RATE,
+                        MAX,
+                        MEAN,
+                        PERCENTILE_75,
+                        MS_10_BUCKET,
+                        MS_30_BUCKET,
+                        MS_50_BUCKET,
+                        MS_75_BUCKET,
+                        MS_100_BUCKET,
+                        MS_250_BUCKET)
 
                     // options: disableTotal(), noTotal(), totalEnabled(boolean)
                     // default: enabled
@@ -197,14 +212,28 @@ public class TimerSample extends AbstractSample {
                         .put("key_2", "value_2_2")) // overrides "key_2" -> "value_2_1"
         );
 
+        // service_1/server_1_1
         fullConfigTimer.update(
             25, MILLISECONDS,
             forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
 
         fullConfigTimer.update(
             50, MILLISECONDS,
+            forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+
+        fullConfigTimer.update(
+            75, MILLISECONDS,
+            forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+
+        fullConfigTimer.update(
+            100, MILLISECONDS,
+            forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+
+        fullConfigTimer.update(
+            50, MILLISECONDS,
             forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
 
+        // other services/servers
         Stopwatch stopwatch = fullConfigTimer.stopwatch(forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
         sleep(25);
         stopwatch.stop();

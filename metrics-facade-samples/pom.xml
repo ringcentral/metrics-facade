@@ -29,6 +29,12 @@
 
         <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>
+            <artifactId>metrics-facade-x</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-prometheus</artifactId>
             <version>${project.version}</version>
         </dependency>

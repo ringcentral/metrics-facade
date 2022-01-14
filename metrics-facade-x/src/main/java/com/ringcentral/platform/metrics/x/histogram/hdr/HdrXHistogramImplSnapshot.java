@@ -79,7 +79,7 @@ public class HdrXHistogramImplSnapshot implements XHistogramImplSnapshot {
             return NO_VALUE;
         }
 
-        double upperBound = bucket.upperBoundAsLong();
+        long upperBound = bucket.upperBoundAsLong();
 
         for (int i = 0; i < bucketUpperBounds.length; ++i) {
             if (upperBound <= bucketUpperBounds[i]) {

@@ -64,7 +64,7 @@ public class XRate extends AbstractRate<XRateImpl> {
         }
 
         private static Map<Measurable, MeasurableValueProvider<XRateImpl>> makeDefaultMeasurableValueProviders() {
-            Map<Measurable, MeasurableValueProvider<XRateImpl>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<XRateImpl>> result = new LinkedHashMap<>();
 
             DEFAULT_RATE_MEASURABLES.forEach(m -> {
                 if (m instanceof Count) {
@@ -96,7 +96,7 @@ public class XRate extends AbstractRate<XRateImpl> {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
 
-            Map<Measurable, MeasurableValueProvider<XRateImpl>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<XRateImpl>> result = new LinkedHashMap<>();
 
             measurables.forEach(m -> {
                 if (m instanceof Count) {

@@ -163,8 +163,17 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
                 if (bucketSizes != null) {
                     long v = iterValue.getValueIteratedTo();
 
-                    while (bucketIndex < bucketSizes.length && bucketUpperBounds[bucketIndex] <= v) {
+                    while (bucketIndex < bucketSizes.length) {
+                        if (bucketUpperBounds[bucketIndex] > v) {
+                            break;
+                        }
+
                         bucketSizes[bucketIndex] = iterValue.getTotalCountToThisValue();
+
+                        if (bucketUpperBounds[bucketIndex] < v) {
+                            bucketSizes[bucketIndex] -= iterValue.getCountAddedInThisIterationStep();
+                        }
+
                         ++bucketIndex;
                     }
                 }

@@ -10,4 +10,12 @@ public class ObjectUtils {
             .append(o2)
             .toHashCode();
     }
+
+    public static int hashCodeFor(Object o1, Object o2, Object o3) {
+        return new HashCodeBuilder(17, 37)
+            .append(o1)
+            .append(o2)
+            .append(o3)
+            .toHashCode();
+    }
 }

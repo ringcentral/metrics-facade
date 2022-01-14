@@ -7,6 +7,7 @@ import com.ringcentral.platform.metrics.reporters.jmx.JmxMetricsReporter;
 import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusHttpServer;
 import com.ringcentral.platform.metrics.timer.*;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
@@ -22,7 +23,9 @@ public class GettingStartedSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // Create a registry
-        MetricRegistry registry = new DropwizardMetricRegistry();
+
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new XMetricRegistry();
 
         // Add reporters
         PrometheusMetricsExporter prometheusExporter = new PrometheusMetricsExporter(registry);

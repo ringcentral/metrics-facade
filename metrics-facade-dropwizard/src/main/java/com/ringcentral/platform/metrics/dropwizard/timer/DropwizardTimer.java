@@ -138,7 +138,7 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
         }
 
         private static Map<Measurable, MeasurableValueProvider<Timer>> makeDefaultMeasurableValueProviders() {
-            Map<Measurable, MeasurableValueProvider<Timer>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<Timer>> result = new LinkedHashMap<>();
 
             DEFAULT_TIMER_MEASURABLES.forEach(m -> {
                 if (m instanceof Count) {
@@ -183,7 +183,7 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
                 return DEFAULT_MEASURABLE_VALUE_PROVIDERS;
             }
 
-            Map<Measurable, MeasurableValueProvider<Timer>> result = new HashMap<>();
+            Map<Measurable, MeasurableValueProvider<Timer>> result = new LinkedHashMap<>();
 
             measurables.forEach(m -> {
                 if (m instanceof Count) {

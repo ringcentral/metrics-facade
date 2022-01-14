@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.samples;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.MetricModBuilder.modifying;
 import static com.ringcentral.platform.metrics.configs.builders.BaseMeterConfigBuilder.withMeter;
@@ -22,7 +23,8 @@ import static java.time.temporal.ChronoUnit.*;
 public class DefaultsSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new XMetricRegistry();
 
         registry.preConfigure(allMetrics(), modifying()
             .metric(withMetric().prefix(dimensionValues(SAMPLE.value("defaults"))))

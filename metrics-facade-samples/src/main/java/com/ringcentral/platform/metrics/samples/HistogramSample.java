@@ -1,8 +1,8 @@
 package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
@@ -18,7 +18,8 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class HistogramSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new XMetricRegistry();
 
         // Default config:
         //   no dimensions
@@ -33,8 +34,9 @@ public class HistogramSample extends AbstractSample {
         //   }
         Histogram defaultConfigHistogram = registry.histogram(withName("histogram", "defaultConfig"));
 
-        defaultConfigHistogram.update(1L);
-        defaultConfigHistogram.update(2L);
+        for (int i = 1; i <= 100; ++i) {
+            defaultConfigHistogram.update(i);
+        }
 
         // Full config
         Histogram fullConfigHistogram = registry.histogram(
@@ -118,7 +120,7 @@ public class HistogramSample extends AbstractSample {
 
                         // options: noMeasurables()
                         // default: the slice's measurables { COUNT, MEAN, MAX }
-                        .measurables(COUNT, MEAN, PERCENTILE_95, MAX)
+                        .measurables(COUNT, MEAN, PERCENTILE_95, MAX, Bucket.of(1), Bucket.of(2))
 
                         // the properties specific to the metrics implementation
                         // default: no properties (no overrides)
@@ -147,7 +149,20 @@ public class HistogramSample extends AbstractSample {
 
                     // options: noMeasurables()
                     // default: the metric's measurables { COUNT, MEAN }
-                    .measurables(COUNT, MEAN, PERCENTILE_50, PERCENTILE_95, MAX)
+                    .measurables(
+                        COUNT,
+                        MEAN,
+                        PERCENTILE_50,
+                        PERCENTILE_95,
+                        MAX,
+                        Bucket.of(0),
+                        Bucket.of(1),
+                        Bucket.of(24),
+                        Bucket.of(25),
+                        Bucket.of(30),
+                        Bucket.of(49),
+                        Bucket.of(50),
+                        Bucket.of(55))
 
                     // options: disableTotal(), noTotal(), totalEnabled(boolean)
                     // default: enabled
@@ -176,8 +191,14 @@ public class HistogramSample extends AbstractSample {
                         .put("key_2", "value_2_2")) // overrides "key_2" -> "value_2_1"
         );
 
-        fullConfigHistogram.update(25, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        fullConfigHistogram.update(50, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+        fullConfigHistogram.update(20, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        fullConfigHistogram.update(25, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("121")));
+        fullConfigHistogram.update(30, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("121")));
+        fullConfigHistogram.update(50, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("121")));
+        fullConfigHistogram.update(55, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("121")));
+        fullConfigHistogram.update(65, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("121")));
+        fullConfigHistogram.update(70, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("121")));
+
         fullConfigHistogram.update(25, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
         fullConfigHistogram.update(75, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_2"), PORT.value("221")));
         fullConfigHistogram.update(100, forDimensionValues(SERVICE.value("service_3"), SERVER.value("server_3_1"), PORT.value("311")));

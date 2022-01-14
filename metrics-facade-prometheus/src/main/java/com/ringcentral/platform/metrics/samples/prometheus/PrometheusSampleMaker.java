@@ -78,7 +78,7 @@ public class PrometheusSampleMaker implements SampleMaker<
                 labelValues.add(p.quantileAsString());
             } else if (m instanceof Histogram.Bucket) {
                 labelNames.add("le");
-                labelValues.add(leValue((Histogram.Bucket)m));
+                labelValues.add(leValue(instance, (Histogram.Bucket)m));
             }
         } else if (m instanceof Histogram.Percentile) {
             labelNames = singletonList("quantile");
@@ -86,7 +86,7 @@ public class PrometheusSampleMaker implements SampleMaker<
             labelValues = singletonList(p.quantileAsString());
         } else if (m instanceof Histogram.Bucket) {
             labelNames = singletonList("le");
-            labelValues = singletonList(leValue((Histogram.Bucket)m));
+            labelValues = singletonList(leValue(instance, (Histogram.Bucket)m));
         } else {
             labelNames = emptyList();
             labelValues = emptyList();
@@ -101,13 +101,16 @@ public class PrometheusSampleMaker implements SampleMaker<
             spec.value());
     }
 
-    private String leValue(Bucket b) {
-        if (b.upperBoundInUnits() == Double.POSITIVE_INFINITY) {
+    private String leValue(MetricInstance instance, Bucket bucket) {
+        if (bucket.isInf()) {
             return "+Inf";
-        } else if (b.upperBoundInUnits() == Double.NEGATIVE_INFINITY) {
+        } else if (bucket.isNegativeInf()) {
             return "-Inf";
         } else {
-            return b.upperBoundSecAsString();
+            return
+                instance instanceof TimerInstance ?
+                bucket.upperBoundSecAsString() :
+                bucket.upperBoundAsString();
         }
     }
 }

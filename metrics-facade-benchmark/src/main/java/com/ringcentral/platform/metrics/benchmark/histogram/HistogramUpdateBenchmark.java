@@ -208,8 +208,9 @@ public class HistogramUpdateBenchmark {
         public static void main(String[] args) {
             Options options = new OptionsBuilder()
                 .include(HistogramUpdateBenchmark.class.getSimpleName())
-                .warmupIterations(5)
-                .measurementIterations(5)
+                .warmupIterations(3)
+                .measurementIterations(3)
+                .measurementTime(TimeValue.seconds(30L))
                 .threads(16)
                 .forks(1)
                 .build();

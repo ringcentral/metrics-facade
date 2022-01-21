@@ -1,9 +1,8 @@
-package com.ringcentral.platform.metrics.x.histogram.hdr;
+package com.ringcentral.platform.metrics.x.histogram;
 
 import com.ringcentral.platform.metrics.histogram.Histogram;
-import com.ringcentral.platform.metrics.x.histogram.XHistogramImplSnapshot;
 
-public class HdrXHistogramImplSnapshot implements XHistogramImplSnapshot {
+public class DefaultXHistogramImplSnapshot implements XHistogramImplSnapshot {
 
     public static final long NO_VALUE = 0L;
 
@@ -16,7 +15,7 @@ public class HdrXHistogramImplSnapshot implements XHistogramImplSnapshot {
     private final long[] bucketUpperBounds;
     private final long[] bucketSizes;
 
-    public HdrXHistogramImplSnapshot(
+    public DefaultXHistogramImplSnapshot(
         long min,
         long max,
         double mean,

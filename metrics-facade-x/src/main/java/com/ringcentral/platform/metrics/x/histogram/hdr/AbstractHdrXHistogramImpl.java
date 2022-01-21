@@ -2,14 +2,14 @@ package com.ringcentral.platform.metrics.x.histogram.hdr;
 
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.measurables.Measurable;
-import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.*;
 import com.ringcentral.platform.metrics.x.histogram.hdr.configs.*;
 import org.HdrHistogram.*;
 
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.x.histogram.hdr.HdrXHistogramImplSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.DefaultXHistogramImplSnapshot.NO_VALUE;
 import static java.lang.Math.sqrt;
 import static java.util.Arrays.fill;
 
@@ -111,7 +111,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
     protected abstract void updateWithExpectedInterval(long value, long expectedInterval);
 
     @Override
-    public synchronized HdrXHistogramImplSnapshot snapshot() {
+    public synchronized XHistogramImplSnapshot snapshot() {
         org.HdrHistogram.Histogram h = hdrHistogramForSnapshot();
 
         long min = withMin ? h.getMinValue() : NO_VALUE;
@@ -122,7 +122,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
         long[] bucketSizes = bucketUpperBounds != null ? new long[bucketUpperBounds.length] : null;
 
         if (!(withMean || withStandardDeviation || percentileValues != null || bucketSizes != null)) {
-            return new HdrXHistogramImplSnapshot(
+            return new DefaultXHistogramImplSnapshot(
                 min,
                 max,
                 mean,
@@ -222,7 +222,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
             }
         }
 
-        return new HdrXHistogramImplSnapshot(
+        return new DefaultXHistogramImplSnapshot(
             min,
             max,
             mean,

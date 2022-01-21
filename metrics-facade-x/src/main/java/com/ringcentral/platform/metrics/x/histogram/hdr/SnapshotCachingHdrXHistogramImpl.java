@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram.hdr;
 
 import com.ringcentral.platform.metrics.utils.*;
+import com.ringcentral.platform.metrics.x.histogram.XHistogramImplSnapshot;
 
 import java.time.Duration;
 
@@ -13,7 +14,7 @@ import java.time.Duration;
 public class SnapshotCachingHdrXHistogramImpl implements HdrXHistogramImpl {
 
     private final HdrXHistogramImpl parent;
-    private final CachingSupplier<HdrXHistogramImplSnapshot> cachingSnapshotSupplier;
+    private final CachingSupplier<XHistogramImplSnapshot> cachingSnapshotSupplier;
 
     public SnapshotCachingHdrXHistogramImpl(HdrXHistogramImpl parent, Duration ttl) {
         this(
@@ -47,7 +48,7 @@ public class SnapshotCachingHdrXHistogramImpl implements HdrXHistogramImpl {
     }
 
     @Override
-    public synchronized HdrXHistogramImplSnapshot snapshot() {
+    public synchronized XHistogramImplSnapshot snapshot() {
         return cachingSnapshotSupplier.get();
     }
 }

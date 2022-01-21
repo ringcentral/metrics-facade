@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram.hdr;
 
-import com.ringcentral.platform.metrics.x.histogram.XHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.*;
 
 public interface HdrXHistogramImpl extends XHistogramImpl {
-    HdrXHistogramImplSnapshot snapshot();
+    XHistogramImplSnapshot snapshot();
 }

@@ -151,6 +151,7 @@ public class HistogramSample extends AbstractSample {
                     // default: the metric's measurables { COUNT, MEAN }
                     .measurables(
                         COUNT,
+                        TOTAL_SUM,
                         MEAN,
                         PERCENTILE_50,
                         PERCENTILE_95,

@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.histogram.HistogramInstance;
+import com.ringcentral.platform.metrics.histogram.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.samples.InstanceSampleMaker;
@@ -77,7 +77,12 @@ public class PrometheusInstanceSampleMaker implements InstanceSampleMaker<
         Collector.Type type;
 
         if (instance instanceof TimerInstance || instance instanceof HistogramInstance) {
-            type = SUMMARY;
+            // io.micrometer.prometheus.PrometheusMeterRegistry:
+            // "Prometheus doesn't balk at a metric being BOTH a histogram and a summary"
+            type =
+                instance.measurables().stream().anyMatch(m -> m instanceof Histogram.Bucket) ?
+                HISTOGRAM :
+                SUMMARY;
         } else if (instance instanceof CounterInstance) {
             type = GAUGE;
         } else if (instance instanceof RateInstance) {

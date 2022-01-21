@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.histogram.HistogramInstance;
+import com.ringcentral.platform.metrics.histogram.*;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
 import com.ringcentral.platform.metrics.var.VarInstance;
@@ -11,6 +11,9 @@ import com.ringcentral.platform.metrics.var.longVar.LongVarInstance;
 import io.prometheus.client.Collector;
 import org.junit.Test;
 
+import java.util.Set;
+
+import static com.ringcentral.platform.metrics.histogram.Histogram.SEC_1_BUCKET;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.*;
 import static java.util.Collections.emptyList;
@@ -295,12 +298,13 @@ public class PrometheusInstanceSampleMakerTest {
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
         when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.measurables()).thenReturn(Set.of(SEC_1_BUCKET));
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
             "Description for " + name("a", "b"),
-            Collector.Type.SUMMARY);
+            Collector.Type.HISTOGRAM);
 
         check(
             maker.makeInstanceSample(new PrometheusInstanceSampleSpec(

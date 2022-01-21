@@ -13,7 +13,7 @@ import io.prometheus.client.Collector;
 
 import java.util.List;
 
-import static io.prometheus.client.Collector.Type.*;
+import static io.prometheus.client.Collector.Type.GAUGE;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 
@@ -26,7 +26,6 @@ public class PrometheusSampleMaker implements SampleMaker<
     public static final MetricName DEFAULT_MIN_CHILD_NAME_SUFFIX = MetricName.of("min");
     public static final MetricName DEFAULT_MAX_CHILD_NAME_SUFFIX = MetricName.of("max");
     public static final MetricName DEFAULT_MEAN_CHILD_NAME_SUFFIX = MetricName.of("mean");
-    public static final MetricName DEFAULT_BUCKET_CHILD_NAME_SUFFIX = MetricName.of("bucket");
 
     @Override
     public PrometheusSample makeSample(PrometheusSampleSpec spec, PrometheusInstanceSampleSpec instanceSampleSpec) {
@@ -50,9 +49,6 @@ public class PrometheusSampleMaker implements SampleMaker<
         } else if (m instanceof Histogram.Mean) {
             childInstanceSampleNameSuffix = DEFAULT_MEAN_CHILD_NAME_SUFFIX;
             childInstanceSampleType = GAUGE;
-        } else if (m instanceof Histogram.Bucket) {
-            childInstanceSampleNameSuffix = DEFAULT_BUCKET_CHILD_NAME_SUFFIX;
-            childInstanceSampleType = HISTOGRAM;
         }
 
         String nameSuffix = null;
@@ -62,6 +58,8 @@ public class PrometheusSampleMaker implements SampleMaker<
                 nameSuffix = "_count";
             } else if (m instanceof Histogram.TotalSum) {
                 nameSuffix = "_sum";
+            } else if (m instanceof Histogram.Bucket) {
+                nameSuffix = "_bucket";
             }
         }
 

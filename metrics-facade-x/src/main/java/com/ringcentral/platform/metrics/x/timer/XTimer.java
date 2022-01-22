@@ -75,7 +75,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
 
             @Override
             public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
-                return timer.rate().count();
+                return snapshot.count();
             }
         };
 
@@ -88,7 +88,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
 
             @Override
             public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
-                return timer.histogram().totalSum() * DURATION_FACTOR;
+                return snapshot.totalSum() * DURATION_FACTOR;
             }
         };
 

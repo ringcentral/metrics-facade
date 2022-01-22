@@ -6,6 +6,8 @@ public class DefaultXHistogramImplSnapshot implements XHistogramImplSnapshot {
 
     public static final long NO_VALUE = 0L;
 
+    private final long count;
+    private final long totalSum;
     private final long min;
     private final long max;
     private final double mean;
@@ -16,6 +18,8 @@ public class DefaultXHistogramImplSnapshot implements XHistogramImplSnapshot {
     private final long[] bucketSizes;
 
     public DefaultXHistogramImplSnapshot(
+        long count,
+        long totalSum,
         long min,
         long max,
         double mean,
@@ -25,6 +29,8 @@ public class DefaultXHistogramImplSnapshot implements XHistogramImplSnapshot {
         long[] bucketUpperBounds,
         long[] bucketSizes) {
 
+        this.count = count;
+        this.totalSum = totalSum;
         this.min = min;
         this.max = max;
         this.mean = mean;
@@ -33,6 +39,16 @@ public class DefaultXHistogramImplSnapshot implements XHistogramImplSnapshot {
         this.percentileValues = percentileValues;
         this.bucketUpperBounds = bucketUpperBounds;
         this.bucketSizes = bucketSizes;
+    }
+
+    @Override
+    public long count() {
+        return count;
+    }
+
+    @Override
+    public long totalSum() {
+        return totalSum;
     }
 
     @Override

@@ -58,8 +58,21 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
 
     @Override
     public synchronized XHistogramImplSnapshot snapshot() {
-        org.HdrHistogram.Histogram h = hdrHistogramForSnapshot();
+        long count = NO_VALUE;
+        long totalSum = NO_VALUE;
 
+        if (counter != null && totalSumAdder != null) {
+            do {
+                count = counter.sum();
+                totalSum = totalSumAdder.sum();
+            } while (count != counter.sum());
+        } else if (counter != null) {
+            count = counter.sum();
+        } else if (totalSumAdder != null) {
+            totalSum = totalSumAdder.sum();
+        }
+
+        org.HdrHistogram.Histogram h = hdrHistogramForSnapshot();
         long min = withMin ? h.getMinValue() : NO_VALUE;
         long max = withMax ? h.getMaxValue() : NO_VALUE;
         double mean = NO_VALUE;
@@ -69,6 +82,8 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
 
         if (!(withMean || withStandardDeviation || percentileValues != null || bucketSizes != null)) {
             return new DefaultXHistogramImplSnapshot(
+                count,
+                totalSum,
                 min,
                 max,
                 mean,
@@ -169,6 +184,8 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
         }
 
         return new DefaultXHistogramImplSnapshot(
+            count,
+            totalSum,
             min,
             max,
             mean,

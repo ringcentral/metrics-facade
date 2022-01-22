@@ -71,7 +71,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
 
             @Override
             public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
-                return histogram.count();
+                return snapshot.count();
             }
         };
 
@@ -84,7 +84,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
 
             @Override
             public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
-                return histogram.totalSum();
+                return snapshot.totalSum();
             }
         };
 

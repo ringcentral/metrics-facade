@@ -20,7 +20,7 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
     protected final long[] bucketUpperBounds;
 
     protected final LongAdder counter;
-    protected final LongAdder totalSum;
+    protected final LongAdder totalSumAdder;
 
     protected ScheduledExecutorService executor;
 
@@ -71,7 +71,7 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             new LongAdder() :
             null;
 
-        this.totalSum =
+        this.totalSumAdder =
             measurables.stream().anyMatch(m -> m instanceof TotalSum) ?
             new LongAdder() :
             null;
@@ -85,8 +85,8 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             counter.increment();
         }
 
-        if (totalSum != null) {
-            totalSum.add(value);
+        if (totalSumAdder != null) {
+            totalSumAdder.add(value);
         }
 
         updateImpl(value);
@@ -101,6 +101,6 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
     @Override
     public long totalSum() {
-        return totalSum.sum();
+        return totalSumAdder.sum();
     }
 }

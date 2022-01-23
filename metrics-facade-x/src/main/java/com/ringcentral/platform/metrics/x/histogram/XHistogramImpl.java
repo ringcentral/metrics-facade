@@ -4,5 +4,5 @@ public interface XHistogramImpl {
     void update(long value);
     long count();
     long totalSum();
-    XHistogramImplSnapshot snapshot();
+    XHistogramSnapshot snapshot();
 }

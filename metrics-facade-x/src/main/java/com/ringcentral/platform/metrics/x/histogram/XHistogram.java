@@ -27,13 +27,13 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             return valueFor(histogram, histogram.snapshot());
         }
 
-        Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot);
+        Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot);
     }
 
     public static class MeasurableValuesImpl extends AbstractMeasurableValues {
 
         private final XHistogramImpl histogram;
-        private final XHistogramImplSnapshot snapshot;
+        private final XHistogramSnapshot snapshot;
         private final Map<Measurable, MeasurableValueProvider<XHistogramImpl>> measurableValueProviders;
 
         public MeasurableValuesImpl(
@@ -70,7 +70,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
 
             @Override
-            public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
                 return snapshot.count();
             }
         };
@@ -83,7 +83,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
 
             @Override
-            public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
                 return snapshot.totalSum();
             }
         };
@@ -102,7 +102,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
 
             @Override
-            public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
                 return snapshot.percentileValue(percentile);
             }
         }
@@ -116,7 +116,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             }
 
             @Override
-            public Object valueFor(XHistogramImpl histogram, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
                 return snapshot.bucketSize(bucket);
             }
         }

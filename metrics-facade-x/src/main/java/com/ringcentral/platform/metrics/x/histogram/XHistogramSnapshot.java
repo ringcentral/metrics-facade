@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.x.histogram;
 
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
 
-public interface XHistogramImplSnapshot {
+public interface XHistogramSnapshot {
     long count();
     long totalSum();
     long min();

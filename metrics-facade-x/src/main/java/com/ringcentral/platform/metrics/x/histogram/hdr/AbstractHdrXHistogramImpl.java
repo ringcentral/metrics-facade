@@ -8,7 +8,7 @@ import org.HdrHistogram.*;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.x.histogram.DefaultXHistogramImplSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.DefaultXHistogramSnapshot.NO_VALUE;
 import static java.lang.Math.sqrt;
 import static java.util.Arrays.fill;
 
@@ -57,7 +57,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
     protected abstract void updateWithExpectedInterval(long value, long expectedInterval);
 
     @Override
-    public synchronized XHistogramImplSnapshot snapshot() {
+    public synchronized XHistogramSnapshot snapshot() {
         long count = NO_VALUE;
         long totalSum = NO_VALUE;
 
@@ -81,7 +81,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
         long[] bucketSizes = bucketUpperBounds != null ? new long[bucketUpperBounds.length] : null;
 
         if (!(withMean || withStandardDeviation || percentileValues != null || bucketSizes != null)) {
-            return new DefaultXHistogramImplSnapshot(
+            return new DefaultXHistogramSnapshot(
                 count,
                 totalSum,
                 min,
@@ -183,7 +183,7 @@ public abstract class AbstractHdrXHistogramImpl extends AbstractXHistogramImpl i
             }
         }
 
-        return new DefaultXHistogramImplSnapshot(
+        return new DefaultXHistogramSnapshot(
             count,
             totalSum,
             min,

@@ -29,13 +29,13 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             return valueFor(timer, timer.histogram().snapshot());
         }
 
-        Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot);
+        Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot);
     }
 
     public static class MeasurableValuesImpl extends AbstractMeasurableValues {
 
         private final XTimerImpl timer;
-        private final XHistogramImplSnapshot snapshot;
+        private final XHistogramSnapshot snapshot;
         private final Map<Measurable, MeasurableValueProvider<XTimerImpl>> measurableValueProviders;
 
         public MeasurableValuesImpl(
@@ -74,7 +74,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return snapshot.count();
             }
         };
@@ -87,7 +87,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return snapshot.totalSum() * DURATION_FACTOR;
             }
         };
@@ -105,7 +105,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return "events/sec";
             }
         };
@@ -124,7 +124,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return snapshot.percentileValue(percentile) * DURATION_FACTOR;
             }
         }
@@ -138,7 +138,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return snapshot.bucketSize(bucket);
             }
         }
@@ -151,7 +151,7 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             }
 
             @Override
-            public Object valueFor(XTimerImpl timer, XHistogramImplSnapshot snapshot) {
+            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
                 return "ms";
             }
         };

@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.x.histogram;
 
 import com.ringcentral.platform.metrics.histogram.Histogram;
 
-public class DefaultXHistogramImplSnapshot implements XHistogramImplSnapshot {
+public class DefaultXHistogramSnapshot implements XHistogramSnapshot {
 
     public static final long NO_VALUE = 0L;
 
@@ -17,7 +17,7 @@ public class DefaultXHistogramImplSnapshot implements XHistogramImplSnapshot {
     private final long[] bucketUpperBounds;
     private final long[] bucketSizes;
 
-    public DefaultXHistogramImplSnapshot(
+    public DefaultXHistogramSnapshot(
         long count,
         long totalSum,
         long min,

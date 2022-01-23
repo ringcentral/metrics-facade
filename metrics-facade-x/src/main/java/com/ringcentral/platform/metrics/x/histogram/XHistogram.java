@@ -266,8 +266,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                 HdrXHistogramImplConfig hdrImplConfig = (HdrXHistogramImplConfig)implConfig;
                 HdrXHistogramImpl hdrImpl;
 
-                if (hdrImplConfig.type() == HdrXHistogramType.UNIFORM) {
-                    hdrImpl = new UniformHdrXHistogramImpl(hdrImplConfig, measurables, executor);
+                if (hdrImplConfig.type() == HdrXHistogramType.NEVER_RESET) {
+                    hdrImpl = new NeverResetHdrXHistogramImpl(hdrImplConfig, measurables, executor);
                 } else if (hdrImplConfig.type() == HdrXHistogramType.RESET_ON_SNAPSHOT) {
                     hdrImpl = new ResetOnSnapshotHdrXHistogramImpl(hdrImplConfig, measurables, executor);
                 } else if (hdrImplConfig.type() == HdrXHistogramType.RESET_BY_CHUNKS) {

@@ -47,8 +47,8 @@ public class HistogramSnapshotBenchmark {
         // x
         final MetricRegistry xMetricRegistry = new XMetricRegistry();
 
-        final Histogram hdrXHistogram_Uniform = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "uniform"),
+        final Histogram hdrXHistogram_NeverReset = xMetricRegistry.histogram(
+            withName("hdrXHistogram", "neverReset"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -60,16 +60,16 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_90,
                     PERCENTILE_99)
                 .with(hdrImpl()
-                    .uniform()
+                    .neverReset()
                     .highestTrackableValue(MINUTES.toNanos(2L), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
 
-        final Histogram hdrXHistogram_Uniform_Count_Mean = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "uniform", "count", "mean"),
+        final Histogram hdrXHistogram_NeverReset_Count_Mean = xMetricRegistry.histogram(
+            withName("hdrXHistogram", "neverReset", "count", "mean"),
             () -> withHistogram()
                 .measurables(COUNT, MEAN)
                 .with(hdrImpl()
-                    .uniform()
+                    .neverReset()
                     .highestTrackableValue(MINUTES.toNanos(2L), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
 
@@ -165,8 +165,8 @@ public class HistogramSnapshotBenchmark {
                 long duration = ThreadLocalRandom.current().nextLong(SECONDS.toNanos(10)) + MILLISECONDS.toNanos(10);
 
                 dwHistogram.update(duration);
-                hdrXHistogram_Uniform.update(duration);
-                hdrXHistogram_Uniform_Count_Mean.update(duration);
+                hdrXHistogram_NeverReset.update(duration);
+                hdrXHistogram_NeverReset_Count_Mean.update(duration);
 //                hdrXHistogram_ResetOnSnapshot.update(duration);
 //                hdrXHistogram_ResetOnSnapshot_Count_Mean.update(duration);
                 hdrXHistogram_ResetByChunks.update(duration);
@@ -186,13 +186,13 @@ public class HistogramSnapshotBenchmark {
     }
 
     @Benchmark
-    public void hdrXHistogram_Uniform_Snapshot(State state) {
-        state.hdrXHistogram_Uniform.iterator().next().measurableValues();
+    public void hdrXHistogram_NeverReset_Snapshot(State state) {
+        state.hdrXHistogram_NeverReset.iterator().next().measurableValues();
     }
 
     @Benchmark
-    public void hdrXHistogram_Uniform_Count_Mean_Snapshot(State state) {
-        state.hdrXHistogram_Uniform_Count_Mean.iterator().next().measurableValues().valueOf(MEAN);
+    public void hdrXHistogram_NeverReset_Count_Mean_Snapshot(State state) {
+        state.hdrXHistogram_NeverReset_Count_Mean.iterator().next().measurableValues().valueOf(MEAN);
     }
 
 //    @Benchmark

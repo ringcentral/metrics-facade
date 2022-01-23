@@ -25,6 +25,8 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
     public static final int MIN_LOWEST_DISCERNIBLE_VALUE = 1;
     public static final int MIN_HIGHEST_TRACKABLE_VALUE = 2;
 
+    public static final boolean DEFAULT_BUCKETS_RESETTABLE = false;
+
     public static final HdrXHistogramImplConfig DEFAULT = new HdrXHistogramImplConfig(
         DEFAULT_TYPE,
         DEFAULT_CHUNKS,
@@ -34,6 +36,7 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
+        DEFAULT_BUCKETS_RESETTABLE,
         Optional.empty());
 
     private final HdrXHistogramType type;
@@ -44,6 +47,7 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
     private final Optional<Long> highestTrackableValue;
     private final Optional<OverflowBehavior> overflowBehavior;
     private final Optional<Long> expectedUpdateInterval;
+    private final boolean bucketsResettable;
     private final Optional<Duration> snapshotTtl;
 
     public HdrXHistogramImplConfig(
@@ -55,6 +59,7 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
         Optional<Long> highestTrackableValue,
         Optional<OverflowBehavior> overflowBehavior,
         Optional<Long> expectedUpdateInterval,
+        boolean bucketsResettable,
         Optional<Duration> snapshotTtl) {
 
         this.type = type;
@@ -65,6 +70,7 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
         this.highestTrackableValue = requireNonNull(highestTrackableValue);
         this.overflowBehavior = requireNonNull(overflowBehavior);
         this.expectedUpdateInterval = requireNonNull(expectedUpdateInterval);
+        this.bucketsResettable = bucketsResettable;
         this.snapshotTtl = requireNonNull(snapshotTtl);
     }
 
@@ -102,6 +108,10 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
 
     public boolean hasSnapshotTtl() {
         return snapshotTtl.isPresent();
+    }
+
+    public boolean areBucketsResettable() {
+        return bucketsResettable;
     }
 
     public Optional<Duration> snapshotTtl() {

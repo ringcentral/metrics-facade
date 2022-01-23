@@ -15,13 +15,13 @@ import static com.ringcentral.platform.metrics.x.histogram.hdr.HdrHistogramUtils
  * (Copyright 2017 Vladimir Bukhtoyarov Licensed under the Apache License, Version 2.0)
  * We thank Vladimir Bukhtoyarov for his great library.
  */
-public class UniformHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
+public class NeverResetHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
 
     private final Recorder recorder;
     private Histogram intervalHistogram;
     private final Histogram totalHistogram;
 
-    public UniformHdrXHistogramImpl(
+    public NeverResetHdrXHistogramImpl(
         HdrXHistogramImplConfig config,
         Set<? extends Measurable> measurables,
         ScheduledExecutorService executor) {

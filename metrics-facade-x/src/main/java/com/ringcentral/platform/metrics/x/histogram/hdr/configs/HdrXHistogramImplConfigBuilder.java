@@ -20,6 +20,7 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
     private Optional<Long> highestTrackableValue = DEFAULT.highestTrackableValue();
     private Optional<OverflowBehavior> overflowBehavior = DEFAULT.overflowBehavior();
     private Optional<Long> expectedUpdateInterval = DEFAULT.expectedUpdateInterval();
+    private boolean bucketsResettable = DEFAULT.areBucketsResettable();
     private Optional<Duration> snapshotTtl = DEFAULT.snapshotTtl();
 
     public static HdrXHistogramImplConfigBuilder hdr() {
@@ -39,11 +40,7 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
     }
 
     public HdrXHistogramImplConfigBuilder neverReset() {
-        return uniform();
-    }
-
-    public HdrXHistogramImplConfigBuilder uniform() {
-        this.type = HdrXHistogramType.UNIFORM;
+        this.type = HdrXHistogramType.NEVER_RESET;
         return this;
     }
 
@@ -108,6 +105,11 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
         return this;
     }
 
+    public HdrXHistogramImplConfigBuilder bucketsResettable(boolean bucketsResettable) {
+        this.bucketsResettable = bucketsResettable;
+        return this;
+    }
+
     public HdrXHistogramImplConfigBuilder snapshotTtl(long ttl, ChronoUnit ttlUnit) {
         checkArgument(ttl > 0L, "ttl must be positive");
         this.snapshotTtl = Optional.of(Duration.of(ttl, ttlUnit));
@@ -126,6 +128,7 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
             highestTrackableValue,
             overflowBehavior,
             expectedUpdateInterval,
+            bucketsResettable,
             snapshotTtl);
     }
 

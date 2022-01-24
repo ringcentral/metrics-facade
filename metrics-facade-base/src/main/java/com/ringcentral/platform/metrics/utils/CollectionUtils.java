@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.utils;
 import java.util.*;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static java.lang.System.arraycopy;
 
 public class CollectionUtils {
 
@@ -60,5 +61,15 @@ public class CollectionUtils {
         }
 
         return true;
+    }
+
+    public static long[] copyLongArray(long[] a) {
+        if (a == null) {
+            return null;
+        }
+
+        long[] copy = new long[a.length];
+        arraycopy(a, 0, copy, 0, a.length);
+        return copy;
     }
 }

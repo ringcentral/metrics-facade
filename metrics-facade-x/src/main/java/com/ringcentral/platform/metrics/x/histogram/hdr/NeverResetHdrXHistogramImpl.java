@@ -17,31 +17,49 @@ import static com.ringcentral.platform.metrics.x.histogram.hdr.HdrHistogramUtils
  */
 public class NeverResetHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
 
-    private final Recorder recorder;
-    private Histogram intervalHistogram;
-    private final Histogram totalHistogram;
-
     public NeverResetHdrXHistogramImpl(
         HdrXHistogramImplConfig config,
         Set<? extends Measurable> measurables,
         ScheduledExecutorService executor) {
 
-        super(config, measurables, executor);
-
-        this.recorder = makeRecorder(config);
-        this.intervalHistogram = recorder.getIntervalHistogram();
-        this.totalHistogram = makeNonConcurrentCopy(this.intervalHistogram);
+        super(
+            config,
+            measurables,
+            measurementSpec -> new ExtendedImpl(config, measurementSpec, executor),
+            executor);
     }
 
-    @Override
-    protected void updateWithExpectedInterval(long value, long expectedInterval) {
-        recorder.recordValueWithExpectedInterval(value, expectedInterval);
-    }
+    protected static class ExtendedImpl extends AbstractHdrExtendedImpl {
 
-    @Override
-    protected Histogram hdrHistogramForSnapshot() {
-        intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
-        addSecondToFirst(totalHistogram, intervalHistogram);
-        return totalHistogram;
+        private final Recorder recorder;
+        private Histogram intervalHistogram;
+        private final Histogram totalHistogram;
+
+        protected ExtendedImpl(
+            HdrXHistogramImplConfig config,
+            MeasurementSpec measurementSpec,
+            ScheduledExecutorService executor) {
+
+            super(
+                config,
+                measurementSpec,
+                executor);
+
+            this.recorder = makeRecorder(config);
+            this.intervalHistogram = recorder.getIntervalHistogram();
+            this.totalHistogram = makeNonConcurrentCopy(this.intervalHistogram);
+        }
+
+        @Override
+        protected void updateWithExpectedInterval(long value, long expectedInterval) {
+            recorder.recordValueWithExpectedInterval(value, expectedInterval);
+        }
+
+        @Override
+        protected Histogram hdrHistogramForSnapshot() {
+            intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
+            addSecondToFirst(totalHistogram, intervalHistogram);
+            return totalHistogram;
+        }
     }
 }

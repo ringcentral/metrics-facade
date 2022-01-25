@@ -66,32 +66,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
 
         public static final double DURATION_FACTOR = 1.0 / MILLISECONDS.toNanos(1L);
 
-        public static final MVP COUNT_VALUE_PROVIDER = new MVP() {
-
-            @Override
-            public Object valueFor(XTimerImpl timer) {
-                return timer.rate().count();
-            }
-
-            @Override
-            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
-                return snapshot.count();
-            }
-        };
-
-        public static final MVP TOTAL_SUM_VALUE_PROVIDER = new MVP() {
-
-            @Override
-            public Object valueFor(XTimerImpl timer) {
-                return timer.histogram().totalSum() * DURATION_FACTOR;
-            }
-
-            @Override
-            public Object valueFor(XTimerImpl timer, XHistogramSnapshot snapshot) {
-                return snapshot.totalSum() * DURATION_FACTOR;
-            }
-        };
-
+        public static final MVP COUNT_VALUE_PROVIDER = (t, s) -> s.count();
+        public static final MVP TOTAL_SUM_VALUE_PROVIDER = (t, s) -> s.totalSum();
         public static final MVP MEAN_RATE_VALUE_PROVIDER = (t, s) -> t.rate().meanRate();
         public static final MVP ONE_MINUTE_RATE_VALUE_PROVIDER = (t, s) -> t.rate().oneMinuteRate();
         public static final MVP FIVE_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fiveMinutesRate();
@@ -289,26 +265,26 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             Set<? extends Measurable> measurables,
             ScheduledExecutorService executor) {
 
+            Set<? extends Measurable> rateMeasurables = measurables;
+
+            if (measurables.stream().anyMatch(m -> m instanceof Count)) {
+                rateMeasurables = new HashSet<>(measurables);
+                rateMeasurables.removeIf(m -> m instanceof Count);
+                rateMeasurables = Set.copyOf(rateMeasurables);
+            }
+
             XRateImpl rateImpl = XRate.MeterImplMakerImpl.INSTANCE.makeMeterImpl(
                 instanceConfig != null ? instanceConfig.context() : null,
                 sliceConfig != null ? sliceConfig.context() : null,
                 config != null ? config.context() : null,
-                measurables,
+                rateMeasurables,
                 executor);
-
-            Set<? extends Measurable> histogramMeasurables = measurables;
-
-            if (measurables.stream().anyMatch(m -> m instanceof Count)) {
-                histogramMeasurables = new HashSet<>(measurables);
-                histogramMeasurables.removeIf(m -> m instanceof Count);
-                histogramMeasurables = Set.copyOf(histogramMeasurables);
-            }
 
             XHistogramImpl histogramImpl = XHistogram.MeterImplMakerImpl.INSTANCE.makeMeterImpl(
                 instanceConfig != null ? instanceConfig.context() : null,
                 sliceConfig != null ? sliceConfig.context() : null,
                 config != null ? config.context() : null,
-                histogramMeasurables,
+                measurables,
                 executor);
 
             return new DefaultXTimerImpl(rateImpl, histogramImpl);

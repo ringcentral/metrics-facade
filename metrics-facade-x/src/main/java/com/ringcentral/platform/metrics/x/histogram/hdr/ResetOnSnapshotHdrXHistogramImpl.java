@@ -15,27 +15,45 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class ResetOnSnapshotHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
 
-    private final Recorder recorder;
-    private Histogram intervalHistogram;
-
     public ResetOnSnapshotHdrXHistogramImpl(
         HdrXHistogramImplConfig config,
         Set<? extends Measurable> measurables,
         ScheduledExecutorService executor) {
 
-        super(config, measurables, executor);
-
-        this.recorder = makeRecorder(config);
-        this.intervalHistogram = recorder.getIntervalHistogram();
+        super(
+            config,
+            measurables,
+            measurementSpec -> new ExtendedImpl(config, measurementSpec, executor),
+            executor);
     }
 
-    @Override
-    protected void updateWithExpectedInterval(long value, long expectedInterval) {
-        recorder.recordValueWithExpectedInterval(value, expectedInterval);
-    }
+    protected static class ExtendedImpl extends AbstractHdrExtendedImpl {
 
-    @Override
-    protected Histogram hdrHistogramForSnapshot() {
-        return intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
+        private final Recorder recorder;
+        private Histogram intervalHistogram;
+
+        protected ExtendedImpl(
+            HdrXHistogramImplConfig config,
+            MeasurementSpec measurementSpec,
+            ScheduledExecutorService executor) {
+
+            super(
+                config,
+                measurementSpec,
+                executor);
+
+            this.recorder = makeRecorder(config);
+            this.intervalHistogram = recorder.getIntervalHistogram();
+        }
+
+        @Override
+        protected void updateWithExpectedInterval(long value, long expectedInterval) {
+            recorder.recordValueWithExpectedInterval(value, expectedInterval);
+        }
+
+        @Override
+        protected Histogram hdrHistogramForSnapshot() {
+            return intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
+        }
     }
 }

@@ -25,8 +25,6 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
     public static final int MIN_LOWEST_DISCERNIBLE_VALUE = 1;
     public static final int MIN_HIGHEST_TRACKABLE_VALUE = 2;
 
-    public static final boolean DEFAULT_BUCKETS_RESETTABLE = false;
-
     public static final HdrXHistogramImplConfig DEFAULT = new HdrXHistogramImplConfig(
         DEFAULT_TYPE,
         DEFAULT_CHUNKS,
@@ -110,6 +108,7 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
         return snapshotTtl.isPresent();
     }
 
+    @Override
     public boolean areBucketsResettable() {
         return bucketsResettable;
     }

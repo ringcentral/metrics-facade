@@ -38,16 +38,6 @@ public class SnapshotCachingHdrXHistogramImpl implements HdrXHistogramImpl {
     }
 
     @Override
-    public long count() {
-        return parent.count();
-    }
-
-    @Override
-    public long totalSum() {
-        return parent.totalSum();
-    }
-
-    @Override
     public synchronized XHistogramSnapshot snapshot() {
         return cachingSnapshotSupplier.get();
     }

@@ -62,32 +62,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
 
         public static final MeasurableValueProvidersProviderImpl INSTANCE = new MeasurableValueProvidersProviderImpl();
 
-        public static final MVP COUNT_VALUE_PROVIDER = new MVP() {
-
-            @Override
-            public Object valueFor(XHistogramImpl histogram) {
-                return histogram.count();
-            }
-
-            @Override
-            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
-                return snapshot.count();
-            }
-        };
-
-        public static final MVP TOTAL_SUM_VALUE_PROVIDER = new MVP() {
-
-            @Override
-            public Object valueFor(XHistogramImpl histogram) {
-                return histogram.totalSum();
-            }
-
-            @Override
-            public Object valueFor(XHistogramImpl histogram, XHistogramSnapshot snapshot) {
-                return snapshot.totalSum();
-            }
-        };
-
+        public static final MVP COUNT_VALUE_PROVIDER = (h, s) -> s.count();
+        public static final MVP TOTAL_SUM_VALUE_PROVIDER = (h, s) -> s.totalSum();
         public static final MVP MIN_VALUE_PROVIDER = (h, s) -> s.min();
         public static final MVP MAX_VALUE_PROVIDER = (h, s) -> s.max();
         public static final MVP MEAN_VALUE_PROVIDER = (h, s) -> s.mean();

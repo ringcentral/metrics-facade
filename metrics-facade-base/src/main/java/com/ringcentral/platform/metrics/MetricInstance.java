@@ -1,8 +1,7 @@
 package com.ringcentral.platform.metrics;
 
 import com.ringcentral.platform.metrics.dimensions.*;
-import com.ringcentral.platform.metrics.measurables.Measurable;
-import com.ringcentral.platform.metrics.measurables.MeasurableValues;
+import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricNamed;
 
 import java.util.*;
@@ -66,4 +65,7 @@ public interface MetricInstance extends MetricNamed {
     Set<Measurable> measurables();
     MeasurableValues measurableValues();
     <V> V valueOf(Measurable measurable) throws NotMeasuredException;
+
+    default void metricInstanceAdded() {}
+    default void metricInstanceRemoved() {}
 }

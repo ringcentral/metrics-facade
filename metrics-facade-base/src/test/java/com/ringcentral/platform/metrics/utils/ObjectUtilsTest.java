@@ -34,6 +34,19 @@ public class ObjectUtilsTest {
         assertThat(hashCodeFor(o1, o2), is(hashCodeBuilder().append(o1).append(o2).toHashCode()));
     }
 
+    @Test
+    public void hashCodeFor_Object_Object_Object() {
+        Object o1 = new Object();
+        Object o2 = new Object();
+        Object o3 = new Object();
+        assertThat(hashCodeFor(o1, o2, o3), is(hashCodeBuilder().append(o1).append(o2).append(o3).toHashCode()));
+
+        o1 = new int[] { 1, 2, 3 };
+        o2 = new Object();
+        o3 = List.of(1, 2, 3);
+        assertThat(hashCodeFor(o1, o2, o3), is(hashCodeBuilder().append(o1).append(o2).append(o3).toHashCode()));
+    }
+
     private HashCodeBuilder hashCodeBuilder() {
         return new HashCodeBuilder(17, 37);
     }

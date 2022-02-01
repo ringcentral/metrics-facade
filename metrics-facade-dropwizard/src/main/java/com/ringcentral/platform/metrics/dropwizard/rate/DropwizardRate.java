@@ -8,12 +8,13 @@ import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.AbstractRate;
 import com.ringcentral.platform.metrics.rate.configs.*;
-import com.ringcentral.platform.metrics.utils.TimeMsProvider;
+import com.ringcentral.platform.metrics.utils.*;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static com.ringcentral.platform.metrics.utils.MetricContextUtils.getForClass;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class DropwizardRate extends AbstractRate<Meter> {
@@ -132,7 +133,8 @@ public class DropwizardRate extends AbstractRate<Meter> {
             RateSliceConfig sliceConfig,
             RateConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            com.ringcentral.platform.metrics.MetricRegistry registry) {
 
             if (instanceConfig != null && instanceConfig.context().has(Meter.class)) {
                 return instanceConfig.context().get(Meter.class);
@@ -209,7 +211,8 @@ public class DropwizardRate extends AbstractRate<Meter> {
         MetricName name,
         RateConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        com.ringcentral.platform.metrics.MetricRegistry registry) {
 
         super(
             name,
@@ -219,6 +222,7 @@ public class DropwizardRate extends AbstractRate<Meter> {
             Meter::mark,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

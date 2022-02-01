@@ -1,5 +1,6 @@
 package com.ringcentral.platform.metrics.stub;
 
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.*;
 import com.ringcentral.platform.metrics.counter.configs.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
@@ -21,13 +22,14 @@ public class StubCounter extends AbstractCounter<Object> implements Counter {
     static final Object stubCounterImplInstance = new Object();
 
     static final MeterImplMaker<Object, CounterInstanceConfig, CounterSliceConfig, CounterConfig> stubCounterImplMaker =
-        (ic, sc, c, m, e) -> stubCounterImplInstance;
+        (ic, sc, c, m, e, r) -> stubCounterImplInstance;
 
     public StubCounter(
         MetricName name,
         CounterConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -80,6 +82,7 @@ public class StubCounter extends AbstractCounter<Object> implements Counter {
                 }
             },
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

@@ -8,14 +8,16 @@ import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.AbstractRate;
 import com.ringcentral.platform.metrics.rate.configs.*;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
 import com.ringcentral.platform.metrics.x.rate.configs.*;
 import com.ringcentral.platform.metrics.x.rate.ema.ExpMovingAverageXRateImpl;
-import com.ringcentral.platform.metrics.x.rate.ema.configs.*;
+import com.ringcentral.platform.metrics.x.rate.ema.configs.ExpMovingAverageXRateImplConfig;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static com.ringcentral.platform.metrics.utils.MetricContextUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class XRate extends AbstractRate<XRateImpl> {
@@ -134,14 +136,16 @@ public class XRate extends AbstractRate<XRateImpl> {
             RateSliceConfig sliceConfig,
             RateConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return makeMeterImpl(
                 instanceConfig != null ? instanceConfig.context() : null,
                 sliceConfig != null ? sliceConfig.context() : null,
                 config != null ? config.context() : null,
                 measurables,
-                executor);
+                executor,
+                registry);
         }
 
         public XRateImpl makeMeterImpl(
@@ -149,47 +153,74 @@ public class XRate extends AbstractRate<XRateImpl> {
             MetricContext sliceContext,
             MetricContext context,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
-            XRateImplConfig implConfig = null;
-
-            if (instanceContext != null) {
-                implConfig = xRateImplConfig(instanceContext);
-            }
-
-            if (implConfig == null && sliceContext != null) {
-                implConfig = xRateImplConfig(sliceContext);
-            }
-
-            if (implConfig == null && context != null) {
-                implConfig = xRateImplConfig(context);
-            }
-
-            if (implConfig == null) {
-                implConfig = ExpMovingAverageXRateImplConfig.DEFAULT;
-            }
+            XRateImplConfig implConfig = implConfig(instanceContext, sliceContext, context);
+            XRateImpl impl;
 
             if (implConfig instanceof ExpMovingAverageXRateImplConfig) {
-                return new ExpMovingAverageXRateImpl((ExpMovingAverageXRateImplConfig)implConfig, measurables);
+                impl = new ExpMovingAverageXRateImpl((ExpMovingAverageXRateImplConfig)implConfig, measurables);
+            } else {
+                impl = makeCustomImpl(
+                    implConfig,
+                    instanceContext,
+                    sliceContext,
+                    context,
+                    measurables,
+                    executor,
+                    registry);
             }
 
-            throw new IllegalArgumentException(
-                "Unsupported " + XRateImplConfig.class.getSimpleName()
-                + ": " + implConfig.getClass().getName());
+            if (impl == null) {
+                throw new IllegalArgumentException(
+                    "Unsupported " + XRateImplConfig.class.getSimpleName()
+                    + ": " + implConfig.getClass().getName());
+            }
+
+            return impl;
         }
 
-        private XRateImplConfig xRateImplConfig(MetricContext context) {
-            if (context.has(XRateImplConfig.class)) {
-                return context.getForClass(XRateImplConfig.class);
-            } else if (context.has(ExpMovingAverageXRateImplConfig.class)) {
-                return context.getForClass(ExpMovingAverageXRateImplConfig.class);
-            } else if (context.has(XRateImplConfigBuilder.class)) {
-                return context.getForClass(XRateImplConfigBuilder.class).build();
-            } else if (context.has(ExpMovingAverageXRateImplConfigBuilder.class)) {
-                return context.getForClass(ExpMovingAverageXRateImplConfigBuilder.class).build();
+        private XRateImplConfig implConfig(
+            MetricContext instanceContext,
+            MetricContext sliceContext,
+            MetricContext context) {
+
+            if (has(XRateImplConfig.class, instanceContext, sliceContext, context)) {
+                return getForClass(XRateImplConfig.class, instanceContext, sliceContext, context);
             }
 
-            return null;
+            if (has(XRateImplConfigBuilder.class, instanceContext, sliceContext, context)) {
+                return getForClass(XRateImplConfigBuilder.class, instanceContext, sliceContext, context).build();
+            }
+
+            return ExpMovingAverageXRateImplConfig.DEFAULT;
+        }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        private XRateImpl makeCustomImpl(
+            XRateImplConfig config,
+            MetricContext instanceContext,
+            MetricContext sliceContext,
+            MetricContext context,
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            CustomXRateImplMaker customImplMaker = ((XMetricRegistry)registry).customXRateImplMakerFor(config.getClass());
+
+            if (customImplMaker == null) {
+                return null;
+            }
+
+            return customImplMaker.makeXRateImpl(
+                config,
+                instanceContext,
+                sliceContext,
+                context,
+                measurables,
+                executor,
+                registry);
         }
     }
 
@@ -250,7 +281,8 @@ public class XRate extends AbstractRate<XRateImpl> {
         MetricName name,
         RateConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -260,6 +292,7 @@ public class XRate extends AbstractRate<XRateImpl> {
             XRateImpl::mark,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

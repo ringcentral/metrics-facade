@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.x.timer;
 
-import com.ringcentral.platform.metrics.NotMeasuredException;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.*;
 import com.ringcentral.platform.metrics.measurables.*;
@@ -263,7 +263,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             TimerSliceConfig sliceConfig,
             TimerConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             Set<? extends Measurable> rateMeasurables = measurables;
 
@@ -273,19 +274,25 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                 rateMeasurables = Set.copyOf(rateMeasurables);
             }
 
+            MetricContext instanceContext = instanceConfig != null ? instanceConfig.context() : null;
+            MetricContext sliceContext = sliceConfig != null ? sliceConfig.context() : null;
+            MetricContext context = config != null ? config.context() : null;
+
             XRateImpl rateImpl = XRate.MeterImplMakerImpl.INSTANCE.makeMeterImpl(
-                instanceConfig != null ? instanceConfig.context() : null,
-                sliceConfig != null ? sliceConfig.context() : null,
-                config != null ? config.context() : null,
+                instanceContext,
+                sliceContext,
+                context,
                 rateMeasurables,
-                executor);
+                executor,
+                registry);
 
             XHistogramImpl histogramImpl = XHistogram.MeterImplMakerImpl.INSTANCE.makeMeterImpl(
-                instanceConfig != null ? instanceConfig.context() : null,
-                sliceConfig != null ? sliceConfig.context() : null,
-                config != null ? config.context() : null,
+                instanceContext,
+                sliceContext,
+                context,
                 measurables,
-                executor);
+                executor,
+                registry);
 
             return new DefaultXTimerImpl(rateImpl, histogramImpl);
         }
@@ -344,7 +351,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
         MetricName name,
         TimerConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -354,7 +362,8 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
             XTimerImpl::update,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 
     @Override

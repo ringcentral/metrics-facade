@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.stub;
 
-import com.ringcentral.platform.metrics.AbstractMetricRegistry;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
 import com.ringcentral.platform.metrics.histogram.Histogram;
@@ -33,63 +33,187 @@ public class StubMetricRegistry extends AbstractMetricRegistry {
     private static class StubMetricMaker implements MetricMaker {
 
         @Override
-        public ObjectVar makeObjectVar(MetricName name, VarConfig config, Supplier<Object> valueSupplier, ScheduledExecutorService executor) {
-            return new StubObjectVar(name, config, valueSupplier, executor);
+        public ObjectVar makeObjectVar(
+            MetricName name,
+            VarConfig config,
+            Supplier<Object> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubObjectVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public CachingObjectVar makeCachingObjectVar(MetricName name, CachingVarConfig config, Supplier<Object> valueSupplier, ScheduledExecutorService executor) {
-            return new StubCachingObjectVar(name, config, valueSupplier, executor);
+        public CachingObjectVar makeCachingObjectVar(
+            MetricName name,
+            CachingVarConfig config,
+            Supplier<Object> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubCachingObjectVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public LongVar makeLongVar(MetricName name, VarConfig config, Supplier<Long> valueSupplier, ScheduledExecutorService executor) {
-            return new StubLongVar(name, config, valueSupplier, executor);
+        public LongVar makeLongVar(
+            MetricName name,
+            VarConfig config,
+            Supplier<Long> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubLongVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public CachingLongVar makeCachingLongVar(MetricName name, CachingVarConfig config, Supplier<Long> valueSupplier, ScheduledExecutorService executor) {
-            return new StubCachingLongVar(name, config, valueSupplier, executor);
+        public CachingLongVar makeCachingLongVar(
+            MetricName name,
+            CachingVarConfig config,
+            Supplier<Long> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubCachingLongVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public DoubleVar makeDoubleVar(MetricName name, VarConfig config, Supplier<Double> valueSupplier, ScheduledExecutorService executor) {
-            return new StubDoubleVar(name, config, valueSupplier, executor);
+        public DoubleVar makeDoubleVar(
+            MetricName name,
+            VarConfig config,
+            Supplier<Double> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubDoubleVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public CachingDoubleVar makeCachingDoubleVar(MetricName name, CachingVarConfig config, Supplier<Double> valueSupplier, ScheduledExecutorService executor) {
-            return new StubCachingDoubleVar(name, config, valueSupplier, executor);
+        public CachingDoubleVar makeCachingDoubleVar(
+            MetricName name,
+            CachingVarConfig config,
+            Supplier<Double> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubCachingDoubleVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public StringVar makeStringVar(MetricName name, VarConfig config, Supplier<String> valueSupplier, ScheduledExecutorService executor) {
-            return new StubStringVar(name, config, valueSupplier, executor);
+        public StringVar makeStringVar(
+            MetricName name,
+            VarConfig config,
+            Supplier<String> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubStringVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public CachingStringVar makeCachingStringVar(MetricName name, CachingVarConfig config, Supplier<String> valueSupplier, ScheduledExecutorService executor) {
-            return new StubCachingStringVar(name, config, valueSupplier, executor);
+        public CachingStringVar makeCachingStringVar(
+            MetricName name,
+            CachingVarConfig config,
+            Supplier<String> valueSupplier,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubCachingStringVar(
+                name,
+                config,
+                valueSupplier,
+                executor);
         }
 
         @Override
-        public Counter makeCounter(MetricName name, CounterConfig config, TimeMsProvider timeMsProvider, ScheduledExecutorService executor) {
-            return new StubCounter(name, config, timeMsProvider, executor);
+        public Counter makeCounter(
+            MetricName name,
+            CounterConfig config,
+            TimeMsProvider timeMsProvider,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubCounter(
+                name,
+                config,
+                timeMsProvider,
+                executor,
+                registry);
         }
 
         @Override
-        public Rate makeRate(MetricName name, RateConfig config, TimeMsProvider timeMsProvider, ScheduledExecutorService executor) {
-            return new StubRate(name, config, timeMsProvider, executor);
+        public Rate makeRate(
+            MetricName name,
+            RateConfig config,
+            TimeMsProvider timeMsProvider,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubRate(
+                name,
+                config,
+                timeMsProvider,
+                executor,
+                registry);
         }
 
         @Override
-        public Histogram makeHistogram(MetricName name, HistogramConfig config, TimeMsProvider timeMsProvider, ScheduledExecutorService executor) {
-            return new StubHistogram(name, config, timeMsProvider, executor);
+        public Histogram makeHistogram(
+            MetricName name,
+            HistogramConfig config,
+            TimeMsProvider timeMsProvider,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubHistogram(
+                name,
+                config,
+                timeMsProvider,
+                executor,
+                registry);
         }
 
         @Override
-        public Timer makeTimer(MetricName name, TimerConfig config, TimeMsProvider timeMsProvider, ScheduledExecutorService executor) {
-            return new StubTimer(name, config, timeMsProvider, executor);
+        public Timer makeTimer(
+            MetricName name,
+            TimerConfig config,
+            TimeMsProvider timeMsProvider,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            return new StubTimer(
+                name,
+                config,
+                timeMsProvider,
+                executor,
+                registry);
         }
     }
 }

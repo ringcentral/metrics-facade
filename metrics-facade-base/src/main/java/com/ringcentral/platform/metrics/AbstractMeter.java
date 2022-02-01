@@ -58,7 +58,8 @@ public abstract class AbstractMeter<
             SC sliceConfig,
             C config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
     }
 
     public interface InstanceMaker<MI> {
@@ -103,6 +104,7 @@ public abstract class AbstractMeter<
 
     private final TimeMsProvider timeMsProvider;
     private final ScheduledExecutorService executor;
+
     private static final Logger logger = getLogger(AbstractMeter.class);
 
     @SuppressWarnings("unchecked")
@@ -114,7 +116,8 @@ public abstract class AbstractMeter<
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(config.isEnabled(), name, config.description());
         this.timeMsProvider = timeMsProvider;
@@ -177,12 +180,12 @@ public abstract class AbstractMeter<
 
             this.allSlice =
                 allSliceConfig.isEnabled() ?
-                new Slice<>(sliceContext, allSliceConfig) :
+                new Slice<>(sliceContext, allSliceConfig, registry) :
                 null;
 
             this.slices =
                 !enabledSliceConfigs.isEmpty() ?
-                enabledSliceConfigs.stream().map(sc -> new Slice<>(sliceContext, sc)).toArray(Slice[]::new) :
+                enabledSliceConfigs.stream().map(sc -> new Slice<>(sliceContext, sc, registry)).toArray(Slice[]::new) :
                 null;
         } else {
             this.dimensions = null;
@@ -208,7 +211,7 @@ public abstract class AbstractMeter<
                     timeMsProvider,
                     executor);
 
-                this.allSlice = new Slice<>(sliceContext, config.allSliceConfig());
+                this.allSlice = new Slice<>(sliceContext, config.allSliceConfig(), registry);
             } else {
                 allSlice = null;
             }
@@ -249,7 +252,11 @@ public abstract class AbstractMeter<
             }
 
             listeners.add(listener);
-            forEach(instance -> notifyListener(listener, l -> l.metricInstanceAdded(instance)));
+
+            forEach(instance -> {
+                notifyListener(listener, l -> l.metricInstanceAdded(instance));
+                instance.metricInstanceAdded();
+            });
         });
     }
 
@@ -314,7 +321,12 @@ public abstract class AbstractMeter<
             }
 
             removed.set(true);
-            listeners.forEach(listener -> forEach(instance -> notifyListener(listener, l -> l.metricInstanceRemoved(instance))));
+
+            forEach(instance -> {
+                listeners.forEach(listener -> listener.metricInstanceRemoved(instance));
+                instance.metricInstanceRemoved();
+            });
+
             listeners.clear();
         });
     }
@@ -500,6 +512,10 @@ public abstract class AbstractMeter<
         @Override
         public Set<Measurable> measurables() {
             return measurables;
+        }
+
+        protected MI meterImpl() {
+            return meterImpl;
         }
 
         @Override
@@ -710,6 +726,7 @@ public abstract class AbstractMeter<
 
         static final long INFINITE_DIMENSIONAL_INSTANCE_EXPIRATION_TIME_MS = DAYS.toMillis(10000L);
 
+        final MetricRegistry registry;
         final SliceContext<MI, IC, SC, C> context;
         final int parentDimensionCount;
         final SC config;
@@ -731,7 +748,8 @@ public abstract class AbstractMeter<
 
         final ConcurrentHashMap<InstanceKey, AbstractMeterInstance<MI>> instances;
 
-        Slice(SliceContext<MI, IC, SC, C> context, SC config) {
+        Slice(SliceContext<MI, IC, SC, C> context, SC config, MetricRegistry registry) {
+            this.registry = registry;
             this.context = context;
             this.parentDimensionCount = context.parentDimensionCount;
             this.config = config;
@@ -797,7 +815,8 @@ public abstract class AbstractMeter<
                         config,
                         context.parentConfig,
                         mvps.keySet(),
-                        context.executor);
+                        context.executor,
+                        registry);
 
                     this.totalInstance = context.instanceMaker.makeInstance(
                         totalInstanceConfig.hasName() ? MetricName.of(this.name, totalInstanceConfig.name()) : this.name,
@@ -813,7 +832,8 @@ public abstract class AbstractMeter<
                         config,
                         context.parentConfig,
                         this.measurableValueProviders.keySet(),
-                        context.executor);
+                        context.executor,
+                        registry);
 
                     this.totalInstance = context.instanceMaker.makeInstance(
                         this.name,
@@ -959,7 +979,8 @@ public abstract class AbstractMeter<
                                     config,
                                     context.parentConfig,
                                     mvps.keySet(),
-                                    context.executor);
+                                    context.executor,
+                                    registry);
 
                                 if (dimensionalInstanceAutoRemovalEnabled) {
                                     newInstance = context.instanceMaker.makeExpirableInstance(
@@ -1029,7 +1050,8 @@ public abstract class AbstractMeter<
                                 config,
                                 context.parentConfig,
                                 measurableValueProviders.keySet(),
-                                context.executor);
+                                context.executor,
+                                registry);
 
                             if (dimensionalInstanceAutoRemovalEnabled) {
                                 newInstance = context.instanceMaker.makeExpirableInstance(
@@ -1087,6 +1109,7 @@ public abstract class AbstractMeter<
             }
 
             context.forEachListener(l -> l.metricInstanceAdded(instance));
+            instance.metricInstanceAdded();
         }
 
         void updateInstance(
@@ -1111,6 +1134,7 @@ public abstract class AbstractMeter<
             if (instance != null) {
                 AbstractMeterInstance<MI> instanceRef = instance;
                 context.forEachListener(l -> l.metricInstanceRemoved(instanceRef));
+                instanceRef.metricInstanceRemoved();
             }
         }
 
@@ -1124,6 +1148,7 @@ public abstract class AbstractMeter<
         }
 
         @Override
+        @SuppressWarnings("NullableProblems")
         public SliceInstancesIterator iterator() {
             return new SliceInstancesIterator(
                 totalInstance,

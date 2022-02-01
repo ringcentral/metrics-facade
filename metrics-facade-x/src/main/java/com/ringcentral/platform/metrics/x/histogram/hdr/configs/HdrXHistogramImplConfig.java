@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.x.histogram.hdr.configs;
 
-import com.ringcentral.platform.metrics.x.histogram.configs.XHistogramImplConfig;
+import com.ringcentral.platform.metrics.x.histogram.configs.*;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -8,10 +8,10 @@ import java.util.Optional;
 import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.MS_PER_SEC;
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class HdrXHistogramImplConfig implements XHistogramImplConfig {
+@SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "ConstantConditions" })
+public class HdrXHistogramImplConfig extends AbstractXHistogramImplConfig {
 
-    public static final HdrXHistogramType DEFAULT_TYPE = HdrXHistogramType.RESET_BY_CHUNKS;
+    public static final HdrXHistogramImplType DEFAULT_TYPE = HdrXHistogramImplType.RESET_BY_CHUNKS;
 
     public static final int MAX_CHUNKS = 60;
     public static final long MIN_CHUNK_RESET_PERIOD_MS = MS_PER_SEC;
@@ -34,10 +34,11 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
-        DEFAULT_BUCKETS_RESETTABLE,
-        Optional.empty());
+        DEFAULT_TOTALS_MEASUREMENT_TYPE,
+        DEFAULT_BUCKETS_MEASUREMENT_TYPE,
+        Optional.ofNullable(DEFAULT_SNAPSHOT_TTL));
 
-    private final HdrXHistogramType type;
+    private final HdrXHistogramImplType type;
     private final int chunkCount;
     private final long chunkResetPeriodMs;
     private final int significantDigitCount;
@@ -45,11 +46,9 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
     private final Optional<Long> highestTrackableValue;
     private final Optional<OverflowBehavior> overflowBehavior;
     private final Optional<Long> expectedUpdateInterval;
-    private final boolean bucketsResettable;
-    private final Optional<Duration> snapshotTtl;
 
     public HdrXHistogramImplConfig(
-        HdrXHistogramType type,
+        HdrXHistogramImplType type,
         int chunkCount,
         long chunkResetPeriodMs,
         int significantDigitCount,
@@ -57,8 +56,14 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
         Optional<Long> highestTrackableValue,
         Optional<OverflowBehavior> overflowBehavior,
         Optional<Long> expectedUpdateInterval,
-        boolean bucketsResettable,
+        TotalsMeasurementType totalsMeasurementType,
+        BucketsMeasurementType bucketsMeasurementType,
         Optional<Duration> snapshotTtl) {
+
+        super(
+            totalsMeasurementType,
+            bucketsMeasurementType,
+            snapshotTtl);
 
         this.type = type;
         this.chunkCount = chunkCount;
@@ -68,11 +73,9 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
         this.highestTrackableValue = requireNonNull(highestTrackableValue);
         this.overflowBehavior = requireNonNull(overflowBehavior);
         this.expectedUpdateInterval = requireNonNull(expectedUpdateInterval);
-        this.bucketsResettable = bucketsResettable;
-        this.snapshotTtl = requireNonNull(snapshotTtl);
     }
 
-    public HdrXHistogramType type() {
+    public HdrXHistogramImplType type() {
         return type;
     }
 
@@ -102,18 +105,5 @@ public class HdrXHistogramImplConfig implements XHistogramImplConfig {
 
     public Optional<Long> expectedUpdateInterval() {
         return expectedUpdateInterval;
-    }
-
-    public boolean hasSnapshotTtl() {
-        return snapshotTtl.isPresent();
-    }
-
-    @Override
-    public boolean areBucketsResettable() {
-        return bucketsResettable;
-    }
-
-    public Optional<Duration> snapshotTtl() {
-        return snapshotTtl;
     }
 }

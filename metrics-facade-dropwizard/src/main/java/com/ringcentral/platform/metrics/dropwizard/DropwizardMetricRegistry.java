@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.dropwizard;
 
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.*;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
@@ -32,15 +33,15 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
-import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.*;
-import static com.ringcentral.platform.metrics.counter.configs.builders.CounterInstanceConfigBuilder.*;
-import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.*;
-import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramInstanceConfigBuilder.*;
-import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder.*;
-import static com.ringcentral.platform.metrics.rate.configs.builders.RateInstanceConfigBuilder.*;
-import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.*;
-import static com.ringcentral.platform.metrics.timer.configs.builders.TimerInstanceConfigBuilder.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.withCounter;
+import static com.ringcentral.platform.metrics.counter.configs.builders.CounterInstanceConfigBuilder.counterInstance;
+import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
+import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramInstanceConfigBuilder.histogramInstance;
+import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder.withRate;
+import static com.ringcentral.platform.metrics.rate.configs.builders.RateInstanceConfigBuilder.rateInstance;
+import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
+import static com.ringcentral.platform.metrics.timer.configs.builders.TimerInstanceConfigBuilder.timerInstance;
+import static org.apache.commons.lang3.StringUtils.split;
 
 @SuppressWarnings("SameParameterValue")
 public class DropwizardMetricRegistry extends AbstractMetricRegistry {
@@ -54,7 +55,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<Object> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardObjectVar(
                 name,
@@ -68,7 +70,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<Object> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardCachingObjectVar(
                 name,
@@ -82,7 +85,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<Long> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardLongVar(
                 name,
@@ -96,7 +100,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<Long> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardCachingLongVar(
                 name,
@@ -110,7 +115,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<Double> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardDoubleVar(
                 name,
@@ -124,7 +130,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<Double> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardCachingDoubleVar(
                 name,
@@ -138,7 +145,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<String> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardStringVar(
                 name,
@@ -152,7 +160,8 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<String> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardCachingStringVar(
                 name,
@@ -166,13 +175,15 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CounterConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardCounter(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
 
         @Override
@@ -180,13 +191,15 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             RateConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardRate(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
 
         @Override
@@ -194,13 +207,15 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             HistogramConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardHistogram(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
 
         @Override
@@ -208,13 +223,15 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             TimerConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new DropwizardTimer(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
     }
 

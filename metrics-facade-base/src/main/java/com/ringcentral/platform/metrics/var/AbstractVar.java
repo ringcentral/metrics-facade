@@ -121,7 +121,11 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
             }
 
             listeners.add(listener);
-            forEach(instance -> notifyListener(listener, l -> l.metricInstanceAdded(instance)));
+
+            forEach(instance -> {
+                notifyListener(listener, l -> l.metricInstanceAdded(instance));
+                instance.metricInstanceAdded();
+            });
         });
     }
 
@@ -152,7 +156,12 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
             }
 
             removed = true;
-            listeners.forEach(listener -> forEach(instance -> notifyListener(listener, l -> l.metricInstanceRemoved(instance))));
+
+            forEach(instance -> {
+                listeners.forEach(listener -> listener.metricInstanceRemoved(instance));
+                instance.metricInstanceRemoved();
+            });
+
             listeners.clear();
         });
     }
@@ -196,6 +205,7 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
 
             instances.put(instanceKey, instance);
             listeners.forEach(listener -> notifyListener(listener, l -> l.metricInstanceAdded(instance)));
+            instance.metricInstanceAdded();
         });
     }
 
@@ -243,6 +253,7 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
 
             if (instance != null) {
                 listeners.forEach(listener -> notifyListener(listener, l -> l.metricInstanceRemoved(instance)));
+                instance.metricInstanceRemoved();
             }
         });
     }

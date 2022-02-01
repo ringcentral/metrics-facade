@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.x.histogram.hdr.configs;
 
-import com.ringcentral.platform.metrics.x.histogram.configs.XHistogramImplConfigBuilder;
+import com.ringcentral.platform.metrics.x.histogram.configs.AbstractXHistogramImplConfigBuilder;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -10,9 +10,9 @@ import static com.ringcentral.platform.metrics.utils.Preconditions.*;
 import static com.ringcentral.platform.metrics.x.histogram.hdr.configs.HdrXHistogramImplConfig.*;
 
 @SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "FieldMayBeFinal" })
-public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuilder<HdrXHistogramImplConfig> {
+public class HdrXHistogramImplConfigBuilder extends AbstractXHistogramImplConfigBuilder<HdrXHistogramImplConfig, HdrXHistogramImplConfigBuilder> {
 
-    private HdrXHistogramType type = DEFAULT.type();
+    private HdrXHistogramImplType type = DEFAULT.type();
     private int chunkCount = DEFAULT.chunkCount();
     private long chunkResetPeriodMs = DEFAULT.chunkResetPeriodMs();
     private int significantDigitCount = DEFAULT.significantDigitCount();
@@ -20,8 +20,6 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
     private Optional<Long> highestTrackableValue = DEFAULT.highestTrackableValue();
     private Optional<OverflowBehavior> overflowBehavior = DEFAULT.overflowBehavior();
     private Optional<Long> expectedUpdateInterval = DEFAULT.expectedUpdateInterval();
-    private boolean bucketsResettable = DEFAULT.areBucketsResettable();
-    private Optional<Duration> snapshotTtl = DEFAULT.snapshotTtl();
 
     public static HdrXHistogramImplConfigBuilder hdr() {
         return hdrXHistogramImplConfigBuilder();
@@ -40,17 +38,17 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
     }
 
     public HdrXHistogramImplConfigBuilder neverReset() {
-        this.type = HdrXHistogramType.NEVER_RESET;
+        this.type = HdrXHistogramImplType.NEVER_RESET;
         return this;
     }
 
     public HdrXHistogramImplConfigBuilder resetOnSnapshot() {
-        this.type = HdrXHistogramType.RESET_ON_SNAPSHOT;
+        this.type = HdrXHistogramImplType.RESET_ON_SNAPSHOT;
         return this;
     }
 
     public HdrXHistogramImplConfigBuilder resetPeriodically(Duration period) {
-        this.type = HdrXHistogramType.RESET_BY_CHUNKS;
+        this.type = HdrXHistogramImplType.RESET_BY_CHUNKS;
         return resetByChunks(0, period.toMillis());
     }
 
@@ -105,11 +103,6 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
         return this;
     }
 
-    public HdrXHistogramImplConfigBuilder bucketsResettable(boolean bucketsResettable) {
-        this.bucketsResettable = bucketsResettable;
-        return this;
-    }
-
     public HdrXHistogramImplConfigBuilder snapshotTtl(long ttl, ChronoUnit ttlUnit) {
         checkArgument(ttl > 0L, "ttl must be positive");
         this.snapshotTtl = Optional.of(Duration.of(ttl, ttlUnit));
@@ -128,7 +121,8 @@ public class HdrXHistogramImplConfigBuilder implements XHistogramImplConfigBuild
             highestTrackableValue,
             overflowBehavior,
             expectedUpdateInterval,
-            bucketsResettable,
+            totalsMeasurementType,
+            bucketsMeasurementType,
             snapshotTtl);
     }
 

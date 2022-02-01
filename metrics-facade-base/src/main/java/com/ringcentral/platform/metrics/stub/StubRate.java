@@ -1,5 +1,6 @@
 package com.ringcentral.platform.metrics.stub;
 
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -21,13 +22,14 @@ public class StubRate extends AbstractRate<Object> implements Rate {
     static final Object stubRateImplInstance = new Object();
 
     static final MeterImplMaker<Object, RateInstanceConfig, RateSliceConfig, RateConfig> stubRateImplMaker =
-        (ic, sc, c, m, e) -> stubRateImplInstance;
+        (ic, sc, c, m, e, r) -> stubRateImplInstance;
 
     public StubRate(
         MetricName name,
         RateConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -80,6 +82,7 @@ public class StubRate extends AbstractRate<Object> implements Rate {
                 }
             },
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

@@ -8,7 +8,7 @@ import java.util.*;
 import static com.ringcentral.platform.metrics.utils.CollectionUtils.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
@@ -55,5 +55,15 @@ public class CollectionUtilsTest {
         assertFalse(containsAllInOrder(List.of(1, 2, 3), List.of(1, 3, 2)));
         assertFalse(containsAllInOrder(List.of(1, 2, 3), List.of(2, 1)));
         assertFalse(containsAllInOrder(List.of(1, 2, 3), List.of(1, 5)));
+    }
+
+    @Test
+    public void copyingLongArray() {
+        long[] a = new long[] { 1L, 2L, 3L };
+        long[] c = copyLongArray(a);
+        assertThat(a, is(c));
+        assertThat(a, is(not(sameInstance(c))));
+
+        assertNull(copyLongArray(null));
     }
 }

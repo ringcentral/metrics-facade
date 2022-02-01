@@ -1,11 +1,14 @@
 package com.ringcentral.platform.metrics;
 
-import java.util.*;
-import static com.ringcentral.platform.metrics.UnmodifiableMetricContext.*;
+import java.util.Map;
+import java.util.concurrent.*;
+
+import static com.ringcentral.platform.metrics.UnmodifiableMetricContext.emptyUnmodifiableMetricContext;
 
 public abstract class AbstractMetricContext implements MetricContext {
 
     private final Map<Object, Object> props;
+    private static final ConcurrentMap<Class<?>, Class<?>> typeKeys = new ConcurrentHashMap<>();
 
     protected AbstractMetricContext(Map<Object, Object> props) {
         this.props = props;
@@ -13,6 +16,26 @@ public abstract class AbstractMetricContext implements MetricContext {
 
     protected void put(Object key, Object value) {
         props.put(key, value);
+    }
+
+    protected void with(Object value) {
+        if (value instanceof MetricContextTypeKeySubtype) {
+            Class<?> type = value.getClass();
+
+            Class<?> typeKey = typeKeys.computeIfAbsent(type, t -> {
+                for (Class<?> iface : type.getInterfaces()) {
+                    if (iface.isAnnotationPresent(MetricContextTypeKey.class)) {
+                        return iface;
+                    }
+                }
+
+                return t;
+            });
+
+            put(typeKey, value);
+        } else {
+            put(value.getClass(), value);
+        }
     }
 
     @Override

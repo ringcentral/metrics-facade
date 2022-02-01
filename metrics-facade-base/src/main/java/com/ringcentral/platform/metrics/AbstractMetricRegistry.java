@@ -52,73 +52,85 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<Object> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         CachingObjectVar makeCachingObjectVar(
             MetricName name,
             CachingVarConfig config,
             Supplier<Object> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         LongVar makeLongVar(
             MetricName name,
             VarConfig config,
             Supplier<Long> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         CachingLongVar makeCachingLongVar(
             MetricName name,
             CachingVarConfig config,
             Supplier<Long> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         DoubleVar makeDoubleVar(
             MetricName name,
             VarConfig config,
             Supplier<Double> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         CachingDoubleVar makeCachingDoubleVar(
             MetricName name,
             CachingVarConfig config,
             Supplier<Double> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         StringVar makeStringVar(
             MetricName name,
             VarConfig config,
             Supplier<String> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         CachingStringVar makeCachingStringVar(
             MetricName name,
             CachingVarConfig config,
             Supplier<String> valueSupplier,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         Counter makeCounter(
             MetricName name,
             CounterConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         Rate makeRate(
             MetricName name,
             RateConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         Histogram makeHistogram(
             MetricName name,
             HistogramConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
 
         Timer makeTimer(
             MetricName name,
             TimerConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor);
+            ScheduledExecutorService executor,
+            MetricRegistry registry);
     }
 
     static final Supplier<MetricConfigBuilderProvider<ObjectVarConfigBuilder>> DEFAULT_OBJECT_VAR_CONFIG_BUILDER_PROVIDER_SUPPLIER = ObjectVarConfigBuilder::new;
@@ -275,7 +287,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     private <C extends VarConfig> MetricConfigBuilder<C> prepareVarConfigBuilder(
@@ -363,7 +376,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareCachingVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     private <C extends CachingVarConfig> MetricConfigBuilder<C> prepareCachingVarConfigBuilder(
@@ -455,7 +469,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -509,7 +524,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareCachingVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -563,7 +579,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -617,7 +634,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareCachingVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -671,7 +689,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -725,7 +744,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             prepareCachingVarConfigBuilder(key, configBuilderProviderSupplier).build(),
             valueSupplier,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -806,7 +826,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             builder.build(),
             timeMsProvider,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -883,7 +904,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             builder.build(),
             timeMsProvider,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -960,7 +982,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             builder.build(),
             timeMsProvider,
-            executor);
+            executor,
+            this);
     }
 
     @Override
@@ -1037,7 +1060,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             key.name(),
             builder.build(),
             timeMsProvider,
-            executor);
+            executor,
+            this);
     }
 
     @Override

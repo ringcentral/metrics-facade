@@ -1,7 +1,8 @@
 package com.ringcentral.platform.metrics.dropwizard.histogram;
 
 import com.codahale.metrics.*;
-import com.ringcentral.platform.metrics.NotMeasuredException;
+import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.histogram.AbstractHistogram;
@@ -173,7 +174,8 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
             HistogramSliceConfig sliceConfig,
             HistogramConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             if (instanceConfig != null && instanceConfig.context().has(Histogram.class)) {
                 return instanceConfig.context().get(Histogram.class);
@@ -248,7 +250,8 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
         MetricName name,
         HistogramConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -258,6 +261,7 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
             Histogram::update,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram;
 
 import com.ringcentral.platform.metrics.histogram.Histogram.Bucket;
+import com.ringcentral.platform.metrics.x.histogram.configs.TotalsMeasurementType;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.LongAdder;
@@ -9,6 +10,7 @@ import static com.ringcentral.platform.metrics.utils.CollectionUtils.copyLongArr
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static com.ringcentral.platform.metrics.x.histogram.DefaultXHistogramSnapshot.NO_VALUE;
 import static java.lang.System.arraycopy;
+import static java.util.Objects.requireNonNull;
 
 public class NeverResetBucketXHistogramImpl implements XHistogramImpl {
 
@@ -17,22 +19,21 @@ public class NeverResetBucketXHistogramImpl implements XHistogramImpl {
 
     private final long[] bucketUpperBounds;
     private final int bucketCount;
-    private final LongAdder[] bucketSizes;
+    private final LongAdder[] intervalCounters;
+    private final LongAdder[] intervalSumAdders;
+    private final LongAdder[] intervalUpdateCounters;
     private final long[] snapshotBucketSizes;
-
-    private final LongAdder[] totalSumAdders;
-    private final long[] snapshotTotalSums;
-
-    private final LongAdder[] updateCounters;
 
     public NeverResetBucketXHistogramImpl(
         boolean withCount,
         boolean withTotalSum,
+        TotalsMeasurementType totalsMeasurementType,
         Collection<? extends Bucket> buckets) {
 
         checkArgument(buckets != null && !buckets.isEmpty(), "No buckets");
         this.withCount = withCount;
         this.withTotalSum = withTotalSum;
+        requireNonNull(totalsMeasurementType);
 
         long[] bounds = buckets.stream()
             .mapToLong(Bucket::upperBoundAsLong)
@@ -47,47 +48,52 @@ public class NeverResetBucketXHistogramImpl implements XHistogramImpl {
         }
 
         this.bucketUpperBounds = bounds;
-        this.bucketCount = this.bucketUpperBounds.length;
-        this.bucketSizes = new LongAdder[this.bucketCount];
+        this.bucketCount = bounds.length;
+        this.intervalCounters = new LongAdder[bucketCount];
 
-        for (int i = 0; i < this.bucketCount; ++i) {
-            this.bucketSizes[i] = new LongAdder();
+        for (int i = 0; i < bucketCount; ++i) {
+            this.intervalCounters[i] = new LongAdder();
         }
-
-        this.snapshotBucketSizes = new long[this.bucketCount];
 
         if (withTotalSum) {
-            this.totalSumAdders = new LongAdder[this.bucketCount];
+            this.intervalSumAdders = new LongAdder[bucketCount];
 
-            for (int i = 0; i < this.bucketCount; ++i) {
-                this.totalSumAdders[i] = new LongAdder();
+            for (int i = 0; i < bucketCount; ++i) {
+                this.intervalSumAdders[i] = new LongAdder();
             }
 
-            this.snapshotTotalSums = new long[this.bucketCount];
-            this.updateCounters = new LongAdder[this.bucketCount];
+            if (totalsMeasurementType == TotalsMeasurementType.CONSISTENT) {
+                this.intervalUpdateCounters = new LongAdder[bucketCount];
 
-            for (int i = 0; i < this.bucketCount; ++i) {
-                this.updateCounters[i] = new LongAdder();
+                for (int i = 0; i < bucketCount; ++i) {
+                    this.intervalUpdateCounters[i] = new LongAdder();
+                }
+            } else {
+                this.intervalUpdateCounters = null;
             }
         } else {
-            this.totalSumAdders = null;
-            this.snapshotTotalSums = null;
-            this.updateCounters = null;
+            this.intervalSumAdders = null;
+            this.intervalUpdateCounters = null;
         }
+
+        this.snapshotBucketSizes = new long[bucketCount];
     }
 
     @Override
     public void update(long value) {
-        int i = bucketCount > 1 ? bucketIndex(value) : 0;
-        bucketSizes[i].increment();
+        int i = bucketCount > 1 ? bucketIndexFor(value) : 0;
+        intervalCounters[i].increment();
 
-        if (totalSumAdders != null) {
-            totalSumAdders[i].add(value);
-            updateCounters[i].increment();
+        if (intervalSumAdders != null) {
+            intervalSumAdders[i].add(value);
+
+            if (intervalUpdateCounters != null) {
+                intervalUpdateCounters[i].increment();
+            }
         }
     }
 
-    int bucketIndex(long value) {
+    int bucketIndexFor(long value) {
         int low = 0;
         int high = bucketCount - 1;
 
@@ -113,49 +119,39 @@ public class NeverResetBucketXHistogramImpl implements XHistogramImpl {
         long totalSum = NO_VALUE;
 
         if (withTotalSum) {
-            long currSize;
-            long currTotalSum;
-
-            for (int i = 0; i < bucketCount; ++i) {
-                long updateCount;
-
-                do {
-                    updateCount = updateCounters[i].sum();
-
-                    // We must read the size last to ensure the consistency of the values.
-                    currTotalSum = totalSumAdders[i].sum();
-                    currSize = bucketSizes[i].sum();
-                } while (currSize != updateCount);
-
-                snapshotBucketSizes[i] = currSize;
-                snapshotTotalSums[i] = currTotalSum;
-            }
-
-            for (int i = 1; i < bucketCount; ++i) {
-                snapshotBucketSizes[i] += snapshotBucketSizes[i - 1];
-            }
-
-            if (withCount) {
-                count = snapshotBucketSizes[bucketCount - 1];
-            }
-
             totalSum = 0L;
+            long intervalCount;
+            long intervalSum;
 
             for (int i = 0; i < bucketCount; ++i) {
-                totalSum += snapshotTotalSums[i];
+                if (intervalUpdateCounters != null) {
+                    long intervalUpdateCount;
+
+                    do {
+                        intervalUpdateCount = intervalUpdateCounters[i].sum();
+
+                        // We must read the intervalCount last to ensure the consistency of the values.
+                        intervalSum = intervalSumAdders[i].sum();
+                        intervalCount = intervalCounters[i].sum();
+                    } while (intervalCount != intervalUpdateCount);
+                } else {
+                    intervalCount = intervalCounters[i].sum();
+                    intervalSum = intervalSumAdders[i].sum();
+                }
+
+                snapshotBucketSizes[i] = i > 0 ? snapshotBucketSizes[i - 1] + intervalCount : intervalCount;
+                totalSum += intervalSum;
             }
         } else {
-            for (int i = 0; i < bucketCount; ++i) {
-                snapshotBucketSizes[i] = bucketSizes[i].sum();
-            }
+            snapshotBucketSizes[0] = intervalCounters[0].sum();
 
             for (int i = 1; i < bucketCount; ++i) {
-                snapshotBucketSizes[i] += snapshotBucketSizes[i - 1];
+                snapshotBucketSizes[i] = snapshotBucketSizes[i - 1] + intervalCounters[i].sum();
             }
+        }
 
-            if (withCount) {
-                count = snapshotBucketSizes[bucketCount - 1];
-            }
+        if (withCount) {
+            count = snapshotBucketSizes[bucketCount - 1];
         }
 
         return new DefaultXHistogramSnapshot(

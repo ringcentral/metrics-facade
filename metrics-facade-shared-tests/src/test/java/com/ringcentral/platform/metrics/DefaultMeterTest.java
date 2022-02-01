@@ -16,6 +16,7 @@ import static com.ringcentral.platform.metrics.histogram.Histogram.MEAN;
 import static com.ringcentral.platform.metrics.rate.Rate.ONE_MINUTE_RATE;
 import static com.ringcentral.platform.metrics.timer.Timer.DURATION_UNIT;
 import static java.util.stream.Collectors.toMap;
+import static org.mockito.Mockito.mock;
 
 public class DefaultMeterTest extends AbstractMeterTest<
     Measurable,
@@ -130,14 +131,15 @@ public class DefaultMeterTest extends AbstractMeterTest<
             MetricName name,
             BaseMeterConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             super(
                 name,
                 config,
                 (ic, sc, c, measurables) -> (measurables.isEmpty() ? SUPPORTED_MEASURABLES : measurables).stream()
                     .collect(toMap(m -> m, m -> meterImpl -> 1L)),
-                (ic, sc, c, m, e) -> new TestMeterImpl(),
+                (ic, sc, c, m, e, r) -> new TestMeterImpl(),
                 TestMeterImpl::update,
                 new InstanceMaker<>() {
 
@@ -184,7 +186,8 @@ public class DefaultMeterTest extends AbstractMeterTest<
                     }
                 },
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
     }
 
@@ -193,7 +196,8 @@ public class DefaultMeterTest extends AbstractMeterTest<
             SUPPORTED_MEASURABLES,
             TestMeterConfigBuilder::new,
             TestMeterInstanceConfigBuilder::new,
-            (name, builder, timeMsProvider, executor) -> new TestMeter(name, builder.build(), timeMsProvider, executor),
+            (name, builder, timeMsProvider, executor) ->
+                new TestMeter(name, builder.build(), timeMsProvider, executor, mock(MetricRegistry.class)),
             (instance, expectedUpdateValues) -> {
                 if (instance instanceof TestMeterInstance) {
                     return ((TestMeterInstance)instance).meterImpl().values().equals(expectedUpdateValues);

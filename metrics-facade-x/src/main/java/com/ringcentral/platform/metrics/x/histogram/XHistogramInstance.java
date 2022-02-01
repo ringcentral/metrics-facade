@@ -30,4 +30,16 @@ public class XHistogramInstance extends AbstractMeterInstance<XHistogramImpl> im
             measurableValueProviders,
             histogram);
     }
+
+    @Override
+    public void metricInstanceAdded() {
+        super.metricInstanceAdded();
+        meterImpl().metricInstanceAdded();
+    }
+
+    @Override
+    public void metricInstanceRemoved() {
+        super.metricInstanceRemoved();
+        meterImpl().metricInstanceRemoved();
+    }
 }

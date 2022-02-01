@@ -1,5 +1,6 @@
 package com.ringcentral.platform.metrics.stub;
 
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -22,13 +23,14 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
     static final Object stubTimerImplInstance = new Object();
 
     static final MeterImplMaker<Object, TimerInstanceConfig, TimerSliceConfig, TimerConfig> stubTimerImplMaker =
-        (ic, sc, c, m, e) -> stubTimerImplInstance;
+        (ic, sc, c, m, e, r) -> stubTimerImplInstance;
 
     public StubTimer(
         MetricName name,
         TimerConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -81,7 +83,8 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
                 }
             },
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 
     @Override

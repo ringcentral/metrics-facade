@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.histogram;
 
-import com.ringcentral.platform.metrics.AbstractMeter;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -34,7 +34,8 @@ public abstract class AbstractHistogram<MI> extends AbstractMeter<
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -44,7 +45,8 @@ public abstract class AbstractHistogram<MI> extends AbstractMeter<
             meterImplUpdater,
             instanceMaker,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 
     @Override

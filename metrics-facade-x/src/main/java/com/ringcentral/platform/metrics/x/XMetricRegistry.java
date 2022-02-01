@@ -9,14 +9,6 @@ import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfo
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.rate.configs.RateConfig;
-import com.ringcentral.platform.metrics.x.counter.XCounter;
-import com.ringcentral.platform.metrics.x.histogram.XHistogram;
-import com.ringcentral.platform.metrics.x.rate.XRate;
-import com.ringcentral.platform.metrics.x.timer.XTimer;
-import com.ringcentral.platform.metrics.x.var.doubleVar.*;
-import com.ringcentral.platform.metrics.x.var.longVar.*;
-import com.ringcentral.platform.metrics.x.var.objectVar.*;
-import com.ringcentral.platform.metrics.x.var.stringVar.*;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
@@ -25,8 +17,18 @@ import com.ringcentral.platform.metrics.var.doubleVar.*;
 import com.ringcentral.platform.metrics.var.longVar.*;
 import com.ringcentral.platform.metrics.var.objectVar.*;
 import com.ringcentral.platform.metrics.var.stringVar.*;
+import com.ringcentral.platform.metrics.x.counter.XCounter;
+import com.ringcentral.platform.metrics.x.histogram.*;
+import com.ringcentral.platform.metrics.x.histogram.configs.XHistogramImplConfig;
+import com.ringcentral.platform.metrics.x.rate.*;
+import com.ringcentral.platform.metrics.x.rate.configs.XRateImplConfig;
+import com.ringcentral.platform.metrics.x.timer.XTimer;
+import com.ringcentral.platform.metrics.x.var.doubleVar.*;
+import com.ringcentral.platform.metrics.x.var.longVar.*;
+import com.ringcentral.platform.metrics.x.var.objectVar.*;
+import com.ringcentral.platform.metrics.x.var.stringVar.*;
 
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 @SuppressWarnings("SameParameterValue")
@@ -41,7 +43,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<Object> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XObjectVar(
                 name,
@@ -55,7 +58,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<Object> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XCachingObjectVar(
                 name,
@@ -69,7 +73,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<Long> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XLongVar(
                 name,
@@ -83,7 +88,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<Long> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XCachingLongVar(
                 name,
@@ -97,7 +103,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<Double> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XDoubleVar(
                 name,
@@ -111,7 +118,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<Double> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XCachingDoubleVar(
                 name,
@@ -125,7 +133,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             VarConfig config,
             Supplier<String> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XStringVar(
                 name,
@@ -139,7 +148,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CachingVarConfig config,
             Supplier<String> valueSupplier,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XCachingStringVar(
                 name,
@@ -153,13 +163,15 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             CounterConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XCounter(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
 
         @Override
@@ -167,13 +179,15 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             RateConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XRate(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
 
         @Override
@@ -181,13 +195,15 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             HistogramConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XHistogram(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
 
         @Override
@@ -195,15 +211,20 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             MetricName name,
             TimerConfig config,
             TimeMsProvider timeMsProvider,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return new XTimer(
                 name,
                 config,
                 timeMsProvider,
-                executor);
+                executor,
+                registry);
         }
     }
+
+    private final ConcurrentMap<Class<? extends XRateImplConfig>, CustomXRateImplMaker<?>> customXRateImplMakers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<? extends XHistogramImplConfig>, CustomXHistogramImplMaker<?>> customXHistogramImplMakers = new ConcurrentHashMap<>();
 
     public XMetricRegistry() {
         super(MetricMakerImpl.INSTANCE);
@@ -247,5 +268,25 @@ public class XMetricRegistry extends AbstractMetricRegistry {
             postModsProvider,
             timeMsProvider,
             executor);
+    }
+
+    /* ****************************** */
+
+    public <C extends XHistogramImplConfig> void extendWith(Class<C> configType, CustomXHistogramImplMaker<C> implMaker) {
+        customXHistogramImplMakers.put(configType, implMaker);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C extends XHistogramImplConfig> CustomXHistogramImplMaker<C> customXHistogramImplMakerFor(Class<C> configType) {
+        return (CustomXHistogramImplMaker<C>)customXHistogramImplMakers.get(configType);
+    }
+
+    public <C extends XRateImplConfig> void extendWith(Class<C> configType, CustomXRateImplMaker<C> implMaker) {
+        customXRateImplMakers.put(configType, implMaker);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C extends XRateImplConfig> CustomXRateImplMaker<C> customXRateImplMakerFor(Class<C> configType) {
+        return (CustomXRateImplMaker<C>)customXRateImplMakers.get(configType);
     }
 }

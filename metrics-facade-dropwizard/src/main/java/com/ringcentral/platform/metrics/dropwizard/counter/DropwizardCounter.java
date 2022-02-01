@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.dropwizard.counter;
 
 import com.codahale.metrics.Counter;
-import com.ringcentral.platform.metrics.NotMeasuredException;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.AbstractCounter;
 import com.ringcentral.platform.metrics.counter.configs.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
@@ -69,7 +69,8 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
             CounterSliceConfig sliceConfig,
             CounterConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return
                 instanceConfig != null ?
@@ -135,7 +136,8 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
         MetricName name,
         CounterConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -145,6 +147,7 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
             Counter::inc,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

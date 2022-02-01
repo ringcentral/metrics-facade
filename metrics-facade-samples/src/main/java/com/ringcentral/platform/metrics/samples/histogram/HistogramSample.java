@@ -1,7 +1,7 @@
-package com.ringcentral.platform.metrics.samples;
+package com.ringcentral.platform.metrics.samples.histogram;
 
-import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.samples.AbstractSample;
 import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
@@ -12,6 +12,7 @@ import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramInstanceConfigBuilder.histogramInstance;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
+import static com.ringcentral.platform.metrics.samples.histogram.LastValueXHistogramConfigBuilder.lastValueImpl;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
 @SuppressWarnings("ALL")
@@ -19,7 +20,8 @@ public class HistogramSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new XMetricRegistry();
+        XMetricRegistry registry = new XMetricRegistry();
+        registry.extendWith(LastValueXHistogramImplConfig.class, new LastValueXHistogramImplMaker());
 
         // Default config:
         //   no dimensions
@@ -80,6 +82,7 @@ public class HistogramSample extends AbstractSample {
                 // the properties specific to the metrics implementation
                 // default: no properties
                 .put("key_1", "value_1_1")
+                //.with(lastValueImpl())
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

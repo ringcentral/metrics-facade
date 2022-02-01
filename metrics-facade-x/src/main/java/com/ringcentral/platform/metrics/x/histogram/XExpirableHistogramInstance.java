@@ -32,4 +32,16 @@ public class XExpirableHistogramInstance extends AbstractExpirableMeterInstance<
             histogram,
             creationTimeMs);
     }
+
+    @Override
+    public void metricInstanceAdded() {
+        super.metricInstanceAdded();
+        meterImpl().metricInstanceAdded();
+    }
+
+    @Override
+    public void metricInstanceRemoved() {
+        super.metricInstanceRemoved();
+        meterImpl().metricInstanceRemoved();
+    }
 }

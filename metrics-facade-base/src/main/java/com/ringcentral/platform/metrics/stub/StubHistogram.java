@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.stub;
 
-import com.ringcentral.platform.metrics.AbstractMeter;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.histogram.*;
 import com.ringcentral.platform.metrics.histogram.configs.*;
@@ -22,13 +22,14 @@ public class StubHistogram extends AbstractHistogram<Object> implements Histogra
     static final Object stubHistogramImplInstance = new Object();
 
     static final MeterImplMaker<Object, HistogramInstanceConfig, HistogramSliceConfig, HistogramConfig> stubHistogramImplMaker =
-        (ic, sc, c, m, e) -> stubHistogramImplInstance;
+        (ic, sc, c, m, e, r) -> stubHistogramImplInstance;
 
     public StubHistogram(
         MetricName name,
         HistogramConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -81,6 +82,7 @@ public class StubHistogram extends AbstractHistogram<Object> implements Histogra
                 }
             },
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

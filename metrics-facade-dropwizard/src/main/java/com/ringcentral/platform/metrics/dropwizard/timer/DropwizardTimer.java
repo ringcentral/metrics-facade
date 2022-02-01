@@ -2,7 +2,8 @@ package com.ringcentral.platform.metrics.dropwizard.timer;
 
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
-import com.ringcentral.platform.metrics.NotMeasuredException;
+import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.dimensions.*;
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
@@ -235,7 +236,8 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
             TimerSliceConfig sliceConfig,
             TimerConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             if (instanceConfig != null && instanceConfig.context().has(Timer.class)) {
                 return instanceConfig.context().get(Timer.class);
@@ -310,7 +312,8 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
         MetricName name,
         TimerConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -320,7 +323,8 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
             (timer, value) -> timer.update(value, NANOSECONDS),
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 
     @Override

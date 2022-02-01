@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.counter;
 
-import com.ringcentral.platform.metrics.AbstractMeter;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.configs.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -22,7 +22,8 @@ public abstract class AbstractCounter<MI> extends AbstractMeter<
         MeterImplUpdater<MI> meterImplUpdater,
         InstanceMaker<MI> instanceMaker,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -32,7 +33,8 @@ public abstract class AbstractCounter<MI> extends AbstractMeter<
             meterImplUpdater,
             instanceMaker,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 
     @Override

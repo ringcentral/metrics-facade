@@ -8,14 +8,18 @@ import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.*;
+import com.ringcentral.platform.metrics.x.XMetricRegistry;
 import com.ringcentral.platform.metrics.x.histogram.configs.*;
 import com.ringcentral.platform.metrics.x.histogram.hdr.*;
 import com.ringcentral.platform.metrics.x.histogram.hdr.configs.*;
+import com.ringcentral.platform.metrics.x.histogram.scale.*;
+import com.ringcentral.platform.metrics.x.histogram.scale.configs.*;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static com.ringcentral.platform.metrics.utils.MetricContextUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class XHistogram extends AbstractHistogram<XHistogramImpl> {
@@ -202,14 +206,16 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             HistogramSliceConfig sliceConfig,
             HistogramConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return makeMeterImpl(
                 instanceConfig != null ? instanceConfig.context() : null,
                 sliceConfig != null ? sliceConfig.context() : null,
                 config != null ? config.context() : null,
                 measurables,
-                executor);
+                executor,
+                registry);
         }
 
         @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -218,65 +224,104 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             MetricContext sliceContext,
             MetricContext context,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
-            XHistogramImplConfig implConfig = null;
-
-            if (instanceContext != null) {
-                implConfig = xHistogramImplConfig(instanceContext);
-            }
-
-            if (implConfig == null && sliceContext != null) {
-                implConfig = xHistogramImplConfig(sliceContext);
-            }
-
-            if (implConfig == null && context != null) {
-                implConfig = xHistogramImplConfig(context);
-            }
-
-            if (implConfig == null) {
-                implConfig = HdrXHistogramImplConfig.DEFAULT;
-            }
+            XHistogramImplConfig implConfig = implConfig(instanceContext, sliceContext, context);
+            XHistogramImpl impl;
 
             if (implConfig instanceof HdrXHistogramImplConfig) {
                 HdrXHistogramImplConfig hdrImplConfig = (HdrXHistogramImplConfig)implConfig;
-                HdrXHistogramImpl hdrImpl;
 
-                if (hdrImplConfig.type() == HdrXHistogramType.NEVER_RESET) {
-                    hdrImpl = new NeverResetHdrXHistogramImpl(hdrImplConfig, measurables, executor);
-                } else if (hdrImplConfig.type() == HdrXHistogramType.RESET_ON_SNAPSHOT) {
-                    hdrImpl = new ResetOnSnapshotHdrXHistogramImpl(hdrImplConfig, measurables, executor);
-                } else if (hdrImplConfig.type() == HdrXHistogramType.RESET_BY_CHUNKS) {
-                    hdrImpl = new ResetByChunksHdrXHistogramImpl(hdrImplConfig, measurables, executor);
+                if (hdrImplConfig.type() == HdrXHistogramImplType.NEVER_RESET) {
+                    impl = new NeverResetHdrXHistogramImpl(hdrImplConfig, measurables, executor);
+                } else if (hdrImplConfig.type() == HdrXHistogramImplType.RESET_ON_SNAPSHOT) {
+                    impl = new ResetOnSnapshotHdrXHistogramImpl(hdrImplConfig, measurables, executor);
+                } else if (hdrImplConfig.type() == HdrXHistogramImplType.RESET_BY_CHUNKS) {
+                    impl = new ResetByChunksHdrXHistogramImpl(hdrImplConfig, measurables, executor);
                 } else {
                     throw new IllegalArgumentException(
                         "Unsupported " + HdrXHistogramImplConfig.class.getSimpleName()
                         + ": " + hdrImplConfig.getClass().getName());
                 }
+            } else if (implConfig instanceof ScaleXHistogramImplConfig) {
+                ScaleXHistogramImplConfig scaleImplConfig = (ScaleXHistogramImplConfig)implConfig;
 
-                return
-                    hdrImplConfig.hasSnapshotTtl() ?
-                    new SnapshotCachingHdrXHistogramImpl(hdrImpl, hdrImplConfig.snapshotTtl().get()) :
-                    hdrImpl;
+                if (scaleImplConfig.type() == ScaleXHistogramImplType.NEVER_RESET) {
+                    impl = new NeverResetScaleXHistogramImpl(scaleImplConfig, measurables, executor);
+                } else if (scaleImplConfig.type() == ScaleXHistogramImplType.RESET_ON_SNAPSHOT) {
+                    impl = new ResetOnSnapshotScaleXHistogramImpl(scaleImplConfig, measurables, executor);
+                } else if (scaleImplConfig.type() == ScaleXHistogramImplType.RESET_BY_CHUNKS) {
+                    impl = new ResetByChunksScaleXHistogramImpl(scaleImplConfig, measurables, executor);
+                } else {
+                    throw new IllegalArgumentException(
+                        "Unsupported " + ScaleXHistogramImplConfig.class.getSimpleName()
+                        + ": " + scaleImplConfig.getClass().getName());
+                }
+            } else {
+                impl = makeCustomImpl(
+                    implConfig,
+                    instanceContext,
+                    sliceContext,
+                    context,
+                    measurables,
+                    executor,
+                    registry);
             }
 
-            throw new IllegalArgumentException(
-                "Unsupported " + XHistogramImplConfig.class.getSimpleName()
-                + ": " + implConfig.getClass().getName());
+            if (impl == null) {
+                throw new IllegalArgumentException(
+                    "Unsupported " + XHistogramImplConfig.class.getSimpleName()
+                    + ": " + implConfig.getClass().getName());
+            }
+
+            if (implConfig.hasSnapshotTtl()) {
+                impl = new SnapshotCachingXHistogramImpl(impl, implConfig.snapshotTtl().get());
+            }
+
+            return impl;
         }
 
-        private XHistogramImplConfig xHistogramImplConfig(MetricContext context) {
-            if (context.has(XHistogramImplConfig.class)) {
-                return context.getForClass(XHistogramImplConfig.class);
-            } else if (context.has(HdrXHistogramImplConfig.class)) {
-                return context.getForClass(HdrXHistogramImplConfig.class);
-            } else if (context.has(XHistogramImplConfigBuilder.class)) {
-                return context.getForClass(XHistogramImplConfigBuilder.class).build();
-            } else if (context.has(HdrXHistogramImplConfigBuilder.class)) {
-                return context.getForClass(HdrXHistogramImplConfigBuilder.class).build();
+        private XHistogramImplConfig implConfig(
+            MetricContext instanceContext,
+            MetricContext sliceContext,
+            MetricContext context) {
+
+            if (has(XHistogramImplConfig.class, instanceContext, sliceContext, context)) {
+                return getForClass(XHistogramImplConfig.class, instanceContext, sliceContext, context);
             }
 
-            return null;
+            if (has(XHistogramImplConfigBuilder.class, instanceContext, sliceContext, context)) {
+                return getForClass(XHistogramImplConfigBuilder.class, instanceContext, sliceContext, context).build();
+            }
+
+            return HdrXHistogramImplConfig.DEFAULT;
+        }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        private XHistogramImpl makeCustomImpl(
+            XHistogramImplConfig config,
+            MetricContext instanceContext,
+            MetricContext sliceContext,
+            MetricContext context,
+            Set<? extends Measurable> measurables,
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
+
+            CustomXHistogramImplMaker customImplMaker = ((XMetricRegistry)registry).customXHistogramImplMakerFor(config.getClass());
+
+            if (customImplMaker == null) {
+                return null;
+            }
+
+            return customImplMaker.makeXHistogramImpl(
+                config,
+                instanceContext,
+                sliceContext,
+                context,
+                measurables,
+                executor,
+                registry);
         }
     }
 
@@ -333,7 +378,8 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
         MetricName name,
         HistogramConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -343,6 +389,7 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             XHistogramImpl::update,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

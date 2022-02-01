@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.x.counter;
 
-import com.ringcentral.platform.metrics.NotMeasuredException;
+import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.AbstractCounter;
 import com.ringcentral.platform.metrics.counter.configs.*;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
@@ -69,7 +69,8 @@ public class XCounter extends AbstractCounter<LongAdder> {
             CounterSliceConfig sliceConfig,
             CounterConfig config,
             Set<? extends Measurable> measurables,
-            ScheduledExecutorService executor) {
+            ScheduledExecutorService executor,
+            MetricRegistry registry) {
 
             return
                 instanceConfig != null ?
@@ -135,7 +136,8 @@ public class XCounter extends AbstractCounter<LongAdder> {
         MetricName name,
         CounterConfig config,
         TimeMsProvider timeMsProvider,
-        ScheduledExecutorService executor) {
+        ScheduledExecutorService executor,
+        MetricRegistry registry) {
 
         super(
             name,
@@ -145,6 +147,7 @@ public class XCounter extends AbstractCounter<LongAdder> {
             LongAdder::add,
             InstanceMakerImpl.INSTANCE,
             timeMsProvider,
-            executor);
+            executor,
+            registry);
     }
 }

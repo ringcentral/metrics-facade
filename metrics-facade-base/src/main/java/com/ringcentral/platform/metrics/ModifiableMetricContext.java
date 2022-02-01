@@ -21,6 +21,10 @@ public class ModifiableMetricContext extends AbstractMetricContext {
         source.properties().forEach(this::put);
     }
 
+    public void with(Object value) {
+        super.with(value);
+    }
+
     public void putIfAbsent(Object key, Object value) {
         if (!has(key)) {
             put(key, value);

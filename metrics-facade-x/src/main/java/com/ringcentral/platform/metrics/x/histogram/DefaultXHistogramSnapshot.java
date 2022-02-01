@@ -4,8 +4,6 @@ import com.ringcentral.platform.metrics.histogram.Histogram;
 
 public class DefaultXHistogramSnapshot implements XHistogramSnapshot {
 
-    public static final long NO_VALUE = 0L;
-
     private final long count;
     private final long totalSum;
     private final long min;

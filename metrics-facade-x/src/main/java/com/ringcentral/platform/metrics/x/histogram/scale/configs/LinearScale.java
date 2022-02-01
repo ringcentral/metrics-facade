@@ -4,7 +4,7 @@ import java.util.*;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
-public class LinearScale extends AbstractScale {
+public class LinearScale implements Scale {
 
     private final List<Long> points;
 
@@ -17,7 +17,7 @@ public class LinearScale extends AbstractScale {
         checkArgument(stepCount >= 0, "stepCount must be >= 0");
         checkArgument(stepCount == 0 || step > 0, "step must be > 0 when stepCount > 0");
 
-        this.points = new ArrayList<>();
+        this.points = new ArrayList<>((int)stepCount + 2);
         this.points.add(from);
         long p = from;
 

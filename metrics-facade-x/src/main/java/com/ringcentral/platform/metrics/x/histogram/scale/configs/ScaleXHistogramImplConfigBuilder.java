@@ -1,24 +1,20 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.configs;
 
-import com.ringcentral.platform.metrics.x.histogram.configs.XHistogramImplConfigBuilder;
+import com.ringcentral.platform.metrics.x.histogram.configs.AbstractXHistogramImplConfigBuilder;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig.*;
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "FieldMayBeFinal" })
-public class ScaleXHistogramImplConfigBuilder implements XHistogramImplConfigBuilder<ScaleXHistogramImplConfig> {
+@SuppressWarnings({ "FieldMayBeFinal" })
+public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConfigBuilder<ScaleXHistogramImplConfig, ScaleXHistogramImplConfigBuilder> {
 
-    private ScaleXHistogramType type = DEFAULT.type();
+    private ScaleXHistogramImplType type = DEFAULT.type();
     private int chunkCount = DEFAULT.chunkCount();
     private long chunkResetPeriodMs = DEFAULT.chunkResetPeriodMs();
     private Scale scale = DEFAULT.scale();
-    private boolean bucketsResettable = DEFAULT.areBucketsResettable();
-    private Optional<Duration> snapshotTtl = DEFAULT.snapshotTtl();
 
     public static ScaleXHistogramImplConfigBuilder scale() {
         return scaleXHistogramImplConfigBuilder();
@@ -37,18 +33,18 @@ public class ScaleXHistogramImplConfigBuilder implements XHistogramImplConfigBui
     }
 
     public ScaleXHistogramImplConfigBuilder neverReset() {
-        this.type = ScaleXHistogramType.NEVER_RESET;
+        this.type = ScaleXHistogramImplType.NEVER_RESET;
         return this;
     }
 
     public ScaleXHistogramImplConfigBuilder resetOnSnapshot() {
-        this.type = ScaleXHistogramType.RESET_ON_SNAPSHOT;
+        this.type = ScaleXHistogramImplType.RESET_ON_SNAPSHOT;
         return this;
     }
 
     public ScaleXHistogramImplConfigBuilder resetPeriodically(Duration period) {
-        this.type = ScaleXHistogramType.RESET_BY_CHUNKS;
-        return resetByChunks(0, period.toMillis());
+        this.type = ScaleXHistogramImplType.RESET_BY_CHUNKS;
+        return resetByChunks(2, 2L * period.toMillis());
     }
 
     private ScaleXHistogramImplConfigBuilder resetByChunks(int chunkCount, long chunkResetPeriodMs) {
@@ -87,24 +83,14 @@ public class ScaleXHistogramImplConfigBuilder implements XHistogramImplConfigBui
         return this;
     }
 
-    public ScaleXHistogramImplConfigBuilder bucketsResettable(boolean bucketsResettable) {
-        this.bucketsResettable = bucketsResettable;
-        return this;
-    }
-
-    public ScaleXHistogramImplConfigBuilder snapshotTtl(long ttl, ChronoUnit ttlUnit) {
-        checkArgument(ttl > 0L, "ttl must be positive");
-        this.snapshotTtl = Optional.of(Duration.of(ttl, ttlUnit));
-        return this;
-    }
-
     public ScaleXHistogramImplConfig build() {
         return new ScaleXHistogramImplConfig(
             type,
             chunkCount,
             chunkResetPeriodMs,
             scale,
-            bucketsResettable,
+            totalsMeasurementType,
+            bucketsMeasurementType,
             snapshotTtl);
     }
 }

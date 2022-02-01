@@ -9,33 +9,29 @@ public class CompositeScaleBuilder implements ScaleBuilder<CompositeScale> {
 
     public List<Scale> scales;
 
-    public CompositeScaleBuilder(Scale first) {
-        this.scales = new ArrayList<>();
-        this.scales.add(first);
-    }
-
     public static CompositeScaleBuilder first(ScaleBuilder<?> first) {
-        return compositeScaleBuilder(first.build());
+        return first(first.build());
     }
 
     public static CompositeScaleBuilder first(Scale first) {
         return compositeScaleBuilder(first);
     }
 
-    public static CompositeScaleBuilder scale(ScaleBuilder<?> first) {
-        return compositeScaleBuilder(first.build());
-    }
-
-    public static CompositeScaleBuilder scale(Scale first) {
-        return compositeScaleBuilder(first);
-    }
-
     public static CompositeScaleBuilder compositeScaleBuilder(ScaleBuilder<?> first) {
-        return new CompositeScaleBuilder(first.build());
+        return compositeScaleBuilder(first.build());
     }
 
     public static CompositeScaleBuilder compositeScaleBuilder(Scale first) {
         return new CompositeScaleBuilder(first);
+    }
+
+    protected CompositeScaleBuilder(Scale first) {
+        this.scales = new ArrayList<>();
+        this.scales.add(first);
+    }
+
+    public CompositeScaleBuilder then(ScaleBuilder<?> next) {
+        return then(next.build());
     }
 
     public CompositeScaleBuilder then(Scale next) {

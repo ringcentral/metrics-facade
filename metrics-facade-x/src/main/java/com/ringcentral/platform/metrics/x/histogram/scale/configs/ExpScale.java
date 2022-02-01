@@ -4,26 +4,24 @@ import java.util.*;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
-public class ExpScale extends AbstractScale {
+public class ExpScale implements Scale {
 
     private final List<Long> points;
 
     public ExpScale(
         long from,
         long base,
-        long factor,
+        double factor,
         long stepCount,
         long max,
         boolean withInf) {
 
         checkArgument(from <= max, "from must be <= max");
         checkArgument(base > 0, "base must be > 0");
-        checkArgument(factor > 0, "factor must be > 0");
+        checkArgument(factor >= 0.01, "factor must be >= 0.01");
+        checkArgument(base * factor > base, "(base * factor) must be > base");
         checkArgument(factor < max, "factor must be < max");
-
-        if (stepCount < 0) {
-            stepCount = Long.MAX_VALUE;
-        }
+        checkArgument(stepCount >= 0, "stepCount must be >= 0");
 
         this.points = new ArrayList<>();
         this.points.add(from);
@@ -35,10 +33,10 @@ public class ExpScale extends AbstractScale {
                 p += increase;
                 this.points.add(p);
 
-                if (max / factor < increase) {
+                if (increase < max / factor) {
                     increase *= factor;
                 } else {
-                    if (max / factor == increase && max / increase == factor) {
+                    if (increase - max / factor < 1.0) {
                         this.points.add(max);
                     }
 

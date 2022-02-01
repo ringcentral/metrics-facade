@@ -1,10 +1,9 @@
 package com.ringcentral.platform.metrics.x.histogram;
 
 import com.ringcentral.platform.metrics.counter.Counter.Count;
-import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
-import com.ringcentral.platform.metrics.x.histogram.configs.XHistogramImplConfig;
+import com.ringcentral.platform.metrics.x.histogram.configs.*;
 
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -119,18 +118,18 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         boolean withBuckets;
         long[] bucketUpperBounds;
 
-        if (measurables.stream().anyMatch(m -> m instanceof Histogram.Percentile)) {
+        if (measurables.stream().anyMatch(m -> m instanceof Percentile)) {
             withPercentiles = true;
 
             quantiles = measurables.stream()
-                .filter(m -> m instanceof Histogram.Percentile)
-                .mapToDouble(m -> ((Histogram.Percentile)m).quantile())
+                .filter(m -> m instanceof Percentile)
+                .mapToDouble(m -> ((Percentile)m).quantile())
                 .sorted()
                 .toArray();
 
             percentiles = measurables.stream()
-                .filter(m -> m instanceof Histogram.Percentile)
-                .mapToDouble(m -> ((Histogram.Percentile)m).percentile())
+                .filter(m -> m instanceof Percentile)
+                .mapToDouble(m -> ((Percentile)m).percentile())
                 .sorted()
                 .toArray();
         } else {
@@ -139,23 +138,23 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             percentiles = null;
         }
 
-        Set<Histogram.Bucket> buckets = measurables.stream()
-            .filter(m -> m instanceof Histogram.Bucket)
-            .map(m -> (Histogram.Bucket)m)
+        Set<Bucket> buckets = measurables.stream()
+            .filter(m -> m instanceof Bucket)
+            .map(m -> (Bucket)m)
             .collect(toSet());
 
         XHistogramImpl basic;
 
         if (buckets.isEmpty()) {
-            basic = new TotalsImpl(withCount, withTotalSum);
+            basic = makeTotalsImpl(config, withCount, withTotalSum);
             withBuckets = false;
             bucketUpperBounds = null;
-        } else if (config.areBucketsResettable()) {
-            basic = new TotalsImpl(withCount, withTotalSum);
+        } else if (config.bucketsMeasurementType() == BucketsMeasurementType.IMPL_SPECIFIC) {
+            basic = makeTotalsImpl(config, withCount, withTotalSum);
             withBuckets = true;
 
             long[] bounds = buckets.stream()
-                .mapToLong(Histogram.Bucket::upperBoundAsLong)
+                .mapToLong(Bucket::upperBoundAsLong)
                 .sorted()
                 .toArray();
 
@@ -168,7 +167,12 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
             bucketUpperBounds = bounds;
         } else {
-            basic = new NeverResetBucketXHistogramImpl(withCount, withTotalSum, buckets);
+            basic = new NeverResetBucketXHistogramImpl(
+                withCount,
+                withTotalSum,
+                config.totalsMeasurementType(),
+                buckets);
+
             withBuckets = false;
             bucketUpperBounds = null;
         }
@@ -193,10 +197,20 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
         this.parent =
             extended != null ?
-            new CombinedImpl(basic, extended, !config.areBucketsResettable()) :
+            new CombinedImpl(
+                basic,
+                extended,
+                config.bucketsMeasurementType() == BucketsMeasurementType.NEVER_RESET) :
             basic;
 
         this.executor = executor;
+    }
+
+    private XHistogramImpl makeTotalsImpl(XHistogramImplConfig config, boolean withCount, boolean withTotalSum) {
+        return
+            config.totalsMeasurementType() == TotalsMeasurementType.CONSISTENT ?
+            new ConsistentTotalsImpl(withCount, withTotalSum) :
+            new EventuallyConsistentTotalsImpl(withCount, withTotalSum);
     }
 
     @Override
@@ -209,16 +223,23 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         return parent.snapshot();
     }
 
-    private static class TotalsImpl implements XHistogramImpl {
+    @SuppressWarnings("ConstantConditions")
+    private static class ConsistentTotalsImpl implements XHistogramImpl {
 
         final LongAdder counter;
         final LongAdder totalSumAdder;
         final LongAdder updateCounter;
 
-        public TotalsImpl(boolean withCount, boolean withTotalSum) {
+        ConsistentTotalsImpl(boolean withCount, boolean withTotalSum) {
             this.counter = withCount ? new LongAdder() : null;
-            this.totalSumAdder = withTotalSum ? new LongAdder() : null;
-            this.updateCounter = withTotalSum ? new LongAdder() : null;
+
+            if (withTotalSum) {
+                this.totalSumAdder = new LongAdder();
+                this.updateCounter = new LongAdder();
+            } else {
+                this.totalSumAdder = null;
+                this.updateCounter = null;
+            }
         }
 
         @Override
@@ -268,6 +289,43 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         }
     }
 
+    private static class EventuallyConsistentTotalsImpl implements XHistogramImpl {
+
+        final LongAdder counter;
+        final LongAdder totalSumAdder;
+
+        EventuallyConsistentTotalsImpl(boolean withCount, boolean withTotalSum) {
+            this.counter = withCount ? new LongAdder() : null;
+            this.totalSumAdder = withTotalSum ? new LongAdder() : null;
+        }
+
+        @Override
+        public void update(long value) {
+            if (counter != null) {
+                counter.increment();
+            }
+
+            if (totalSumAdder != null) {
+                totalSumAdder.add(value);
+            }
+        }
+
+        @Override
+        public XHistogramSnapshot snapshot() {
+            return new DefaultXHistogramSnapshot(
+                counter != null ? counter.sum() : NO_VALUE,
+                totalSumAdder != null ? totalSumAdder.sum() : NO_VALUE,
+                NO_VALUE,
+                NO_VALUE,
+                NO_VALUE,
+                NO_VALUE,
+                null,
+                null,
+                null,
+                null);
+        }
+    }
+
     private static class CombinedImpl implements XHistogramImpl {
 
         final XHistogramImpl basic;
@@ -291,7 +349,7 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         }
 
         @Override
-        public synchronized XHistogramSnapshot snapshot() {
+        public XHistogramSnapshot snapshot() {
             XHistogramSnapshot extendedSnapshot = extended.snapshot();
             XHistogramSnapshot basicSnapshot = basic.snapshot();
             return new CombinedSnapshot(basicSnapshot, extendedSnapshot, bucketsFromBasic);
@@ -344,13 +402,13 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             }
 
             @Override
-            public double percentileValue(Histogram.Percentile percentile) {
+            public double percentileValue(Percentile percentile) {
                 return extendedSnapshot.percentileValue(percentile);
             }
 
             @Override
-            public long bucketSize(Histogram.Bucket bucket) {
-                return bucketsFromBasic ? basicSnapshot.bucketSize(bucket) : extendedSnapshot.bucketSize(bucket);
+            public long bucketSize(Bucket bucket) {
+                return (bucketsFromBasic ? basicSnapshot : extendedSnapshot).bucketSize(bucket);
             }
         }
     }

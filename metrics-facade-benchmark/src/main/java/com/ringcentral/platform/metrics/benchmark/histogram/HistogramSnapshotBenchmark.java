@@ -204,7 +204,7 @@ public class HistogramSnapshotBenchmark {
         public void setup() throws InterruptedException {
             long allChunksResetPeriodMs = HdrXHistogramImplConfig.DEFAULT.chunkResetPeriodMs() * HdrXHistogramImplConfig.DEFAULT.chunkCount();
             long updateCount = (allChunksResetPeriodMs + SECONDS.toMillis(30)) / 10;
-            System.out.println("Sample count: " + updateCount);
+            System.out.println("Update count: " + updateCount);
             Random random = new Random(123);
 
             for (int i = 0; i < updateCount; ++i) {
@@ -276,19 +276,8 @@ public class HistogramSnapshotBenchmark {
             .then(linear().steps(MINUTES.toNanos(10), 5 + 12).withInf());
     }
 
-    static long[] makeValues_2() {
-        Random random = new Random(123);
-        long[] values = new long[100000];
-
-        for (int i = 0; i < values.length; i++) {
-            if (i % 250 == 0) {
-                values[i] = random.nextInt(10);
-            } else {
-                values[i] = 0;
-            }
-        }
-
-        return values;
+    static ScaleBuilder<?> scale_2() {
+        return linear().from(1).steps(1, 9);
     }
 
     @Benchmark

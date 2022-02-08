@@ -16,7 +16,7 @@ public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConf
     private int chunkCount = DEFAULT.chunkCount();
     private long chunkResetPeriodMs = DEFAULT.chunkResetPeriodMs();
     private Scale scale = DEFAULT.scale();
-    private int maxLazyTreeLevel;
+    private int maxLazyTreeLevel = DEFAULT.maxLazyTreeLevel();
 
     public static ScaleXHistogramImplConfigBuilder scale() {
         return scaleXHistogramImplConfigBuilder();

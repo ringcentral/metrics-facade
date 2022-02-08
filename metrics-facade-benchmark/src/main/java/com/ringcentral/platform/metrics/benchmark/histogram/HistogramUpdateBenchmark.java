@@ -40,7 +40,7 @@ public class HistogramUpdateBenchmark {
                 COUNT,
                 MIN,
                 MAX,
-                MEAN,
+                // MEAN,
                 PERCENTILE_50,
                 PERCENTILE_75,
                 PERCENTILE_90,
@@ -112,7 +112,7 @@ public class HistogramUpdateBenchmark {
                     COUNT,
                     MIN,
                     MAX,
-                    MEAN,
+                    // MEAN,
                     PERCENTILE_50,
                     PERCENTILE_75,
                     PERCENTILE_90,
@@ -185,7 +185,7 @@ public class HistogramUpdateBenchmark {
                     COUNT,
                     MIN,
                     MAX,
-                    MEAN,
+                    // MEAN,
                     PERCENTILE_50,
                     PERCENTILE_75,
                     PERCENTILE_90,
@@ -211,7 +211,7 @@ public class HistogramUpdateBenchmark {
                     COUNT,
                     MIN,
                     MAX,
-                    MEAN,
+                    // MEAN,
                     PERCENTILE_50,
                     PERCENTILE_75,
                     PERCENTILE_90,
@@ -221,7 +221,7 @@ public class HistogramUpdateBenchmark {
                     .scale(scale_1())));
 
         // values
-        final long[] values = makeValues();
+        final long[] values = makeValues_1();
         final ThreadLocal<ValueIndex> valueIndex = ThreadLocal.withInitial(() -> new ValueIndex(values.length));
     }
 
@@ -244,8 +244,11 @@ public class HistogramUpdateBenchmark {
             .then(linear().steps(MINUTES.toNanos(10), 5 + 12).withInf());
     }
 
-    static long[] makeValues() {
-        // ThreadLocalRandom.current().nextLong(30_000_000) + 5_000_000
+    private static ScaleBuilder<?> scale_2() {
+        return linear().from(1).steps(1, 9);
+    }
+
+    static long[] makeValues_1() {
         Random random = new Random(123);
         long[] values = new long[100000];
 
@@ -278,14 +281,29 @@ public class HistogramUpdateBenchmark {
         return values;
     }
 
+    static long[] makeValues_2() {
+        Random random = new Random(123);
+        long[] values = new long[100000];
+
+        for (int i = 0; i < values.length; i++) {
+            if (i % 250 == 0) {
+                values[i] = random.nextInt(10);
+            } else {
+                values[i] = 0;
+            }
+        }
+
+        return values;
+    }
+
     long value(State state) {
         return state.values[state.valueIndex.get().next()];
     }
 
-    @Benchmark
-    public void dwHistogram_Update(State state) {
-        state.dwHistogram.update(value(state));
-    }
+//    @Benchmark
+//    public void dwHistogram_Update(State state) {
+//        state.dwHistogram.update(value(state));
+//    }
 
 //    @Benchmark
 //    public void hdrXHistogram_NeverReset_Update(State state) {
@@ -297,21 +315,21 @@ public class HistogramUpdateBenchmark {
 //        state.hdrXHistogram_NeverReset_Count_Mean.update(value(state));
 //    }
 
-    @Benchmark
-    public void hdrXHistogram_ResetOnSnapshot_Update(State state) {
-        state.hdrXHistogram_ResetOnSnapshot.update(value(state));
-    }
+//    @Benchmark
+//    public void hdrXHistogram_ResetOnSnapshot_Update(State state) {
+//        state.hdrXHistogram_ResetOnSnapshot.update(value(state));
+//    }
 
 //    @Benchmark
 //    public void hdrXHistogram_ResetOnSnapshot_Count_Mean_Update(State state) {
 //        state.hdrXHistogram_ResetOnSnapshot_Count_Mean.update(value(state));
 //    }
 
-//    @Benchmark
-//    public void hdrXHistogram_ResetByChunks_Update(State state) {
-//        state.hdrXHistogram_ResetByChunks.update(value(state));
-//    }
-//
+    @Benchmark
+    public void hdrXHistogram_ResetByChunks_Update(State state) {
+        state.hdrXHistogram_ResetByChunks.update(value(state));
+    }
+
 //    @Benchmark
 //    public void hdrXHistogram_ResetByChunks_Count_Mean_Update(State state) {
 //        state.hdrXHistogram_ResetByChunks_Count_Mean.update(value(state));
@@ -332,10 +350,10 @@ public class HistogramUpdateBenchmark {
 //        state.scaleXHistogram_NeverReset.update(value(state));
 //    }
 
-    @Benchmark
-    public void scaleXHistogram_ResetOnSnapshot_Update(State state) {
-        state.scaleXHistogram_ResetOnSnapshot.update(value(state));
-    }
+//    @Benchmark
+//    public void scaleXHistogram_ResetOnSnapshot_Update(State state) {
+//        state.scaleXHistogram_ResetOnSnapshot.update(value(state));
+//    }
 
 //    @Benchmark
 //    public void scaleXHistogram_ResetOnSnapshot_Count_Mean_Update(State state) {

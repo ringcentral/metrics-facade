@@ -207,11 +207,14 @@ public class XRate extends AbstractRate<XRateImpl> {
             ScheduledExecutorService executor,
             MetricRegistry registry) {
 
-            CustomXRateImplMaker customImplMaker = ((XMetricRegistry)registry).customXRateImplMakerFor(config.getClass());
+            CustomXRateImplSpec<? extends XRateImplConfig> customImplSpec =
+                ((XMetricRegistry) registry).customXRateImplMakerFor(config.getClass());
 
-            if (customImplMaker == null) {
+            if (customImplSpec == null) {
                 return null;
             }
+
+            CustomXRateImplMaker customImplMaker = (CustomXRateImplMaker)customImplSpec;
 
             return customImplMaker.makeXRateImpl(
                 config,

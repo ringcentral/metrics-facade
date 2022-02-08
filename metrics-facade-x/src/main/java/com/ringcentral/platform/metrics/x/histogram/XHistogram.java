@@ -312,11 +312,14 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
             ScheduledExecutorService executor,
             MetricRegistry registry) {
 
-            CustomXHistogramImplMaker customImplMaker = ((XMetricRegistry)registry).customXHistogramImplMakerFor(config.getClass());
+            CustomXHistogramImplSpec<? extends XHistogramImplConfig> customImplSpec =
+                ((XMetricRegistry)registry).customXHistogramImplMakerFor(config.getClass());
 
-            if (customImplMaker == null) {
+            if (customImplSpec == null) {
                 return null;
             }
+
+            CustomXHistogramImplMaker customImplMaker = customImplSpec.implMaker();
 
             return customImplMaker.makeXHistogramImpl(
                 config,

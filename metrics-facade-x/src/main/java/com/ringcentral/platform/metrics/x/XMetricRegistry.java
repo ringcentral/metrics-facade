@@ -223,8 +223,8 @@ public class XMetricRegistry extends AbstractMetricRegistry {
         }
     }
 
-    private final ConcurrentMap<Class<? extends XRateImplConfig>, CustomXRateImplMaker<?>> customXRateImplMakers = new ConcurrentHashMap<>();
-    private final ConcurrentMap<Class<? extends XHistogramImplConfig>, CustomXHistogramImplMaker<?>> customXHistogramImplMakers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<? extends XRateImplConfig>, CustomXRateImplSpec<?>> customXRateImplSpecs = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<? extends XHistogramImplConfig>, CustomXHistogramImplSpec<?>> customXHistogramImplSpecs = new ConcurrentHashMap<>();
 
     public XMetricRegistry() {
         super(MetricMakerImpl.INSTANCE);
@@ -273,20 +273,20 @@ public class XMetricRegistry extends AbstractMetricRegistry {
     /* ****************************** */
 
     public <C extends XHistogramImplConfig> void extendWith(Class<C> configType, CustomXHistogramImplMaker<C> implMaker) {
-        customXHistogramImplMakers.put(configType, implMaker);
+        customXHistogramImplSpecs.put(configType, new CustomXHistogramImplSpec<>(implMaker));
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends XHistogramImplConfig> CustomXHistogramImplMaker<C> customXHistogramImplMakerFor(Class<C> configType) {
-        return (CustomXHistogramImplMaker<C>)customXHistogramImplMakers.get(configType);
+    public <C extends XHistogramImplConfig> CustomXHistogramImplSpec<C> customXHistogramImplMakerFor(Class<C> configType) {
+        return (CustomXHistogramImplSpec<C>)customXHistogramImplSpecs.get(configType);
     }
 
     public <C extends XRateImplConfig> void extendWith(Class<C> configType, CustomXRateImplMaker<C> implMaker) {
-        customXRateImplMakers.put(configType, implMaker);
+        customXRateImplSpecs.put(configType, new CustomXRateImplSpec<>(implMaker));
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends XRateImplConfig> CustomXRateImplMaker<C> customXRateImplMakerFor(Class<C> configType) {
-        return (CustomXRateImplMaker<C>)customXRateImplMakers.get(configType);
+    public <C extends XRateImplConfig> CustomXRateImplSpec<C> customXRateImplMakerFor(Class<C> configType) {
+        return (CustomXRateImplSpec<C>) customXRateImplSpecs.get(configType);
     }
 }

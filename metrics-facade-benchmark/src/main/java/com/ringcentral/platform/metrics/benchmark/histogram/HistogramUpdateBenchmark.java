@@ -225,7 +225,7 @@ public class HistogramUpdateBenchmark {
         final ThreadLocal<ValueIndex> valueIndex = ThreadLocal.withInitial(() -> new ValueIndex(values.length));
     }
 
-    private static ScaleBuilder<?> scale_1() {
+    static ScaleBuilder<?> scale_1() {
         // 500 ms
         return first(linear().steps(MILLISECONDS.toNanos(5), 100))
             // 1 sec
@@ -244,7 +244,7 @@ public class HistogramUpdateBenchmark {
             .then(linear().steps(MINUTES.toNanos(10), 5 + 12).withInf());
     }
 
-    private static ScaleBuilder<?> scale_2() {
+    static ScaleBuilder<?> scale_2() {
         return linear().from(1).steps(1, 9);
     }
 

@@ -252,12 +252,12 @@ public class HistogramSnapshotBenchmark {
                 // Rolling - HDR
                 rollingHdrHistogram_ResetByChunks.update(duration);
 
-                 sleep(10L);
+                sleep(10L);
             }
         }
     }
 
-    private static ScaleBuilder<?> scale_1() {
+    static ScaleBuilder<?> scale_1() {
         // 500 ms
         return first(linear().steps(MILLISECONDS.toNanos(5), 100))
             // 1 sec
@@ -274,6 +274,21 @@ public class HistogramSnapshotBenchmark {
             .then(linear().steps(MINUTES.toNanos(1), 9))
             // 3 h
             .then(linear().steps(MINUTES.toNanos(10), 5 + 12).withInf());
+    }
+
+    static long[] makeValues_2() {
+        Random random = new Random(123);
+        long[] values = new long[100000];
+
+        for (int i = 0; i < values.length; i++) {
+            if (i % 250 == 0) {
+                values[i] = random.nextInt(10);
+            } else {
+                values[i] = 0;
+            }
+        }
+
+        return values;
     }
 
     @Benchmark
@@ -343,7 +358,7 @@ public class HistogramSnapshotBenchmark {
 //
     @Benchmark
     public void rollingHdrHistogram_ResetByChunks_Snapshot(State state) {
-        state.rollingHdrHistogram_ResetByChunks.getSnapshot().getMean();
+        state.rollingHdrHistogram_ResetByChunks.getSnapshot();
     }
 
     @SuppressWarnings("DuplicatedCode")

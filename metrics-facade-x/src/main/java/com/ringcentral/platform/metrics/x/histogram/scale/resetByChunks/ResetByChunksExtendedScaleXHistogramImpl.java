@@ -132,8 +132,11 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
                 if (item == currItem) {
                     item.inactiveChunk.startSnapshot();
                     item.flipChunks();
+                } else {
+                    item.activeChunk.startSnapshot();
                 }
 
+                item.inactiveChunk.startSnapshot();
                 snapshotItems.add(item);
             }
         }
@@ -141,16 +144,15 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
         for (Item item : snapshotItems) {
             if (hasLazyTreeLevels()) {
                 item.activeChunk.calcLazySubtreeUpdateCounts();
-
-                if (item.activeChunk.isNonEmpty()) {
-                    nonEmptySnapshotChunks.add(item.activeChunk);
-                }
-
                 item.inactiveChunk.calcLazySubtreeUpdateCounts();
+            }
 
-                if (item.inactiveChunk.isNonEmpty()) {
-                    nonEmptySnapshotChunks.add(item.inactiveChunk);
-                }
+            if (item.activeChunk.isNonEmpty()) {
+                nonEmptySnapshotChunks.add(item.activeChunk);
+            }
+
+            if (item.inactiveChunk.isNonEmpty()) {
+                nonEmptySnapshotChunks.add(item.inactiveChunk);
             }
         }
 
@@ -158,7 +160,14 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
 
         for (Item item : snapshotItems) {
             if (item == currItem) {
+                item.inactiveChunk.endSnapshot();
+                item.inactiveChunk.resetSnapshotTotalSum();
                 item.flipChunks();
+                item.inactiveChunk.endSnapshot();
+                item.inactiveChunk.resetSnapshotTotalSum();
+            } else {
+                item.activeChunk.endSnapshot();
+                item.activeChunk.resetSnapshotTotalSum();
                 item.inactiveChunk.endSnapshot();
                 item.inactiveChunk.resetSnapshotTotalSum();
             }

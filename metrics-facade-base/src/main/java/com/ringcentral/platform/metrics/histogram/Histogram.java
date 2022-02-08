@@ -197,6 +197,7 @@ public interface Histogram extends Meter {
         }
     }
 
+    Percentile PERCENTILE_1 = Percentile.of(0.01);
     Percentile PERCENTILE_5 = Percentile.of(0.05);
     Percentile PERCENTILE_10 = Percentile.of(0.1);
     Percentile PERCENTILE_15 = Percentile.of(0.15);

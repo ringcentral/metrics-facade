@@ -42,9 +42,15 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
         try {
             inactiveChunk.startSnapshot();
             flipChunks();
+            inactiveChunk.startSnapshot();
+
+            activeChunk.calcLazySubtreeUpdateCounts();
+            inactiveChunk.calcLazySubtreeUpdateCounts();
 
             XHistogramSnapshot snapshot = takeSnapshot();
 
+            inactiveChunk.endSnapshot();
+            inactiveChunk.resetSnapshotTotalSum();
             flipChunks();
             inactiveChunk.endSnapshot();
             inactiveChunk.resetSnapshotTotalSum();

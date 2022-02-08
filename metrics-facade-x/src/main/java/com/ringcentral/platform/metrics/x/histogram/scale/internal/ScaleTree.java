@@ -248,7 +248,16 @@ public class ScaleTree {
                     node = node.left;
                 }
 
-                break;
+                if (node.right == null) {
+                    break;
+                }
+
+                long nodeSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+                long rightSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
+
+                if (nodeSubtreeUpdateCount > rightSubtreeUpdateCount) {
+                    break;
+                }
             } else if (node.right != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right) > 0L) {
                 node = node.right;
             } else {
@@ -276,7 +285,16 @@ public class ScaleTree {
                     node = node.right;
                 }
 
-                break;
+                if (node.left == null) {
+                    break;
+                }
+
+                long nodeSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+                long leftSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left);
+
+                if (nodeSubtreeUpdateCount > leftSubtreeUpdateCount) {
+                    break;
+                }
             } else if (node.left != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left) > 0L) {
                 node = node.left;
             } else {

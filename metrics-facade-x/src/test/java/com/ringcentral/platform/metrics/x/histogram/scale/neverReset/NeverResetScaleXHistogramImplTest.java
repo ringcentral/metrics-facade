@@ -91,18 +91,18 @@ public class NeverResetScaleXHistogramImplTest {
 
         assertThat(snapshot.percentileValue(PERCENTILE_1), is(1.0));
         assertThat(snapshot.percentileValue(PERCENTILE_5), is(5.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_15), is(16.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_25), is(26.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_35), is(36.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_45), is(49.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_15), is(15.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_25), is(25.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_35), is(35.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_45), is(45.0));
         assertThat(snapshot.percentileValue(PERCENTILE_50), is(50.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_55), is(56.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_70), is(74.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_75), is(77.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_80), is(83.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_95), is(100.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_99), is(100.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_999), is(100.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_55), is(55.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_70), is(70.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_75), is(75.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_80), is(80.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_95), is(95.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_99), is(99.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_999), is(99.0));
 
         h.metricInstanceRemoved();
     }

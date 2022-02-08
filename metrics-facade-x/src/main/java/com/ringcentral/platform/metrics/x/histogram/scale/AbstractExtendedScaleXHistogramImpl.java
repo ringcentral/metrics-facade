@@ -83,7 +83,7 @@ public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramI
                 if (node.hasRight()) {
                     node.toRight();
                     nodeCount = rightCount;
-                    percentileCount -= leftCount;
+                    percentileCount -= (leftCount + 1L);
                 } else {
                     return node.point();
                 }

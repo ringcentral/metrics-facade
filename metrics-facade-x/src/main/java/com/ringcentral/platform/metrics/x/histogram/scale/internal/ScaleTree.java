@@ -382,7 +382,7 @@ public class ScaleTree {
                     if (node.right != null) {
                         node = node.right;
                         nodeCount = rightCount;
-                        percentileCount -= leftCount;
+                        percentileCount -= (leftCount + 1L);
                     } else {
                         percentileValues[i] = node.point;
                         continue percentilesLoop;

@@ -1,23 +1,23 @@
-package com.ringcentral.platform.metrics.x.histogram.hdr;
+package com.ringcentral.platform.metrics.x.histogram.hdr.resetOnSnapshot;
 
 import com.ringcentral.platform.metrics.measurables.Measurable;
+import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.hdr.AbstractExtendedHdrXHistogramImpl;
 import com.ringcentral.platform.metrics.x.histogram.hdr.configs.HdrXHistogramImplConfig;
 import org.HdrHistogram.*;
 
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.x.histogram.hdr.HdrHistogramUtils.*;
-
 /**
  * That's just a slightly refactored version of
- * https://github.com/vladimir-bukhtoyarov/rolling-metrics/blob/3.0/rolling-metrics-core/src/main/java/com/github/rollingmetrics/histogram/hdr/impl/UniformRollingHdrHistogramImpl.java
+ * https://github.com/vladimir-bukhtoyarov/rolling-metrics/blob/3.0/rolling-metrics-core/src/main/java/com/github/rollingmetrics/histogram/hdr/impl/ResetOnSnapshotRollingHdrHistogramImpl.java
  * (Copyright 2017 Vladimir Bukhtoyarov Licensed under the Apache License, Version 2.0)
  * We thank Vladimir Bukhtoyarov for his great library.
  */
-public class NeverResetHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
+public class ResetOnSnapshotHdrXHistogramImpl extends AbstractXHistogramImpl {
 
-    public NeverResetHdrXHistogramImpl(
+    public ResetOnSnapshotHdrXHistogramImpl(
         HdrXHistogramImplConfig config,
         Set<? extends Measurable> measurables,
         ScheduledExecutorService executor) {
@@ -29,11 +29,10 @@ public class NeverResetHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
             executor);
     }
 
-    protected static class ExtendedImpl extends AbstractHdrExtendedImpl {
+    protected static class ExtendedImpl extends AbstractExtendedHdrXHistogramImpl {
 
         private final Recorder recorder;
         private Histogram intervalHistogram;
-        private final Histogram totalHistogram;
 
         protected ExtendedImpl(
             HdrXHistogramImplConfig config,
@@ -47,7 +46,6 @@ public class NeverResetHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
 
             this.recorder = makeRecorder(config);
             this.intervalHistogram = recorder.getIntervalHistogram();
-            this.totalHistogram = makeNonConcurrentCopy(this.intervalHistogram);
         }
 
         @Override
@@ -57,9 +55,7 @@ public class NeverResetHdrXHistogramImpl extends AbstractHdrXHistogramImpl {
 
         @Override
         protected Histogram hdrHistogramForSnapshot() {
-            intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
-            addSecondToFirst(totalHistogram, intervalHistogram);
-            return totalHistogram;
+            return intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
         }
     }
 }

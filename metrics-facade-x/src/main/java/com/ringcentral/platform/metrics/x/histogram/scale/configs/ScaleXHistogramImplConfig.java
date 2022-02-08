@@ -18,12 +18,14 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
     public static final int DEFAULT_CHUNKS = 6;
     public static final long DEFAULT_CHUNK_RESET_PERIOD_MS = 20L * MS_PER_SEC;
     public static final ExpScale DEFAULT_SCALE = exp().from(0).base(2).factor(2).build();
+    public static final int DEFAULT_MAX_LAZY_TREE_LEVEL = 4;
 
     public static final ScaleXHistogramImplConfig DEFAULT = new ScaleXHistogramImplConfig(
         DEFAULT_TYPE,
         DEFAULT_CHUNKS,
         DEFAULT_CHUNK_RESET_PERIOD_MS,
         DEFAULT_SCALE,
+        DEFAULT_MAX_LAZY_TREE_LEVEL,
         DEFAULT_TOTALS_MEASUREMENT_TYPE,
         DEFAULT_BUCKETS_MEASUREMENT_TYPE,
         Optional.ofNullable(DEFAULT_SNAPSHOT_TTL));
@@ -32,12 +34,14 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
     private final int chunkCount;
     private final long chunkResetPeriodMs;
     private final Scale scale;
+    private final int maxLazyTreeLevel;
 
     public ScaleXHistogramImplConfig(
         ScaleXHistogramImplType type,
         int chunkCount,
         long chunkResetPeriodMs,
         Scale scale,
+        int maxLazyTreeLevel,
         TotalsMeasurementType totalsMeasurementType,
         BucketsMeasurementType bucketsMeasurementType,
         Optional<Duration> snapshotTtl) {
@@ -51,6 +55,7 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
         this.chunkCount = chunkCount;
         this.chunkResetPeriodMs = chunkResetPeriodMs;
         this.scale = scale;
+        this.maxLazyTreeLevel = maxLazyTreeLevel;
     }
 
     public ScaleXHistogramImplType type() {
@@ -67,5 +72,9 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
 
     public Scale scale() {
         return scale;
+    }
+
+    public int maxLazyTreeLevel() {
+        return maxLazyTreeLevel;
     }
 }

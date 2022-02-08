@@ -8,13 +8,15 @@ import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument
 import static com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig.*;
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings({ "FieldMayBeFinal" })
 public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConfigBuilder<ScaleXHistogramImplConfig, ScaleXHistogramImplConfigBuilder> {
+
+    public static final int NO_LAZY_TREE_LEVELS = -1;
 
     private ScaleXHistogramImplType type = DEFAULT.type();
     private int chunkCount = DEFAULT.chunkCount();
     private long chunkResetPeriodMs = DEFAULT.chunkResetPeriodMs();
     private Scale scale = DEFAULT.scale();
+    private int maxLazyTreeLevel;
 
     public static ScaleXHistogramImplConfigBuilder scale() {
         return scaleXHistogramImplConfigBuilder();
@@ -60,6 +62,10 @@ public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConf
         return this;
     }
 
+    public ScaleXHistogramImplConfigBuilder resetByChunks() {
+        return resetByChunks(DEFAULT_CHUNKS, DEFAULT_CHUNKS * DEFAULT_CHUNK_RESET_PERIOD_MS);
+    }
+
     public ScaleXHistogramImplConfigBuilder resetByChunks(int chunkCount, Duration allChunksResetPeriod) {
         checkArgument(chunkCount >= 2, "chunkCount must be >= 2");
         return resetByChunks(chunkCount, allChunksResetPeriod.toMillis() / chunkCount);
@@ -83,12 +89,22 @@ public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConf
         return this;
     }
 
+    public ScaleXHistogramImplConfigBuilder noLazyTreeLevels() {
+        return maxLazyTreeLevel(NO_LAZY_TREE_LEVELS);
+    }
+
+    public ScaleXHistogramImplConfigBuilder maxLazyTreeLevel(int maxLazyTreeLevel) {
+        this.maxLazyTreeLevel = maxLazyTreeLevel;
+        return this;
+    }
+
     public ScaleXHistogramImplConfig build() {
         return new ScaleXHistogramImplConfig(
             type,
             chunkCount,
             chunkResetPeriodMs,
             scale,
+            maxLazyTreeLevel,
             totalsMeasurementType,
             bucketsMeasurementType,
             snapshotTtl);

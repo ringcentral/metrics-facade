@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 import static com.ringcentral.platform.metrics.UnmodifiableMetricContext.emptyUnmodifiableMetricContext;
+import static org.apache.commons.lang3.ClassUtils.getAllInterfaces;
 
 public abstract class AbstractMetricContext implements MetricContext {
 
@@ -23,7 +24,7 @@ public abstract class AbstractMetricContext implements MetricContext {
             Class<?> type = value.getClass();
 
             Class<?> typeKey = typeKeys.computeIfAbsent(type, t -> {
-                for (Class<?> iface : type.getInterfaces()) {
+                for (Class<?> iface : getAllInterfaces(type)) {
                     if (iface.isAnnotationPresent(MetricContextTypeKey.class)) {
                         return iface;
                     }

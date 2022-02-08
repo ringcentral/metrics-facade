@@ -10,10 +10,14 @@ import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.*;
 import com.ringcentral.platform.metrics.x.XMetricRegistry;
 import com.ringcentral.platform.metrics.x.histogram.configs.*;
-import com.ringcentral.platform.metrics.x.histogram.hdr.*;
 import com.ringcentral.platform.metrics.x.histogram.hdr.configs.*;
-import com.ringcentral.platform.metrics.x.histogram.scale.*;
+import com.ringcentral.platform.metrics.x.histogram.hdr.neverReset.NeverResetHdrXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.hdr.resetByChunks.ResetByChunksHdrXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.hdr.resetOnSnapshot.ResetOnSnapshotHdrXHistogramImpl;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.*;
+import com.ringcentral.platform.metrics.x.histogram.scale.neverReset.NeverResetScaleXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.scale.resetByChunks.ResetByChunksScaleXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.scale.resetOnSnapshot.ResetOnSnapshotScaleXHistogramImpl;
 import org.slf4j.Logger;
 
 import java.util.*;

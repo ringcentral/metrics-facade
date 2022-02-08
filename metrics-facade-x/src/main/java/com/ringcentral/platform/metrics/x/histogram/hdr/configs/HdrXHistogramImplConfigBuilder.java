@@ -65,6 +65,10 @@ public class HdrXHistogramImplConfigBuilder extends AbstractXHistogramImplConfig
         return this;
     }
 
+    public HdrXHistogramImplConfigBuilder resetByChunks() {
+        return resetByChunks(DEFAULT_CHUNKS, DEFAULT_CHUNKS * DEFAULT_CHUNK_RESET_PERIOD_MS);
+    }
+
     public HdrXHistogramImplConfigBuilder resetByChunks(int chunkCount, Duration allChunksResetPeriod) {
         checkArgument(chunkCount >= 2, "chunkCount must be >= 2");
         return resetByChunks(chunkCount, allChunksResetPeriod.toMillis() / chunkCount);

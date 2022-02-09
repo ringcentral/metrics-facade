@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.neverReset;
 
 import com.ringcentral.platform.metrics.measurables.Measurable;
-import com.ringcentral.platform.metrics.x.histogram.*;
+import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
 
 import java.util.Set;

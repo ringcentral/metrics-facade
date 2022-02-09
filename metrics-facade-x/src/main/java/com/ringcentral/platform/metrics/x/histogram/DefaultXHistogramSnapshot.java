@@ -72,7 +72,7 @@ public class DefaultXHistogramSnapshot implements XHistogramSnapshot {
     @Override
     public double percentileValue(Histogram.Percentile percentile) {
         if (quantiles == null) {
-            return NO_VALUE;
+            return NO_VALUE_DOUBLE;
         }
 
         double quantile = percentile.quantile();

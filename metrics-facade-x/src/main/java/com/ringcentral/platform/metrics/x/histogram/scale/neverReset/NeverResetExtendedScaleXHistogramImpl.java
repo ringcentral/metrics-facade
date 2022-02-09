@@ -6,7 +6,7 @@ import com.ringcentral.platform.metrics.x.histogram.scale.AbstractExtendedScaleX
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
 import com.ringcentral.platform.metrics.x.histogram.scale.internal.DoubleNode;
 
-import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 
 public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScaleXHistogramImpl {
 
@@ -100,8 +100,8 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
             }
         }
 
-        double mean = NO_VALUE;
-        double standardDeviation = NO_VALUE;
+        double mean = NO_VALUE_DOUBLE;
+        double standardDeviation = NO_VALUE_DOUBLE;
 
         if (withMean || withStandardDeviation) {
             long countForMean = 0L;

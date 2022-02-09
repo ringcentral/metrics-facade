@@ -4,12 +4,11 @@ import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl.Measu
 import com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot;
 import com.ringcentral.platform.metrics.x.histogram.scale.AbstractExtendedScaleXHistogramImpl;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
-import com.ringcentral.platform.metrics.x.histogram.scale.internal.Chunk;
 
 public class ResetOnSnapshotExtendedScaleXHistogramImpl extends AbstractExtendedScaleXHistogramImpl {
 
-    private volatile Chunk activeChunk;
-    private volatile Chunk inactiveChunk;
+    private volatile ResetOnSnapshotChunk activeChunk;
+    private volatile ResetOnSnapshotChunk inactiveChunk;
 
     public ResetOnSnapshotExtendedScaleXHistogramImpl(
         ScaleXHistogramImplConfig config,
@@ -53,7 +52,7 @@ public class ResetOnSnapshotExtendedScaleXHistogramImpl extends AbstractExtended
 
     private void flipChunks() {
         inactiveChunk.startUpdateEpoch();
-        Chunk tempChunk = inactiveChunk;
+        ResetOnSnapshotChunk tempChunk = inactiveChunk;
         inactiveChunk = activeChunk;
         activeChunk = tempChunk;
         flipPhase();

@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.x.histogram.scale.configs.Scale;
 
 import java.util.*;
 
-import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 import static java.lang.Math.sqrt;
 
 @SuppressWarnings("NonAtomicOperationOnVolatileField")
@@ -320,7 +320,7 @@ public class ScaleTree {
             traverseUpdateCount(subtreeUpdateCountProvider, calculator);
             return calculator.standardDeviation(treeUpdateCount);
         } else {
-            return NO_VALUE;
+            return NO_VALUE_DOUBLE;
         }
     }
 
@@ -351,7 +351,7 @@ public class ScaleTree {
 
         percentilesLoop:
         for (int i = 0; i < quantiles.length; ++i) {
-            percentileValues[i] = NO_VALUE;
+            percentileValues[i] = NO_VALUE_DOUBLE;
             ScaleTreeNode node = root;
             long nodeCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
 

@@ -7,7 +7,7 @@ import com.ringcentral.platform.metrics.x.histogram.scale.internal.ScaleTree.*;
 
 import java.util.concurrent.atomic.LongAdder;
 
-import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 
 public abstract class Chunk {
 
@@ -134,8 +134,8 @@ public abstract class Chunk {
         long min = withMin ? min() : NO_VALUE;
         long max = withMax ? max() : NO_VALUE;
 
-        double mean = NO_VALUE;
-        double standardDeviation = NO_VALUE;
+        double mean = NO_VALUE_DOUBLE;
+        double standardDeviation = NO_VALUE_DOUBLE;
 
         if (withMean || withStandardDeviation) {
             long treeUpdateCount = treeUpdateCount();

@@ -10,7 +10,7 @@ import com.ringcentral.platform.metrics.x.histogram.scale.internal.*;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedScaleXHistogramImpl {
@@ -219,8 +219,8 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
             }
         }
 
-        double mean = NO_VALUE;
-        double standardDeviation = NO_VALUE;
+        double mean = NO_VALUE_DOUBLE;
+        double standardDeviation = NO_VALUE_DOUBLE;
 
         if (withMean || withStandardDeviation) {
             long countForMean = 0L;

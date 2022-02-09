@@ -7,7 +7,7 @@ import org.HdrHistogram.*;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 import static java.lang.Math.sqrt;
 import static java.util.Arrays.fill;
 
@@ -81,8 +81,8 @@ public abstract class AbstractExtendedHdrXHistogramImpl implements XHistogramImp
         org.HdrHistogram.Histogram h = hdrHistogramForSnapshot();
         long min = withMin ? h.getMinValue() : NO_VALUE;
         long max = withMax ? h.getMaxValue() : NO_VALUE;
-        double mean = NO_VALUE;
-        double standardDeviation = NO_VALUE;
+        double mean = NO_VALUE_DOUBLE;
+        double standardDeviation = NO_VALUE_DOUBLE;
         double[] percentileValues = withPercentiles ? new double[percentiles.length] : null;
         long[] bucketSizes = withBuckets ? new long[bucketUpperBounds.length] : null;
 

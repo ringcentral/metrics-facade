@@ -7,7 +7,7 @@ import com.ringcentral.platform.metrics.x.histogram.scale.internal.MultiNode;
 import com.ringcentral.platform.metrics.x.histogram.scale.internal.ScaleTree.StandardDeviationCalculator;
 import org.HdrHistogram.WriterReaderPhaser;
 
-import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 
 public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramImpl {
 
@@ -55,11 +55,11 @@ public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramI
         phaser.flipPhase(10000L);
     }
 
-    protected long calcPercentile(double quantile, MultiNode node) {
+    protected double calcPercentile(double quantile, MultiNode node) {
         long nodeCount = node.subtreeUpdateCount();
 
         if (nodeCount == 0L) {
-            return NO_VALUE;
+            return NO_VALUE_DOUBLE;
         }
 
         long percentileCount = Math.min(Math.max((long)(nodeCount * quantile), 0L), nodeCount);
@@ -90,6 +90,6 @@ public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramI
             }
         }
 
-        return NO_VALUE;
+        return NO_VALUE_DOUBLE;
     }
 }

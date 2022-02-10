@@ -223,6 +223,16 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         return parent.snapshot();
     }
 
+    @Override
+    public void metricInstanceAdded() {
+        parent.metricInstanceAdded();
+    }
+
+    @Override
+    public void metricInstanceRemoved() {
+        parent.metricInstanceRemoved();
+    }
+
     @SuppressWarnings("ConstantConditions")
     private static class ConsistentTotalsImpl implements XHistogramImpl {
 
@@ -353,6 +363,18 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             XHistogramSnapshot extendedSnapshot = extended.snapshot();
             XHistogramSnapshot basicSnapshot = basic.snapshot();
             return new CombinedSnapshot(basicSnapshot, extendedSnapshot, bucketsFromBasic);
+        }
+
+        @Override
+        public void metricInstanceAdded() {
+            basic.metricInstanceAdded();
+            extended.metricInstanceAdded();
+        }
+
+        @Override
+        public void metricInstanceRemoved() {
+            basic.metricInstanceRemoved();
+            extended.metricInstanceRemoved();
         }
 
         static class CombinedSnapshot implements XHistogramSnapshot {

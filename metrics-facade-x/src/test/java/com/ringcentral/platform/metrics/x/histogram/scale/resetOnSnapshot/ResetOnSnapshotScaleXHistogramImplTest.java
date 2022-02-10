@@ -26,7 +26,7 @@ public class ResetOnSnapshotScaleXHistogramImplTest {
     @Test
     public void scale_1_allMeasurables_neverResetBuckets() {
         ResetOnSnapshotScaleXHistogramImpl h = new ResetOnSnapshotScaleXHistogramImpl(
-            scaleImpl().neverReset().with(SCALE_1).build(),
+            scaleImpl().resetOnSnapshot().with(SCALE_1).build(),
             Set.of(
                 COUNT,
                 TOTAL_SUM,
@@ -106,7 +106,7 @@ public class ResetOnSnapshotScaleXHistogramImplTest {
             assertThat(snapshot.percentileValue(PERCENTILE_80), is(80.0));
             assertThat(snapshot.percentileValue(PERCENTILE_95), is(95.0));
             assertThat(snapshot.percentileValue(PERCENTILE_99), is(99.0));
-            assertThat(snapshot.percentileValue(PERCENTILE_999), is(99.0));
+            assertThat(snapshot.percentileValue(PERCENTILE_999), is(100.0));
 
             assertThat(snapshot.bucketSize(Bucket.of(-5)), is(0L));
             assertThat(snapshot.bucketSize(Bucket.of(2)), is(2L * i));

@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class NeverResetScaleXHistogramImplTest {
 
-    static final LinearScaleBuilder SCALE_1 = linearScale().steps(1, 100);
+    static final LinearScaleBuilder SCALE_1 = linearScale().steps(1, 10000);
     static final TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
     static final ScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
 
@@ -102,7 +102,7 @@ public class NeverResetScaleXHistogramImplTest {
         assertThat(snapshot.percentileValue(PERCENTILE_80), is(80.0));
         assertThat(snapshot.percentileValue(PERCENTILE_95), is(95.0));
         assertThat(snapshot.percentileValue(PERCENTILE_99), is(99.0));
-        assertThat(snapshot.percentileValue(PERCENTILE_999), is(99.0));
+        assertThat(snapshot.percentileValue(PERCENTILE_999), is(100.0));
 
         assertThat(snapshot.bucketSize(Bucket.of(-5)), is(0L));
         assertThat(snapshot.bucketSize(Bucket.of(2)), is(2L));

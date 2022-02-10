@@ -33,11 +33,11 @@ public class DefaultMultiNode implements MultiNode {
     public boolean isNull() {
         for (int i = 0; i < chunkCount; ++i) {
             if (nodes[i] != null) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     @Override

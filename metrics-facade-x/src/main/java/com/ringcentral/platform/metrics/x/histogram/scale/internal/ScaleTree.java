@@ -241,28 +241,22 @@ public class ScaleTree {
         ScaleTreeNode node = root;
 
         while (true) {
-            if (node.left != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left) > 0L) {
+            while (node.left != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left) > 0L) {
                 node = node.left;
+            }
 
-                while (node.left != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left) > 0L) {
-                    node = node.left;
-                }
-
-                if (node.right == null) {
-                    break;
-                }
-
-                long nodeSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
-                long rightSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
-
-                if (nodeSubtreeUpdateCount > rightSubtreeUpdateCount) {
-                    break;
-                }
-            } else if (node.right != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right) > 0L) {
-                node = node.right;
-            } else {
+            if (node.right == null) {
                 break;
             }
+
+            long nodeSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+            long rightSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
+
+            if (rightSubtreeUpdateCount == 0L || nodeSubtreeUpdateCount > rightSubtreeUpdateCount) {
+                break;
+            }
+
+            node = node.right;
         }
 
         if (subtreeUpdateCountProvider.subtreeUpdateCountFor(node) > 0L) {
@@ -278,28 +272,22 @@ public class ScaleTree {
         ScaleTreeNode node = root;
 
         while (true) {
-            if (node.right != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right) > 0L) {
+            while (node.right != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right) > 0L) {
                 node = node.right;
+            }
 
-                while (node.right != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right) > 0L) {
-                    node = node.right;
-                }
-
-                if (node.left == null) {
-                    break;
-                }
-
-                long nodeSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
-                long leftSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left);
-
-                if (nodeSubtreeUpdateCount > leftSubtreeUpdateCount) {
-                    break;
-                }
-            } else if (node.left != null && subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left) > 0L) {
-                node = node.left;
-            } else {
+            if (node.left == null) {
                 break;
             }
+
+            long nodeSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+            long leftSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left);
+
+            if (leftSubtreeUpdateCount == 0L || nodeSubtreeUpdateCount > leftSubtreeUpdateCount) {
+                break;
+            }
+
+            node = node.left;
         }
 
         if (subtreeUpdateCountProvider.subtreeUpdateCountFor(node) > 0L) {
@@ -353,40 +341,48 @@ public class ScaleTree {
         for (int i = 0; i < quantiles.length; ++i) {
             percentileValues[i] = NO_VALUE_DOUBLE;
             ScaleTreeNode node = root;
-            long nodeCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
 
-            if (nodeCount == 0L) {
-                continue;
+
+            long count = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+
+            if (count == 0L) {
+                continue ;
             }
 
-            long percentileCount = Math.min(Math.max((long)(nodeCount * quantiles[i]), 0L), nodeCount);
+            long percentileCount = Math.min(Math.max(Math.round(count * quantiles[i]), 0L), count);
+
 
             while (node != null) {
-                long leftCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left);
-                long rightCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
+                long leftSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left);
+                long rightSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
 
-                if ((nodeCount - rightCount) == percentileCount) {
+                if (percentileCount > leftSubtreeUpdateCount
+                    && percentileCount <= (count - rightSubtreeUpdateCount)
+                    && (count - leftSubtreeUpdateCount - rightSubtreeUpdateCount) > 0L) {
+
                     percentileValues[i] = node.point;
                     continue percentilesLoop;
                 }
 
-                if (percentileCount <= leftCount) {
-                    if (node.left != null) {
+                if (percentileCount <= leftSubtreeUpdateCount) {
+                    if (leftSubtreeUpdateCount > 0L) {
                         node = node.left;
-                        nodeCount = leftCount;
-                    } else {
+                        count = leftSubtreeUpdateCount;
+                    } else if ((count - leftSubtreeUpdateCount - rightSubtreeUpdateCount) > 0L) {
                         percentileValues[i] = node.point;
                         continue percentilesLoop;
-                    }
-                } else {
-                    if (node.right != null) {
+                    } else {
                         node = node.right;
-                        percentileCount -= (nodeCount - rightCount);
-                        nodeCount = rightCount;
-                    } else {
-                        percentileValues[i] = node.point;
-                        continue percentilesLoop;
+                        percentileCount -= (count - rightSubtreeUpdateCount);
+                        count = rightSubtreeUpdateCount;
                     }
+                } else if (rightSubtreeUpdateCount > 0L) {
+                    node = node.right;
+                    percentileCount -= (count - rightSubtreeUpdateCount);
+                    count = rightSubtreeUpdateCount;
+                } else {
+                    percentileValues[i] = node.point;
+                    continue percentilesLoop;
                 }
             }
         }

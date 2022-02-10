@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.resetByChunks;
 
 import com.ringcentral.platform.metrics.measurables.Measurable;
-import com.ringcentral.platform.metrics.utils.SystemTimeMsProvider;
+import com.ringcentral.platform.metrics.utils.*;
 import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
 
@@ -15,6 +15,19 @@ public class ResetByChunksScaleXHistogramImpl extends AbstractXHistogramImpl {
         Set<? extends Measurable> measurables,
         ScheduledExecutorService executor) {
 
+        this(
+            config,
+            measurables,
+            executor,
+            SystemTimeMsProvider.INSTANCE);
+    }
+
+    public ResetByChunksScaleXHistogramImpl(
+        ScaleXHistogramImplConfig config,
+        Set<? extends Measurable> measurables,
+        ScheduledExecutorService executor,
+        TimeMsProvider timeMsProvider) {
+
         super(
             config,
             measurables,
@@ -22,7 +35,7 @@ public class ResetByChunksScaleXHistogramImpl extends AbstractXHistogramImpl {
                 config,
                 measurementSpec,
                 executor,
-                SystemTimeMsProvider.INSTANCE),
+                timeMsProvider),
             executor);
     }
 }

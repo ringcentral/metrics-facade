@@ -7,7 +7,7 @@ import com.ringcentral.platform.metrics.x.histogram.scale.internal.MultiNode;
 import com.ringcentral.platform.metrics.x.histogram.scale.internal.ScaleTree.StandardDeviationCalculator;
 import org.HdrHistogram.WriterReaderPhaser;
 
-import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE_DOUBLE;
 
 public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramImpl {
 
@@ -52,41 +52,46 @@ public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramI
     }
 
     protected void flipPhase() {
-        phaser.flipPhase(10000L);
+        phaser.flipPhase();
     }
 
     protected double calcPercentile(double quantile, MultiNode node) {
-        long nodeCount = node.subtreeUpdateCount();
+        long count = node.subtreeUpdateCount();
 
-        if (nodeCount == 0L) {
+        if (count == 0L) {
             return NO_VALUE_DOUBLE;
         }
 
-        long percentileCount = Math.min(Math.max((long)(nodeCount * quantile), 0L), nodeCount);
+        long percentileCount = Math.min(Math.max(Math.round(count * quantile), 0L), count);
 
         while (!node.isNull()) {
-            long leftCount = node.leftSubtreeUpdateCount();
-            long rightCount = node.rightSubtreeUpdateCount();
+            long leftSubtreeUpdateCount = node.leftSubtreeUpdateCount();
+            long rightSubtreeUpdateCount = node.rightSubtreeUpdateCount();
 
-            if ((nodeCount - rightCount) == percentileCount) {
+            if (percentileCount > leftSubtreeUpdateCount
+                && percentileCount <= (count - rightSubtreeUpdateCount)
+                && (count - leftSubtreeUpdateCount - rightSubtreeUpdateCount) > 0L) {
+
                 return node.point();
             }
 
-            if (percentileCount <= leftCount) {
-                if (node.hasLeft()) {
+            if (percentileCount <= leftSubtreeUpdateCount) {
+                if (leftSubtreeUpdateCount > 0L) {
                     node.toLeft();
-                    nodeCount = leftCount;
-                } else {
+                    count = leftSubtreeUpdateCount;
+                } else if ((count - leftSubtreeUpdateCount - rightSubtreeUpdateCount) > 0L) {
                     return node.point();
-                }
-            } else {
-                if (node.hasRight()) {
+                } else {
                     node.toRight();
-                    percentileCount -= (nodeCount - rightCount);
-                    nodeCount = rightCount;
-                } else {
-                    return node.point();
+                    percentileCount -= (count - rightSubtreeUpdateCount);
+                    count = rightSubtreeUpdateCount;
                 }
+            } else if (rightSubtreeUpdateCount > 0L) {
+                node.toRight();
+                percentileCount -= (count - rightSubtreeUpdateCount);
+                count = rightSubtreeUpdateCount;
+            } else {
+                return node.point();
             }
         }
 

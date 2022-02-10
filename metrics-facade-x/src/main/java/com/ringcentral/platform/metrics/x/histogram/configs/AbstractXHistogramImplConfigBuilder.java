@@ -31,8 +31,8 @@ public abstract class AbstractXHistogramImplConfigBuilder<
         return builder();
     }
 
-    public CB implSpecificBuckets() {
-        this.bucketsMeasurementType = BucketsMeasurementType.IMPL_SPECIFIC;
+    public CB resettableBuckets() {
+        this.bucketsMeasurementType = BucketsMeasurementType.RESETTABLE;
         return builder();
     }
 

@@ -36,4 +36,9 @@ public class ScaleTreeNode {
     public boolean isLeftChild() {
         return parent != null && parent.left == this;
     }
+
+    @Override
+    public String toString() {
+        return Long.toString(point);
+    }
 }

@@ -105,6 +105,7 @@ public class NeverResetScaleXHistogramImplTest {
         assertThat(snapshot.percentileValue(PERCENTILE_999), is(100.0));
 
         assertThat(snapshot.bucketSize(Bucket.of(-5)), is(0L));
+        assertThat(snapshot.bucketSize(Bucket.of(1)), is(1L));
         assertThat(snapshot.bucketSize(Bucket.of(2)), is(2L));
         assertThat(snapshot.bucketSize(Bucket.of(3)), is(3L));
         assertThat(snapshot.bucketSize(Bucket.of(4)), is(4L));
@@ -153,6 +154,7 @@ public class NeverResetScaleXHistogramImplTest {
         assertThat(snapshot.percentileValue(PERCENTILE_999), is(100.0));
 
         assertThat(snapshot.bucketSize(Bucket.of(-5)), is(0L));
+        assertThat(snapshot.bucketSize(Bucket.of(1)), is(1L + 1L));
         assertThat(snapshot.bucketSize(Bucket.of(2)), is(2L + 2L));
         assertThat(snapshot.bucketSize(Bucket.of(3)), is(3L + 3L));
         assertThat(snapshot.bucketSize(Bucket.of(4)), is(4L + 4L));
@@ -201,6 +203,7 @@ public class NeverResetScaleXHistogramImplTest {
         assertThat(snapshot.percentileValue(PERCENTILE_999), is(100.0));
 
         assertThat(snapshot.bucketSize(Bucket.of(-5)), is(0L));
+        assertThat(snapshot.bucketSize(Bucket.of(1)), is(1L + 1L + 1L));
         assertThat(snapshot.bucketSize(Bucket.of(2)), is(2L + 2L + 2L));
         assertThat(snapshot.bucketSize(Bucket.of(3)), is(3L + 3L + 3L));
         assertThat(snapshot.bucketSize(Bucket.of(4)), is(4L + 4L + 4L));
@@ -214,9 +217,13 @@ public class NeverResetScaleXHistogramImplTest {
     }
 
     @Test
-    public void scale_1_AllMeasurables_ImplSpecificBuckets() {
+    public void scale_1_AllMeasurables_ResettableBuckets() {
         NeverResetScaleXHistogramImpl h = new NeverResetScaleXHistogramImpl(
-            scaleImpl().neverReset().with(SCALE_1).build(),
+            scaleImpl()
+                .neverReset()
+                .with(SCALE_1)
+                .resettableBuckets()
+                .build(),
             Set.of(
                 COUNT,
                 TOTAL_SUM,
@@ -296,6 +303,7 @@ public class NeverResetScaleXHistogramImplTest {
         assertThat(snapshot.percentileValue(PERCENTILE_999), is(100.0));
 
         assertThat(snapshot.bucketSize(Bucket.of(-5)), is(0L));
+        assertThat(snapshot.bucketSize(Bucket.of(1)), is(1L));
         assertThat(snapshot.bucketSize(Bucket.of(2)), is(2L));
         assertThat(snapshot.bucketSize(Bucket.of(3)), is(3L));
         assertThat(snapshot.bucketSize(Bucket.of(4)), is(4L));

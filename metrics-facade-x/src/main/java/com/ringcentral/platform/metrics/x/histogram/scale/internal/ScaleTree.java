@@ -323,11 +323,48 @@ public class ScaleTree {
         SubtreeUpdateCountProvider subtreeUpdateCountProvider) {
 
         for (int i = 0; i < bucketUpperBounds.length; ++i) {
-            ScaleTreeNode node = nodeForValue(bucketUpperBounds[i]);
-            bucketSizes[i] += subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+            long value = bucketUpperBounds[i];
+            ScaleTreeNode node = root;
 
-            if (node != null && node.right != null) {
-                bucketSizes[i] -= subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
+            while (true) {
+                if (value < node.point) {
+                    if (node.left != null) {
+                        node = node.left;
+                    } else {
+                        bucketSizes[i] += subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+
+                        if (node.right != null) {
+                            bucketSizes[i] -= subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
+                        }
+
+                        break;
+                    }
+                } else if (value > node.point) {
+                    if (node.right != null) {
+                        bucketSizes[i] += (subtreeUpdateCountProvider.subtreeUpdateCountFor(node) - subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right));
+                        node = node.right;
+                    } else {
+                        if (node.isLeftChild()) {
+                            node = node.parent;
+                        }
+
+                        bucketSizes[i] += subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+
+                        if (node.right != null) {
+                            bucketSizes[i] -= subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
+                        }
+
+                        break;
+                    }
+                } else {
+                    bucketSizes[i] += subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
+
+                    if (node.right != null) {
+                        bucketSizes[i] -= subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
+                    }
+
+                    break;
+                }
             }
         }
 

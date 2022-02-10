@@ -149,7 +149,7 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             basic = makeTotalsImpl(config, withCount, withTotalSum);
             withBuckets = false;
             bucketUpperBounds = null;
-        } else if (config.bucketsMeasurementType() == BucketsMeasurementType.IMPL_SPECIFIC) {
+        } else if (config.bucketsMeasurementType() == BucketsMeasurementType.RESETTABLE) {
             basic = makeTotalsImpl(config, withCount, withTotalSum);
             withBuckets = true;
 

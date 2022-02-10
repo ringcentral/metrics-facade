@@ -24,7 +24,7 @@ public class ResetOnSnapshotScaleXHistogramImplTest {
     static final ScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
 
     @Test
-    public void scale_1_allMeasurables_neverResetBuckets() {
+    public void scale_1_AllMeasurables_NeverResetBuckets() {
         ResetOnSnapshotScaleXHistogramImpl h = new ResetOnSnapshotScaleXHistogramImpl(
             scaleImpl().resetOnSnapshot().with(SCALE_1).build(),
             Set.of(

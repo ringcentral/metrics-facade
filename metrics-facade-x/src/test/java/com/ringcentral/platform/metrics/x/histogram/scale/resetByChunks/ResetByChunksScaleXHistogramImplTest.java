@@ -29,7 +29,7 @@ public class ResetByChunksScaleXHistogramImplTest {
     static final ScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
 
     @Test
-    public void scale_1_allMeasurables_neverResetBuckets() {
+    public void scale_1_AllMeasurables_NeverResetBuckets() {
         ResetByChunksScaleXHistogramImpl h = new ResetByChunksScaleXHistogramImpl(
             scaleImpl()
                 .resetByChunks(CHUNK_COUNT, Duration.ofMillis(ALL_CHUNKS_RESET_PERIOD_MS))

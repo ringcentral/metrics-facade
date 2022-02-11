@@ -4,6 +4,7 @@ import com.ringcentral.platform.metrics.Meter;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
 
+import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -128,6 +129,8 @@ public interface Histogram extends Meter {
 
     class Percentile implements HistogramMeasurable {
 
+        private static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100.0);
+
         private final double quantile;
         private final String quantileAsString;
         private final String quantileDecimalPartAsString;
@@ -143,7 +146,7 @@ public interface Histogram extends Meter {
             this.quantileAsString = Double.toString(quantile);
             String afterPoint = this.quantileAsString.substring(this.quantileAsString.indexOf(".") + 1);
             this.quantileDecimalPartAsString = afterPoint.length() > 1 ? afterPoint : afterPoint + "0";
-            this.percentile = min(max(quantile * 100.0, 0.0), 100.0);
+            this.percentile = min(max(BigDecimal.valueOf(quantile).multiply(BIG_DECIMAL_100).doubleValue(), 0.0), 100.0);
             this.hashCode = hashCodeFor("Histogram.Percentile", quantile);
         }
 

@@ -95,7 +95,7 @@ public class ResetByChunksExtendedHdrXHistogramImpl extends AbstractExtendedHdrX
 
             if (withHistory) {
                 long currPhaseNum = (currPhase.proposedInvalidationTimeMs - creationTimeMs) / chunkResetPeriodMs;
-                int historyIndex = (int) (currPhaseNum - 1) % historySize;
+                int historyIndex = (int)(currPhaseNum - 1) % historySize;
                 HistoryItem historyItem = history[historyIndex];
                 reset(historyItem.histogram);
                 addSecondToFirst(historyItem.histogram, currPhase.totalHistogram);

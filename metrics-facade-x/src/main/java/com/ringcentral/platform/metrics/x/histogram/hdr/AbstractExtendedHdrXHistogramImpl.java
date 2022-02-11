@@ -112,7 +112,7 @@ public abstract class AbstractExtendedHdrXHistogramImpl implements XHistogramImp
 
                 // mean and standard deviation
                 if (withMean || withStandardDeviation) {
-                    totalForMean += h.medianEquivalentValue(iterValue.getValueIteratedTo()) * (double) iterValue.getCountAtValueIteratedTo();
+                    totalForMean += h.medianEquivalentValue(iterValue.getValueIteratedTo()) * (double)iterValue.getCountAtValueIteratedTo();
                 }
 
                 // percentiles

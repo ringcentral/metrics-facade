@@ -8,6 +8,14 @@ public class SpecificScaleBuilder implements ScaleBuilder<SpecificScale> {
 
     private final List<Long> points;
 
+    public static SpecificScaleBuilder infOnlyScale() {
+        return points(Long.MAX_VALUE);
+    }
+
+    public static SpecificScaleBuilder points(Long... points) {
+        return points(List.of(points));
+    }
+
     public static SpecificScaleBuilder points(List<Long> points) {
         return new SpecificScaleBuilder(points);
     }

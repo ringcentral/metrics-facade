@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.MS_PER_SEC;
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.ExpScaleBuilder.exp;
+import static com.ringcentral.platform.metrics.x.histogram.scale.configs.SpecificScaleBuilder.infOnlyScale;
 
 @SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "ConstantConditions" })
 public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
@@ -17,7 +17,7 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
     public static final long MIN_CHUNK_RESET_PERIOD_MS = MS_PER_SEC;
     public static final int DEFAULT_CHUNKS = 6;
     public static final long DEFAULT_CHUNK_RESET_PERIOD_MS = 20L * MS_PER_SEC;
-    public static final ExpScale DEFAULT_SCALE = exp().from(0).base(2).factor(2).build();
+    public static final SpecificScale DEFAULT_SCALE = infOnlyScale().build();
     public static final int DEFAULT_MAX_LAZY_TREE_LEVEL = 4;
 
     public static final ScaleXHistogramImplConfig DEFAULT = new ScaleXHistogramImplConfig(

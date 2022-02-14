@@ -1,15 +1,19 @@
 package com.ringcentral.platform.metrics.benchmark.histogram;
 
+import com.github.rollingmetrics.histogram.OverflowResolver;
+import com.github.rollingmetrics.histogram.hdr.RollingHdrHistogram;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.benchmark.utils.ValueIndex;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.x.XMetricRegistry;
+import com.ringcentral.platform.metrics.x.histogram.hdr.configs.HdrXHistogramImplConfig;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleBuilder;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.*;
 import org.openjdk.jmh.runner.options.*;
 
+import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -38,9 +42,10 @@ public class HistogramUpdateBenchmark {
             withName("dwHistogram"),
             () -> withHistogram().measurables(
                 COUNT,
+                TOTAL_SUM,
                 MIN,
                 MAX,
-                // MEAN,
+                MEAN,
                 PERCENTILE_50,
                 PERCENTILE_75,
                 PERCENTILE_90,
@@ -54,6 +59,7 @@ public class HistogramUpdateBenchmark {
             () -> withHistogram()
                 .measurables(
                     COUNT,
+                    TOTAL_SUM,
                     MIN,
                     MAX,
                     MEAN,
@@ -82,6 +88,7 @@ public class HistogramUpdateBenchmark {
             () -> withHistogram()
                 .measurables(
                     COUNT,
+                    TOTAL_SUM,
                     MIN,
                     MAX,
                     MEAN,
@@ -110,9 +117,10 @@ public class HistogramUpdateBenchmark {
             () -> withHistogram()
                 .measurables(
                     COUNT,
+                    TOTAL_SUM,
                     MIN,
                     MAX,
-                    // MEAN,
+                    MEAN,
                     PERCENTILE_50,
                     PERCENTILE_75,
                     PERCENTILE_90,
@@ -138,6 +146,7 @@ public class HistogramUpdateBenchmark {
             () -> withHistogram()
                 .measurables(
                     COUNT,
+                    TOTAL_SUM,
                     MIN,
                     MAX,
                     MEAN,
@@ -167,6 +176,7 @@ public class HistogramUpdateBenchmark {
             () -> withHistogram()
                 .measurables(
                     COUNT,
+                    TOTAL_SUM,
                     MIN,
                     MAX,
                     MEAN,
@@ -183,9 +193,10 @@ public class HistogramUpdateBenchmark {
             () -> withHistogram()
                 .measurables(
                     COUNT,
+                    TOTAL_SUM,
                     MIN,
                     MAX,
-                    // MEAN,
+                    MEAN,
                     PERCENTILE_50,
                     PERCENTILE_75,
                     PERCENTILE_90,
@@ -209,9 +220,10 @@ public class HistogramUpdateBenchmark {
             () -> withHistogram()
                 .measurables(
                     COUNT,
+                    TOTAL_SUM,
                     MIN,
                     MAX,
-                    // MEAN,
+                    MEAN,
                     PERCENTILE_50,
                     PERCENTILE_75,
                     PERCENTILE_90,
@@ -219,6 +231,15 @@ public class HistogramUpdateBenchmark {
                 .with(scaleImpl()
                     .resetByChunks()
                     .scale(scale_1())));
+
+        // Rolling - HDR
+        final RollingHdrHistogram rollingHdrHistogram_ResetByChunks = RollingHdrHistogram.builder()
+            .resetReservoirPeriodicallyByChunks(
+                Duration.ofMillis(HdrXHistogramImplConfig.DEFAULT.chunkResetPeriodMs() * HdrXHistogramImplConfig.DEFAULT.chunkCount()),
+                HdrXHistogramImplConfig.DEFAULT.chunkCount())
+            .withHighestTrackableValue(HOURS.toNanos(3), OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE)
+            .withLowestDiscernibleValue(MILLISECONDS.toNanos(1))
+            .build();
 
         // values
         final long[] values = makeValues_1();
@@ -363,6 +384,11 @@ public class HistogramUpdateBenchmark {
     @Benchmark
     public void scaleXHistogram_ResetByChunks_Update(State state) {
         state.scaleXHistogram_ResetByChunks.update(value(state));
+    }
+
+    @Benchmark
+    public void rollingHdrHistogram_ResetByChunks_Update(State state) {
+        state.rollingHdrHistogram_ResetByChunks.update(value(state));
     }
 
     public static class Driver {

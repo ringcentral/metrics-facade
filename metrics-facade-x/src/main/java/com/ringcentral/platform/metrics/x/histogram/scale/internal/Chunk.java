@@ -11,11 +11,13 @@ import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 
 public abstract class Chunk {
 
-    private static final long NO_SNAPSHOT_TOTAL_SUM = -1L;
+    private static final long NO_SNAPSHOT_SUM = -1L;
 
     protected final int maxLazyTreeLevel;
     protected final int upperLazyTreeLevel;
 
+    protected final boolean withCount;
+    protected final boolean withTotalSum;
     protected final boolean withMin;
     protected final boolean withMax;
     protected final boolean withMean;
@@ -28,8 +30,8 @@ public abstract class Chunk {
     protected final ScaleTree tree;
     private final long[] lazySubtreeUpdateCounts;
 
-    private final LongAdder totalSumAdder;
-    private volatile long snapshotTotalSum = NO_SNAPSHOT_TOTAL_SUM;
+    private final LongAdder sumAdder;
+    private volatile long snapshotSum = NO_SNAPSHOT_SUM;
 
     private final StandardDeviationCalculator standardDeviationCalculator;
 
@@ -41,6 +43,8 @@ public abstract class Chunk {
         this.maxLazyTreeLevel = config.maxLazyTreeLevel();
         this.upperLazyTreeLevel = this.maxLazyTreeLevel >= 0 ? this.maxLazyTreeLevel + 1 : -1;
 
+        this.withCount = measurementSpec.isWithCount();
+        this.withTotalSum = measurementSpec.isWithTotalSum();
         this.withMin = measurementSpec.isWithMin();
         this.withMax = measurementSpec.isWithMax();
         this.withMean = measurementSpec.isWithMean();
@@ -62,8 +66,8 @@ public abstract class Chunk {
             new long[(2 << (this.maxLazyTreeLevel + 1)) - 1] :
             null;
 
-        this.totalSumAdder =
-            (this.withMean || this.withStandardDeviation) ?
+        this.sumAdder =
+            (this.withTotalSum || this.withMean || this.withStandardDeviation) ?
             new LongAdder() :
             null;
 
@@ -86,22 +90,22 @@ public abstract class Chunk {
         ScaleTreeNode node = tree.nodeForValue(value);
         long point = node.point;
         updateTree(node, snapshotInProgress, snapshotNum);
-        updateTotalSum(point, snapshotInProgress);
+        updateSum(point, snapshotInProgress);
     }
 
     protected abstract void updateTree(ScaleTreeNode node, boolean snapshotInProgress, long snapshotNum);
 
-    protected void updateTotalSum(long point, boolean snapshotInProgress) {
-        if (totalSumAdder != null) {
-            if (snapshotInProgress && snapshotTotalSum == NO_SNAPSHOT_TOTAL_SUM) {
-                long totalSum = totalSumAdder.sum();
+    protected void updateSum(long point, boolean snapshotInProgress) {
+        if (sumAdder != null) {
+            if (snapshotInProgress && snapshotSum == NO_SNAPSHOT_SUM) {
+                long sum = sumAdder.sum();
 
-                if (snapshotTotalSum == NO_SNAPSHOT_TOTAL_SUM) {
-                    snapshotTotalSum = totalSum;
+                if (snapshotSum == NO_SNAPSHOT_SUM) {
+                    snapshotSum = sum;
                 }
             }
 
-            totalSumAdder.add(point);
+            sumAdder.add(point);
         }
     }
 
@@ -130,19 +134,36 @@ public abstract class Chunk {
         return lazySubtreeUpdateCounts[node.levelOrderIndex];
     }
 
-    public XHistogramSnapshot snapshot() {
+    public XHistogramSnapshot snapshot(long currCount, long currTotalSum) {
+        long treeUpdateCount = treeUpdateCount();
+
+        if (treeUpdateCount == 0L) {
+            return new DefaultXHistogramSnapshot(
+                currCount,
+                currTotalSum,
+                NO_VALUE,
+                NO_VALUE,
+                NO_VALUE,
+                NO_VALUE,
+                null,
+                null,
+                null,
+                null);
+        }
+
         long min = withMin ? min() : NO_VALUE;
         long max = withMax ? max() : NO_VALUE;
 
         double mean = NO_VALUE_DOUBLE;
         double standardDeviation = NO_VALUE_DOUBLE;
 
-        if (withMean || withStandardDeviation) {
-            long treeUpdateCount = treeUpdateCount();
+        long sum = NO_VALUE;
 
-            if (treeUpdateCount > 0L) {
-                long totalSum = totalSum();
-                mean = (1.0 * totalSum) / treeUpdateCount;
+        if (withTotalSum || withMean || withStandardDeviation) {
+            sum = sum();
+
+            if (withMean || withStandardDeviation) {
+                mean = (1.0 * sum) / treeUpdateCount;
                 standardDeviationCalculator.reset(mean);
 
                 if (withStandardDeviation) {
@@ -155,12 +176,19 @@ public abstract class Chunk {
             }
         }
 
-        long[] bucketSizes = withBuckets ? tree.bucketSizes(bucketUpperBounds, this::subtreeUpdateCountFor) : null;
-        double[] percentileValues = withPercentiles ? tree.percentileValues(quantiles, this::subtreeUpdateCountFor) : null;
+        long[] bucketSizes =
+            withBuckets ?
+            tree.bucketSizes(bucketUpperBounds, this::subtreeUpdateCountFor) :
+            null;
+
+        double[] percentileValues =
+            withPercentiles ?
+            tree.percentileValues(quantiles, this::subtreeUpdateCountFor) :
+            null;
 
         return new DefaultXHistogramSnapshot(
-            NO_VALUE,
-            NO_VALUE,
+            withCount ? currCount + treeUpdateCount : NO_VALUE,
+            withTotalSum ? currTotalSum + sum : NO_VALUE,
             min,
             max,
             mean,
@@ -179,25 +207,25 @@ public abstract class Chunk {
         return tree.max(this::subtreeUpdateCountFor);
     }
 
-    public long totalSum() {
-        long totalSum = totalSumAdder.sum();
+    public long sum() {
+        long sum = sumAdder.sum();
 
-        if (snapshotTotalSum != NO_SNAPSHOT_TOTAL_SUM) {
-            totalSum = snapshotTotalSum;
+        if (snapshotSum != NO_SNAPSHOT_SUM) {
+            sum = snapshotSum;
         }
 
-        return totalSum;
+        return sum;
     }
 
-    public void resetTotalSum() {
-        if (totalSumAdder != null) {
-            totalSumAdder.add(-totalSumAdder.sum());
-            resetSnapshotTotalSum();
+    public void resetSum() {
+        if (sumAdder != null) {
+            sumAdder.add(-sumAdder.sum());
+            resetSnapshotSum();
         }
     }
 
-    public void resetSnapshotTotalSum() {
-        snapshotTotalSum = NO_SNAPSHOT_TOTAL_SUM;
+    public void resetSnapshotSum() {
+        snapshotSum = NO_SNAPSHOT_SUM;
     }
 
     public void addBucketSizesTo(long[] bucketSizes) {

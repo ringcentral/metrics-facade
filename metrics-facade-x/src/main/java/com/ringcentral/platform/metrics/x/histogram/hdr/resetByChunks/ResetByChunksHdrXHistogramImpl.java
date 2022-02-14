@@ -37,7 +37,12 @@ public class ResetByChunksHdrXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
-            measurementSpec -> new ResetByChunksExtendedHdrXHistogramImpl(config, measurementSpec, executor, timeMsProvider),
+            new ExtendedImplInfo(false),
+            measurementSpec -> new ResetByChunksExtendedHdrXHistogramImpl(
+                config,
+                measurementSpec,
+                executor,
+                timeMsProvider),
             executor);
     }
 }

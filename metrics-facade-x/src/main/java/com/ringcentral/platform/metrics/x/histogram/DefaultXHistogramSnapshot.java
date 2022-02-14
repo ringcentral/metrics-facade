@@ -15,6 +15,20 @@ public class DefaultXHistogramSnapshot implements XHistogramSnapshot {
     private final long[] bucketUpperBounds;
     private final long[] bucketSizes;
 
+    public static DefaultXHistogramSnapshot emptySnapshot() {
+        return new DefaultXHistogramSnapshot(
+            NO_VALUE,
+            NO_VALUE,
+            NO_VALUE,
+            NO_VALUE,
+            NO_VALUE,
+            NO_VALUE,
+            null,
+            null,
+            null,
+            null);
+    }
+
     public DefaultXHistogramSnapshot(
         long count,
         long totalSum,

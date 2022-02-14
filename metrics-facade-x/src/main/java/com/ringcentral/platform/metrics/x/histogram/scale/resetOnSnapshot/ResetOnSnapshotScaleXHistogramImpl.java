@@ -17,6 +17,7 @@ public class ResetOnSnapshotScaleXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
+            new ExtendedImplInfo(true),
             measurementSpec -> new ResetOnSnapshotExtendedScaleXHistogramImpl(config, measurementSpec),
             executor);
     }

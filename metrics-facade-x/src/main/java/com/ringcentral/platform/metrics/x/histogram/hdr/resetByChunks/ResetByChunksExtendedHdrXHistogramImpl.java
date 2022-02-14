@@ -50,7 +50,7 @@ public class ResetByChunksExtendedHdrXHistogramImpl extends AbstractExtendedHdrX
 
         this.leftPhase = new Phase(config, this.creationTimeMs + this.chunkResetPeriodMs);
         this.rightPhase = new Phase(config, Long.MAX_VALUE);
-        this.phases = new Phase[]{ this.leftPhase, this.rightPhase };
+        this.phases = new Phase[] { this.leftPhase, this.rightPhase };
         this.currPhaseRef = new AtomicReference<>(this.leftPhase);
 
         this.historySize = config.chunkCount();
@@ -117,7 +117,7 @@ public class ResetByChunksExtendedHdrXHistogramImpl extends AbstractExtendedHdrX
         reset(histogramForSnapshot);
 
         for (Phase phase : phases) {
-            if (phase.isNeedToBeReportedToSnapshot(nowMs)) {
+            if (phase.needsToBeSnapshoted(nowMs)) {
                 phase.intervalHistogram = phase.recorder.getIntervalHistogram(phase.intervalHistogram);
                 addSecondToFirst(phase.totalHistogram, phase.intervalHistogram);
                 addSecondToFirst(histogramForSnapshot, phase.totalHistogram);
@@ -159,7 +159,7 @@ public class ResetByChunksExtendedHdrXHistogramImpl extends AbstractExtendedHdrX
             this.proposedInvalidationTimeMs = proposedInvalidationTimeMs;
         }
 
-        boolean isNeedToBeReportedToSnapshot(long nowMs) {
+        boolean needsToBeSnapshoted(long nowMs) {
             long localProposedInvalidationTimeMs = proposedInvalidationTimeMs;
 
             if (localProposedInvalidationTimeMs > nowMs) {

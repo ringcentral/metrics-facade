@@ -6,6 +6,7 @@ import com.ringcentral.platform.metrics.x.histogram.scale.AbstractExtendedScaleX
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
 import com.ringcentral.platform.metrics.x.histogram.scale.internal.DoubleNode;
 
+import static com.ringcentral.platform.metrics.x.histogram.DefaultXHistogramSnapshot.emptySnapshot;
 import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
 
 public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScaleXHistogramImpl {
@@ -50,10 +51,10 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
             XHistogramSnapshot snapshot = takeSnapshot();
 
             inactiveChunk.endSnapshot();
-            inactiveChunk.resetSnapshotTotalSum();
+            inactiveChunk.resetSnapshotSum();
             flipChunks();
             inactiveChunk.endSnapshot();
-            inactiveChunk.resetSnapshotTotalSum();
+            inactiveChunk.resetSnapshotSum();
 
             return snapshot;
         } finally {
@@ -68,13 +69,46 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
         flipPhase();
     }
 
+    @SuppressWarnings("ConstantConditions")
     private XHistogramSnapshot takeSnapshot() {
         boolean activeChunkNonEmpty = activeChunk.isNonEmpty();
         boolean inactiveChunkNonEmpty = inactiveChunk.isNonEmpty();
 
+        if (!activeChunkNonEmpty && !inactiveChunkNonEmpty) {
+            return emptySnapshot();
+        }
+
+        long count = NO_VALUE;
+
+        if (withCount) {
+            count = 0L;
+
+            if (activeChunkNonEmpty) {
+                count += activeChunk.treeUpdateCount();
+            }
+
+            if (inactiveChunkNonEmpty) {
+                count += inactiveChunk.treeUpdateCount();
+            }
+        }
+
+        long totalSum = NO_VALUE;
+
+        if (withTotalSum) {
+            totalSum = 0L;
+
+            if (activeChunkNonEmpty) {
+                totalSum += activeChunk.sum();
+            }
+
+            if (inactiveChunkNonEmpty) {
+                totalSum += inactiveChunk.sum();
+            }
+        }
+
         long min = NO_VALUE;
 
-        if (withMin && (activeChunkNonEmpty || inactiveChunkNonEmpty)) {
+        if (withMin) {
             min = activeChunkNonEmpty ? activeChunk.min() : Long.MAX_VALUE;
 
             if (inactiveChunkNonEmpty) {
@@ -88,7 +122,7 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
 
         long max = NO_VALUE;
 
-        if (withMax && (activeChunkNonEmpty || inactiveChunkNonEmpty)) {
+        if (withMax) {
             max = activeChunkNonEmpty ? activeChunk.max() : Long.MIN_VALUE;
 
             if (inactiveChunkNonEmpty) {
@@ -112,7 +146,7 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
 
                 if (chunkUpdateCount > 0L) {
                     countForMean += chunkUpdateCount;
-                    totalSumForMean += activeChunk.totalSum();
+                    totalSumForMean += activeChunk.sum();
                 }
             }
 
@@ -121,7 +155,7 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
 
                 if (chunkUpdateCount > 0L) {
                     countForMean += chunkUpdateCount;
-                    totalSumForMean += inactiveChunk.totalSum();
+                    totalSumForMean += inactiveChunk.sum();
                 }
             }
 
@@ -175,8 +209,8 @@ public class NeverResetExtendedScaleXHistogramImpl extends AbstractExtendedScale
         }
 
         return new DefaultXHistogramSnapshot(
-            NO_VALUE,
-            NO_VALUE,
+            count,
+            totalSum,
             min,
             max,
             mean,

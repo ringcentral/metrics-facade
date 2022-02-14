@@ -16,6 +16,8 @@ public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramI
     protected final int upperLazyTreeLevel;
 
     protected final MeasurementSpec measurementSpec;
+    protected final boolean withCount;
+    protected final boolean withTotalSum;
     protected final boolean withMin;
     protected final boolean withMax;
     protected final boolean withMean;
@@ -29,10 +31,15 @@ public abstract class AbstractExtendedScaleXHistogramImpl implements XHistogramI
     protected final StandardDeviationCalculator standardDeviationCalculator = new StandardDeviationCalculator();
     protected final WriterReaderPhaser phaser = new WriterReaderPhaser();
 
-    protected AbstractExtendedScaleXHistogramImpl(ScaleXHistogramImplConfig config, MeasurementSpec measurementSpec) {
+    protected AbstractExtendedScaleXHistogramImpl(
+        ScaleXHistogramImplConfig config,
+        MeasurementSpec measurementSpec) {
+
         this.config = config;
 
         this.measurementSpec = measurementSpec;
+        this.withCount = measurementSpec.isWithCount();
+        this.withTotalSum = measurementSpec.isWithTotalSum();
         this.withMin = measurementSpec.isWithMin();
         this.withMax = measurementSpec.isWithMax();
         this.withMean = measurementSpec.isWithMean();

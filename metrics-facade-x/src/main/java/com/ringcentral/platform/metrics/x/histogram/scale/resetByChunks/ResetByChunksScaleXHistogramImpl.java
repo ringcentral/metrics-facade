@@ -31,6 +31,7 @@ public class ResetByChunksScaleXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
+            new ExtendedImplInfo(true),
             measurementSpec -> new ResetByChunksExtendedScaleXHistogramImpl(
                 config,
                 measurementSpec,

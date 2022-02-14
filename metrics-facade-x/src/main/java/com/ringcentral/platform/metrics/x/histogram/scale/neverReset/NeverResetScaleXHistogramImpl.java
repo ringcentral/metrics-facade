@@ -17,6 +17,7 @@ public class NeverResetScaleXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
+            new ExtendedImplInfo(true),
             measurementSpec -> new NeverResetExtendedScaleXHistogramImpl(config, measurementSpec),
             executor);
     }

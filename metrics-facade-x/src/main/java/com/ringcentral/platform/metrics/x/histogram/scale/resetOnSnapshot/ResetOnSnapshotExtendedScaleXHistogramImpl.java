@@ -5,10 +5,15 @@ import com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot;
 import com.ringcentral.platform.metrics.x.histogram.scale.AbstractExtendedScaleXHistogramImpl;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
 
+import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.NO_VALUE;
+
 public class ResetOnSnapshotExtendedScaleXHistogramImpl extends AbstractExtendedScaleXHistogramImpl {
 
     private volatile ResetOnSnapshotChunk activeChunk;
     private volatile ResetOnSnapshotChunk inactiveChunk;
+
+    private long count;
+    private long totalSum;
 
     public ResetOnSnapshotExtendedScaleXHistogramImpl(
         ScaleXHistogramImplConfig config,
@@ -18,6 +23,9 @@ public class ResetOnSnapshotExtendedScaleXHistogramImpl extends AbstractExtended
 
         this.activeChunk = new ResetOnSnapshotChunk(config, measurementSpec);
         this.inactiveChunk = new ResetOnSnapshotChunk(config, measurementSpec);
+
+        this.count = measurementSpec.isWithCount() ? 0L : NO_VALUE;
+        this.totalSum = measurementSpec.isWithTotalSum() ? 0L : NO_VALUE;
     }
 
     @Override
@@ -44,9 +52,15 @@ public class ResetOnSnapshotExtendedScaleXHistogramImpl extends AbstractExtended
 
     private XHistogramSnapshot takeSnapshot() {
         flipChunks();
+        inactiveChunk.startSnapshot();
         inactiveChunk.calcLazySubtreeUpdateCounts();
-        XHistogramSnapshot snapshot = inactiveChunk.snapshot();
-        inactiveChunk.resetTotalSum();
+
+        XHistogramSnapshot snapshot = inactiveChunk.snapshot(count, totalSum);
+        count = snapshot.count();
+        totalSum = snapshot.totalSum();
+
+        inactiveChunk.endSnapshot();
+        inactiveChunk.resetSum();
         return snapshot;
     }
 

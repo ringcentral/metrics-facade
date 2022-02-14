@@ -27,6 +27,7 @@ public class NeverResetHdrXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
+            new ExtendedImplInfo(false),
             measurementSpec -> new ExtendedImpl(config, measurementSpec, executor),
             executor);
     }

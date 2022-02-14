@@ -17,6 +17,8 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
     public static class MeasurementSpec {
 
         private final Set<? extends Measurable> measurables;
+        private final boolean withCount;
+        private final boolean withTotalSum;
         private final boolean withMin;
         private final boolean withMax;
         private final boolean withMean;
@@ -29,6 +31,8 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
         public MeasurementSpec(
             Set<? extends Measurable> measurables,
+            boolean withCount,
+            boolean withTotalSum,
             boolean withMin,
             boolean withMax,
             boolean withMean,
@@ -40,6 +44,8 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             long[] bucketUpperBounds) {
 
             this.measurables = measurables;
+            this.withCount = withCount;
+            this.withTotalSum = withTotalSum;
             this.withMin = withMin;
             this.withMax = withMax;
             this.withMean = withMean;
@@ -53,6 +59,14 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
         public Set<? extends Measurable> measurables() {
             return measurables;
+        }
+
+        public boolean isWithCount() {
+            return withCount;
+        }
+
+        public boolean isWithTotalSum() {
+            return withTotalSum;
         }
 
         public boolean isWithMin() {
@@ -92,6 +106,20 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         }
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static class ExtendedImplInfo {
+
+        private final boolean supportsTotals;
+
+        public ExtendedImplInfo(boolean supportsTotals) {
+            this.supportsTotals = supportsTotals;
+        }
+
+        public boolean supportsTotals() {
+            return supportsTotals;
+        }
+    }
+
     public interface ExtendedImplMaker {
         XHistogramImpl makeExtendedImpl(MeasurementSpec measurementSpec);
     }
@@ -102,6 +130,7 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
     protected AbstractXHistogramImpl(
         XHistogramImplConfig config,
         Set<? extends Measurable> measurables,
+        ExtendedImplInfo extendedImplInfo,
         ExtendedImplMaker extendedImplMaker,
         ScheduledExecutorService executor) {
 
@@ -143,14 +172,29 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             .map(m -> (Bucket)m)
             .collect(toSet());
 
-        XHistogramImpl basic;
+        XHistogramImpl basic = null;
+
+        boolean extendedRequired =
+            withMin
+            || withMax
+            || withMean
+            || withStandardDeviation
+            || withPercentiles;
 
         if (buckets.isEmpty()) {
-            basic = makeTotalsImpl(config, withCount, withTotalSum);
+            if (!extendedRequired || !extendedImplInfo.supportsTotals()) {
+                basic = makeTotalsImpl(config, withCount, withTotalSum);
+                withCount = false;
+                withTotalSum = false;
+            }
+
             withBuckets = false;
             bucketUpperBounds = null;
         } else if (config.bucketsMeasurementType() == BucketsMeasurementType.RESETTABLE) {
-            basic = makeTotalsImpl(config, withCount, withTotalSum);
+            if (!extendedImplInfo.supportsTotals()) {
+                basic = makeTotalsImpl(config, withCount, withTotalSum);
+            }
+
             withBuckets = true;
 
             long[] bounds = buckets.stream()
@@ -168,8 +212,8 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             bucketUpperBounds = bounds;
         } else {
             basic = new NeverResetBucketXHistogramImpl(
-                withCount,
-                withTotalSum,
+                withCount && (!extendedRequired || !extendedImplInfo.supportsTotals()),
+                withTotalSum && (!extendedRequired || !extendedImplInfo.supportsTotals()),
                 config.totalsMeasurementType(),
                 buckets);
 
@@ -179,9 +223,11 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
         XHistogramImpl extended = null;
 
-        if (withMin || withMax || withMean || withStandardDeviation || withPercentiles || withBuckets) {
+        if (extendedRequired || withBuckets) {
             MeasurementSpec measurementSpec = new MeasurementSpec(
                 Set.copyOf(measurables),
+                extendedImplInfo.supportsTotals && withCount,
+                extendedImplInfo.supportsTotals && withTotalSum,
                 withMin,
                 withMax,
                 withMean,
@@ -195,13 +241,17 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             extended = extendedImplMaker.makeExtendedImpl(measurementSpec);
         }
 
-        this.parent =
-            extended != null ?
-            new CombinedImpl(
+        if (basic == null) {
+            this.parent = extended;
+        } else if (extended != null) {
+            this.parent = new CombinedImpl(
                 basic,
                 extended,
-                config.bucketsMeasurementType() == BucketsMeasurementType.NEVER_RESET) :
-            basic;
+                !extendedImplInfo.supportsTotals(),
+                config.bucketsMeasurementType() == BucketsMeasurementType.NEVER_RESET);
+        } else {
+            this.parent = basic;
+        }
 
         this.executor = executor;
     }
@@ -340,15 +390,20 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
         final XHistogramImpl basic;
         final XHistogramImpl extended;
+
+        final boolean totalsFromBasic;
         final boolean bucketsFromBasic;
 
         CombinedImpl(
             XHistogramImpl basic,
             XHistogramImpl extended,
+            boolean totalsFromBasic,
             boolean bucketsFromBasic) {
 
             this.basic = basic;
             this.extended = extended;
+
+            this.totalsFromBasic = totalsFromBasic;
             this.bucketsFromBasic = bucketsFromBasic;
         }
 
@@ -362,7 +417,12 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         public XHistogramSnapshot snapshot() {
             XHistogramSnapshot extendedSnapshot = extended.snapshot();
             XHistogramSnapshot basicSnapshot = basic.snapshot();
-            return new CombinedSnapshot(basicSnapshot, extendedSnapshot, bucketsFromBasic);
+
+            return new CombinedSnapshot(
+                basicSnapshot,
+                extendedSnapshot,
+                totalsFromBasic,
+                bucketsFromBasic);
         }
 
         @Override
@@ -381,26 +441,31 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
 
             final XHistogramSnapshot basicSnapshot;
             final XHistogramSnapshot extendedSnapshot;
+
+            final boolean totalsFromBasic;
             final boolean bucketsFromBasic;
 
             CombinedSnapshot(
                 XHistogramSnapshot basicSnapshot,
                 XHistogramSnapshot extendedSnapshot,
+                boolean totalsFromBasic,
                 boolean bucketsFromBasic) {
 
                 this.basicSnapshot = basicSnapshot;
                 this.extendedSnapshot = extendedSnapshot;
+
+                this.totalsFromBasic = totalsFromBasic;
                 this.bucketsFromBasic = bucketsFromBasic;
             }
 
             @Override
             public long count() {
-                return basicSnapshot.count();
+                return (totalsFromBasic ? basicSnapshot : extendedSnapshot).count();
             }
 
             @Override
             public long totalSum() {
-                return basicSnapshot.totalSum();
+                return (totalsFromBasic ? basicSnapshot : extendedSnapshot).totalSum();
             }
 
             @Override

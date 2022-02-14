@@ -128,7 +128,9 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
         nonEmptySnapshotChunks.clear();
 
         for (Item item : items) {
-            if (item.isNeedToBeReportedToSnapshot(nowMs)) {
+            boolean needsToBeSnapshoted = item.needsToBeSnapshoted(nowMs);
+
+            if (withCount || withTotalSum || needsToBeSnapshoted) {
                 if (item == currItem) {
                     item.inactiveChunk.startSnapshot();
                     item.flipChunks();
@@ -137,50 +139,86 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
                 }
 
                 item.inactiveChunk.startSnapshot();
-                snapshotItems.add(item);
-            }
-        }
 
-        for (Item item : snapshotItems) {
-            if (hasLazyTreeLevels()) {
-                item.activeChunk.calcLazySubtreeUpdateCounts();
-                item.inactiveChunk.calcLazySubtreeUpdateCounts();
-            }
+                if (hasLazyTreeLevels()) {
+                    if (item == currItem || !item.lazySubtreeUpdateCountsCalculated) {
+                        item.calcLazySubtreeUpdateCounts();
 
-            if (item.activeChunk.isNonEmpty()) {
-                nonEmptySnapshotChunks.add(item.activeChunk);
-            }
+                        if (item != currItem) {
+                            item.lazySubtreeUpdateCountsCalculated = true;
+                        }
+                    }
+                }
 
-            if (item.inactiveChunk.isNonEmpty()) {
-                nonEmptySnapshotChunks.add(item.inactiveChunk);
+                if (needsToBeSnapshoted) {
+                    snapshotItems.add(item);
+
+                    if (item.activeChunk.isNonEmpty()) {
+                        nonEmptySnapshotChunks.add(item.activeChunk);
+                    }
+
+                    if (item.inactiveChunk.isNonEmpty()) {
+                        nonEmptySnapshotChunks.add(item.inactiveChunk);
+                    }
+                }
             }
         }
 
         XHistogramSnapshot snapshot = takeSnapshot();
 
-        for (Item item : snapshotItems) {
-            if (item == currItem) {
-                item.inactiveChunk.endSnapshot();
-                item.inactiveChunk.resetSnapshotTotalSum();
-                item.flipChunks();
-                item.inactiveChunk.endSnapshot();
-                item.inactiveChunk.resetSnapshotTotalSum();
-            } else {
-                item.activeChunk.endSnapshot();
-                item.activeChunk.resetSnapshotTotalSum();
-                item.inactiveChunk.endSnapshot();
-                item.inactiveChunk.resetSnapshotTotalSum();
+        if (withCount || withTotalSum) {
+            for (Item item : items) {
+                endSnapshotFor(item);
+            }
+        } else {
+            for (Item item : snapshotItems) {
+                endSnapshotFor(item);
             }
         }
 
         return snapshot;
     }
 
+    private void endSnapshotFor(Item item) {
+        if (item == currItem) {
+            item.inactiveChunk.endSnapshot();
+            item.inactiveChunk.resetSnapshotSum();
+            item.flipChunks();
+        } else {
+            item.activeChunk.endSnapshot();
+            item.activeChunk.resetSnapshotSum();
+        }
+
+        item.inactiveChunk.endSnapshot();
+        item.inactiveChunk.resetSnapshotSum();
+    }
+
+    @SuppressWarnings("ConstantConditions")
     private XHistogramSnapshot takeSnapshot() {
+        long count = NO_VALUE;
+
+        if (withCount) {
+            count = 0L;
+
+            for (Item item : items) {
+                count += item.count();
+            }
+        }
+
+        long totalSum = NO_VALUE;
+
+        if (withTotalSum) {
+            totalSum = 0L;
+
+            for (Item item : items) {
+                totalSum += item.totalSum();
+            }
+        }
+
         if (nonEmptySnapshotChunks.isEmpty()) {
             return new DefaultXHistogramSnapshot(
-                NO_VALUE,
-                NO_VALUE,
+                count,
+                totalSum,
                 NO_VALUE,
                 NO_VALUE,
                 NO_VALUE,
@@ -231,7 +269,7 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
 
                 if (chunkUpdateCount > 0L) {
                     countForMean += chunkUpdateCount;
-                    totalSumForMean += chunk.totalSum();
+                    totalSumForMean += chunk.sum();
                 }
             }
 
@@ -276,8 +314,8 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
         }
 
         return new DefaultXHistogramSnapshot(
-            NO_VALUE,
-            NO_VALUE,
+            count,
+            totalSum,
             min,
             max,
             mean,
@@ -294,6 +332,9 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
         volatile long startTimeMs;
         volatile ResetByChunksChunk activeChunk;
         volatile ResetByChunksChunk inactiveChunk;
+        boolean lazySubtreeUpdateCountsCalculated;
+        long retainedCount;
+        long retainedTotalSum;
 
         Item(
             ScaleXHistogramImplConfig config,
@@ -306,22 +347,39 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
             this.inactiveChunk = new ResetByChunksChunk(config, measurementSpec);
         }
 
-        boolean isNeedToBeReportedToSnapshot(long nowMs) {
+        void calcLazySubtreeUpdateCounts() {
+            activeChunk.calcLazySubtreeUpdateCounts();
+            inactiveChunk.calcLazySubtreeUpdateCounts();
+        }
+
+        boolean needsToBeSnapshoted(long nowMs) {
             return nowMs - startTimeMs < allChunksResetPeriodMs;
         }
 
         void reset(long startTimeMs, boolean inPlace) {
             this.startTimeMs = startTimeMs;
+            lazySubtreeUpdateCountsCalculated = false;
+
+            retainedCount += inactiveChunk.treeUpdateCount();
+            retainedTotalSum += inactiveChunk.sum();
+
             inactiveChunk.startUpdateEpoch();
-            inactiveChunk.resetTotalSum();
+            inactiveChunk.resetSum();
 
             if (inPlace) {
                 flipChunks();
+
+                retainedCount += inactiveChunk.treeUpdateCount();
+                retainedTotalSum += inactiveChunk.sum();
+
                 inactiveChunk.startUpdateEpoch();
-                inactiveChunk.resetTotalSum();
+                inactiveChunk.resetSum();
             } else {
+                retainedCount += activeChunk.treeUpdateCount();
+                retainedTotalSum += activeChunk.sum();
+
                 activeChunk.startUpdateEpoch();
-                activeChunk.resetTotalSum();
+                activeChunk.resetSum();
             }
         }
 
@@ -330,6 +388,14 @@ public class ResetByChunksExtendedScaleXHistogramImpl extends AbstractExtendedSc
             inactiveChunk = activeChunk;
             activeChunk = tempChunk;
             flipPhase();
+        }
+
+        public long count() {
+            return retainedCount + activeChunk.treeUpdateCount() + inactiveChunk.treeUpdateCount();
+        }
+
+        public long totalSum() {
+            return retainedTotalSum + activeChunk.sum() + inactiveChunk.sum();
         }
     }
 }

@@ -37,7 +37,7 @@ public class PrometheusSampleMaker implements SampleMaker<
         MetricName childInstanceSampleNameSuffix = null;
         Collector.Type childInstanceSampleType = null;
 
-        // TODO: support exporting Histogram.Min/Max/Mean/Bucket as a regular sample with a special name suffix.
+        // TODO: support exporting Histogram.Min/Max/Mean as a regular sample with a special name suffix.
         Measurable m = spec.measurable();
 
         if (m instanceof Histogram.Min) {

@@ -98,6 +98,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_90,
                     PERCENTILE_99)
                 .with(hdrImpl()
+                    .eventuallyConsistentTotals()
                     .resetByChunks()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -198,11 +199,15 @@ public class HistogramSnapshotBenchmark {
                     .with(scale_1())));
 
         // Rolling - HDR
-        final RollingHdrHistogram rollingHdrHistogram_ResetByChunks = RollingHdrHistogram.builder()
-            .neverResetReservoir()
-            .withHighestTrackableValue(HOURS.toNanos(3), OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE)
-            .withLowestDiscernibleValue(MILLISECONDS.toNanos(1))
-            .build();
+        final com.codahale.metrics.Histogram rollingHdrHistogram_ResetByChunks = new com.codahale.metrics.Histogram(
+            new RollingHdrReservoir(
+                RollingHdrHistogram.builder()
+                    .resetReservoirPeriodicallyByChunks(
+                        Duration.ofMillis(HdrXHistogramImplConfig.DEFAULT.chunkResetPeriodMs() * HdrXHistogramImplConfig.DEFAULT.chunkCount()),
+                        HdrXHistogramImplConfig.DEFAULT.chunkCount())
+                    .withHighestTrackableValue(HOURS.toNanos(3), OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE)
+                    .withLowestDiscernibleValue(MILLISECONDS.toNanos(1))
+                    .build()));
 
         @Setup
         public void setup() throws InterruptedException {
@@ -319,10 +324,10 @@ public class HistogramSnapshotBenchmark {
 //        state.hdrXHistogram_ResetByChunks_Count_Mean.iterator().next().measurableValues();
 //    }
 //
-//    @Benchmark
-//    public void hdrXHistogram_ResetByChunks_3_Digits_Snapshot(State state) {
-//        state.hdrXHistogram_ResetByChunks_3_Digits.iterator().next().measurableValues();
-//    }
+    @Benchmark
+    public void hdrXHistogram_ResetByChunks_3_Digits_Snapshot(State state) {
+        state.hdrXHistogram_ResetByChunks_3_Digits.iterator().next().measurableValues();
+    }
 //
 //    @Benchmark
 //    public void hdrXHistogram_ResetByChunks_Count_Mean_3_Digits_Snapshot(State state) {

@@ -233,13 +233,15 @@ public class HistogramUpdateBenchmark {
                     .scale(scale_1())));
 
         // Rolling - HDR
-        final RollingHdrHistogram rollingHdrHistogram_ResetByChunks = RollingHdrHistogram.builder()
-            .resetReservoirPeriodicallyByChunks(
-                Duration.ofMillis(HdrXHistogramImplConfig.DEFAULT.chunkResetPeriodMs() * HdrXHistogramImplConfig.DEFAULT.chunkCount()),
-                HdrXHistogramImplConfig.DEFAULT.chunkCount())
-            .withHighestTrackableValue(HOURS.toNanos(3), OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE)
-            .withLowestDiscernibleValue(MILLISECONDS.toNanos(1))
-            .build();
+        final com.codahale.metrics.Histogram rollingHdrHistogram_ResetByChunks = new com.codahale.metrics.Histogram(
+            new RollingHdrReservoir(
+                RollingHdrHistogram.builder()
+                .resetReservoirPeriodicallyByChunks(
+                    Duration.ofMillis(HdrXHistogramImplConfig.DEFAULT.chunkResetPeriodMs() * HdrXHistogramImplConfig.DEFAULT.chunkCount()),
+                    HdrXHistogramImplConfig.DEFAULT.chunkCount())
+                .withHighestTrackableValue(HOURS.toNanos(3), OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE)
+                .withLowestDiscernibleValue(MILLISECONDS.toNanos(1))
+                .build()));
 
         // values
         final long[] values = makeValues_1();
@@ -398,7 +400,7 @@ public class HistogramUpdateBenchmark {
                 .warmupIterations(4)
                 .measurementIterations(4)
                 .measurementTime(TimeValue.seconds(45))
-                .threads(12)
+                .threads(1)
                 .forks(1)
                 .build();
             try {

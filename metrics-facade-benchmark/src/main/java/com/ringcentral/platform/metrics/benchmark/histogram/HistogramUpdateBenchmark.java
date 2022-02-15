@@ -321,10 +321,10 @@ public class HistogramUpdateBenchmark {
         return state.values[state.valueIndex.get().next()];
     }
 
-//    @Benchmark
-//    public void dwHistogram_Update(State state) {
-//        state.dwHistogram.update(value(state));
-//    }
+    @Benchmark
+    public void dwHistogram_Update(State state) {
+        state.dwHistogram.update(value(state));
+    }
 
 //    @Benchmark
 //    public void hdrXHistogram_NeverReset_Update(State state) {

@@ -1,5 +1,7 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.configs;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
 public class LinearScaleBuilder implements ScaleBuilder<LinearScale> {
@@ -24,6 +26,10 @@ public class LinearScaleBuilder implements ScaleBuilder<LinearScale> {
     public LinearScaleBuilder from(long from) {
         this.from = from;
         return this;
+    }
+
+    public LinearScaleBuilder steps(long step, TimeUnit unit, long stepCount) {
+        return steps(unit.toNanos(step), stepCount);
     }
 
     public LinearScaleBuilder steps(long step, long stepCount) {

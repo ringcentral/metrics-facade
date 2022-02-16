@@ -267,22 +267,23 @@ public class HistogramSnapshotBenchmark {
     }
 
     static ScaleBuilder<?> scale_1() {
-        // 500 ms
-        return first(linear().steps(MILLISECONDS.toNanos(5), 100))
+        return
+            // 500 ms
+            first(linear().steps(5, MILLISECONDS, 100))
             // 1 sec
-            .then(linear().steps(MILLISECONDS.toNanos(25), 20))
+            .then(linear().steps(25, MILLISECONDS, 20))
             // 2 sec
-            .then(linear().steps(MILLISECONDS.toNanos(100), 10))
+            .then(linear().steps(100, MILLISECONDS, 10))
             // 10 sec
-            .then(linear().steps(SECONDS.toNanos(1), 8))
+            .then(linear().steps(1, SECONDS, 8))
             // 30 sec
-            .then(linear().steps(SECONDS.toNanos(5), 4))
+            .then(linear().steps(5, SECONDS, 4))
             // 1 min
-            .then(linear().steps(SECONDS.toNanos(10), 3))
+            .then(linear().steps(10, SECONDS, 3))
             // 10 min
-            .then(linear().steps(MINUTES.toNanos(1), 9))
+            .then(linear().steps(1, MINUTES, 9))
             // 3 h
-            .then(linear().steps(MINUTES.toNanos(10), 5 + 12).withInf());
+            .then(linear().steps(10, MINUTES, 5 + 12).withInf());
     }
 
     static ScaleBuilder<?> scale_2() {

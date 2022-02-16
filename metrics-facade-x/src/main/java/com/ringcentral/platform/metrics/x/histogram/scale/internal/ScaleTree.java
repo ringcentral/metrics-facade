@@ -386,15 +386,13 @@ public class ScaleTree {
             percentileValues[i] = NO_VALUE_DOUBLE;
             ScaleTreeNode node = root;
 
-
             long count = subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
 
             if (count == 0L) {
-                continue ;
+                continue;
             }
 
             long percentileCount = Math.min(Math.max(Math.round(count * quantiles[i]), 0L), count);
-
 
             while (node != null) {
                 long leftSubtreeUpdateCount = subtreeUpdateCountProvider.subtreeUpdateCountFor(node.left);

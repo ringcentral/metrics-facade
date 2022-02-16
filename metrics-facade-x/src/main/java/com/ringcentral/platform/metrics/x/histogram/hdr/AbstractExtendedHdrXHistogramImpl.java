@@ -54,8 +54,8 @@ public abstract class AbstractExtendedHdrXHistogramImpl implements XHistogramImp
         if (config.highestTrackableValue().isPresent()) {
             return
                 config.lowestDiscernibleValue().isPresent() ?
-                    new Recorder(config.lowestDiscernibleValue().get(), config.highestTrackableValue().get(), config.significantDigitCount()) :
-                    new Recorder(config.highestTrackableValue().get(), config.significantDigitCount());
+                new Recorder(config.lowestDiscernibleValue().get(), config.highestTrackableValue().get(), config.significantDigitCount()) :
+                new Recorder(config.highestTrackableValue().get(), config.significantDigitCount());
         } else {
             return new Recorder(config.significantDigitCount());
         }

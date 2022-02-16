@@ -163,8 +163,15 @@ public class ScaleTree {
                 if (node.right != null) {
                     node = node.right;
                 } else {
-                    if (node.isLeftChild()) {
-                        node = node.parent;
+                    ScaleTreeNode n = node;
+
+                    while (n != null) {
+                        if (n.isLeftChild()) {
+                            node = n.parent;
+                            break;
+                        } else {
+                            n = n.parent;
+                        }
                     }
 
                     break;

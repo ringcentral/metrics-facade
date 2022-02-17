@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.x.histogram.hdr.resetOnSnapshot;
 
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.configs.BucketsMeasurementType;
 import com.ringcentral.platform.metrics.x.histogram.hdr.AbstractExtendedHdrXHistogramImpl;
 import com.ringcentral.platform.metrics.x.histogram.hdr.configs.HdrXHistogramImplConfig;
 import org.HdrHistogram.*;
@@ -25,7 +26,7 @@ public class ResetOnSnapshotHdrXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
-            new ExtendedImplInfo(false),
+            new ExtendedImplInfo(false, BucketsMeasurementType.RESETTABLE),
             measurementSpec -> new ExtendedImpl(config, measurementSpec, executor),
             executor);
     }

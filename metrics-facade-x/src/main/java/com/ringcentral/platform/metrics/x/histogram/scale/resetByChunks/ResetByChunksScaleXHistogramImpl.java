@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.x.histogram.scale.resetByChunks;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.utils.*;
 import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.configs.BucketsMeasurementType;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
 
 import java.util.Set;
@@ -31,7 +32,7 @@ public class ResetByChunksScaleXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
-            new ExtendedImplInfo(true),
+            new ExtendedImplInfo(true, BucketsMeasurementType.RESETTABLE),
             measurementSpec -> new ResetByChunksExtendedScaleXHistogramImpl(
                 config,
                 measurementSpec,

@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.x.histogram.scale.neverReset;
 
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.x.histogram.AbstractXHistogramImpl;
+import com.ringcentral.platform.metrics.x.histogram.configs.BucketsMeasurementType;
 import com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfig;
 
 import java.util.Set;
@@ -17,7 +18,7 @@ public class NeverResetScaleXHistogramImpl extends AbstractXHistogramImpl {
         super(
             config,
             measurables,
-            new ExtendedImplInfo(true),
+            new ExtendedImplInfo(true, BucketsMeasurementType.NEVER_RESET),
             measurementSpec -> new NeverResetExtendedScaleXHistogramImpl(config, measurementSpec),
             executor);
     }

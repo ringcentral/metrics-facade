@@ -110,13 +110,22 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
     public static class ExtendedImplInfo {
 
         private final boolean supportsTotals;
+        private final BucketsMeasurementType bucketsMeasurementType;
 
-        public ExtendedImplInfo(boolean supportsTotals) {
+        public ExtendedImplInfo(
+            boolean supportsTotals,
+            BucketsMeasurementType bucketsMeasurementType) {
+
             this.supportsTotals = supportsTotals;
+            this.bucketsMeasurementType = bucketsMeasurementType;
         }
 
         public boolean supportsTotals() {
             return supportsTotals;
+        }
+
+        public BucketsMeasurementType bucketsMeasurementType() {
+            return bucketsMeasurementType;
         }
     }
 
@@ -196,29 +205,27 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
             }
 
             withBuckets = true;
-
-            long[] bounds = buckets.stream()
-                .mapToLong(Bucket::upperBoundAsLong)
-                .sorted()
-                .toArray();
-
-            if (bounds[bounds.length - 1] != Long.MAX_VALUE) {
-                long[] boundsWithInf = new long[bounds.length + 1];
-                System.arraycopy(bounds, 0, boundsWithInf, 0, bounds.length);
-                boundsWithInf[bounds.length] = Long.MAX_VALUE;
-                bounds = boundsWithInf;
-            }
-
-            bucketUpperBounds = bounds;
+            bucketUpperBounds = upperBoundsOf(buckets);
         } else {
-            basic = new NeverResetBucketXHistogramImpl(
-                withCount && (!extendedRequired || !extendedImplInfo.supportsTotals()),
-                withTotalSum && (!extendedRequired || !extendedImplInfo.supportsTotals()),
-                config.totalsMeasurementType(),
-                buckets);
+            if (!extendedRequired || extendedImplInfo.bucketsMeasurementType() != BucketsMeasurementType.NEVER_RESET) {
+                basic = new NeverResetBucketXHistogramImpl(
+                    withCount && (!extendedRequired || !extendedImplInfo.supportsTotals()),
+                    withTotalSum && (!extendedRequired || !extendedImplInfo.supportsTotals()),
+                    config.totalsMeasurementType(),
+                    buckets);
 
-            withBuckets = false;
-            bucketUpperBounds = null;
+                withBuckets = false;
+                bucketUpperBounds = null;
+            } else {
+                if (!extendedImplInfo.supportsTotals()) {
+                    basic = makeTotalsImpl(config, withCount, withTotalSum);
+                    withCount = false;
+                    withTotalSum = false;
+                }
+
+                withBuckets = true;
+                bucketUpperBounds = upperBoundsOf(buckets);
+            }
         }
 
         XHistogramImpl extended = null;
@@ -244,16 +251,35 @@ public abstract class AbstractXHistogramImpl implements XHistogramImpl {
         if (basic == null) {
             this.parent = extended;
         } else if (extended != null) {
+            boolean bucketsFromBasic = config.bucketsMeasurementType() == BucketsMeasurementType.NEVER_RESET
+                && extendedImplInfo.bucketsMeasurementType() != BucketsMeasurementType.NEVER_RESET;
+
             this.parent = new CombinedImpl(
                 basic,
                 extended,
                 !extendedImplInfo.supportsTotals(),
-                config.bucketsMeasurementType() == BucketsMeasurementType.NEVER_RESET);
+                bucketsFromBasic);
         } else {
             this.parent = basic;
         }
 
         this.executor = executor;
+    }
+
+    private long[] upperBoundsOf(Set<Bucket> buckets) {
+        long[] bounds = buckets.stream()
+            .mapToLong(Bucket::upperBoundAsLong)
+            .sorted()
+            .toArray();
+
+        if (bounds[bounds.length - 1] != Long.MAX_VALUE) {
+            long[] boundsWithInf = new long[bounds.length + 1];
+            System.arraycopy(bounds, 0, boundsWithInf, 0, bounds.length);
+            boundsWithInf[bounds.length] = Long.MAX_VALUE;
+            bounds = boundsWithInf;
+        }
+
+        return bounds;
     }
 
     private XHistogramImpl makeTotalsImpl(XHistogramImplConfig config, boolean withCount, boolean withTotalSum) {

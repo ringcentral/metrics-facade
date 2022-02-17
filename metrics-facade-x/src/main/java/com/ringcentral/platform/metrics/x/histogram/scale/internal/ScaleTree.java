@@ -184,6 +184,10 @@ public class ScaleTree {
         return node;
     }
 
+    public void traversePostOrder(NodeConsumer consumer) {
+        traversePostOrder(root, consumer, Integer.MAX_VALUE);
+    }
+
     public void traversePostOrder(NodeConsumer consumer, int maxLevel) {
         // assuming that maxLevel >= 0
         traversePostOrder(root, consumer, maxLevel);
@@ -330,37 +334,22 @@ public class ScaleTree {
         SubtreeUpdateCountProvider subtreeUpdateCountProvider) {
 
         for (int i = 0; i < bucketUpperBounds.length; ++i) {
-            long value = bucketUpperBounds[i];
+            long bound = bucketUpperBounds[i];
             ScaleTreeNode node = root;
 
             while (true) {
-                if (value < node.point) {
+                if (bound < node.point) {
                     if (node.left != null) {
                         node = node.left;
                     } else {
-                        bucketSizes[i] += subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
-
-                        if (node.right != null) {
-                            bucketSizes[i] -= subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
-                        }
-
                         break;
                     }
-                } else if (value > node.point) {
+                } else if (bound > node.point) {
                     if (node.right != null) {
                         bucketSizes[i] += (subtreeUpdateCountProvider.subtreeUpdateCountFor(node) - subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right));
                         node = node.right;
                     } else {
-                        if (node.isLeftChild()) {
-                            node = node.parent;
-                        }
-
                         bucketSizes[i] += subtreeUpdateCountProvider.subtreeUpdateCountFor(node);
-
-                        if (node.right != null) {
-                            bucketSizes[i] -= subtreeUpdateCountProvider.subtreeUpdateCountFor(node.right);
-                        }
-
                         break;
                     }
                 } else {

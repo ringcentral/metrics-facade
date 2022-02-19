@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.x.histogram.scale.resetOnSnapshot;
 
 import com.ringcentral.platform.metrics.test.time.*;
 import com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot;
-import com.ringcentral.platform.metrics.x.histogram.scale.configs.LinearScaleBuilder;
+import com.ringcentral.platform.metrics.scale.LinearScaleBuilder;
 import org.junit.Test;
 
 import java.util.Set;
@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.x.histogram.XHistogramSnapshot.*;
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.LinearScaleBuilder.linearScale;
+import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
 import static com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfigBuilder.scaleImpl;
 import static java.lang.Math.sqrt;
 import static org.hamcrest.CoreMatchers.is;

@@ -1,8 +1,9 @@
-package com.ringcentral.platform.metrics.x.histogram.scale.configs;
+package com.ringcentral.platform.metrics.scale;
 
-import java.util.List;
+import java.util.*;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static java.util.stream.Collectors.toList;
 
 public class SpecificScaleBuilder implements ScaleBuilder<SpecificScale> {
 
@@ -12,8 +13,8 @@ public class SpecificScaleBuilder implements ScaleBuilder<SpecificScale> {
         return points(Long.MAX_VALUE);
     }
 
-    public static SpecificScaleBuilder points(Long... points) {
-        return points(List.of(points));
+    public static SpecificScaleBuilder points(long... points) {
+        return points(List.copyOf(Arrays.stream(points).boxed().collect(toList())));
     }
 
     public static SpecificScaleBuilder points(List<Long> points) {

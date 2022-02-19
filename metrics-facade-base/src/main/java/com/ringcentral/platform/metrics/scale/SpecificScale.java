@@ -1,4 +1,4 @@
-package com.ringcentral.platform.metrics.x.histogram.scale.configs;
+package com.ringcentral.platform.metrics.scale;
 
 import java.util.List;
 

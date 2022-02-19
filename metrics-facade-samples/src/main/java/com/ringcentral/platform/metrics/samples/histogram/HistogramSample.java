@@ -12,7 +12,7 @@ import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramInstanceConfigBuilder.histogramInstance;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
-import static com.ringcentral.platform.metrics.samples.histogram.LastValueXHistogramConfigBuilder.lastValueImpl;
+import static com.ringcentral.platform.metrics.scale.SpecificScaleBuilder.points;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
 @SuppressWarnings("ALL")
@@ -159,14 +159,7 @@ public class HistogramSample extends AbstractSample {
                         PERCENTILE_50,
                         PERCENTILE_95,
                         MAX,
-                        Bucket.of(0),
-                        Bucket.of(1),
-                        Bucket.of(24),
-                        Bucket.of(25),
-                        Bucket.of(30),
-                        Bucket.of(49),
-                        Bucket.of(50),
-                        Bucket.of(55))
+                        Buckets.of(points(0, 1, 24, 25, 30, 49, 50, 55)))
 
                     // options: disableTotal(), noTotal(), totalEnabled(boolean)
                     // default: enabled

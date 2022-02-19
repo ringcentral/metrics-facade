@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.internal;
 
-import com.ringcentral.platform.metrics.x.histogram.scale.configs.Scale;
+import com.ringcentral.platform.metrics.scale.Scale;
 
 import java.util.*;
 

@@ -1,6 +1,6 @@
-package com.ringcentral.platform.metrics.x.histogram.scale.configs;
+package com.ringcentral.platform.metrics.scale;
 
-import java.util.*;
+import java.util.List;
 
 public interface Scale {
     default long point(int i) {

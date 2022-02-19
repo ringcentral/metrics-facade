@@ -1,10 +1,10 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.internal;
 
-import com.ringcentral.platform.metrics.x.histogram.scale.configs.Scale;
+import com.ringcentral.platform.metrics.scale.Scale;
 import com.ringcentral.platform.metrics.x.histogram.scale.internal.ScaleTree.SubtreeUpdateCountProvider;
 import org.junit.Test;
 
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.LinearScaleBuilder.linear;
+import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linear;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 

@@ -1,8 +1,8 @@
-package com.ringcentral.platform.metrics.x.histogram.scale.configs;
+package com.ringcentral.platform.metrics.scale;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
-public class ExpScaleBuilder implements ScaleBuilder<ExpScale> {
+public class ExpStepScaleBuilder implements ScaleBuilder<ExpStepScale> {
 
     private long from;
     private long base;
@@ -11,57 +11,57 @@ public class ExpScaleBuilder implements ScaleBuilder<ExpScale> {
     private long max = Long.MAX_VALUE;
     private boolean withInf;
 
-    public static ExpScaleBuilder exp() {
-        return expScaleBuilder();
+    public static ExpStepScaleBuilder expStep() {
+        return expStepScaleBuilder();
     }
 
-    public static ExpScaleBuilder expScale() {
-        return expScaleBuilder();
+    public static ExpStepScaleBuilder expStepScale() {
+        return expStepScaleBuilder();
     }
 
-    public static ExpScaleBuilder expScaleBuilder() {
-        return new ExpScaleBuilder();
+    public static ExpStepScaleBuilder expStepScaleBuilder() {
+        return new ExpStepScaleBuilder();
     }
 
-    public ExpScaleBuilder from(long from) {
+    public ExpStepScaleBuilder from(long from) {
         this.from = from;
         return this;
     }
 
-    public ExpScaleBuilder base(long base) {
+    public ExpStepScaleBuilder base(long base) {
         checkArgument(base > 0, "base must be > 0");
         this.base = base;
         return this;
     }
 
-    public ExpScaleBuilder factor(double factor) {
+    public ExpStepScaleBuilder factor(double factor) {
         checkArgument(factor >= 0.01, "factor must be >= 0.01");
         this.factor = factor;
         return this;
     }
 
-    public ExpScaleBuilder steps(long stepCount) {
+    public ExpStepScaleBuilder steps(long stepCount) {
         checkArgument(stepCount >= 0, "stepCount must be >= 0");
         this.stepCount = stepCount;
         return this;
     }
 
-    public ExpScaleBuilder max(long max) {
+    public ExpStepScaleBuilder max(long max) {
         this.max = max;
         return this;
     }
 
-    public ExpScaleBuilder withInf() {
+    public ExpStepScaleBuilder withInf() {
         return withInf(true);
     }
 
-    public ExpScaleBuilder withInf(boolean withInf) {
+    public ExpStepScaleBuilder withInf(boolean withInf) {
         this.withInf = withInf;
         return this;
     }
 
     @Override
-    public ExpScale build() {
+    public ExpStepScale build() {
         checkArgument(from <= max, "from must be <= max");
         checkArgument(base > 0, "base must be > 0");
         checkArgument(factor >= 0.01, "factor must be >= 0.01");
@@ -69,6 +69,6 @@ public class ExpScaleBuilder implements ScaleBuilder<ExpScale> {
         checkArgument(factor < max, "factor must be < max");
         checkArgument(stepCount >= 0, "stepCount must be >= 0");
 
-        return new ExpScale(from, base, factor, stepCount, max, withInf);
+        return new ExpStepScale(from, base, factor, stepCount, max, withInf);
     }
 }

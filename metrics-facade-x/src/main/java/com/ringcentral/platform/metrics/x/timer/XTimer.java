@@ -171,6 +171,10 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                     result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof Bucket) {
                     addBucketMvp(result, m, infBucketAdded);
+                } else if (m instanceof Buckets) {
+                    for (Bucket bucket : ((Buckets)m).buckets()) {
+                        addBucketMvp(result, bucket, infBucketAdded);
+                    }
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
                 }
@@ -239,6 +243,10 @@ public class XTimer extends AbstractTimer<XTimerImpl> {
                     addBucketMvp(result, m, infBucketAdded);
                 } else if (m instanceof DurationUnit) {
                     result.put(m, DURATION_UNIT_VALUE_PROVIDER);
+                } else if (m instanceof Buckets) {
+                    for (Bucket bucket : ((Buckets)m).buckets()) {
+                        addBucketMvp(result, bucket, infBucketAdded);
+                    }
                 } else {
                     logger.warn("Unsupported measurable {}", m.getClass().getName());
                 }

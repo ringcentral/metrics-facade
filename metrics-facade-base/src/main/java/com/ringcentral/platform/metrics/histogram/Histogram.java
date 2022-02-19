@@ -3,18 +3,22 @@ package com.ringcentral.platform.metrics.histogram;
 import com.ringcentral.platform.metrics.Meter;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
+import com.ringcentral.platform.metrics.scale.*;
 
 import java.math.BigDecimal;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
 import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
+import static com.ringcentral.platform.metrics.scale.ExpScaleBuilder.expScale;
+import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
 import static com.ringcentral.platform.metrics.utils.ObjectUtils.hashCodeFor;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.NANOS_PER_SEC;
 import static java.lang.Math.*;
 import static java.util.concurrent.TimeUnit.*;
+import static java.util.stream.Collectors.toSet;
 
 public interface Histogram extends Meter {
     class TotalSum implements HistogramMeasurable {
@@ -255,7 +259,7 @@ public interface Histogram extends Meter {
                     + " in nanos results in an overflow");
             }
 
-            this.upperBoundAsLong = Math.round(upperBound);
+            this.upperBoundAsLong = round(upperBound);
             this.inf = (this.upperBoundAsLong == Long.MAX_VALUE);
             this.negativeInf = (this.upperBoundAsLong == Long.MIN_VALUE);
             this.upperBoundAsString = upperBoundAsString(upperBound);
@@ -409,6 +413,72 @@ public interface Histogram extends Meter {
     Bucket SEC_30_BUCKET = Bucket.of(30, SECONDS);
 
     Bucket INF_BUCKET = Bucket.of(Double.POSITIVE_INFINITY);
+
+    class Buckets implements HistogramMeasurable {
+
+        static final int HASH_CODE = "Histogram.Buckets".hashCode();
+
+        private final Set<Bucket> buckets;
+
+        public Buckets(Set<Bucket> buckets) {
+            checkArgument(
+                buckets != null && !buckets.isEmpty(),
+                "buckets is null or empty");
+
+            this.buckets = buckets;
+        }
+
+        public static Buckets linear(long from, long step, long stepCount) {
+            return linear(from, step, stepCount, null);
+        }
+
+        public static Buckets linear(long from, long step, long stepCount, TimeUnit unit) {
+            return of(linearScale().from(from).steps(step, stepCount).withInf(), unit);
+        }
+
+        public static Buckets exp(long from, double factor, long stepCount) {
+            return exp(from, factor, stepCount, null);
+        }
+
+        public static Buckets exp(long from, double factor, long stepCount, TimeUnit unit) {
+            return of(expScale().from(from).factor(factor).steps(stepCount).withInf(), unit);
+        }
+
+        public static Buckets of(ScaleBuilder<?> scaleBuilder) {
+            return of(scaleBuilder, null);
+        }
+
+        public static Buckets of(ScaleBuilder<?> scaleBuilder, TimeUnit unit) {
+            return of(scaleBuilder.build(), unit);
+        }
+
+        public static Buckets of(Scale scale) {
+            return of(scale, null);
+        }
+
+        public static Buckets of(Scale scale, TimeUnit unit) {
+            return new Buckets(scale.points().stream().map(p -> Bucket.of(p.doubleValue(), unit)).collect(toSet()));
+        }
+
+        @Override
+        public MeasurableType type() {
+            return OBJECT;
+        }
+
+        public Set<Bucket> buckets() {
+            return buckets;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other != null && getClass() == other.getClass());
+        }
+
+        @Override
+        public int hashCode() {
+            return HASH_CODE;
+        }
+    }
 
     default void update(long value) {
         update(value, NO_DIMENSION_VALUES);

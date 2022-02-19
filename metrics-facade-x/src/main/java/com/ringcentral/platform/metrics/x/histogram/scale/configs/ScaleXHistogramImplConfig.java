@@ -1,12 +1,13 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.configs;
 
+import com.ringcentral.platform.metrics.scale.*;
 import com.ringcentral.platform.metrics.x.histogram.configs.*;
 
 import java.time.Duration;
 import java.util.Optional;
 
+import static com.ringcentral.platform.metrics.scale.SpecificScaleBuilder.infOnlyScale;
 import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.MS_PER_SEC;
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.SpecificScaleBuilder.infOnlyScale;
 
 @SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "ConstantConditions" })
 public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {

@@ -1,5 +1,6 @@
 package com.ringcentral.platform.metrics.x.histogram.scale.configs;
 
+import com.ringcentral.platform.metrics.scale.*;
 import com.ringcentral.platform.metrics.x.histogram.configs.AbstractXHistogramImplConfigBuilder;
 
 import java.time.Duration;

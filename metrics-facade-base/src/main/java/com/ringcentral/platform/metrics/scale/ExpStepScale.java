@@ -1,14 +1,14 @@
-package com.ringcentral.platform.metrics.x.histogram.scale.configs;
+package com.ringcentral.platform.metrics.scale;
 
 import java.util.*;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
-public class ExpScale implements Scale {
+public class ExpStepScale implements Scale {
 
     private final List<Long> points;
 
-    public ExpScale(
+    public ExpStepScale(
         long from,
         long base,
         double factor,

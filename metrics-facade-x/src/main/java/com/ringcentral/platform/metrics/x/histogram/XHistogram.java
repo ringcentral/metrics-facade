@@ -133,6 +133,10 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                     result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof Bucket) {
                     addBucketMvp(result, m, infBucketAdded);
+                } else if (m instanceof Buckets) {
+                    for (Bucket bucket : ((Buckets)m).buckets()) {
+                        addBucketMvp(result, bucket, infBucketAdded);
+                    }
                 }
             });
 
@@ -187,6 +191,10 @@ public class XHistogram extends AbstractHistogram<XHistogramImpl> {
                     result.put(m, new PercentileValueProvider((Percentile)m));
                 } else if (m instanceof Bucket) {
                     addBucketMvp(result, m, infBucketAdded);
+                } else if (m instanceof Buckets) {
+                    for (Bucket bucket : ((Buckets)m).buckets()) {
+                        addBucketMvp(result, bucket, infBucketAdded);
+                    }
                 } else {
                     logger.warn("Unsupported measurable {}", m.getClass().getName());
                 }

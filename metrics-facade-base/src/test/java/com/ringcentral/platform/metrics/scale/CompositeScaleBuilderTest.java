@@ -1,12 +1,12 @@
-package com.ringcentral.platform.metrics.x.histogram.scale.configs;
+package com.ringcentral.platform.metrics.scale;
 
 import org.junit.Test;
 
 import java.util.List;
 
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.CompositeScaleBuilder.first;
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.LinearScaleBuilder.linear;
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.SpecificScaleBuilder.points;
+import static com.ringcentral.platform.metrics.scale.CompositeScaleBuilder.first;
+import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linear;
+import static com.ringcentral.platform.metrics.scale.SpecificScaleBuilder.points;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 

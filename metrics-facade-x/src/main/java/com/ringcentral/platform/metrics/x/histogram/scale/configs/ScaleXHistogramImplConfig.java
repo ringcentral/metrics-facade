@@ -19,6 +19,7 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
     public static final int DEFAULT_CHUNKS = 6;
     public static final long DEFAULT_CHUNK_RESET_PERIOD_MS = 20L * MS_PER_SEC;
     public static final SpecificScale DEFAULT_SCALE = infOnlyScale().build();
+    public static final int DEFAULT_SCALE_SPLIT_FACTOR_FOR_PERCENTILES = 1;
     public static final int DEFAULT_MAX_LAZY_TREE_LEVEL = 4;
 
     public static final ScaleXHistogramImplConfig DEFAULT = new ScaleXHistogramImplConfig(
@@ -26,6 +27,7 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
         DEFAULT_CHUNKS,
         DEFAULT_CHUNK_RESET_PERIOD_MS,
         DEFAULT_SCALE,
+        DEFAULT_SCALE_SPLIT_FACTOR_FOR_PERCENTILES,
         DEFAULT_MAX_LAZY_TREE_LEVEL,
         DEFAULT_TOTALS_MEASUREMENT_TYPE,
         DEFAULT_BUCKETS_MEASUREMENT_TYPE,
@@ -35,6 +37,7 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
     private final int chunkCount;
     private final long chunkResetPeriodMs;
     private final Scale scale;
+    private final int scaleSplitFactorForPercentiles;
     private final int maxLazyTreeLevel;
 
     public ScaleXHistogramImplConfig(
@@ -42,6 +45,7 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
         int chunkCount,
         long chunkResetPeriodMs,
         Scale scale,
+        int scaleSplitFactorForPercentiles,
         int maxLazyTreeLevel,
         TotalsMeasurementType totalsMeasurementType,
         BucketsMeasurementType bucketsMeasurementType,
@@ -56,6 +60,7 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
         this.chunkCount = chunkCount;
         this.chunkResetPeriodMs = chunkResetPeriodMs;
         this.scale = scale;
+        this.scaleSplitFactorForPercentiles = scaleSplitFactorForPercentiles;
         this.maxLazyTreeLevel = maxLazyTreeLevel;
     }
 
@@ -73,6 +78,10 @@ public class ScaleXHistogramImplConfig extends AbstractXHistogramImplConfig {
 
     public Scale scale() {
         return scale;
+    }
+
+    public int scaleSplitFactorForPercentiles() {
+        return scaleSplitFactorForPercentiles;
     }
 
     public int maxLazyTreeLevel() {

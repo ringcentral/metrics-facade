@@ -51,12 +51,13 @@ public class ScaleTree {
 
     public static ScaleTree of(
         Scale scale,
+        int scaleSplitFactor,
         long[] bucketUpperBounds,
         int maxIndexedLevel,
         boolean resettable,
         long initialUpdateEpoch) {
 
-        List<Long> points = points(scale, bucketUpperBounds);
+        List<Long> points = points(scale, bucketUpperBounds, scaleSplitFactor);
 
         ScaleTreeNode root = buildSubtree(
             points,
@@ -90,15 +91,44 @@ public class ScaleTree {
         return new ScaleTree(root, initialUpdateEpoch);
     }
 
-    private static List<Long> points(Scale scale, long[] bucketUpperBounds) {
-        if (bucketUpperBounds == null || bucketUpperBounds.length == 0) {
+    private static List<Long> points(
+        Scale scale,
+        long[] bucketUpperBounds,
+        int scaleSplitFactor) {
+
+        if ((bucketUpperBounds == null || bucketUpperBounds.length == 0) && scaleSplitFactor < 2) {
             return scale.points();
         }
 
         SortedSet<Long> points = new TreeSet<>(scale.points());
 
-        for (long bucketUpperBound : bucketUpperBounds) {
-            points.add(bucketUpperBound);
+        if (bucketUpperBounds != null && bucketUpperBounds.length > 0) {
+            for (long bucketUpperBound : bucketUpperBounds) {
+                points.add(bucketUpperBound);
+            }
+        }
+
+        if (scaleSplitFactor > 1) {
+            Set<Long> additionalPoints = new HashSet<>();
+            Long lastPoint = null;
+
+            for (Long point : points) {
+                if (lastPoint != null) {
+                    long step = Math.max((point - lastPoint) / scaleSplitFactor, 1L);
+                    long additionalPoint = lastPoint + step;
+
+                    while (additionalPoint < point) {
+                        additionalPoints.add(additionalPoint);
+                        additionalPoint += step;
+                    }
+                }
+
+                lastPoint = point;
+            }
+
+            if (!additionalPoints.isEmpty()) {
+                points.addAll(additionalPoints);
+            }
         }
 
         return new ArrayList<>(points);

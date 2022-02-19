@@ -17,6 +17,7 @@ public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConf
     private int chunkCount = DEFAULT.chunkCount();
     private long chunkResetPeriodMs = DEFAULT.chunkResetPeriodMs();
     private Scale scale = DEFAULT.scale();
+    private int scaleSplitFactorForPercentiles = DEFAULT.scaleSplitFactorForPercentiles();
     private int maxLazyTreeLevel = DEFAULT.maxLazyTreeLevel();
 
     public static ScaleXHistogramImplConfigBuilder scale() {
@@ -90,6 +91,12 @@ public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConf
         return this;
     }
 
+    public ScaleXHistogramImplConfigBuilder scaleSplitFactorForPercentiles(int scaleSplitFactorForPercentiles) {
+        checkArgument(scaleSplitFactorForPercentiles > 0, "scaleSplitFactorForPercentiles must be > 0");
+        this.scaleSplitFactorForPercentiles = scaleSplitFactorForPercentiles;
+        return this;
+    }
+
     public ScaleXHistogramImplConfigBuilder noLazyTreeLevels() {
         return maxLazyTreeLevel(NO_LAZY_TREE_LEVELS);
     }
@@ -105,6 +112,7 @@ public class ScaleXHistogramImplConfigBuilder extends AbstractXHistogramImplConf
             chunkCount,
             chunkResetPeriodMs,
             scale,
+            scaleSplitFactorForPercentiles,
             maxLazyTreeLevel,
             totalsMeasurementType,
             bucketsMeasurementType,

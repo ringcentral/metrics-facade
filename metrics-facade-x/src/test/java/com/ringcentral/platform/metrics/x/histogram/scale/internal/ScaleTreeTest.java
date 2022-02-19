@@ -14,6 +14,7 @@ public class ScaleTreeTest {
     public void nodeForValue() {
         ScaleTree tree = ScaleTree.of(
             linear().steps(10, 9).withInf().build(),
+            1,
             new long[] {},
             4,
             true,
@@ -43,6 +44,7 @@ public class ScaleTreeTest {
 
         ScaleTree tree = ScaleTree.of(
             scale,
+            1,
             bucketUpperBounds,
             3,
             true,
@@ -90,10 +92,11 @@ public class ScaleTreeTest {
             assertThat(bucketSize, is(0L));
         }
 
-        scale = linear().steps(10, 9).build();
+        scale = linear().steps(90, 1).build();
 
         tree = ScaleTree.of(
             scale,
+            9,
             null,
             3,
             true,

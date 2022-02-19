@@ -56,6 +56,7 @@ public abstract class Chunk {
 
         this.tree = ScaleTree.of(
             config.scale(),
+            withPercentiles ? config.scaleSplitFactorForPercentiles() : 1,
             this.bucketUpperBounds,
             this.maxLazyTreeLevel,
             resettable,

@@ -49,7 +49,7 @@
 
         <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>
-            <artifactId>metrics-facade-x</artifactId>
+            <artifactId>metrics-facade-default-impl</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

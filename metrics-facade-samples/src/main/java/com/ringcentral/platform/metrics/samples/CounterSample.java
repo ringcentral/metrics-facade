@@ -2,8 +2,7 @@ package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.withCounter;
@@ -19,7 +18,7 @@ public class CounterSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new XMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         // Default config:
         //   no dimensions

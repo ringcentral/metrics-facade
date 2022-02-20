@@ -2,12 +2,11 @@ package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.reporters.jmx.JmxMetricsReporter;
 import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusHttpServer;
 import com.ringcentral.platform.metrics.timer.*;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
@@ -25,7 +24,7 @@ public class GettingStartedSample extends AbstractSample {
         // Create a registry
 
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new XMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         // Add reporters
         PrometheusMetricsExporter prometheusExporter = new PrometheusMetricsExporter(registry);

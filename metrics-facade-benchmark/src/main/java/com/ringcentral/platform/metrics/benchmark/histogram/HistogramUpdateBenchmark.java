@@ -4,11 +4,11 @@ import com.github.rollingmetrics.histogram.OverflowResolver;
 import com.github.rollingmetrics.histogram.hdr.RollingHdrHistogram;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.benchmark.utils.ValueIndex;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfig;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.scale.ScaleBuilder;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
-import com.ringcentral.platform.metrics.x.histogram.hdr.configs.HdrXHistogramImplConfig;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.*;
 import org.openjdk.jmh.runner.options.*;
@@ -18,24 +18,24 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleImpl;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.scale.CompositeScaleBuilder.first;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linear;
-import static com.ringcentral.platform.metrics.x.histogram.hdr.configs.HdrXHistogramImplConfigBuilder.hdrImpl;
-import static com.ringcentral.platform.metrics.x.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
-import static com.ringcentral.platform.metrics.x.histogram.scale.configs.ScaleXHistogramImplConfigBuilder.scaleImpl;
 import static java.util.concurrent.TimeUnit.*;
 
-@SuppressWarnings("DuplicatedCode")
 @BenchmarkMode({ Mode.Throughput, Mode.AverageTime })
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
+@SuppressWarnings("DuplicatedCode")
 public class HistogramUpdateBenchmark {
 
     @org.openjdk.jmh.annotations.State(Scope.Benchmark)
     public static class State {
-        // dw
+        // DW
         final MetricRegistry dwMetricRegistry = new DropwizardMetricRegistry();
 
         final Histogram dwHistogram = dwMetricRegistry.histogram(
@@ -51,11 +51,11 @@ public class HistogramUpdateBenchmark {
                 PERCENTILE_90,
                 PERCENTILE_99));
 
-        // X - HDR
-        final MetricRegistry xMetricRegistry = new XMetricRegistry();
+        // Default - HDR
+        final MetricRegistry defaultMetricRegistry = new DefaultMetricRegistry();
 
-        final Histogram hdrXHistogram_NeverReset = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "neverReset"),
+        final Histogram hdrHistogram_NeverReset = defaultMetricRegistry.histogram(
+            withName("hdrHistogram", "neverReset"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -72,19 +72,8 @@ public class HistogramUpdateBenchmark {
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
 
-        final Histogram hdrXHistogram_NeverReset_Count_Mean = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "neverReset", "count", "mean"),
-            () -> withHistogram()
-                .measurables(
-                    COUNT,
-                    MEAN)
-                .with(hdrImpl()
-                    .neverReset()
-                    .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
-                    .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
-
-        final Histogram hdrXHistogram_ResetOnSnapshot = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "resetOnSnapshot"),
+        final Histogram hdrHistogram_ResetOnSnapshot = defaultMetricRegistry.histogram(
+            withName("hdrHistogram", "resetOnSnapshot"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -101,19 +90,8 @@ public class HistogramUpdateBenchmark {
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
 
-        final Histogram hdrXHistogram_ResetOnSnapshot_Count_Mean = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "resetOnSnapshot", "count", "mean"),
-            () -> withHistogram()
-                .measurables(
-                    COUNT,
-                    MEAN)
-                .with(hdrImpl()
-                    .resetOnSnapshot()
-                    .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
-                    .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
-
-        final Histogram hdrXHistogram_ResetByChunks = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "resetByChunks"),
+        final Histogram hdrHistogram_ResetByChunks = defaultMetricRegistry.histogram(
+            withName("hdrHistogram", "resetByChunks"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -130,19 +108,8 @@ public class HistogramUpdateBenchmark {
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
 
-        final Histogram hdrXHistogram_ResetByChunks_Count_Mean = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "resetByChunks", "count", "mean"),
-            () -> withHistogram()
-                .measurables(
-                    COUNT,
-                    MEAN)
-                .with(hdrImpl()
-                    .resetByChunks()
-                    .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
-                    .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
-
-        final Histogram hdrXHistogram_ResetByChunks_3_Digits = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "resetByChunks", "3digits"),
+        final Histogram hdrHistogram_ResetByChunks_3_Digits = defaultMetricRegistry.histogram(
+            withName("hdrHistogram", "resetByChunks", "3digits"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -159,20 +126,9 @@ public class HistogramUpdateBenchmark {
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
 
-        final Histogram hdrXHistogram_ResetByChunks_Count_Mean_3_Digits = xMetricRegistry.histogram(
-            withName("hdrXHistogram", "resetByChunks", "count", "mean", "3digits"),
-            () -> withHistogram()
-                .measurables(
-                    COUNT,
-                    MEAN)
-                .with(hdrImpl()
-                    .significantDigits(3)
-                    .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
-                    .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
-
-        // X - Scale
-        final Histogram scaleXHistogram_NeverReset = xMetricRegistry.histogram(
-            withName("scaleXHistogram", "neverReset"),
+        // Default - Scale
+        final Histogram scaleHistogram_NeverReset = defaultMetricRegistry.histogram(
+            withName("scaleHistogram", "neverReset"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -188,8 +144,8 @@ public class HistogramUpdateBenchmark {
                     .neverReset()
                     .with(scale_1())));
 
-        final Histogram scaleXHistogram_ResetOnSnapshot = xMetricRegistry.histogram(
-            withName("scaleXHistogram", "resetOnSnapshot"),
+        final Histogram scaleHistogram_ResetOnSnapshot = defaultMetricRegistry.histogram(
+            withName("scaleHistogram", "resetOnSnapshot"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -205,18 +161,8 @@ public class HistogramUpdateBenchmark {
                     .resetOnSnapshot()
                     .scale(scale_1())));
 
-        final Histogram scaleXHistogram_ResetOnSnapshot_Count_Mean = xMetricRegistry.histogram(
-            withName("scaleXHistogram", "resetOnSnapshot", "count", "mean"),
-            () -> withHistogram()
-                .measurables(
-                    COUNT,
-                    MEAN)
-                .with(scaleImpl()
-                    .resetOnSnapshot()
-                    .scale(scale_1())));
-
-        final Histogram scaleXHistogram_ResetByChunks = xMetricRegistry.histogram(
-            withName("scaleXHistogram", "resetByChunks"),
+        final Histogram scaleHistogram_ResetByChunks = defaultMetricRegistry.histogram(
+            withName("scaleHistogram", "resetByChunks"),
             () -> withHistogram()
                 .measurables(
                     COUNT,
@@ -236,14 +182,14 @@ public class HistogramUpdateBenchmark {
         final com.codahale.metrics.Histogram rollingHdrHistogram_ResetByChunks = new com.codahale.metrics.Histogram(
             new RollingHdrReservoir(
                 RollingHdrHistogram.builder()
-                .resetReservoirPeriodicallyByChunks(
-                    Duration.ofMillis(HdrXHistogramImplConfig.DEFAULT.chunkResetPeriodMs() * HdrXHistogramImplConfig.DEFAULT.chunkCount()),
-                    HdrXHistogramImplConfig.DEFAULT.chunkCount())
-                .withHighestTrackableValue(HOURS.toNanos(3), OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE)
-                .withLowestDiscernibleValue(MILLISECONDS.toNanos(1))
-                .build()));
+                    .resetReservoirPeriodicallyByChunks(
+                        Duration.ofMillis(HdrHistogramImplConfig.DEFAULT.chunkResetPeriodMs() * HdrHistogramImplConfig.DEFAULT.chunkCount()),
+                        HdrHistogramImplConfig.DEFAULT.chunkCount())
+                    .withHighestTrackableValue(HOURS.toNanos(3), OverflowResolver.REDUCE_TO_HIGHEST_TRACKABLE)
+                    .withLowestDiscernibleValue(MILLISECONDS.toNanos(1))
+                    .build()));
 
-        // values
+        // Values
         final long[] values = makeValues_1();
         final ThreadLocal<ValueIndex> valueIndex = ThreadLocal.withInitial(() -> new ValueIndex(values.length));
     }
@@ -325,72 +271,47 @@ public class HistogramUpdateBenchmark {
     }
 
     @Benchmark
-    public void dwHistogram_Update(State state) {
+    public void dwHistogram(State state) {
         state.dwHistogram.update(value(state));
     }
 
-//    @Benchmark
-//    public void hdrXHistogram_NeverReset_Update(State state) {
-//        state.hdrXHistogram_NeverReset.update(value(state));
-//    }
-
-//    @Benchmark
-//    public void hdrXHistogram_NeverReset_Count_Mean_Update(State state) {
-//        state.hdrXHistogram_NeverReset_Count_Mean.update(value(state));
-//    }
-
-//    @Benchmark
-//    public void hdrXHistogram_ResetOnSnapshot_Update(State state) {
-//        state.hdrXHistogram_ResetOnSnapshot.update(value(state));
-//    }
-
-//    @Benchmark
-//    public void hdrXHistogram_ResetOnSnapshot_Count_Mean_Update(State state) {
-//        state.hdrXHistogram_ResetOnSnapshot_Count_Mean.update(value(state));
-//    }
-
     @Benchmark
-    public void hdrXHistogram_ResetByChunks_Update(State state) {
-        state.hdrXHistogram_ResetByChunks.update(value(state));
-    }
-
-//    @Benchmark
-//    public void hdrXHistogram_ResetByChunks_Count_Mean_Update(State state) {
-//        state.hdrXHistogram_ResetByChunks_Count_Mean.update(value(state));
-//    }
-//
-//    @Benchmark
-//    public void hdrXHistogram_ResetByChunks_3_Digits_Update(State state) {
-//        state.hdrXHistogram_ResetByChunks_3_Digits.update(value(state));
-//    }
-//
-//    @Benchmark
-//    public void hdrXHistogram_ResetByChunks_Count_Mean_3_Digits_Update(State state) {
-//        state.hdrXHistogram_ResetByChunks_Count_Mean_3_Digits.update(value(state));
-//    }
-//
-//    @Benchmark
-//    public void scaleXHistogram_NeverReset_Update(State state) {
-//        state.scaleXHistogram_NeverReset.update(value(state));
-//    }
-
-//    @Benchmark
-//    public void scaleXHistogram_ResetOnSnapshot_Update(State state) {
-//        state.scaleXHistogram_ResetOnSnapshot.update(value(state));
-//    }
-
-//    @Benchmark
-//    public void scaleXHistogram_ResetOnSnapshot_Count_Mean_Update(State state) {
-//        state.scaleXHistogram_ResetOnSnapshot_Count_Mean.update(value(state));
-//    }
-
-    @Benchmark
-    public void scaleXHistogram_ResetByChunks_Update(State state) {
-        state.scaleXHistogram_ResetByChunks.update(value(state));
+    public void hdrHistogram_NeverReset(State state) {
+        state.hdrHistogram_NeverReset.update(value(state));
     }
 
     @Benchmark
-    public void rollingHdrHistogram_ResetByChunks_Update(State state) {
+    public void hdrHistogram_ResetOnSnapshot(State state) {
+        state.hdrHistogram_ResetOnSnapshot.update(value(state));
+    }
+
+    @Benchmark
+    public void hdrHistogram_ResetByChunks(State state) {
+        state.hdrHistogram_ResetByChunks.update(value(state));
+    }
+
+    @Benchmark
+    public void hdrHistogram_ResetByChunks_3_Digits(State state) {
+        state.hdrHistogram_ResetByChunks_3_Digits.update(value(state));
+    }
+
+    @Benchmark
+    public void scaleHistogram_NeverReset(State state) {
+        state.scaleHistogram_NeverReset.update(value(state));
+    }
+
+    @Benchmark
+    public void scaleHistogram_ResetOnSnapshot(State state) {
+        state.scaleHistogram_ResetOnSnapshot.update(value(state));
+    }
+
+    @Benchmark
+    public void scaleHistogram_ResetByChunks(State state) {
+        state.scaleHistogram_ResetByChunks.update(value(state));
+    }
+
+    @Benchmark
+    public void rollingHdrHistogram_ResetByChunks(State state) {
         state.rollingHdrHistogram_ResetByChunks.update(value(state));
     }
 
@@ -401,7 +322,7 @@ public class HistogramUpdateBenchmark {
                 .warmupIterations(4)
                 .measurementIterations(4)
                 .measurementTime(TimeValue.seconds(45))
-                .threads(1)
+                .threads(12)
                 .forks(1)
                 .build();
             try {

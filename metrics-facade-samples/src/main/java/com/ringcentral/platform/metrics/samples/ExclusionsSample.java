@@ -1,9 +1,8 @@
 package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.timer.Timer;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
@@ -15,7 +14,7 @@ public class ExclusionsSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new XMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         Timer t = registry.timer(
             withName("ActiveHealthChecker", "healthCheck"),

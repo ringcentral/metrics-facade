@@ -1,16 +1,15 @@
 package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.producers.*;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 @SuppressWarnings("ALL")
 public class MetricsProducersSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new XMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         // Adds some system metrics
         new SystemMetricsProducer().produceMetrics(registry);

@@ -1,8 +1,8 @@
 package com.ringcentral.platform.metrics.samples.histogram;
 
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
@@ -20,8 +20,8 @@ public class HistogramSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        XMetricRegistry registry = new XMetricRegistry();
-        registry.extendWith(LastValueXHistogramImplConfig.class, new LastValueXHistogramImplMaker());
+        DefaultMetricRegistry registry = new DefaultMetricRegistry();
+        registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
 
         // Default config:
         //   no dimensions

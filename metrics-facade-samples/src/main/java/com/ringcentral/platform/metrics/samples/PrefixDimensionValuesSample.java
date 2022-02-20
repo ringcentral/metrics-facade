@@ -1,20 +1,17 @@
 package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.timer.Timer;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
 
 import static com.ringcentral.platform.metrics.MetricModBuilder.modifying;
 import static com.ringcentral.platform.metrics.PrefixDimensionValuesMetricKey.withKey;
 import static com.ringcentral.platform.metrics.configs.builders.BaseMetricConfigBuilder.withMetric;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
-import static com.ringcentral.platform.metrics.names.MetricName.name;
-import static com.ringcentral.platform.metrics.names.MetricName.withName;
+import static com.ringcentral.platform.metrics.names.MetricName.*;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.metricsMatchingNameMask;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
 
@@ -26,7 +23,7 @@ public class PrefixDimensionValuesSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new XMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         registry.postConfigure(
             metricsMatchingNameMask("ActiveHealthChecker.**"),

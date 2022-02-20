@@ -1,9 +1,9 @@
 package com.ringcentral.platform.metrics.benchmark.rate;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.rate.Rate;
-import com.ringcentral.platform.metrics.x.XMetricRegistry;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.*;
 import org.openjdk.jmh.runner.options.*;
@@ -21,55 +21,51 @@ public class RateBenchmark {
 
     @org.openjdk.jmh.annotations.State(Scope.Benchmark)
     public static class State {
-        // dw
+        // DW
         final MetricRegistry dwMetricRegistry = new DropwizardMetricRegistry();
 
         final Rate dwRate = dwMetricRegistry.rate(
             withName("dwRate"),
             () -> withRate().measurables(COUNT, MEAN_RATE, ONE_MINUTE_RATE, FIVE_MINUTES_RATE, FIFTEEN_MINUTES_RATE));
 
-        // x
-        final MetricRegistry xMetricRegistry = new XMetricRegistry();
+        // Default
+        final MetricRegistry defaultMetricRegistry = new DefaultMetricRegistry();
 
-        final Rate xRate_allMeasurables = xMetricRegistry.rate(
-            withName("xRate", "allMeasurables"),
+        final Rate rate_allMeasurables = defaultMetricRegistry.rate(
+            withName("rate", "allMeasurables"),
             () -> withRate().measurables(COUNT, MEAN_RATE, ONE_MINUTE_RATE, FIVE_MINUTES_RATE, FIFTEEN_MINUTES_RATE));
 
-        final Rate xRate_count = xMetricRegistry.rate(
-            withName("xRate", "count"),
+        final Rate rate_count = defaultMetricRegistry.rate(
+            withName("rate", "count"),
             () -> withRate().measurables(COUNT));
 
-        final Rate xRate_count_oneMinuteRate = xMetricRegistry.rate(
-            withName("xRate", "count", "oneMinuteRate"),
+        final Rate rate_count_oneMinuteRate = defaultMetricRegistry.rate(
+            withName("rate", "count", "oneMinuteRate"),
             () -> withRate().measurables(COUNT, ONE_MINUTE_RATE));
     }
 
     @Benchmark
     @Group("dwRate")
-    // @GroupThreads(16)
-    public void zdwRate_mark(State rates) {
+    public void dwRate_mark(State rates) {
         rates.dwRate.mark();
     }
 
     @Benchmark
-    @Group("xRate_allMeasurables")
-    // @GroupThreads(16)
-    public void xRate_allMeasurables(State rates) {
-        rates.xRate_allMeasurables.mark();
+    @Group("rate_allMeasurables")
+    public void rate_allMeasurables(State rates) {
+        rates.rate_allMeasurables.mark();
     }
 
     @Benchmark
-    @Group("xRate_count")
-    // @GroupThreads(16)
-    public void xRate_count(State state) {
-        state.xRate_count.mark();
+    @Group("rate_count")
+    public void rate_count(State state) {
+        state.rate_count.mark();
     }
 
     @Benchmark
-    @Group("xRate_count_oneMinuteRate")
-    // @GroupThreads(16)
-    public void xRate_count_oneMinuteRate(State state) {
-        state.xRate_count_oneMinuteRate.mark();
+    @Group("rate_count_oneMinuteRate")
+    public void rate_count_oneMinuteRate(State state) {
+        state.rate_count_oneMinuteRate.mark();
     }
 
     public static class SixteenThreads {

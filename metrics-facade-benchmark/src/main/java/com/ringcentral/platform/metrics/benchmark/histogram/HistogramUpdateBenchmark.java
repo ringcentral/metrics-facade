@@ -27,6 +27,7 @@ import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.scale.CompositeScaleBuilder.first;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linear;
 import static java.util.concurrent.TimeUnit.*;
+import static org.openjdk.jmh.runner.options.TimeValue.seconds;
 
 @BenchmarkMode({ Mode.Throughput, Mode.AverageTime })
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
@@ -321,7 +322,7 @@ public class HistogramUpdateBenchmark {
                 .include(HistogramUpdateBenchmark.class.getSimpleName())
                 .warmupIterations(4)
                 .measurementIterations(4)
-                .measurementTime(TimeValue.seconds(45))
+                .measurementTime(seconds(45))
                 .threads(12)
                 .forks(1)
                 .build();

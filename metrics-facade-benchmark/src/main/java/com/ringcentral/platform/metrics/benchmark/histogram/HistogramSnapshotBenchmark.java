@@ -27,6 +27,7 @@ import static com.ringcentral.platform.metrics.scale.CompositeScaleBuilder.first
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linear;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.*;
+import static org.openjdk.jmh.runner.options.TimeValue.seconds;
 
 @BenchmarkMode({ Mode.Throughput, Mode.AverageTime })
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
@@ -274,7 +275,7 @@ public class HistogramSnapshotBenchmark {
                 .include(HistogramSnapshotBenchmark.class.getSimpleName())
                 .warmupIterations(1)
                 .measurementIterations(2)
-                .measurementTime(TimeValue.seconds(15))
+                .measurementTime(seconds(15))
                 .threads(1)
                 .forks(1)
                 .build();

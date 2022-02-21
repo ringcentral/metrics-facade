@@ -1,4 +1,4 @@
-name: Deploy to Maven Central
+name: Deploy to Maven Central - No Spring
 
 on:
   workflow_dispatch:

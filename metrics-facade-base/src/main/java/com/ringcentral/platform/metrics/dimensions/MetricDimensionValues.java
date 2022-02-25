@@ -28,6 +28,21 @@ public class MetricDimensionValues {
         return new MetricDimensionValues(values);
     }
 
+    public static MetricDimensionValues dimensionValues(MetricDimensionValues prefix, MetricDimensionValue... suffix) {
+        if (suffix == null || suffix.length == 0) {
+            return prefix;
+        }
+
+        if (prefix == null || prefix.isEmpty()) {
+            return dimensionValues(suffix);
+        }
+
+        List<MetricDimensionValue> values = new ArrayList<>(prefix.size() + suffix.length);
+        values.addAll(prefix.list());
+        values.addAll(List.of(suffix));
+        return new MetricDimensionValues(values);
+    }
+
     private MetricDimensionValues(Collection<? extends MetricDimensionValue> values) {
         this.list = List.copyOf(values);
     }

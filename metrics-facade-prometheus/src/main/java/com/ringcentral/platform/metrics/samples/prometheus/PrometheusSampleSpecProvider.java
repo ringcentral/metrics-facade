@@ -9,22 +9,17 @@ import com.ringcentral.platform.metrics.samples.SampleSpecProvider;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
 import com.ringcentral.platform.metrics.var.*;
 
+import java.util.concurrent.TimeUnit;
+
+import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.NANOS_PER_SEC;
+import static java.util.concurrent.TimeUnit.*;
+
 public class PrometheusSampleSpecProvider implements SampleSpecProvider<
     PrometheusSampleSpec,
     PrometheusInstanceSampleSpec> {
 
     // ms to sec
-    public static final double DEFAULT_DURATION_FACTOR = 1.0 / 1000.0;
-
-    private final double durationFactor;
-
-    public PrometheusSampleSpecProvider() {
-        this(DEFAULT_DURATION_FACTOR);
-    }
-
-    public PrometheusSampleSpecProvider(double durationFactor) {
-        this.durationFactor = durationFactor;
-    }
+    public static final double MS_DURATION_FACTOR = (1.0 * MILLISECONDS.toNanos(1L)) / NANOS_PER_SEC;
 
     @Override
     public PrometheusSampleSpec sampleSpecFor(
@@ -71,7 +66,14 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
                 || measurable instanceof Histogram.Mean
                 || measurable instanceof Histogram.Percentile) {
 
-                value *= durationFactor;
+                TimerInstance timerInstance = (TimerInstance)instance;
+                TimeUnit unit = timerInstance.durationUnit();
+
+                if (unit == MILLISECONDS) {
+                    value *= MS_DURATION_FACTOR;
+                } else if (unit != SECONDS) {
+                    value *= (1.0 * unit.toNanos(1L)) / NANOS_PER_SEC;
+                }
             }
         }
 

@@ -18,6 +18,7 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.rate.Rate.*;
 import static com.ringcentral.platform.metrics.timer.Timer.DURATION_UNIT;
 import static com.ringcentral.platform.metrics.var.longVar.LongVar.LONG_VALUE;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
@@ -222,6 +223,7 @@ public class PrometheusSampleSpecProviderTest {
 
         // timer
         instance = mock(TimerInstance.class);
+        when(((TimerInstance)instance).durationUnit()).thenReturn(MILLISECONDS);
 
         instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,

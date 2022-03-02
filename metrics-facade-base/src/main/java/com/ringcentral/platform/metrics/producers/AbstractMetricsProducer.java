@@ -11,11 +11,11 @@ import com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVar
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.ObjectVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder.*;
-import static java.util.Objects.*;
+import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder.doubleVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.longVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.ObjectVarConfigBuilder.objectVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder.stringVarConfigBuilder;
+import static java.util.Objects.requireNonNull;
 
 public abstract class AbstractMetricsProducer implements MetricsProducer {
 

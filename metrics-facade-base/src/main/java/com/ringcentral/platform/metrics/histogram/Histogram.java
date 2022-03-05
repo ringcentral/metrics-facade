@@ -15,7 +15,6 @@ import static com.ringcentral.platform.metrics.scale.ExpScaleBuilder.expScale;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
 import static com.ringcentral.platform.metrics.utils.ObjectUtils.hashCodeFor;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
-import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.NANOS_PER_SEC;
 import static java.lang.Math.*;
 import static java.util.concurrent.TimeUnit.*;
 import static java.util.stream.Collectors.toSet;
@@ -288,15 +287,16 @@ public interface Histogram extends Meter {
                 this.upperBoundAsStringWithUnit = upperBoundAsString(upperBoundInUnits) + upperBoundUnitAsString;
             }
 
+            TimeUnit resolvedUpperBoundUnit = upperBoundUnit != null ? upperBoundUnit : NANOSECONDS;
+
             this.upperBoundSecAsString = String.valueOf(
                 Double.isInfinite(upperBoundInUnits) || upperBoundUnit == SECONDS ?
                 upperBoundInUnits :
-                upperBoundInUnits * ((1.0 * (upperBoundUnit != null ? upperBoundUnit : NANOSECONDS).toNanos(1L)) / NANOS_PER_SEC));
+                // instead of upperBoundInUnits * ((1.0 * (upperBoundUnit != null ? upperBoundUnit : NANOSECONDS).toNanos(1L)) / NANOS_PER_SEC)
+                // for example, 1.7000000000000002 -> 1.7
+                BigDecimal.valueOf(upperBoundInUnits).multiply(BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000000001))).doubleValue());
 
-            this.hashCode = hashCodeFor(
-                "Histogram.Bucket",
-                upperBoundInUnits,
-                upperBoundUnit != null ? upperBoundUnit : NANOSECONDS);
+            this.hashCode = hashCodeFor("Histogram.Bucket", upperBoundInUnits, resolvedUpperBoundUnit);
         }
 
         static String upperBoundAsString(double b) {

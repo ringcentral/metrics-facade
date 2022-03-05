@@ -19,7 +19,7 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
     PrometheusInstanceSampleSpec> {
 
     // ms to sec
-    public static final double MS_DURATION_FACTOR = (1.0 * MILLISECONDS.toNanos(1L)) / NANOS_PER_SEC;
+    public static final double MS_TO_SEC_FACTOR = (1.0 * MILLISECONDS.toNanos(1L)) / NANOS_PER_SEC;
 
     @Override
     public PrometheusSampleSpec sampleSpecFor(
@@ -70,7 +70,7 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
                 TimeUnit unit = timerInstance.durationUnit();
 
                 if (unit == MILLISECONDS) {
-                    value *= MS_DURATION_FACTOR;
+                    value *= MS_TO_SEC_FACTOR;
                 } else if (unit != SECONDS) {
                     value *= (1.0 * unit.toNanos(1L)) / NANOS_PER_SEC;
                 }

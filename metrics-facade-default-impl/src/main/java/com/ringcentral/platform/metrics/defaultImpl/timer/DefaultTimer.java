@@ -67,7 +67,7 @@ public class DefaultTimer extends AbstractTimer<TimerImpl> {
         public static final double DURATION_FACTOR = 1.0 / MILLISECONDS.toNanos(1L);
 
         public static final MVP COUNT_VALUE_PROVIDER = (t, s) -> s.count();
-        public static final MVP TOTAL_SUM_VALUE_PROVIDER = (t, s) -> s.totalSum();
+        public static final MVP TOTAL_SUM_VALUE_PROVIDER = (t, s) -> s.totalSum() * DURATION_FACTOR;
         public static final MVP MEAN_RATE_VALUE_PROVIDER = (t, s) -> t.rate().meanRate();
         public static final MVP ONE_MINUTE_RATE_VALUE_PROVIDER = (t, s) -> t.rate().oneMinuteRate();
         public static final MVP FIVE_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fiveMinutesRate();

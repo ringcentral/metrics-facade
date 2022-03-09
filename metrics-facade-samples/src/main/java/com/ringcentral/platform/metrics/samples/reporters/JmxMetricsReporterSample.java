@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.samples.reporters;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.infoProviders.MaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -21,7 +22,8 @@ import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 public class JmxMetricsReporterSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         // Default config
         // registry.addListener(new JmxMetricsReporter());

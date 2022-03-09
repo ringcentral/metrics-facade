@@ -11,15 +11,12 @@ import com.ringcentral.platform.metrics.var.*;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.NANOS_PER_SEC;
+import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.*;
 import static java.util.concurrent.TimeUnit.*;
 
 public class PrometheusSampleSpecProvider implements SampleSpecProvider<
     PrometheusSampleSpec,
     PrometheusInstanceSampleSpec> {
-
-    // ms to sec
-    public static final double MS_TO_SEC_FACTOR = (1.0 * MILLISECONDS.toNanos(1L)) / NANOS_PER_SEC;
 
     @Override
     public PrometheusSampleSpec sampleSpecFor(
@@ -72,7 +69,7 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
                 if (unit == MILLISECONDS) {
                     value *= MS_TO_SEC_FACTOR;
                 } else if (unit != SECONDS) {
-                    value *= (1.0 * unit.toNanos(1L)) / NANOS_PER_SEC;
+                    value = convertTimeUnit(value, unit, SECONDS);
                 }
             }
         }

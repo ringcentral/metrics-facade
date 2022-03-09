@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.samples.garm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.infoProviders.MaskTreeMetricNamedInfoProvider;
@@ -50,7 +51,8 @@ public class GarmSample extends AbstractSample {
     static final MetricDimension METHOD = new MetricDimension("method");
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         // Defaults
         registry.postConfigure(allMetrics(), modifying()

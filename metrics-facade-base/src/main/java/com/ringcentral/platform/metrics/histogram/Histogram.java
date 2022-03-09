@@ -15,6 +15,7 @@ import static com.ringcentral.platform.metrics.scale.ExpScaleBuilder.expScale;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
 import static com.ringcentral.platform.metrics.utils.ObjectUtils.hashCodeFor;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.convertTimeUnit;
 import static java.lang.Math.*;
 import static java.util.concurrent.TimeUnit.*;
 import static java.util.stream.Collectors.toSet;
@@ -235,6 +236,7 @@ public interface Histogram extends Meter {
         private final boolean negativeInf;
         private final String upperBoundAsString;
         private final String upperBoundAsStringWithUnit;
+        private final Map<TimeUnit, String> unitToUpperBoundAsStringWithUnit = new EnumMap<>(TimeUnit.class);
         private final String upperBoundSecAsString;
         private final int hashCode;
 
@@ -262,39 +264,63 @@ public interface Histogram extends Meter {
             this.inf = (this.upperBoundAsLong == Long.MAX_VALUE);
             this.negativeInf = (this.upperBoundAsLong == Long.MIN_VALUE);
             this.upperBoundAsString = upperBoundAsString(upperBound);
+            TimeUnit resolvedUpperBoundUnit = upperBoundUnit != null ? upperBoundUnit : NANOSECONDS;
 
             if (Double.isInfinite(upperBoundInUnits)) {
                 this.upperBoundAsStringWithUnit = upperBoundAsString(upperBoundInUnits);
-            } else {
-                String upperBoundUnitAsString;
 
-                if (upperBoundUnit == null || upperBoundUnit == NANOSECONDS) {
-                    upperBoundUnitAsString = "ns";
-                } else if (upperBoundUnit == MICROSECONDS) {
-                    upperBoundUnitAsString = "us";
-                } else if (upperBoundUnit == MILLISECONDS) {
-                    upperBoundUnitAsString = "ms";
-                } else if (upperBoundUnit == SECONDS) {
-                    upperBoundUnitAsString = "sec";
-                } else if (upperBoundUnit == HOURS) {
-                    upperBoundUnitAsString = "h";
-                } else if (upperBoundUnit == DAYS) {
-                    upperBoundUnitAsString = "d";
-                } else  {
-                    upperBoundUnitAsString = upperBoundUnit.name().toLowerCase(Locale.ENGLISH);
+                for (TimeUnit unit : TimeUnit.values()) {
+                    unitToUpperBoundAsStringWithUnit.put(unit, this.upperBoundAsStringWithUnit);
+                }
+            } else {
+                for (TimeUnit unit : TimeUnit.values()) {
+                    String unitAsString;
+
+                    if (unit == NANOSECONDS) {
+                        unitAsString = "ns";
+                    } else if (unit == MICROSECONDS) {
+                        unitAsString = "us";
+                    } else if (unit == MILLISECONDS) {
+                        unitAsString = "ms";
+                    } else if (unit == SECONDS) {
+                        unitAsString = "sec";
+                    } else if (unit == HOURS) {
+                        unitAsString = "h";
+                    } else if (unit == DAYS) {
+                        unitAsString = "d";
+                    } else  {
+                        unitAsString = unit.name().toLowerCase(Locale.ENGLISH);
+                    }
+
+                    double convertedUpperBoundInUnits;
+
+                    if (unit == resolvedUpperBoundUnit) {
+                        convertedUpperBoundInUnits = upperBoundInUnits;
+                    } else if (unit == MILLISECONDS) {
+                        convertedUpperBoundInUnits = BigDecimal.valueOf(upperBoundInUnits).multiply(
+                            BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000001))).doubleValue();
+                    } else if (unit == SECONDS) {
+                        convertedUpperBoundInUnits = BigDecimal.valueOf(upperBoundInUnits).multiply(
+                            BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000000001))).doubleValue();
+                    } else {
+                        convertedUpperBoundInUnits = convertTimeUnit(upperBoundInUnits, resolvedUpperBoundUnit, unit);
+                    }
+
+                    unitToUpperBoundAsStringWithUnit.put(
+                        unit,
+                        upperBoundAsString(convertedUpperBoundInUnits) + unitAsString);
                 }
 
-                this.upperBoundAsStringWithUnit = upperBoundAsString(upperBoundInUnits) + upperBoundUnitAsString;
+                this.upperBoundAsStringWithUnit = unitToUpperBoundAsStringWithUnit.get(resolvedUpperBoundUnit);
             }
-
-            TimeUnit resolvedUpperBoundUnit = upperBoundUnit != null ? upperBoundUnit : NANOSECONDS;
 
             this.upperBoundSecAsString = String.valueOf(
                 Double.isInfinite(upperBoundInUnits) || upperBoundUnit == SECONDS ?
                 upperBoundInUnits :
                 // instead of upperBoundInUnits * ((1.0 * (upperBoundUnit != null ? upperBoundUnit : NANOSECONDS).toNanos(1L)) / NANOS_PER_SEC)
                 // for example, 1.7000000000000002 -> 1.7
-                BigDecimal.valueOf(upperBoundInUnits).multiply(BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000000001))).doubleValue());
+                BigDecimal.valueOf(upperBoundInUnits).multiply(
+                    BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000000001))).doubleValue());
 
             this.hashCode = hashCodeFor("Histogram.Bucket", upperBoundInUnits, resolvedUpperBoundUnit);
         }
@@ -355,6 +381,10 @@ public interface Histogram extends Meter {
 
         public String upperBoundAsStringWithUnit() {
             return upperBoundAsStringWithUnit;
+        }
+
+        public String upperBoundAsStringWithUnit(TimeUnit unit) {
+            return unitToUpperBoundAsStringWithUnit.get(unit);
         }
 
         public String upperBoundSecAsString() {

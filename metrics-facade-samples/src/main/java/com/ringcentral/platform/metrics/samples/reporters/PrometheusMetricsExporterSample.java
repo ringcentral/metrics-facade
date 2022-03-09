@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.samples.reporters;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.*;
 import com.ringcentral.platform.metrics.reporters.jmx.JmxMetricsReporter;
 import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter;
@@ -26,7 +26,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class PrometheusMetricsExporterSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
 
         // Default config
         // PrometheusMetricsExporter prometheusMetricsExporter = new PrometheusMetricsExporter(registry);

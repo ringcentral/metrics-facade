@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.samples.reporters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.*;
 import com.ringcentral.platform.metrics.reporters.telegraf.TelegrafMetricsJsonExporter;
@@ -21,7 +22,8 @@ import static com.ringcentral.platform.metrics.samples.DefaultSampleSpec.sampleS
 public class TelegrafMetricsJsonExporterSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
         DefaultInstanceSampleSpecModsProvider miSampleSpecModsProvider = new DefaultInstanceSampleSpecModsProvider();
 
         miSampleSpecModsProvider.addMod(

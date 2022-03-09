@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.samples.micrometer;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.micrometer.MfMeterRegistry;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
@@ -15,7 +16,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class MicrometerSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
-        MetricRegistry registry = new DropwizardMetricRegistry();
+        // MetricRegistry registry = new DropwizardMetricRegistry();
+        MetricRegistry registry = new DefaultMetricRegistry();
         export(registry);
 
         MfMeterRegistry mmRegistry = new MfMeterRegistry(registry, Clock.SYSTEM);

@@ -8,6 +8,7 @@ import com.ringcentral.platform.metrics.timer.*;
 import com.ringcentral.platform.metrics.var.*;
 
 import static java.util.Locale.ENGLISH;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class DefaultMeasurableNameProvider implements MeasurableNameProvider {
 
@@ -58,7 +59,13 @@ public class DefaultMeasurableNameProvider implements MeasurableNameProvider {
             return "duration." + p.quantileDecimalPartAsString() + "_percentile";
         } else if (measurable instanceof Histogram.Bucket) {
             Histogram.Bucket b = (Histogram.Bucket)measurable;
-            return "duration." + b.upperBoundAsStringWithUnit() + "_bucket";
+
+            String upperBoundAsStringWithUnit =
+                b.upperBoundUnit() != null ?
+                b.upperBoundAsStringWithUnit() :
+                b.upperBoundAsStringWithUnit(MILLISECONDS);
+
+            return "duration." + upperBoundAsStringWithUnit + "_bucket";
         } else if (measurable instanceof Timer.DurationUnit) {
             return "duration.unit";
         } else {

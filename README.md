@@ -356,29 +356,29 @@ subscribe to an event of adding/removing a metric.*
 A metric registry is represented by the ```MetricRegistry``` class.  
 
 ```MetricRegistry``` implementations provide metric implementations.    
-Currently there is only one implementation of ```MetricRegistry``` is supported -    
-```DropwizardMetricRegistry``` based on https://metrics.dropwizard.io.    
-In the next versions, we plan to abandon this implementation in favor of our own  
-(possibly based on existing solutions).  
+Currently, the following implementations are supported:
+- ```DefaultMetricRegistry```
+- ```DropwizardMetricRegistry``` based on https://metrics.dropwizard.io  
+In the next versions, we plan to abandon this implementation in favor of ```DefaultMetricRegistry```
 
 Let us move on to practice and show how to implement the requirements from example 1      
-using Metrics Facade. First of all, you need to add a number of dependencies:        
+using Metrics Facade. First, you need to add a number of dependencies:        
 
 Base (Core):
 ```xml
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
-```MetricRegistry``` implementation (for example, ```DropwizardMetricRegistry```):
+```MetricRegistry``` implementation (for example, ```DefaultMetricRegistry```):
 ```xml
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
-    <artifactId>metrics-facade-dropwizard</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <artifactId>metrics-facade-default-impl</artifactId>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -387,7 +387,7 @@ Metrics reporter(s) (for example, ```PrometheusMetricsExporter```):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -406,7 +406,7 @@ MetricDimension PORT = new MetricDimension("port");
 and add the metric using```MetricRegistry```:      
 
 ```java
-MetricRegistry registry = new DropwizardMetricRegistry();  
+MetricRegistry registry = new DefaultMetricRegistry();  
 ...
 
 Timer httpClientRequestTimer = registry.timer(
@@ -458,7 +458,7 @@ By default, [Timer](#timer) measures the following values:
 - ```Timer.DURATION_UNIT```
 
 However, Metrics Facade allows for *extremely flexible configuration of metrics*.      
-In particular, for each metrics you can specify a set of values to be ***calculated*** and ***exported***.  
+In particular, for each metric you can specify a set of values to be ***calculated*** and ***exported***.  
 
 Suppose, for example, that you have multiple timers in your project, and for most of them    
 (and the number of timers in an average project can reach several dozen)      
@@ -712,7 +712,7 @@ You can find the complete sample ```GettingStartedSample.java``` in the followin
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-samples</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -1241,6 +1241,7 @@ Supported measurables:
 - ```Histogram.MEAN```
 - ```Histogram.STANDARD_DEVIATION```
 - ```Histogram.Percentile``` (including the predefined ```Histogram.PERCENTILE_5```, ```Histogram.PERCENTILE_10```, ...)
+- ```Histogram.Bucket``` (including the predefined ```Histogram.MS_10_BUCKET```, ```Histogram.SEC_1_BUCKET```, ...)  
 
 #### Histogram Config
 
@@ -1287,6 +1288,7 @@ Histogram fullConfigHistogram = registry.histogram(
         // the properties specific to the metrics implementation
         // default: no properties
         .put("key_1", "value_1_1")
+        //.with(lastValueImpl())
 
         .allSlice()
             // options: disable(), enabled(boolean)
@@ -1327,7 +1329,7 @@ Histogram fullConfigHistogram = registry.histogram(
 
                 // options: noMeasurables()
                 // default: the slice's measurables { COUNT, MEAN, MAX }
-                .measurables(COUNT, MEAN, PERCENTILE_95, MAX)
+                .measurables(COUNT, MEAN, PERCENTILE_95, MAX, Bucket.of(1), Bucket.of(2))
 
                 // the properties specific to the metrics implementation
                 // default: no properties (no overrides)
@@ -1356,7 +1358,14 @@ Histogram fullConfigHistogram = registry.histogram(
 
             // options: noMeasurables()
             // default: the metric's measurables { COUNT, MEAN }
-            .measurables(COUNT, MEAN, PERCENTILE_50, PERCENTILE_95, MAX)
+            .measurables(
+                COUNT,
+                TOTAL_SUM,
+                MEAN,
+                PERCENTILE_50,
+                PERCENTILE_95,
+                MAX,
+                Buckets.of(points(0, 1, 24, 25, 30, 49, 50, 55)))
 
             // options: disableTotal(), noTotal(), totalEnabled(boolean)
             // default: enabled
@@ -1404,6 +1413,7 @@ Supported measurables:
 - ```Histogram.MEAN```
 - ```Histogram.STANDARD_DEVIATION```
 - ```Histogram.Percentile``` (including the predefined ```Histogram.PERCENTILE_5```, ```Histogram.PERCENTILE_10```, ...)
+- ```Histogram.Bucket``` (including the predefined ```Histogram.MS_10_BUCKET```, ```Histogram.SEC_1_BUCKET```, ...)
 - ```Timer.DURATION_UNIT```
 
 #### Timer Config
@@ -1529,8 +1539,19 @@ Timer fullConfigTimer = registry.timer(
     
             // options: noMeasurables()
             // default: the metric's measurables { COUNT, MEAN_RATE, MAX, MEAN }
-            .measurables(COUNT, MEAN_RATE, MAX, MEAN, PERCENTILE_75)
-    
+            .measurables(
+                COUNT,
+                MEAN_RATE,
+                MAX,
+                MEAN,
+                PERCENTILE_75,
+                MS_10_BUCKET,
+                MS_30_BUCKET,
+                MS_50_BUCKET,
+                MS_75_BUCKET,
+                MS_100_BUCKET,
+                MS_250_BUCKET)
+
             // options: disableTotal(), noTotal(), totalEnabled(boolean)
             // default: enabled
             .enableTotal()
@@ -1556,7 +1577,7 @@ Timer fullConfigTimer = registry.timer(
                 // default: no properties (no overrides)
                 .put("key_1", "value_1_2") // overrides "key_1" -> "value_1_2"
                 .put("key_2", "value_2_2")) // overrides "key_2" -> "value_2_1"
-    );
+);
 ```
 
 ### Var and CachingVar
@@ -1671,13 +1692,13 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
 Example:
 ```java
-MetricRegistry registry = new DropwizardMetricRegistry();
+MetricRegistry registry = new DefaultMetricRegistry();
 PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
 
 Histogram h = registry.histogram(
@@ -1714,7 +1735,7 @@ you need to configure the ```PrometheusMetricsExporter``` accordingly:
 
 ```PrometheusMetricsExporterSample.java```
 ```java
-MetricRegistry registry = new DropwizardMetricRegistry();
+MetricRegistry registry = new DefaultMetricRegistry();
 
 PrometheusInstanceSampleSpecProvider miSampleSpecProvider = new PrometheusInstanceSampleSpecProvider(
     true, // exportTotalInstances. defaults to true
@@ -1792,14 +1813,14 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
 ```ZabbixMetricsJsonExporter``` and ```ZabbixLldMetricsReporter``` are best explained with:  
 ```ZabbixReportersSample.java```
 ```java
-MetricRegistry registry = new DropwizardMetricRegistry();
+MetricRegistry registry = new DefaultMetricRegistry();
 DefaultInstanceSampleSpecModsProvider miSampleSpecModsProvider = new DefaultInstanceSampleSpecModsProvider();
 
 miSampleSpecModsProvider.addMod(
@@ -1958,14 +1979,14 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
 ```TelegrafMetricsJsonExporter``` is best explained with:  
 ```TelegrafMetricsJsonExporterSample.java```
 ```java
-MetricRegistry registry = new DropwizardMetricRegistry();
+MetricRegistry registry = new DefaultMetricRegistry();
 DefaultInstanceSampleSpecModsProvider miSampleSpecModsProvider = new DefaultInstanceSampleSpecModsProvider();
 
 miSampleSpecModsProvider.addMod(
@@ -2060,14 +2081,14 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RELEASE</version>
 </dependency>
 ```
 
 ```JmxMetricsReporter``` is best explained with:  
 ```JmxMetricsReporterSample.java```
 ```java
-MetricRegistry registry = new DropwizardMetricRegistry();
+MetricRegistry registry = new DefaultMetricRegistry();
 
 // Default config
 // registry.addListener(new JmxMetricsReporter());
@@ -2118,7 +2139,7 @@ Metrics producers are represented by subclasses of ```MetricsProducer```.
 
 ```MetricsProducersSample.java```  
 ```java
-MetricRegistry registry = new DropwizardMetricRegistry();
+MetricRegistry registry = new DefaultMetricRegistry();
 
 // adds some system metrics
 new SystemMetricsProducer().produceMetrics(registry);
@@ -2127,11 +2148,18 @@ new SystemMetricsProducer().produceMetrics(registry);
 ### SystemMetricsProducer
 
 ```SystemMetricsProducer``` just combines:
+- ```RuntimeMetricsProducer```
 - ```OperatingSystemMetricsProducer```
 - ```GarbageCollectorsMetricsProducer```
 - ```MemoryMetricsProducer```
 - ```ThreadsMetricsProducer```
 - ```BufferPoolsMetricsProducer```
+- ```ClassesMetricsProducer```
+
+### RuntimeMetricsProducer
+
+Adds a number of metrics related to the JVM.
+It is based on ```java.lang.management.RuntimeMXBean```.
 
 ### OperatingSystemMetricsProducer
 
@@ -2161,6 +2189,11 @@ It is based on ```java.lang.management.ThreadMXBean```
 
 Adds a number of metrics related to buffer pools.      
 It is based on the MBeans ```java.nio:type=BufferPool,name=<pool_name>```.      
+
+### ClassesMetricsProducer
+
+Adds a number of metrics related to the class loading system of the JVM.
+It is based on ```java.lang.management.ClassLoadingMXBean```.
 
 ## License
 

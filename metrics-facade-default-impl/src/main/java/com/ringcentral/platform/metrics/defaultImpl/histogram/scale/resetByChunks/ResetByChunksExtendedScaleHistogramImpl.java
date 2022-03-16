@@ -182,15 +182,12 @@ public class ResetByChunksExtendedScaleHistogramImpl extends AbstractExtendedSca
     private void endSnapshotFor(Item item) {
         if (item == currItem) {
             item.inactiveChunk.endSnapshot();
-            item.inactiveChunk.resetSnapshotSum();
             item.flipChunks();
         } else {
             item.activeChunk.endSnapshot();
-            item.activeChunk.resetSnapshotSum();
         }
 
         item.inactiveChunk.endSnapshot();
-        item.inactiveChunk.resetSnapshotSum();
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -51,10 +51,8 @@ public class NeverResetExtendedScaleHistogramImpl extends AbstractExtendedScaleH
             HistogramSnapshot snapshot = takeSnapshot();
 
             inactiveChunk.endSnapshot();
-            inactiveChunk.resetSnapshotSum();
             flipChunks();
             inactiveChunk.endSnapshot();
-            inactiveChunk.resetSnapshotSum();
 
             return snapshot;
         } finally {

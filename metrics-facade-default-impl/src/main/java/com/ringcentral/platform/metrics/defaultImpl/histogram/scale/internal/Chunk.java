@@ -116,6 +116,7 @@ public abstract class Chunk {
 
     public void endSnapshot() {
         tree.endSnapshot();
+        resetSnapshotSum();
     }
 
     public void calcLazySubtreeUpdateCounts() {

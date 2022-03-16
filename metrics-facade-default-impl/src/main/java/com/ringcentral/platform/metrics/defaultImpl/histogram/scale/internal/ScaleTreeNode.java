@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.*;
 
 public class ScaleTreeNode {
 
+    public static final long INITIAL_SNAPSHOT_NUM = Long.MIN_VALUE;
+
     public final long point;
 
     public ScaleTreeNode parent;
@@ -15,7 +17,7 @@ public class ScaleTreeNode {
     public final AtomicLong updateEpoch;
     public final LongAdder subtreeUpdateCount = new LongAdder();
 
-    public final AtomicLong snapshotNum = new AtomicLong(Long.MIN_VALUE);
+    public final AtomicLong snapshotNum = new AtomicLong(INITIAL_SNAPSHOT_NUM);
     public volatile long snapshotSubtreeUpdateCount = Long.MIN_VALUE;
 
     public ScaleTreeNode(

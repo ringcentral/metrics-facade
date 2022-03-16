@@ -8,6 +8,7 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.Sca
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.*;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTreeNode.INITIAL_SNAPSHOT_NUM;
 
 public abstract class Chunk {
 
@@ -60,7 +61,7 @@ public abstract class Chunk {
             this.bucketUpperBounds,
             this.maxLazyTreeLevel,
             resettable,
-            Long.MIN_VALUE + 1L);
+            INITIAL_SNAPSHOT_NUM + 1L);
 
         this.lazySubtreeUpdateCounts =
             this.maxLazyTreeLevel >= 0 ?
@@ -89,14 +90,13 @@ public abstract class Chunk {
 
     public void update(long value, boolean snapshotInProgress, long snapshotNum) {
         ScaleTreeNode node = tree.nodeForValue(value);
-        long point = node.point;
         updateTree(node, snapshotInProgress, snapshotNum);
-        updateSum(point, snapshotInProgress);
+        updateSum(node, snapshotInProgress);
     }
 
     protected abstract void updateTree(ScaleTreeNode node, boolean snapshotInProgress, long snapshotNum);
 
-    protected void updateSum(long point, boolean snapshotInProgress) {
+    protected void updateSum(ScaleTreeNode node, boolean snapshotInProgress) {
         if (sumAdder != null) {
             if (snapshotInProgress && snapshotSum == NO_SNAPSHOT_SUM) {
                 long sum = sumAdder.sum();
@@ -106,7 +106,7 @@ public abstract class Chunk {
                 }
             }
 
-            sumAdder.add(point);
+            sumAdder.add(node.point);
         }
     }
 
@@ -158,7 +158,6 @@ public abstract class Chunk {
 
         double mean = NO_VALUE_DOUBLE;
         double standardDeviation = NO_VALUE_DOUBLE;
-
         long sum = NO_VALUE;
 
         if (withTotalSum || withMean || withStandardDeviation) {
@@ -166,9 +165,10 @@ public abstract class Chunk {
 
             if (withMean || withStandardDeviation) {
                 mean = (1.0 * sum) / treeUpdateCount;
-                standardDeviationCalculator.reset(mean);
 
                 if (withStandardDeviation) {
+                    standardDeviationCalculator.reset(mean);
+
                     standardDeviation = tree.standardDeviation(
                         this::subtreeUpdateCountFor,
                         standardDeviationCalculator,

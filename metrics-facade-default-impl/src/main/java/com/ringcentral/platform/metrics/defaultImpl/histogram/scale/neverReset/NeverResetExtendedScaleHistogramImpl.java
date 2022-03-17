@@ -195,7 +195,7 @@ public class NeverResetExtendedScaleHistogramImpl extends AbstractExtendedScaleH
         if (withPercentiles) {
             percentileValues = new double[quantiles.length];
 
-            for (int i = 0; i < quantiles.length; i++) {
+            for (int i = 0; i < quantiles.length; ++i) {
                 if (multiNode == null) {
                     multiNode = new DoubleNode(activeChunk, inactiveChunk);
                 } else {

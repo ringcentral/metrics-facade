@@ -42,17 +42,17 @@ public class ResetByChunksExtendedScaleHistogramImpl extends AbstractExtendedSca
         this.items = new Item[chunkCount];
 
         for (int i = 0; i < chunkCount; ++i) {
-            long chunkStartTimeMs =
+            long startTimeMs =
                 i > 0 ?
-                -(config.chunkResetPeriodMs() * config.chunkCount() + 1L) :
+                this.creationTimeMs - (config.chunkResetPeriodMs() * config.chunkCount() + 1L) :
                 this.creationTimeMs;
 
-            this.items[i] = new Item(config, measurementSpec, chunkStartTimeMs);
+            this.items[i] = new Item(config, measurementSpec, startTimeMs);
         }
 
         this.currItem = this.items[0];
         this.snapshotItems = new ArrayList<>(chunkCount);
-        this.nonEmptySnapshotChunks = new ArrayList<>(chunkCount);
+        this.nonEmptySnapshotChunks = new ArrayList<>(2 * chunkCount);
     }
 
     @Override
@@ -300,7 +300,7 @@ public class ResetByChunksExtendedScaleHistogramImpl extends AbstractExtendedSca
         if (withPercentiles) {
             percentileValues = new double[quantiles.length];
 
-            for (int i = 0; i < quantiles.length; i++) {
+            for (int i = 0; i < quantiles.length; ++i) {
                 MultiNode multiNode =
                     nonEmptySnapshotChunks.size() == 2 ?
                     new DoubleNode(nonEmptySnapshotChunks.get(0), nonEmptySnapshotChunks.get(1)) :

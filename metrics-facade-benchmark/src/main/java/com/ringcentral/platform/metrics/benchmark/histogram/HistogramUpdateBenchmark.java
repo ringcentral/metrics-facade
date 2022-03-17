@@ -223,7 +223,7 @@ public class HistogramUpdateBenchmark {
         Random random = new Random(123);
         long[] values = new long[100000];
 
-        for (int i = 0; i < values.length; i++) {
+        for (int i = 0; i < values.length; ++i) {
             long ms;
 
             if (i % 3 == 0) {
@@ -256,7 +256,7 @@ public class HistogramUpdateBenchmark {
         Random random = new Random(123);
         long[] values = new long[100000];
 
-        for (int i = 0; i < values.length; i++) {
+        for (int i = 0; i < values.length; ++i) {
             if (i % 250 == 0) {
                 values[i] = random.nextInt(10);
             } else {

@@ -202,6 +202,8 @@ public abstract class AbstractHistogramImpl implements HistogramImpl {
         } else if (config.bucketsMeasurementType() == BucketsMeasurementType.RESETTABLE) {
             if (!extendedImplInfo.supportsTotals()) {
                 basic = makeTotalsImpl(config, withCount, withTotalSum);
+                withCount = false;
+                withTotalSum = false;
             }
 
             withBuckets = true;

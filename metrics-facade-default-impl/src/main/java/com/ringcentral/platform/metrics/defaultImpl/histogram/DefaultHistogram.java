@@ -321,7 +321,7 @@ public class DefaultHistogram extends AbstractHistogram<HistogramImpl> {
             MetricRegistry registry) {
 
             CustomHistogramImplSpec<? extends HistogramImplConfig> customImplSpec =
-                ((DefaultMetricRegistry)registry).customHistogramImplMakerFor(config.getClass());
+                ((DefaultMetricRegistry)registry).customHistogramImplSpecFor(config.getClass());
 
             if (customImplSpec == null) {
                 return null;

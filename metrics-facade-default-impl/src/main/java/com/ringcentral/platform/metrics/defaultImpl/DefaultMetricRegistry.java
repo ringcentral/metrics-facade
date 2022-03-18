@@ -277,7 +277,7 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends HistogramImplConfig> CustomHistogramImplSpec<C> customHistogramImplMakerFor(Class<C> configType) {
+    public <C extends HistogramImplConfig> CustomHistogramImplSpec<C> customHistogramImplSpecFor(Class<C> configType) {
         return (CustomHistogramImplSpec<C>)customHistogramImplSpecs.get(configType);
     }
 
@@ -286,7 +286,7 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends RateImplConfig> CustomRateImplSpec<C> customRateImplMakerFor(Class<C> configType) {
-        return (CustomRateImplSpec<C>) customRateImplSpecs.get(configType);
+    public <C extends RateImplConfig> CustomRateImplSpec<C> customRateImplSpecFor(Class<C> configType) {
+        return (CustomRateImplSpec<C>)customRateImplSpecs.get(configType);
     }
 }

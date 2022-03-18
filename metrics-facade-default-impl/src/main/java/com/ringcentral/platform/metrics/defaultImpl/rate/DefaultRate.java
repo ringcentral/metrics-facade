@@ -208,13 +208,13 @@ public class DefaultRate extends AbstractRate<RateImpl> {
             MetricRegistry registry) {
 
             CustomRateImplSpec<? extends RateImplConfig> customImplSpec =
-                ((DefaultMetricRegistry) registry).customRateImplMakerFor(config.getClass());
+                ((DefaultMetricRegistry)registry).customRateImplSpecFor(config.getClass());
 
             if (customImplSpec == null) {
                 return null;
             }
 
-            CustomRateImplMaker customImplMaker = (CustomRateImplMaker)customImplSpec;
+            CustomRateImplMaker customImplMaker = customImplSpec.implMaker();
 
             return customImplMaker.makeRateImpl(
                 config,

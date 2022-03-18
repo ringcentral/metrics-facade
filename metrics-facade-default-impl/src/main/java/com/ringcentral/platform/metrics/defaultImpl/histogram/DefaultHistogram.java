@@ -148,15 +148,15 @@ public class DefaultHistogram extends AbstractHistogram<HistogramImpl> {
             Measurable measurable,
             Ref<Boolean> infBucketAdded) {
 
-            Bucket b = (Bucket)measurable;
+            Bucket bucket = (Bucket)measurable;
 
             if (!infBucketAdded.value()) {
                 result.put(INF_BUCKET, new BucketValueProvider(INF_BUCKET));
                 infBucketAdded.setValue(true);
             }
 
-            if (!b.isInf()) {
-                result.put(measurable, new BucketValueProvider(b));
+            if (!bucket.isInf()) {
+                result.put(measurable, new BucketValueProvider(bucket));
             }
         }
 

@@ -71,7 +71,7 @@ public class DefaultTimer extends AbstractTimer<TimerImpl> {
         public static final MVP MEAN_RATE_VALUE_PROVIDER = (t, s) -> t.rate().meanRate();
         public static final MVP ONE_MINUTE_RATE_VALUE_PROVIDER = (t, s) -> t.rate().oneMinuteRate();
         public static final MVP FIVE_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fiveMinutesRate();
-        public static final MVP FIFTEEN_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fiveMinutesRate();
+        public static final MVP FIFTEEN_MINUTES_RATE_VALUE_PROVIDER = (t, s) -> t.rate().fifteenMinutesRate();
 
         public static final MVP RATE_UNIT_VALUE_PROVIDER = new MVP() {
 
@@ -188,15 +188,15 @@ public class DefaultTimer extends AbstractTimer<TimerImpl> {
             Measurable measurable,
             Ref<Boolean> infBucketAdded) {
 
-            Bucket b = (Bucket)measurable;
+            Bucket bucket = (Bucket)measurable;
 
             if (!infBucketAdded.value()) {
                 result.put(INF_BUCKET, new BucketValueProvider(INF_BUCKET));
                 infBucketAdded.setValue(true);
             }
 
-            if (!b.isInf()) {
-                result.put(measurable, new BucketValueProvider(b));
+            if (!bucket.isInf()) {
+                result.put(measurable, new BucketValueProvider(bucket));
             }
         }
 

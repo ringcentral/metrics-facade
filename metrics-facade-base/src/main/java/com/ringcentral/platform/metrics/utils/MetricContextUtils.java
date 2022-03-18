@@ -8,12 +8,12 @@ public class MetricContextUtils {
         return get(key, contexts) != null;
     }
 
-    public static  <V> V get(Object key, V defaultValue, MetricContext... contexts) {
+    public static <V> V get(Object key, V defaultValue, MetricContext... contexts) {
         V v = get(key, contexts);
         return v != null ? v : defaultValue;
     }
 
-    public static  <V> V getForClass(Class<? extends V> key, MetricContext... contexts) {
+    public static <V> V getForClass(Class<? extends V> key, MetricContext... contexts) {
         return get(key, contexts);
     }
 

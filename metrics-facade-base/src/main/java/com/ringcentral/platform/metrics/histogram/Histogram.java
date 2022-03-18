@@ -446,9 +446,8 @@ public interface Histogram extends Meter {
 
     class Buckets implements HistogramMeasurable {
 
-        static final int HASH_CODE = "Histogram.Buckets".hashCode();
-
         private final Set<Bucket> buckets;
+        private final int hashCode;
 
         public Buckets(Set<Bucket> buckets) {
             checkArgument(
@@ -456,6 +455,7 @@ public interface Histogram extends Meter {
                 "buckets is null or empty");
 
             this.buckets = buckets;
+            this.hashCode = hashCodeFor("Histogram.Buckets", buckets);
         }
 
         public static Buckets linear(long from, long step, long stepCount) {
@@ -501,12 +501,26 @@ public interface Histogram extends Meter {
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other != null && getClass() == other.getClass());
+            if (this == other) {
+                return true;
+            }
+
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+
+            Buckets that = (Buckets)other;
+
+            if (hashCode != that.hashCode) {
+                return false;
+            }
+
+            return buckets.equals(that.buckets);
         }
 
         @Override
         public int hashCode() {
-            return HASH_CODE;
+            return hashCode;
         }
     }
 

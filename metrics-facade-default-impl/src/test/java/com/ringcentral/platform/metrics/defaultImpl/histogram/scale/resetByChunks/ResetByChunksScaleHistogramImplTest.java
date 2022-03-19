@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.resetByChunks;
 
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
-import com.ringcentral.platform.metrics.scale.LinearScaleBuilder;
+import com.ringcentral.platform.metrics.scale.*;
 import com.ringcentral.platform.metrics.test.time.*;
 import org.junit.Test;
 
@@ -14,16 +14,26 @@ import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSn
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleImpl;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
+import static com.ringcentral.platform.metrics.scale.SpecificScaleBuilder.points;
+import static java.lang.Long.MAX_VALUE;
 import static java.lang.Math.sqrt;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ResetByChunksScaleHistogramImplTest {
 
     static final int CHUNK_COUNT = 5;
-    static final int ALL_CHUNKS_RESET_PERIOD_MS = 1000 * CHUNK_COUNT;
+    public static final long CHUNK_RESET_PERIOD_MS = 1000L;
+    static final long ALL_CHUNKS_RESET_PERIOD_MS = CHUNK_RESET_PERIOD_MS * CHUNK_COUNT;
 
     static final LinearScaleBuilder SCALE_1 = linearScale().steps(1, 100);
+
+    static final Scale SCALE_2 = points(
+        MILLISECONDS,
+        5, 10, 25, 50, 75, 100, 250, 500, 750, 1000,
+        2500, 5000, 7500, 10000, MAX_VALUE).build();
+
     static final TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
     static final TestTimeMsProvider timeMsProvider = new TestTimeMsProvider(timeNanosProvider);
     static final ScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
@@ -1253,6 +1263,346 @@ public class ResetByChunksScaleHistogramImplTest {
         h.metricInstanceRemoved();
     }
 
+    @Test
+    public void scale_2_ResettableBuckets_ResetPeriodically() {
+        ResetByChunksScaleHistogramImpl h = new ResetByChunksScaleHistogramImpl(
+            scaleImpl()
+                .resetPeriodically(Duration.ofMillis(CHUNK_RESET_PERIOD_MS))
+                .with(SCALE_2)
+                .resettableBuckets()
+                .build(),
+            Set.of(
+                COUNT,
+                TOTAL_SUM,
+                MIN,
+                MAX,
+                MEAN,
+
+                // percentiles
+                PERCENTILE_1,
+                PERCENTILE_5,
+                PERCENTILE_15,
+                PERCENTILE_25,
+                PERCENTILE_35,
+                PERCENTILE_45,
+                PERCENTILE_50,
+                PERCENTILE_55,
+                PERCENTILE_70,
+                PERCENTILE_75,
+                PERCENTILE_80,
+                PERCENTILE_95,
+                PERCENTILE_99,
+                PERCENTILE_999,
+
+                // buckets
+                Buckets.of(SCALE_2)),
+            executor,
+            timeMsProvider);
+
+        h.metricInstanceAdded();
+
+        h.update(ms(1));
+        h.update(ms(3));
+        h.update(ms(3));
+        h.update(ms(25));
+        h.update(ms(27));
+        h.update(ms(27));
+        h.update(ms(27));
+        h.update(ms(32));
+        h.update(ms(75));
+        h.update(ms(77));
+        h.update(ms(125));
+        h.update(ms(235));
+        h.update(ms(48));
+        h.update(ms(778));
+        h.update(ms(778));
+        h.update(ms(778));
+        h.update(ms(275));
+        h.update(ms(500));
+        h.update(ms(500));
+        h.update(ms(8000));
+
+        long expectedTotalSum = ms(3 * 5 + 25 + 5 * 50 + 75 + 100 + 2 * 250 + 3 * 500 + 3 * 1000 + 10000);
+        double expectedMean = (1.0 * expectedTotalSum) / 20;
+
+        for (int i = 0; i < 10; ++i) {
+            HistogramSnapshot snapshot = h.snapshot();
+            assertThat(snapshot.count(), is(20L));
+            assertThat(snapshot.totalSum(), is(expectedTotalSum));
+            assertThat(snapshot.min(), is(ms(5)));
+            assertThat(snapshot.max(), is(ms(10000)));
+            assertThat(snapshot.mean(), is(expectedMean));
+
+            assertThat(snapshot.percentileValue(PERCENTILE_1), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_5), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_15), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_25), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_35), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_45), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_50), is(percentileValueMs(75)));
+            assertThat(snapshot.percentileValue(PERCENTILE_55), is(percentileValueMs(100)));
+            assertThat(snapshot.percentileValue(PERCENTILE_70), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_75), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_80), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_95), is(percentileValueMs(1000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_99), is(percentileValueMs(10000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_999), is(percentileValueMs(10000)));
+
+            assertThat(snapshot.bucketSize(Bucket.of(5, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(10, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(25, MILLISECONDS)), is(4L));
+            assertThat(snapshot.bucketSize(Bucket.of(50, MILLISECONDS)), is(9L));
+            assertThat(snapshot.bucketSize(Bucket.of(75, MILLISECONDS)), is(10L));
+            assertThat(snapshot.bucketSize(Bucket.of(100, MILLISECONDS)), is(11L));
+            assertThat(snapshot.bucketSize(Bucket.of(250, MILLISECONDS)), is(13L));
+            assertThat(snapshot.bucketSize(Bucket.of(500, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(750, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(1000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(2500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(5000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(7500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(10000, MILLISECONDS)), is(20L));
+            assertThat(snapshot.bucketSize(INF_BUCKET), is(20L));
+        }
+
+        timeNanosProvider.increaseMs(CHUNK_RESET_PERIOD_MS - 1);
+
+        for (int i = 0; i < 10; ++i) {
+            HistogramSnapshot snapshot = h.snapshot();
+            assertThat(snapshot.count(), is(20L));
+            assertThat(snapshot.totalSum(), is(expectedTotalSum));
+            assertThat(snapshot.min(), is(ms(5)));
+            assertThat(snapshot.max(), is(ms(10000)));
+            assertThat(snapshot.mean(), is(expectedMean));
+
+            assertThat(snapshot.percentileValue(PERCENTILE_1), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_5), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_15), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_25), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_35), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_45), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_50), is(percentileValueMs(75)));
+            assertThat(snapshot.percentileValue(PERCENTILE_55), is(percentileValueMs(100)));
+            assertThat(snapshot.percentileValue(PERCENTILE_70), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_75), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_80), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_95), is(percentileValueMs(1000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_99), is(percentileValueMs(10000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_999), is(percentileValueMs(10000)));
+
+            assertThat(snapshot.bucketSize(Bucket.of(5, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(10, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(25, MILLISECONDS)), is(4L));
+            assertThat(snapshot.bucketSize(Bucket.of(50, MILLISECONDS)), is(9L));
+            assertThat(snapshot.bucketSize(Bucket.of(75, MILLISECONDS)), is(10L));
+            assertThat(snapshot.bucketSize(Bucket.of(100, MILLISECONDS)), is(11L));
+            assertThat(snapshot.bucketSize(Bucket.of(250, MILLISECONDS)), is(13L));
+            assertThat(snapshot.bucketSize(Bucket.of(500, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(750, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(1000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(2500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(5000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(7500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(10000, MILLISECONDS)), is(20L));
+            assertThat(snapshot.bucketSize(INF_BUCKET), is(20L));
+        }
+
+        timeNanosProvider.increaseMs(1);
+
+        HistogramSnapshot snapshot = h.snapshot();
+        assertThat(snapshot.count(), is(20L));
+        assertThat(snapshot.totalSum(), is(expectedTotalSum));
+        assertThat(snapshot.min(), is(NO_VALUE));
+        assertThat(snapshot.max(), is(NO_VALUE));
+        assertThat(snapshot.mean(), is(NO_VALUE_DOUBLE));
+
+        assertThat(snapshot.percentileValue(PERCENTILE_1), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_5), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_15), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_25), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_35), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_45), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_50), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_55), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_70), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_75), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_80), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_95), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_99), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_999), is(NO_VALUE_DOUBLE));
+
+        assertThat(snapshot.bucketSize(Bucket.of(5, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(10, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(25, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(50, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(75, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(100, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(250, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(500, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(750, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(1000, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(2500, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(5000, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(7500, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(10000, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(INF_BUCKET), is(NO_VALUE));
+
+        h.update(ms(1));
+        h.update(ms(3));
+        h.update(ms(3));
+        h.update(ms(25));
+        h.update(ms(27));
+        h.update(ms(27));
+        h.update(ms(27));
+        h.update(ms(32));
+        h.update(ms(75));
+        h.update(ms(77));
+        h.update(ms(125));
+        h.update(ms(235));
+        h.update(ms(48));
+        h.update(ms(778));
+        h.update(ms(778));
+        h.update(ms(778));
+        h.update(ms(275));
+        h.update(ms(500));
+        h.update(ms(500));
+        h.update(ms(8000));
+
+        expectedTotalSum *= 2;
+
+        for (int i = 0; i < 10; ++i) {
+            snapshot = h.snapshot();
+            assertThat(snapshot.count(), is(40L));
+            assertThat(snapshot.totalSum(), is(expectedTotalSum));
+            assertThat(snapshot.min(), is(ms(5)));
+            assertThat(snapshot.max(), is(ms(10000)));
+            assertThat(snapshot.mean(), is(expectedMean));
+
+            assertThat(snapshot.percentileValue(PERCENTILE_1), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_5), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_15), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_25), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_35), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_45), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_50), is(percentileValueMs(75)));
+            assertThat(snapshot.percentileValue(PERCENTILE_55), is(percentileValueMs(100)));
+            assertThat(snapshot.percentileValue(PERCENTILE_70), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_75), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_80), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_95), is(percentileValueMs(1000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_99), is(percentileValueMs(10000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_999), is(percentileValueMs(10000)));
+
+            assertThat(snapshot.bucketSize(Bucket.of(5, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(10, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(25, MILLISECONDS)), is(4L));
+            assertThat(snapshot.bucketSize(Bucket.of(50, MILLISECONDS)), is(9L));
+            assertThat(snapshot.bucketSize(Bucket.of(75, MILLISECONDS)), is(10L));
+            assertThat(snapshot.bucketSize(Bucket.of(100, MILLISECONDS)), is(11L));
+            assertThat(snapshot.bucketSize(Bucket.of(250, MILLISECONDS)), is(13L));
+            assertThat(snapshot.bucketSize(Bucket.of(500, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(750, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(1000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(2500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(5000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(7500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(10000, MILLISECONDS)), is(20L));
+            assertThat(snapshot.bucketSize(INF_BUCKET), is(20L));
+        }
+
+        timeNanosProvider.increaseMs(CHUNK_RESET_PERIOD_MS - 1);
+
+        for (int i = 0; i < 10; ++i) {
+            snapshot = h.snapshot();
+            assertThat(snapshot.count(), is(40L));
+            assertThat(snapshot.totalSum(), is(expectedTotalSum));
+            assertThat(snapshot.min(), is(ms(5)));
+            assertThat(snapshot.max(), is(ms(10000)));
+            assertThat(snapshot.mean(), is(expectedMean));
+
+            assertThat(snapshot.percentileValue(PERCENTILE_1), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_5), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_15), is(percentileValueMs(5)));
+            assertThat(snapshot.percentileValue(PERCENTILE_25), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_35), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_45), is(percentileValueMs(50)));
+            assertThat(snapshot.percentileValue(PERCENTILE_50), is(percentileValueMs(75)));
+            assertThat(snapshot.percentileValue(PERCENTILE_55), is(percentileValueMs(100)));
+            assertThat(snapshot.percentileValue(PERCENTILE_70), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_75), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_80), is(percentileValueMs(500)));
+            assertThat(snapshot.percentileValue(PERCENTILE_95), is(percentileValueMs(1000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_99), is(percentileValueMs(10000)));
+            assertThat(snapshot.percentileValue(PERCENTILE_999), is(percentileValueMs(10000)));
+
+            assertThat(snapshot.bucketSize(Bucket.of(5, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(10, MILLISECONDS)), is(3L));
+            assertThat(snapshot.bucketSize(Bucket.of(25, MILLISECONDS)), is(4L));
+            assertThat(snapshot.bucketSize(Bucket.of(50, MILLISECONDS)), is(9L));
+            assertThat(snapshot.bucketSize(Bucket.of(75, MILLISECONDS)), is(10L));
+            assertThat(snapshot.bucketSize(Bucket.of(100, MILLISECONDS)), is(11L));
+            assertThat(snapshot.bucketSize(Bucket.of(250, MILLISECONDS)), is(13L));
+            assertThat(snapshot.bucketSize(Bucket.of(500, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(750, MILLISECONDS)), is(16L));
+            assertThat(snapshot.bucketSize(Bucket.of(1000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(2500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(5000, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(7500, MILLISECONDS)), is(19L));
+            assertThat(snapshot.bucketSize(Bucket.of(10000, MILLISECONDS)), is(20L));
+            assertThat(snapshot.bucketSize(INF_BUCKET), is(20L));
+        }
+
+        timeNanosProvider.increaseMs(1);
+
+        snapshot = h.snapshot();
+        assertThat(snapshot.count(), is(40L));
+        assertThat(snapshot.totalSum(), is(expectedTotalSum));
+        assertThat(snapshot.min(), is(NO_VALUE));
+        assertThat(snapshot.max(), is(NO_VALUE));
+        assertThat(snapshot.mean(), is(NO_VALUE_DOUBLE));
+
+        assertThat(snapshot.percentileValue(PERCENTILE_1), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_5), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_15), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_25), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_35), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_45), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_50), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_55), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_70), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_75), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_80), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_95), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_99), is(NO_VALUE_DOUBLE));
+        assertThat(snapshot.percentileValue(PERCENTILE_999), is(NO_VALUE_DOUBLE));
+
+        assertThat(snapshot.bucketSize(Bucket.of(5, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(10, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(25, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(50, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(75, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(100, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(250, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(500, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(750, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(1000, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(2500, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(5000, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(7500, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(Bucket.of(10000, MILLISECONDS)), is(NO_VALUE));
+        assertThat(snapshot.bucketSize(INF_BUCKET), is(NO_VALUE));
+
+        h.metricInstanceRemoved();
+    }
+
+    double percentileValueMs(long amount) {
+        return (double)(ms(amount));
+    }
+
+    long ms(long amount) {
+        return MILLISECONDS.toNanos(amount);
+    }
+
     static class PercentileCalculator {
         public static void main(String[] args) {
             int size = 10;
@@ -1280,7 +1630,7 @@ public class ResetByChunksScaleHistogramImplTest {
 
         static long percentile(long[] a, double q) {
             int index = (int)Math.round(q * a.length);
-            return a[Math.max(index-1, 0)];
+            return a[Math.max(index - 1, 0)];
         }
     }
 }

@@ -10,7 +10,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogramSnapshot.NO_VALUE;
-import static java.util.stream.Collectors.toSet;
 
 public abstract class AbstractHistogramImpl implements HistogramImpl {
 
@@ -176,10 +175,15 @@ public abstract class AbstractHistogramImpl implements HistogramImpl {
             percentiles = null;
         }
 
-        Set<Bucket> buckets = measurables.stream()
-            .filter(m -> m instanceof Bucket)
-            .map(m -> (Bucket)m)
-            .collect(toSet());
+        Set<Bucket> buckets = new HashSet<>();
+
+        for (Measurable m : measurables) {
+            if (m instanceof Bucket) {
+                buckets.add((Bucket)m);
+            } else if (m instanceof Buckets) {
+                buckets.addAll(((Buckets)m).buckets());
+            }
+        }
 
         HistogramImpl basic = null;
 

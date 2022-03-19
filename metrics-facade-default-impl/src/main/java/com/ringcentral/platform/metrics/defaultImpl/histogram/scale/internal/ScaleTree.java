@@ -10,6 +10,8 @@ import static java.lang.Math.sqrt;
 @SuppressWarnings("NonAtomicOperationOnVolatileField")
 public class ScaleTree {
 
+    public static final long INITIAL_SNAPSHOT_NUM = Long.MIN_VALUE;
+
     public interface NodeConsumer {
         void consumeNode(ScaleTreeNode node);
     }
@@ -47,7 +49,7 @@ public class ScaleTree {
 
     public volatile long updateEpoch;
     public volatile boolean snapshotInProgress;
-    public volatile long snapshotNum = Long.MIN_VALUE;
+    public volatile long snapshotNum = INITIAL_SNAPSHOT_NUM;
 
     public static ScaleTree of(
         Scale scale,

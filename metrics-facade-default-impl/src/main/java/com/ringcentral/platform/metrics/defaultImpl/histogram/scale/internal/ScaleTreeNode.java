@@ -2,9 +2,9 @@ package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal;
 
 import java.util.concurrent.atomic.*;
 
-public class ScaleTreeNode {
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTree.INITIAL_SNAPSHOT_NUM;
 
-    public static final long INITIAL_SNAPSHOT_NUM = Long.MIN_VALUE;
+public class ScaleTreeNode {
 
     public final long point;
 

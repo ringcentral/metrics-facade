@@ -3,12 +3,11 @@ package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.AbstractHistogramImpl.MeasurementSpec;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.*;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfig;
-import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTree.*;
 
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.*;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTreeNode.INITIAL_SNAPSHOT_NUM;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTree.*;
 
 public abstract class Chunk {
 

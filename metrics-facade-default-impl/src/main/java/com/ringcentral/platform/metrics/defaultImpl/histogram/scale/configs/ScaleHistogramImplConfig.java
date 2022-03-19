@@ -1,13 +1,15 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs;
 
 import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.*;
-import com.ringcentral.platform.metrics.scale.*;
+import com.ringcentral.platform.metrics.scale.Scale;
 
 import java.time.Duration;
 import java.util.Optional;
 
-import static com.ringcentral.platform.metrics.scale.SpecificScaleBuilder.infOnlyScale;
+import static com.ringcentral.platform.metrics.scale.SpecificScaleBuilder.points;
 import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.MS_PER_SEC;
+import static java.lang.Long.MAX_VALUE;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "ConstantConditions" })
 public class ScaleHistogramImplConfig extends AbstractHistogramImplConfig {
@@ -18,7 +20,12 @@ public class ScaleHistogramImplConfig extends AbstractHistogramImplConfig {
     public static final long MIN_CHUNK_RESET_PERIOD_MS = MS_PER_SEC;
     public static final int DEFAULT_CHUNKS = 6;
     public static final long DEFAULT_CHUNK_RESET_PERIOD_MS = 20L * MS_PER_SEC;
-    public static final SpecificScale DEFAULT_SCALE = infOnlyScale().build();
+
+    public static final Scale DEFAULT_SCALE = points(
+        MILLISECONDS,
+        5, 10, 25, 50, 75, 100, 250, 500, 750, 1000,
+        2500, 5000, 7500, 10000, MAX_VALUE).build();
+
     public static final int DEFAULT_SCALE_SPLIT_FACTOR_FOR_PERCENTILES = 1;
     public static final int DEFAULT_MAX_LAZY_TREE_LEVEL = 4;
 

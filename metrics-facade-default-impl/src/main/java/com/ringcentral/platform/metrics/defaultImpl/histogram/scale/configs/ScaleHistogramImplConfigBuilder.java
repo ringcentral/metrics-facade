@@ -43,8 +43,7 @@ public class ScaleHistogramImplConfigBuilder extends AbstractHistogramImplConfig
     }
 
     public ScaleHistogramImplConfigBuilder resetPeriodically(Duration period) {
-        this.type = ScaleHistogramImplType.RESET_BY_CHUNKS;
-        return resetByChunks(2, 2L * period.toMillis());
+        return resetByChunks(1, period.toMillis());
     }
 
     private ScaleHistogramImplConfigBuilder resetByChunks(int chunkCount, long chunkResetPeriodMs) {
@@ -55,13 +54,14 @@ public class ScaleHistogramImplConfigBuilder extends AbstractHistogramImplConfig
             chunkResetPeriodMs >= MIN_CHUNK_RESET_PERIOD_MS,
             "chunkResetPeriodMs must be >= " + MIN_CHUNK_RESET_PERIOD_MS + " ms");
 
+        this.type = ScaleHistogramImplType.RESET_BY_CHUNKS;
         this.chunkCount = chunkCount;
         this.chunkResetPeriodMs = chunkResetPeriodMs;
         return this;
     }
 
     public ScaleHistogramImplConfigBuilder resetByChunks() {
-        return resetByChunks(DEFAULT_CHUNKS, DEFAULT_CHUNKS * DEFAULT_CHUNK_RESET_PERIOD_MS);
+        return resetByChunks(DEFAULT_CHUNKS, DEFAULT_CHUNK_RESET_PERIOD_MS);
     }
 
     public ScaleHistogramImplConfigBuilder resetByChunks(int chunkCount, Duration allChunksResetPeriod) {

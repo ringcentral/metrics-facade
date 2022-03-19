@@ -97,7 +97,7 @@ public class DefaultHistogramSnapshot implements HistogramSnapshot {
             }
         }
 
-        return max;
+        return max != NO_VALUE ? max : percentileValues[percentileValues.length - 1];
     }
 
     @Override

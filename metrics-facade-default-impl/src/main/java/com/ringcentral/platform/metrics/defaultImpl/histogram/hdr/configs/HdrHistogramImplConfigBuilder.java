@@ -44,7 +44,6 @@ public class HdrHistogramImplConfigBuilder extends AbstractHistogramImplConfigBu
     }
 
     public HdrHistogramImplConfigBuilder resetPeriodically(Duration period) {
-        this.type = HdrHistogramImplType.RESET_BY_CHUNKS;
         return resetByChunks(0, period.toMillis());
     }
 
@@ -56,13 +55,14 @@ public class HdrHistogramImplConfigBuilder extends AbstractHistogramImplConfigBu
             chunkResetPeriodMs >= MIN_CHUNK_RESET_PERIOD_MS,
             "chunkResetPeriodMs must be >= " + MIN_CHUNK_RESET_PERIOD_MS + " ms");
 
+        this.type = HdrHistogramImplType.RESET_BY_CHUNKS;
         this.chunkCount = chunkCount;
         this.chunkResetPeriodMs = chunkResetPeriodMs;
         return this;
     }
 
     public HdrHistogramImplConfigBuilder resetByChunks() {
-        return resetByChunks(DEFAULT_CHUNKS, DEFAULT_CHUNKS * DEFAULT_CHUNK_RESET_PERIOD_MS);
+        return resetByChunks(DEFAULT_CHUNKS, DEFAULT_CHUNK_RESET_PERIOD_MS);
     }
 
     public HdrHistogramImplConfigBuilder resetByChunks(int chunkCount, Duration allChunksResetPeriod) {

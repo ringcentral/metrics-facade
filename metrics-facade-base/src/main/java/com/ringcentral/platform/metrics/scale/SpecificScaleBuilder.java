@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.scale;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
@@ -11,6 +12,10 @@ public class SpecificScaleBuilder implements ScaleBuilder<SpecificScale> {
 
     public static SpecificScaleBuilder infOnlyScale() {
         return points(Long.MAX_VALUE);
+    }
+
+    public static SpecificScaleBuilder points(TimeUnit unit, long... points) {
+        return points(List.copyOf(Arrays.stream(points).map(unit::toNanos).boxed().collect(toList())));
     }
 
     public static SpecificScaleBuilder points(long... points) {

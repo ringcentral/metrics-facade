@@ -301,10 +301,10 @@ public class ResetByChunksExtendedScaleHistogramImpl extends AbstractExtendedSca
             percentileValues = new double[quantiles.length];
 
             for (int i = 0; i < quantiles.length; ++i) {
-                MultiNode multiNode =
+                MultiScaleTreeNode multiNode =
                     nonEmptySnapshotChunks.size() == 2 ?
-                    new DoubleNode(nonEmptySnapshotChunks.get(0), nonEmptySnapshotChunks.get(1)) :
-                    new DefaultMultiNode(nonEmptySnapshotChunks);
+                    new DoubleScaleTreeNode(nonEmptySnapshotChunks.get(0), nonEmptySnapshotChunks.get(1)) :
+                    new DefaultMultiScaleTreeNode(nonEmptySnapshotChunks);
 
                 percentileValues[i] = calcPercentile(quantiles[i], multiNode);
             }

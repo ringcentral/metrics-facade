@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal;
 
-public interface MultiNode {
+public interface MultiScaleTreeNode {
     /**
      * Check isNull() before.
      */

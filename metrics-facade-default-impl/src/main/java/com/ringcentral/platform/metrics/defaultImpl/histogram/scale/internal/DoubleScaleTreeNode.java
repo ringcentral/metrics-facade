@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal;
 
-public class DoubleNode implements MultiNode {
+public class DoubleScaleTreeNode implements MultiScaleTreeNode {
 
     private Chunk chunk1;
     private ScaleTreeNode node1;
@@ -8,7 +8,7 @@ public class DoubleNode implements MultiNode {
     private Chunk chunk2;
     private ScaleTreeNode node2;
 
-    public DoubleNode(Chunk chunk1, Chunk chunk2) {
+    public DoubleScaleTreeNode(Chunk chunk1, Chunk chunk2) {
         this.chunk1 = chunk1;
         this.node1 = chunk1.tree().root;
 

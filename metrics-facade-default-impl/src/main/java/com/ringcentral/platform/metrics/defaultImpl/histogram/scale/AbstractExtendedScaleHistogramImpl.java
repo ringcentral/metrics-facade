@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.defaultImpl.histogram.scale;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.AbstractHistogramImpl.MeasurementSpec;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramImpl;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfig;
-import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.MultiNode;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.MultiScaleTreeNode;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTree.StandardDeviationCalculator;
 import org.HdrHistogram.WriterReaderPhaser;
 
@@ -62,7 +62,7 @@ public abstract class AbstractExtendedScaleHistogramImpl implements HistogramImp
         phaser.flipPhase();
     }
 
-    protected double calcPercentile(double quantile, MultiNode node) {
+    protected double calcPercentile(double quantile, MultiScaleTreeNode node) {
         long count = node.subtreeUpdateCount();
 
         if (count == 0L) {

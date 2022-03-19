@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.AbstractHistogramI
 import com.ringcentral.platform.metrics.defaultImpl.histogram.*;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.AbstractExtendedScaleHistogramImpl;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfig;
-import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.DoubleNode;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.DoubleScaleTreeNode;
 
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogramSnapshot.emptySnapshot;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.*;
@@ -13,7 +13,7 @@ public class NeverResetExtendedScaleHistogramImpl extends AbstractExtendedScaleH
 
     private volatile NeverResetChunk activeChunk;
     private volatile NeverResetChunk inactiveChunk;
-    private DoubleNode multiNode;
+    private DoubleScaleTreeNode multiNode;
 
     public NeverResetExtendedScaleHistogramImpl(
         ScaleHistogramImplConfig config,
@@ -197,7 +197,7 @@ public class NeverResetExtendedScaleHistogramImpl extends AbstractExtendedScaleH
 
             for (int i = 0; i < quantiles.length; ++i) {
                 if (multiNode == null) {
-                    multiNode = new DoubleNode(activeChunk, inactiveChunk);
+                    multiNode = new DoubleScaleTreeNode(activeChunk, inactiveChunk);
                 } else {
                     multiNode.reset(activeChunk, inactiveChunk);
                 }

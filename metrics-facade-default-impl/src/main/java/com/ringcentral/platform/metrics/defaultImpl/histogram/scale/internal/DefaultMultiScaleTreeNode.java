@@ -2,13 +2,13 @@ package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal;
 
 import java.util.List;
 
-public class DefaultMultiNode implements MultiNode {
+public class DefaultMultiScaleTreeNode implements MultiScaleTreeNode {
 
     private final List<? extends Chunk> chunks;
     private final int chunkCount;
     private final ScaleTreeNode[] nodes;
 
-    public DefaultMultiNode(List<? extends Chunk> chunks) {
+    public DefaultMultiScaleTreeNode(List<? extends Chunk> chunks) {
         this.chunks = chunks;
         this.chunkCount = chunks.size();
         this.nodes = new ScaleTreeNode[chunkCount];

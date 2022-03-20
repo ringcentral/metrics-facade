@@ -4,7 +4,11 @@ import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 
+import java.time.Duration;
+
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
@@ -82,7 +86,14 @@ public class HistogramSample extends AbstractSample {
                 // the properties specific to the metrics implementation
                 // default: no properties
                 .put("key_1", "value_1_1")
-                //.with(lastValueImpl())
+
+                // options: hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(), scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+                // default: hdrImpl()
+                .with(hdrImpl()
+                    .resetByChunks(6, Duration.ofMinutes(2))
+                    .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
+                    .significantDigits(3)
+                    .snapshotTtl(30, SECONDS))
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

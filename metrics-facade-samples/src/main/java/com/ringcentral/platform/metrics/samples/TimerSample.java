@@ -4,9 +4,13 @@ import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.timer.*;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
+import static com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfigBuilder.expMovingAverageImpl;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
@@ -17,7 +21,7 @@ import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfi
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerInstanceConfigBuilder.timerInstance;
 import static java.lang.Thread.sleep;
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @SuppressWarnings("ALL")
 public class TimerSample extends AbstractSample {
@@ -103,6 +107,19 @@ public class TimerSample extends AbstractSample {
                 // the properties specific to the metrics implementation
                 // default: no properties
                 .put("key_1", "value_1_1")
+
+                // options: expMovingAverageImpl() == ExpMovingAverageRateImplConfigBuilder.expMovingAverageImpl()
+                // default: expMovingAverageImpl()
+                .with(expMovingAverageImpl())
+
+                // options: hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(), scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+                // default: hdrImpl()
+                .with(hdrImpl()
+                    .resetByChunks(6, Duration.ofMinutes(2))
+                    .lowestDiscernibleValue(MILLISECONDS.toNanos(1))
+                    .highestTrackableValue(DAYS.toNanos(7), REDUCE_TO_HIGHEST_TRACKABLE)
+                    .significantDigits(2)
+                    .snapshotTtl(30, SECONDS))
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

@@ -108,11 +108,15 @@ public class TimerSample extends AbstractSample {
                 // default: no properties
                 .put("key_1", "value_1_1")
 
-                // options: expMovingAverageImpl() == ExpMovingAverageRateImplConfigBuilder.expMovingAverageImpl()
+                // options: expMovingAverageImpl() == ExpMovingAverageRateImplConfigBuilder.expMovingAverageImpl(), custom impl
                 // default: expMovingAverageImpl()
                 .with(expMovingAverageImpl())
 
-                // options: hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(), scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+                // options:
+                //   - hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(),
+                //   - scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+                //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
+                //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
                 // default: hdrImpl()
                 .with(hdrImpl()
                     .resetByChunks(6, Duration.ofMinutes(2))

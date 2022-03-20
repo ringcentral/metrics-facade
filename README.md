@@ -1288,7 +1288,18 @@ Histogram fullConfigHistogram = registry.histogram(
         // the properties specific to the metrics implementation
         // default: no properties
         .put("key_1", "value_1_1")
-        //.with(lastValueImpl())
+
+        // options:
+        //   - hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(),
+        //   - scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+        //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
+        //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+        // default: hdrImpl()
+        .with(hdrImpl()
+            .resetByChunks(6, Duration.ofMinutes(2))
+            .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
+            .significantDigits(3)
+            .snapshotTtl(30, SECONDS))
 
         .allSlice()
             // options: disable(), enabled(boolean)
@@ -1471,6 +1482,23 @@ Timer fullConfigTimer = registry.timer(
         // default: no properties
         .put("key_1", "value_1_1")
     
+        // options: expMovingAverageImpl() == ExpMovingAverageRateImplConfigBuilder.expMovingAverageImpl(), custom impl
+        // default: expMovingAverageImpl()
+        .with(expMovingAverageImpl())
+
+        // options:
+        //   - hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(),
+        //   - scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+        //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
+        //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+        // default: hdrImpl()
+        .with(hdrImpl()
+            .resetByChunks(6, Duration.ofMinutes(2))
+            .lowestDiscernibleValue(MILLISECONDS.toNanos(1))
+            .highestTrackableValue(DAYS.toNanos(7), REDUCE_TO_HIGHEST_TRACKABLE)
+            .significantDigits(2)
+            .snapshotTtl(30, SECONDS))
+
         .allSlice()
             // options: disable(), enabled(boolean)
             // default: enabled

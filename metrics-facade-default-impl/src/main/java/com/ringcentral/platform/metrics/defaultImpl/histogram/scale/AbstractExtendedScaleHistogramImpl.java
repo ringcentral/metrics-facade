@@ -88,10 +88,12 @@ public abstract class AbstractExtendedScaleHistogramImpl implements HistogramImp
                     count = leftSubtreeUpdateCount;
                 } else if ((count - leftSubtreeUpdateCount - rightSubtreeUpdateCount) > 0L) {
                     return node.point();
-                } else {
+                } else if (rightSubtreeUpdateCount > 0L) {
                     node.toRight();
                     percentileCount -= (count - rightSubtreeUpdateCount);
                     count = rightSubtreeUpdateCount;
+                } else {
+                    return node.point();
                 }
             } else if (rightSubtreeUpdateCount > 0L) {
                 node.toRight();

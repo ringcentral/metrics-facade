@@ -20,7 +20,7 @@ public class ResetByChunksChunkTest {
     static final LinearScale SCALE_1 = linearScale().from(1).steps(1, 99).build();
 
     @Test
-    public void snapshotShouldBeConsistent() {
+    public void snapshotIsConsistent() {
         Set<HistogramMeasurable> measurables = Set.of(
             COUNT,
             TOTAL_SUM,

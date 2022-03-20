@@ -434,10 +434,13 @@ public class ScaleTree {
                     } else if ((count - leftSubtreeUpdateCount - rightSubtreeUpdateCount) > 0L) {
                         percentileValues[i] = node.point;
                         continue percentilesLoop;
-                    } else {
+                    } else if (rightSubtreeUpdateCount > 0L) {
                         node = node.right;
                         percentileCount -= (count - rightSubtreeUpdateCount);
                         count = rightSubtreeUpdateCount;
+                    } else {
+                        percentileValues[i] = node.point;
+                        continue percentilesLoop;
                     }
                 } else if (rightSubtreeUpdateCount > 0L) {
                     node = node.right;

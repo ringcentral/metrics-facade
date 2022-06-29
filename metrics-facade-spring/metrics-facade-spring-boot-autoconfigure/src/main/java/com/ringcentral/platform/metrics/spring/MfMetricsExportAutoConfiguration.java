@@ -37,7 +37,7 @@ public class MfMetricsExportAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MetricRegistry metricRegistry(
+    public MetricRegistry mfMetricRegistry(
         MetricRegistryMaker maker,
         List<MetricRegistryCustomizer> customizers,
         List<MetricRegistryListener> listeners) {

@@ -1,13 +1,17 @@
 package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
+import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.samples.InstanceSampleSpec;
 
 import java.util.List;
+import java.util.Map;
 
-import static java.lang.Boolean.*;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyList;
 
 public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
@@ -114,6 +118,26 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
 
     public List<MetricDimensionValue> dimensionValues() {
         return dimensionValues;
+    }
+
+    public boolean hasDimension(MetricDimension dimension) {
+        return MetricDimensionUtils.hasDimension(dimensionValues, dimension);
+    }
+
+    public String valueOf(MetricDimension dimension) {
+        return MetricDimensionUtils.valueOf(dimensionValues, dimension);
+    }
+
+    public MetricDimensionValue dimensionValueOf(MetricDimension dimension) {
+        return MetricDimensionUtils.dimensionValueOf(dimensionValues, dimension);
+    }
+
+    public Map<MetricDimension, MetricDimensionValue> dimensionToValue() {
+        return MetricDimensionUtils.dimensionToValue(dimensionValues);
+    }
+
+    public List<MetricDimensionValue> dimensionValuesWithout(MetricDimension dimension, MetricDimension... dimensions) {
+        return MetricDimensionUtils.dimensionValuesWithout(dimensionValues, dimension, dimensions);
     }
 
     @Override

@@ -27,7 +27,8 @@ public class DefaultSampleSpecProvider implements SampleSpecProvider<DefaultSamp
         DefaultInstanceSampleSpec instanceSampleSpec,
         MetricInstance instance,
         MeasurableValues measurableValues,
-        Measurable measurable) {
+        Measurable measurable,
+        DefaultSampleSpec currSpec) {
 
         List<MetricDimensionValue> dimensionValues = instanceSampleSpec.dimensionValues();
 

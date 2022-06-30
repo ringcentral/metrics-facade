@@ -23,7 +23,8 @@ public class PrometheusSampleSpecProvider implements SampleSpecProvider<
         PrometheusInstanceSampleSpec instanceSampleSpec,
         MetricInstance instance,
         MeasurableValues measurableValues,
-        Measurable measurable) {
+        Measurable measurable,
+        PrometheusSampleSpec currSpec) {
 
         if (instance instanceof TimerInstance || instance instanceof HistogramInstance) {
             if (!(measurable instanceof Counter.Count

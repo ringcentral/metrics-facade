@@ -59,7 +59,7 @@ public abstract class AbstractInstanceSamplesProvider<
             }
 
             metric.forEach(instance -> {
-                ISS instanceSampleSpec = instanceSampleSpecProvider.instanceSampleSpecFor(metric, instance);
+                ISS instanceSampleSpec = instanceSampleSpecProvider.instanceSampleSpecFor(metric, instance, null);
 
                 if (instanceSampleSpec == null || !instanceSampleSpec.isEnabled()) {
                     return;
@@ -67,7 +67,7 @@ public abstract class AbstractInstanceSamplesProvider<
 
                 if (instanceSampleSpecModsProvider != null) {
                     for (ISSP instanceSampleSpecModProvider : instanceSampleSpecModsProvider.infosFor(instance)) {
-                        instanceSampleSpec.modify(instanceSampleSpecModProvider.instanceSampleSpecFor(metric, instance));
+                        instanceSampleSpec.modify(instanceSampleSpecModProvider.instanceSampleSpecFor(metric, instance, instanceSampleSpec));
                     }
                 }
 
@@ -84,7 +84,7 @@ public abstract class AbstractInstanceSamplesProvider<
                 MeasurableValues measurableValues = instance.measurableValues();
 
                 instance.measurables().forEach(measurable -> {
-                    SS sampleSpec = sampleSpecProvider.sampleSpecFor(instanceSampleSpec, instance, measurableValues, measurable);
+                    SS sampleSpec = sampleSpecProvider.sampleSpecFor(instanceSampleSpec, instance, measurableValues, measurable, null);
 
                     if (sampleSpec == null || !sampleSpec.isEnabled()) {
                         return;
@@ -92,7 +92,7 @@ public abstract class AbstractInstanceSamplesProvider<
 
                     if (sampleSpecModsProvider != null) {
                         for (SSP sampleSpecModProvider : sampleSpecModsProvider.infosFor(instance)) {
-                            sampleSpec.modify(sampleSpecModProvider.sampleSpecFor(instanceSampleSpec, instance, measurableValues, measurable));
+                            sampleSpec.modify(sampleSpecModProvider.sampleSpecFor(instanceSampleSpec, instance, measurableValues, measurable, sampleSpec));
                         }
                     }
 

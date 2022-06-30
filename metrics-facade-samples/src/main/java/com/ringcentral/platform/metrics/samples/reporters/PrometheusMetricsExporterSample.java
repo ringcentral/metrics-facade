@@ -43,13 +43,18 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             forMetricInstancesMatching(
                 nameMask("Histogram.**"),
                 instance -> "service_2".equals(instance.valueOf(SERVICE))),
-            (metric, instance) -> instanceSampleSpec().disable());
+            (metric, instance, currSpec) -> instanceSampleSpec().disable());
 
         miSampleSpecModsProvider.addMod(
             forMetricWithName("Histogram"),
-            (metric, instance) -> instanceSampleSpec()
+            (metric, instance, currSpec) -> instanceSampleSpec()
                 .name(instance.name().withNewPart(instance.valueOf(SERVICE)))
-                .dimensionValues(instance.dimensionValuesWithout(SERVICE)));
+                .dimensionValues(currSpec.dimensionValuesWithout(SERVICE)));
+
+        miSampleSpecModsProvider.addMod(
+            forMetricsWithNamePrefix("Histogram"),
+            (metric, instance, currSpec) ->
+                instanceSampleSpec().name(currSpec.name().replaceLast(currSpec.name().lastPart() + "_svc")));
 
         PrometheusInstanceSampleMaker miSampleMaker = new PrometheusInstanceSampleMaker(
             null, // totalInstanceNameSuffix. defaults to null that means no suffix
@@ -62,7 +67,7 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             forMetricInstancesMatching(
                 nameMask("Histogram.**"),
                 instance -> instance instanceof HistogramInstance),
-            (instanceSampleSpec, instance, measurableValues, measurable) ->
+            (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
                 measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
         PrometheusSampleMaker sampleMaker = new PrometheusSampleMaker();
@@ -89,9 +94,9 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
                 .measurables(MIN, MAX, MEAN));
 
         h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        h.update(-1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-        h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+        h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        h.update(3, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+        h.update(4, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
         Timer t = registry.timer(
             withName("Timer"),

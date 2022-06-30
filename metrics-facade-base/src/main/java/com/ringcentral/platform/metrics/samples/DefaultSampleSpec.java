@@ -1,9 +1,12 @@
 package com.ringcentral.platform.metrics.samples;
 
+import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.names.MetricName;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.Boolean.*;
 import static java.util.Collections.*;
@@ -110,6 +113,26 @@ public class DefaultSampleSpec implements SampleSpec {
 
     public List<MetricDimensionValue> dimensionValues() {
         return dimensionValues;
+    }
+
+    public boolean hasDimension(MetricDimension dimension) {
+        return MetricDimensionUtils.hasDimension(dimensionValues, dimension);
+    }
+
+    public String valueOf(MetricDimension dimension) {
+        return MetricDimensionUtils.valueOf(dimensionValues, dimension);
+    }
+
+    public MetricDimensionValue dimensionValueOf(MetricDimension dimension) {
+        return MetricDimensionUtils.dimensionValueOf(dimensionValues, dimension);
+    }
+
+    public Map<MetricDimension, MetricDimensionValue> dimensionToValue() {
+        return MetricDimensionUtils.dimensionToValue(dimensionValues);
+    }
+
+    public List<MetricDimensionValue> dimensionValuesWithout(MetricDimension dimension, MetricDimension... dimensions) {
+        return MetricDimensionUtils.dimensionValuesWithout(dimensionValues, dimension, dimensions);
     }
 
     public boolean hasValue() {

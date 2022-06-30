@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.defaultImpl.rate;
 
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.measurables.Measurable;
+import com.ringcentral.platform.metrics.rate.Rate.MeanRate;
 import com.ringcentral.platform.metrics.utils.TimeNanosProvider;
 
 import java.util.Set;
@@ -23,7 +24,7 @@ public abstract class AbstractRateImpl implements RateImpl {
         this.startTime = timeNanosProvider.timeNanos();
 
         this.counter =
-            measurables.stream().anyMatch(m -> m instanceof Count) ?
+            measurables.stream().anyMatch(m -> m instanceof Count || m instanceof MeanRate) ?
             new LongAdder() :
             null;
     }
@@ -41,7 +42,7 @@ public abstract class AbstractRateImpl implements RateImpl {
 
     @Override
     public long count() {
-        return counter.sum();
+        return counter != null ? counter.sum() : 0L;
     }
 
     @Override

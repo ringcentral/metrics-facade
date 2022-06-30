@@ -219,6 +219,10 @@ public class MetricName implements MetricKey, Iterable<String> {
         return new MetricName(asList(resultParts));
     }
 
+    public MetricName replaceLast(String replacement) {
+        return replace(replacement, size() - 1);
+    }
+
     public MetricName lowerCase() {
         return lowerCase(Locale.ENGLISH);
     }

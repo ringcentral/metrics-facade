@@ -84,7 +84,7 @@
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
 
         <commons-lang3.version>3.11</commons-lang3.version>
-        <jackson.version>2.12.1</jackson.version>
+        <jackson.version>2.13.3</jackson.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <logback-classic.version>1.2.3</logback-classic.version>
         <junit.version>4.13.1</junit.version>

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.infoProviders.MaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.producers.SystemMetricsProducer;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -76,13 +75,13 @@ public class GarmSample extends AbstractSample {
 
         instanceSampleSpecModsProvider.addMod(
             forMetricInstancesMatching(nameMask("allEndpoints.clientRequestProcessingTime"), instance -> instance.hasDimension(METHOD)),
-            (metric, instance) -> instanceSampleSpec()
+            (metric, instance, currSpec) -> instanceSampleSpec()
                 .name(instance.name().withNewPart(instance.valueOf(METHOD), 1))
                 .dimensionValues(instance.dimensionValuesWithout(METHOD)));
 
         instanceSampleSpecModsProvider.addMod(
             forMetricsWithNamePrefix("longVar"),
-            (metric, instance) -> instanceSampleSpec().noMeasurableName());
+            (metric, instance, currSpec) -> instanceSampleSpec().noMeasurableName());
 
         // Move certain counters to DELTA bucket
         DefaultSampleSpecModsProvider sampleSpecModsProvider = new DefaultSampleSpecModsProvider();
@@ -91,11 +90,11 @@ public class GarmSample extends AbstractSample {
             forMetrics()
                 .including(metricWithName("allEndpoints.activeClientConnectionsCount"))
                 .including(metricWithName("allEndpoints.activeRequestsCount")),
-            (instanceSampleSpec, instance, measurableValues, measurable) -> sampleSpec().type(DELTA));
+            (instanceSampleSpec, instance, measurableValues, measurable, currSpec) -> sampleSpec().type(DELTA));
 
         sampleSpecModsProvider.addMod(
             forMetricsWithNamePrefix("longVar"),
-            (instanceSampleSpec, instance, measurableValues, measurable) -> sampleSpec().noMeasurableName());
+            (instanceSampleSpec, instance, measurableValues, measurable, currSpec) -> sampleSpec().noMeasurableName());
 
         // Metric instance samples provider
         DefaultInstanceSamplesProvider instanceSamplesProvider = new DefaultInstanceSamplesProvider(

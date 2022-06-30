@@ -1,5 +1,6 @@
 package com.ringcentral.platform.metrics.spring;
 
+import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.infoProviders.*;
@@ -17,11 +18,24 @@ import org.springframework.context.annotation.*;
 
 import java.util.List;
 
+import static com.ringcentral.platform.metrics.MetricModBuilder.modifying;
+import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.counter;
+import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.withCounter;
+import static com.ringcentral.platform.metrics.names.MetricNameMask.metricWithName;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.nameMask;
 import static com.ringcentral.platform.metrics.predicates.DefaultMetricInstancePredicate.forMetricInstancesMatching;
 
 @Configuration
 public class MetricsFacadeConfig {
+
+    // Defaults and overrides
+
+    @Bean
+    public MetricRegistryCustomizer mfDefaultsAndOverridesCustomizer() {
+        return registry -> registry.postConfigure(
+            metricWithName("counter"),
+            modifying().counter(withCounter().description("Customized counter description")));
+    }
 
     // JMX
 

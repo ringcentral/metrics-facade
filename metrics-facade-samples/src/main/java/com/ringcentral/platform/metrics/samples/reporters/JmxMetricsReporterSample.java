@@ -2,7 +2,6 @@ package com.ringcentral.platform.metrics.samples.reporters;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.infoProviders.MaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.reporters.jmx.*;

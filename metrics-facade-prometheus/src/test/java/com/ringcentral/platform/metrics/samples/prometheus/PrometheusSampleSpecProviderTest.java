@@ -52,7 +52,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                LONG_VALUE),
+                LONG_VALUE,
+                null),
             expectedSampleSpec);
 
         // counter
@@ -72,7 +73,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                COUNT),
+                COUNT,
+                null),
             expectedSampleSpec);
 
         // rate
@@ -92,38 +94,44 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                COUNT),
+                COUNT,
+                null),
             expectedSampleSpec);
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            MEAN_RATE));
+            MEAN_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            ONE_MINUTE_RATE));
+            ONE_MINUTE_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            FIVE_MINUTES_RATE));
+            FIVE_MINUTES_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            FIFTEEN_MINUTES_RATE));
+            FIFTEEN_MINUTES_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            RATE_UNIT));
+            RATE_UNIT,
+            null));
 
         // histogram
         instance = mock(HistogramInstance.class);
@@ -142,7 +150,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                COUNT),
+                COUNT,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
@@ -152,7 +161,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                TOTAL_SUM),
+                TOTAL_SUM,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
@@ -162,7 +172,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                MIN),
+                MIN,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
@@ -172,7 +183,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                MAX),
+                MAX,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
@@ -182,7 +194,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                MEAN),
+                MEAN,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
@@ -192,7 +205,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                PERCENTILE_50),
+                PERCENTILE_50,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
@@ -202,7 +216,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                PERCENTILE_75),
+                PERCENTILE_75,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
@@ -212,14 +227,16 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                SEC_1_BUCKET),
+                SEC_1_BUCKET,
+                null),
             expectedSampleSpec);
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            STANDARD_DEVIATION));
+            STANDARD_DEVIATION,
+            null));
 
         // timer
         instance = mock(TimerInstance.class);
@@ -239,7 +256,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                COUNT),
+                COUNT,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 0.001);
@@ -249,7 +267,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                TOTAL_SUM),
+                TOTAL_SUM,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, MIN, 0.001);
@@ -259,7 +278,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                MIN),
+                MIN,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, MAX, 0.001);
@@ -269,7 +289,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                MAX),
+                MAX,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, MEAN, 0.001);
@@ -279,7 +300,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                MEAN),
+                MEAN,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 0.001);
@@ -289,7 +311,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                PERCENTILE_50),
+                PERCENTILE_50,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 0.001);
@@ -299,7 +322,8 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                PERCENTILE_75),
+                PERCENTILE_75,
+                null),
             expectedSampleSpec);
 
         expectedSampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
@@ -309,50 +333,58 @@ public class PrometheusSampleSpecProviderTest {
                 instanceSampleSpec,
                 instance,
                 measurableValues,
-                SEC_1_BUCKET),
+                SEC_1_BUCKET,
+                null),
             expectedSampleSpec);
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            MEAN_RATE));
+            MEAN_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            ONE_MINUTE_RATE));
+            ONE_MINUTE_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            FIVE_MINUTES_RATE));
+            FIVE_MINUTES_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            FIFTEEN_MINUTES_RATE));
+            FIFTEEN_MINUTES_RATE,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            RATE_UNIT));
+            RATE_UNIT,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            STANDARD_DEVIATION));
+            STANDARD_DEVIATION,
+            null));
 
         assertNull(provider.sampleSpecFor(
             instanceSampleSpec,
             instance,
             measurableValues,
-            DURATION_UNIT));
+            DURATION_UNIT,
+            null));
     }
 
     public void check(PrometheusSampleSpec actual, PrometheusSampleSpec expected) {

@@ -9,5 +9,6 @@ public interface SampleSpecProvider<SS extends SampleSpec, ISS extends InstanceS
         ISS instanceSampleSpec,
         MetricInstance instance,
         MeasurableValues measurableValues,
-        Measurable measurable);
+        Measurable measurable,
+        SS currSpec);
 }

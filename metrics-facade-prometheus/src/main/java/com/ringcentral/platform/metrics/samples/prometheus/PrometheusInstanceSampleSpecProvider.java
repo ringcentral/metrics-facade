@@ -40,7 +40,11 @@ public class PrometheusInstanceSampleSpecProvider implements InstanceSampleSpecP
     }
 
     @Override
-    public PrometheusInstanceSampleSpec instanceSampleSpecFor(Metric metric, MetricInstance instance) {
+    public PrometheusInstanceSampleSpec instanceSampleSpecFor(
+        Metric metric,
+        MetricInstance instance,
+        PrometheusInstanceSampleSpec currSpec) {
+
         if (metric instanceof ObjectVar || metric instanceof StringVar) {
             return null;
         }

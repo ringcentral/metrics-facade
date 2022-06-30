@@ -105,9 +105,21 @@ public class DefaultInstanceSamplesProviderTest {
 
         instanceSampleSpecModsProvider.addMod(
             forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e"), instance -> instance.hasDimension(DIMENSION_3)),
-            (metric, instance) -> instanceSampleSpec()
+            (metric, instance, currSpec) -> instanceSampleSpec()
                 .name(instance.name().withNewPart(instance.valueOf(DIMENSION_3), 1))
                 .dimensionValues(instance.dimensionValuesWithout(DIMENSION_3)));
+
+        instanceSampleSpecModsProvider.addMod(
+            forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e")),
+            (metric, instance, currSpec) -> instanceSampleSpec().name(currSpec.name().withNewPart("f")));
+
+        instanceSampleSpecModsProvider.addMod(
+            forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e")),
+            (metric, instance, currSpec) -> instanceSampleSpec().name(currSpec.name().withNewPart("g")));
+
+        instanceSampleSpecModsProvider.addMod(
+            forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e")),
+            (metric, instance, currSpec) -> instanceSampleSpec().dimensionValues(currSpec.dimensionValuesWithout(DIMENSION_1)));
 
         // move certain values to DELTA bucket
         DefaultSampleSpecModsProvider sampleSpecModsProvider = new DefaultSampleSpecModsProvider();
@@ -116,7 +128,7 @@ public class DefaultInstanceSamplesProviderTest {
             forMetrics()
                 .including(metricWithName("longVar.a.b.c"))
                 .including(metricWithName("longVar.a.b.c.d")),
-            (instanceSampleSpec, instance, measurableValues, measurable) -> sampleSpec().type(DELTA));
+            (instanceSampleSpec, instance, measurableValues, measurable, currSpec) -> sampleSpec().type(DELTA));
 
         provider = new DefaultInstanceSamplesProvider(instanceSampleSpecModsProvider, sampleSpecModsProvider, registry);
 
@@ -200,7 +212,7 @@ public class DefaultInstanceSamplesProviderTest {
         samples = instanceSample.samples();
         assertThat(samples.size(), is(1));
         sample = samples.get(0);
-        assertThat(sample.name(), is("longVar.3.a.b.c.d.e.1.2.value"));
+        assertThat(sample.name(), is("longVar.3.a.b.c.d.e.f.g.2.value"));
         assertThat(sample.value(), is(4L));
         assertThat(sample.type(), is(INSTANT));
     }
@@ -212,7 +224,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         instanceSampleSpecModsProvider.addMod(
             forMetricInstancesMatching(nameMask("cachingLongVar.a.b.c.d.e")),
-            (metric, instance) -> instanceSampleSpec().disable());
+            (metric, instance, currSpec) -> instanceSampleSpec().disable());
 
         // disable certain samples
         DefaultSampleSpecModsProvider sampleSpecModsProvider = new DefaultSampleSpecModsProvider();
@@ -221,7 +233,7 @@ public class DefaultInstanceSamplesProviderTest {
             forMetrics()
                 .including(metricWithName("cachingLongVar.a.b.c"))
                 .including(metricWithName("cachingLongVar.a.b.c.d")),
-            (instanceSampleSpec, instance, measurableValues, measurable) -> sampleSpec().disable());
+            (instanceSampleSpec, instance, measurableValues, measurable, currSpec) -> sampleSpec().disable());
 
         provider = new DefaultInstanceSamplesProvider(instanceSampleSpecModsProvider, sampleSpecModsProvider, registry);
 

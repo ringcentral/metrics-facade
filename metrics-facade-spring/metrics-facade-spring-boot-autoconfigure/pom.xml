@@ -30,7 +30,7 @@
 
         <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>
-            <artifactId>metrics-facade-dropwizard</artifactId>
+            <artifactId>metrics-facade-default-impl</artifactId>
             <version>${metrics-facade-version}</version>
         </dependency>
 

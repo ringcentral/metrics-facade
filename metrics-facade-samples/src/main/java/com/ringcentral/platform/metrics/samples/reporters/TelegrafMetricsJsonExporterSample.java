@@ -3,7 +3,6 @@ package com.ringcentral.platform.metrics.samples.reporters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.*;
 import com.ringcentral.platform.metrics.reporters.telegraf.TelegrafMetricsJsonExporter;
 import com.ringcentral.platform.metrics.samples.*;
@@ -30,11 +29,11 @@ public class TelegrafMetricsJsonExporterSample extends AbstractSample {
             forMetricInstancesMatching(
                 nameMask("histogram.**"),
                 instance -> "service_2".equals(instance.valueOf(SERVICE))),
-            (metric, instance) -> instanceSampleSpec().disable());
+            (metric, instance, currSpec) -> instanceSampleSpec().disable());
 
         miSampleSpecModsProvider.addMod(
             forMetricWithName("histogram"),
-            (metric, instance) -> instanceSampleSpec().name(instance.name().withNewPart("test")));
+            (metric, instance, currSpec) -> instanceSampleSpec().name(instance.name().withNewPart("test")));
 
         DefaultSampleSpecModsProvider sampleSpecModsProvider = new DefaultSampleSpecModsProvider();
 
@@ -42,7 +41,7 @@ public class TelegrafMetricsJsonExporterSample extends AbstractSample {
             forMetricInstancesMatching(
                 nameMask("histogram.**"),
                 instance -> instance instanceof HistogramInstance),
-            (instanceSampleSpec, instance, measurableValues, measurable) ->
+            (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
                 measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
         DefaultInstanceSamplesProvider miSamplesProvider = new DefaultInstanceSamplesProvider(

@@ -1765,6 +1765,9 @@ you need to configure the ```PrometheusMetricsExporter``` accordingly:
 ```java
 MetricRegistry registry = new DefaultMetricRegistry();
 
+// Default config
+// PrometheusMetricsExporter prometheusMetricsExporter = new PrometheusMetricsExporter(registry);
+
 PrometheusInstanceSampleSpecProvider miSampleSpecProvider = new PrometheusInstanceSampleSpecProvider(
     true, // exportTotalInstances. defaults to true
     false, // exportDimensionalTotalInstances. defaults to false
@@ -1774,15 +1777,20 @@ PrometheusInstanceSampleSpecModsProvider miSampleSpecModsProvider = new Promethe
 
 miSampleSpecModsProvider.addMod(
     forMetricInstancesMatching(
-        nameMask("histogram.**"),
+        nameMask("Histogram.**"),
         instance -> "service_2".equals(instance.valueOf(SERVICE))),
-    (metric, instance) -> instanceSampleSpec().disable());
+    (metric, instance, currSpec) -> instanceSampleSpec().disable());
 
 miSampleSpecModsProvider.addMod(
-    forMetricWithName("histogram"),
-    (metric, instance) -> instanceSampleSpec()
+    forMetricWithName("Histogram"),
+    (metric, instance, currSpec) -> instanceSampleSpec()
         .name(instance.name().withNewPart(instance.valueOf(SERVICE)))
-        .dimensionValues(instance.dimensionValuesWithout(SERVICE)));
+        .dimensionValues(currSpec.dimensionValuesWithout(SERVICE)));
+
+miSampleSpecModsProvider.addMod(
+    forMetricsWithNamePrefix("Histogram"),
+    (metric, instance, currSpec) ->
+        instanceSampleSpec().name(currSpec.name().replaceLast(currSpec.name().lastPart() + "_svc")));
 
 PrometheusInstanceSampleMaker miSampleMaker = new PrometheusInstanceSampleMaker(
     null, // totalInstanceNameSuffix. defaults to null that means no suffix
@@ -1793,9 +1801,9 @@ PrometheusSampleSpecModsProvider sampleSpecModsProvider = new PrometheusSampleSp
 
 sampleSpecModsProvider.addMod(
     forMetricInstancesMatching(
-        nameMask("histogram.**"),
+        nameMask("Histogram.**"),
         instance -> instance instanceof HistogramInstance),
-    (instanceSampleSpec, instance, measurableValues, measurable) ->
+    (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
         measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
 PrometheusSampleMaker sampleMaker = new PrometheusSampleMaker();
@@ -1809,23 +1817,60 @@ PrometheusInstanceSamplesProvider miSamplesProvider = new PrometheusInstanceSamp
     sampleMaker,
     registry);
 
-PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(miSamplesProvider);
+PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(
+    true,
+    Locale.ENGLISH,
+    miSamplesProvider);
 
 Histogram h = registry.histogram(
-    withName("histogram"),
+    withName("Histogram"),
     () -> withHistogram()
+        .description("Histogram for " + PrometheusMetricsExporterSample.class.getSimpleName())
         .dimensions(SERVICE, SERVER, PORT)
-        .measurables(MAX, MEAN));
+        .measurables(MIN, MAX, MEAN));
 
 h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+h.update(3, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+h.update(4, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+
+Timer t = registry.timer(
+    withName("Timer"),
+    () -> withTimer()
+        .description("Timer for " + PrometheusMetricsExporterSample.class.getSimpleName())
+        .dimensions(SERVICE, SERVER, PORT)
+        .measurables(MIN, MAX, MEAN));
+
+t.update(SECONDS.toNanos(1), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+t.update(SECONDS.toNanos(2), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+t.update(SECONDS.toNanos(3), forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 ```
 
-Output (simplified):  
+Output:  
 ```bash
-histogram_service_1_mean{server="server_1_1",port="111",} 1.0
-histogram_service_1_mean{server="server_1_2",port="121",} 2.0
+# HELP histogram_service_1_svc_mean Histogram for PrometheusMetricsExporterSample
+# TYPE histogram_service_1_svc_mean gauge
+histogram_service_1_svc_mean{server="server_1_1",port="111",} 1.5
+histogram_service_1_svc_mean{server="server_1_2",port="121",} 3.0
+# HELP histogram_service_1_svc_min Histogram for PrometheusMetricsExporterSample
+# TYPE histogram_service_1_svc_min gauge
+histogram_service_1_svc_min{server="server_1_1",port="111",} 1.0
+histogram_service_1_svc_min{server="server_1_2",port="121",} 3.0
+# HELP timer_max Timer for PrometheusMetricsExporterSample
+# TYPE timer_max gauge
+timer_max{service="service_1",server="server_1_1",port="111",} 1.002438655
+timer_max{service="service_1",server="server_1_2",port="121",} 2.004877311
+timer_max{service="service_2",server="server_2_1",port="211",} 3.003121663
+# HELP timer_mean Timer for PrometheusMetricsExporterSample
+# TYPE timer_mean gauge
+timer_mean{service="service_1",server="server_1_1",port="111",} 1.000341504
+timer_mean{service="service_1",server="server_1_2",port="121",} 2.000683008
+timer_mean{service="service_2",server="server_2_1",port="211",} 2.9947330560000003
+# HELP timer_min Timer for PrometheusMetricsExporterSample
+# TYPE timer_min gauge
+timer_min{service="service_1",server="server_1_1",port="111",} 0.998244352
+timer_min{service="service_1",server="server_1_2",port="121",} 1.996488704
+timer_min{service="service_2",server="server_2_1",port="211",} 2.986344448
 ```
 
 ### ZabbixMetricsJsonExporter and ZabbixLldMetricsReporter
@@ -1855,11 +1900,11 @@ miSampleSpecModsProvider.addMod(
     forMetricInstancesMatching(
         nameMask("histogram.**"),
         instance -> "service_2".equals(instance.valueOf(SERVICE))),
-    (metric, instance) -> instanceSampleSpec().disable());
+    (metric, instance, currSpec) -> instanceSampleSpec().disable());
 
 miSampleSpecModsProvider.addMod(
     forMetricWithName("histogram"),
-    (metric, instance) -> instanceSampleSpec().name(instance.name().withNewPart("test")));
+    (metric, instance, currSpec) -> instanceSampleSpec().name(instance.name().withNewPart("test")));
 
 DefaultSampleSpecModsProvider sampleSpecModsProvider = new DefaultSampleSpecModsProvider();
 
@@ -1867,8 +1912,8 @@ sampleSpecModsProvider.addMod(
     forMetricInstancesMatching(
         nameMask("histogram.**"),
         instance -> instance instanceof HistogramInstance),
-    (instanceSampleSpec, instance, measurableValues, measurable) ->
-        measurable instanceof Max ? sampleSpec().disable() :sampleSpec());
+    (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
+        measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
 DefaultInstanceSamplesProvider miSamplesProvider = new DefaultInstanceSamplesProvider(
     miSampleSpecModsProvider,
@@ -1906,56 +1951,244 @@ Histogram h = registry.histogram(
     withName("histogram"),
     () -> withHistogram()
         .dimensions(SERVICE, SERVER, PORT)
-        .measurables(COUNT, MAX, MEAN));
+        .measurables(COUNT, MAX, MEAN, Buckets.of(scale())));
 
 h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
 h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
 h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
-System.out.println(toJson(exporter.exportMetrics()));
+...
+
+static ScaleBuilder<?> scale() {
+    return
+        // 100 ms
+        first(linear().steps(25, MILLISECONDS, 4))
+        // 500 ms
+        .then(linear().steps(100, MILLISECONDS, 4).withInf());
+}
 ```
 
 ```exporter.exportMetrics()``` as JSON:  
 ```json
 {
-  "instant": [
-    {
-      "histogram.test.mean": 2.0
-    },
-    {
-      "histogram.test.service_1.mean": 1.5
-    },
-    {
-      "histogram.test.service_1.server_1_1.111.mean": 1.0
-    },
-    {
-      "histogram.test.service_1.server_1_1.mean": 1.0
-    },
-    {
-      "histogram.test.service_1.server_1_2.121.mean": 2.0
-    },
-    {
-      "histogram.test.service_1.server_1_2.mean": 2.0
-    }
-  ],
   "delta": [
     {
-      "histogram.test.count": 3
+      "timer.test.count": 3
     },
     {
-      "histogram.test.service_1.count": 2
+      "timer.test.service_1.count": 2
     },
     {
-      "histogram.test.service_1.server_1_1.111.count": 1
+      "timer.test.service_1.server_1_1.111.count": 1
     },
     {
-      "histogram.test.service_1.server_1_1.count": 1
+      "timer.test.service_1.server_1_1.count": 1
     },
     {
-      "histogram.test.service_1.server_1_2.121.count": 1
+      "timer.test.service_1.server_1_2.121.count": 1
     },
     {
-      "histogram.test.service_1.server_1_2.count": 1
+      "timer.test.service_1.server_1_2.count": 1
+    }
+  ],
+  "instant": [
+    {
+      "timer.test.duration.0ms_bucket": 0
+    },
+    {
+      "timer.test.duration.100ms_bucket": 3
+    },
+    {
+      "timer.test.duration.200ms_bucket": 3
+    },
+    {
+      "timer.test.duration.25ms_bucket": 3
+    },
+    {
+      "timer.test.duration.300ms_bucket": 3
+    },
+    {
+      "timer.test.duration.400ms_bucket": 3
+    },
+    {
+      "timer.test.duration.500ms_bucket": 3
+    },
+    {
+      "timer.test.duration.50ms_bucket": 3
+    },
+    {
+      "timer.test.duration.75ms_bucket": 3
+    },
+    {
+      "timer.test.duration.inf_bucket": 3
+    },
+    {
+      "timer.test.duration.mean": 2.0E-6
+    },
+    {
+      "timer.test.service_1.duration.0ms_bucket": 0
+    },
+    {
+      "timer.test.service_1.duration.100ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.200ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.25ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.300ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.400ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.500ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.50ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.75ms_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.inf_bucket": 2
+    },
+    {
+      "timer.test.service_1.duration.mean": 1.5E-6
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.0ms_bucket": 0
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.100ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.200ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.25ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.300ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.400ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.500ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.50ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.75ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.inf_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.111.duration.mean": 1.0E-6
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.0ms_bucket": 0
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.100ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.200ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.25ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.300ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.400ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.500ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.50ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.75ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.inf_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_1.duration.mean": 1.0E-6
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.0ms_bucket": 0
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.100ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.200ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.25ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.300ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.400ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.500ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.50ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.75ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.inf_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.121.duration.mean": 2.0E-6
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.0ms_bucket": 0
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.100ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.200ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.25ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.300ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.400ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.500ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.50ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.75ms_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.inf_bucket": 1
+    },
+    {
+      "timer.test.service_1.server_1_2.duration.mean": 2.0E-6
     }
   ]
 }
@@ -2021,11 +2254,11 @@ miSampleSpecModsProvider.addMod(
     forMetricInstancesMatching(
         nameMask("histogram.**"),
         instance -> "service_2".equals(instance.valueOf(SERVICE))),
-    (metric, instance) -> instanceSampleSpec().disable());
+    (metric, instance, currSpec) -> instanceSampleSpec().disable());
 
 miSampleSpecModsProvider.addMod(
     forMetricWithName("histogram"),
-    (metric, instance) -> instanceSampleSpec().name(instance.name().withNewPart("test")));
+    (metric, instance, currSpec) -> instanceSampleSpec().name(instance.name().withNewPart("test")));
 
 DefaultSampleSpecModsProvider sampleSpecModsProvider = new DefaultSampleSpecModsProvider();
 
@@ -2033,8 +2266,8 @@ sampleSpecModsProvider.addMod(
     forMetricInstancesMatching(
         nameMask("histogram.**"),
         instance -> instance instanceof HistogramInstance),
-    (instanceSampleSpec, instance, measurableValues, measurable) ->
-        measurable instanceof Max ? sampleSpec().disable() :sampleSpec());
+    (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
+        measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
 DefaultInstanceSamplesProvider miSamplesProvider = new DefaultInstanceSamplesProvider(
     miSampleSpecModsProvider,
@@ -2052,29 +2285,23 @@ Histogram h = registry.histogram(
 h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
 h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
 h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
-
-TelegrafMetricsJsonExporter exporter = new TelegrafMetricsJsonExporter(
-    false, // without grouping by types
-    miSamplesProvider);
-
-System.out.println(toJson(exporter.exportMetrics()));
 ```
 
 ```exporter.exportMetrics()``` as JSON (without grouping by types):
 ```json
 {
-  "histogram.test.count": 3,
   "histogram.test.mean": 2.0,
-  "histogram.test.service_1.server_1_1.111.count": 1,
+  "histogram.test.count": 3,
   "histogram.test.service_1.server_1_1.111.mean": 1.0,
-  "histogram.test.service_1.server_1_2.121.count": 1,
+  "histogram.test.service_1.server_1_1.111.count": 1,
   "histogram.test.service_1.server_1_2.121.mean": 2.0,
-  "histogram.test.service_1.count": 2,
+  "histogram.test.service_1.server_1_2.121.count": 1,
   "histogram.test.service_1.mean": 1.5,
-  "histogram.test.service_1.server_1_2.count": 1,
+  "histogram.test.service_1.count": 2,
   "histogram.test.service_1.server_1_2.mean": 2.0,
-  "histogram.test.service_1.server_1_1.count": 1,
-  "histogram.test.service_1.server_1_1.mean": 1.0
+  "histogram.test.service_1.server_1_2.count": 1,
+  "histogram.test.service_1.server_1_1.mean": 1.0,
+  "histogram.test.service_1.server_1_1.count": 1
 }
 ```
 

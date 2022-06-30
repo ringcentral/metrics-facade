@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.spring;
 
 import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.micrometer.*;
 import io.micrometer.core.instrument.Clock;
 import org.springframework.boot.actuate.autoconfigure.metrics.*;
@@ -32,7 +32,7 @@ public class MfMetricsExportAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public MetricRegistryMaker metricRegistryMaker() {
-        return DropwizardMetricRegistry::new;
+        return DefaultMetricRegistry::new;
     }
 
     @Bean

@@ -104,6 +104,10 @@ public class MetricNameTest {
         assertThat(metricName("A", "B").replace("C", 1, "D", 0), is(name("D", "C")));
         assertThat(metricName("A", "B", "C").replace("D", 0, "E", 2), is(name("D", "B", "E")));
         assertThat(metricName("A", "B", "C").replace("D", 2, "E", 0), is(name("E", "B", "D")));
+
+        assertThat(metricName("A").replaceLast("D"), is(name("D")));
+        assertThat(metricName("A", "B").replaceLast("D"), is(name("A", "D")));
+        assertThat(metricName("A", "B", "C").replaceLast("D"), is(name("A", "B", "D")));
     }
 
     @Test

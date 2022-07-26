@@ -13,7 +13,7 @@ public class PrometheusSample implements Sample {
 
     private final MetricName childInstanceSampleNameSuffix;
     private final Collector.Type childInstanceSampleType;
-
+    private final MetricName name;
     private final String nameSuffix;
     private final List<String> labelNames;
     private final List<String> labelValues;
@@ -22,6 +22,7 @@ public class PrometheusSample implements Sample {
     public PrometheusSample(
         MetricName childInstanceSampleNameSuffix,
         Collector.Type childInstanceSampleType,
+        MetricName name,
         String nameSuffix,
         List<String> labelNames,
         List<String> labelValues,
@@ -35,6 +36,7 @@ public class PrometheusSample implements Sample {
         this.childInstanceSampleNameSuffix = childInstanceSampleNameSuffix;
         this.childInstanceSampleType = childInstanceSampleType;
 
+        this.name = name;
         this.nameSuffix = nameSuffix;
         this.labelNames = labelNames != null ? labelNames : emptyList();
         this.labelValues = labelValues != null ? labelValues : emptyList();
@@ -57,10 +59,19 @@ public class PrometheusSample implements Sample {
         return new PrometheusSample(
             null,
             null,
+            name,
             nameSuffix,
             labelNames,
             labelValues,
             value);
+    }
+
+    public boolean hasName() {
+        return name != null;
+    }
+
+    public MetricName name() {
+        return name;
     }
 
     public boolean hasNameSuffix() {

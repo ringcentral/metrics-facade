@@ -2,22 +2,30 @@ package com.ringcentral.platform.metrics.samples.reporters;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
-import com.ringcentral.platform.metrics.histogram.*;
+import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.reporters.jmx.JmxMetricsReporter;
 import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 import com.ringcentral.platform.metrics.samples.prometheus.*;
+import com.ringcentral.platform.metrics.samples.prometheus.collectorRegistry.SimpleCollectorRegistryPrometheusInstanceSamplesProvider;
 import com.ringcentral.platform.metrics.timer.Timer;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Counter;
+import io.prometheus.client.SampleNameFilter;
+import io.prometheus.client.Summary;
 
 import java.util.Locale;
 
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
+import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.*;
 import static com.ringcentral.platform.metrics.predicates.DefaultMetricInstancePredicate.forMetricInstancesMatching;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleSpec.instanceSampleSpec;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProviderBuilder.prometheusInstanceSamplesProvider;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleSpec.sampleSpec;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -72,19 +80,40 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
 
         PrometheusSampleMaker sampleMaker = new PrometheusSampleMaker();
 
-        PrometheusInstanceSamplesProvider miSamplesProvider = new PrometheusInstanceSamplesProvider(
-            miSampleSpecProvider,
-            miSampleSpecModsProvider,
-            miSampleMaker,
-            sampleSpecProvider,
-            sampleSpecModsProvider,
-            sampleMaker,
-            registry);
+        PrometheusInstanceSamplesProvider miSamplesProvider = prometheusInstanceSamplesProvider(registry)
+            .instanceSampleSpecProvider(miSampleSpecProvider)
+            .instanceSampleSpecModsProvider(miSampleSpecModsProvider)
+            .instanceSampleMaker(miSampleMaker)
+            .sampleSpecProvider(sampleSpecProvider)
+            .sampleSpecModsProvider(sampleSpecModsProvider)
+            .sampleMaker(sampleMaker)
+            .build();
 
         PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(
             true,
             Locale.ENGLISH,
-            miSamplesProvider);
+            miSamplesProvider,
+            new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(
+                name("defaultRegistry"), // optional prefix
+                new SampleNameFilter.Builder().nameMustNotStartWith("counter").build(), // optional filter
+                sampleName -> !sampleName.endsWith("created"), // optional filter
+                CollectorRegistry.defaultRegistry));
+
+        Counter defaultRegistry_Counter = Counter.build()
+            .name("counter")
+            .help("Counter from defaultRegistry")
+            .register();
+
+        defaultRegistry_Counter.inc(3);
+
+        Summary defaultRegistry_Summary = Summary.build()
+            .name("summary")
+            .help("Summary from defaultRegistry")
+            .register();
+
+        defaultRegistry_Summary.observe(10);
+        defaultRegistry_Summary.observe(20);
+        defaultRegistry_Summary.observe(30);
 
         Histogram h = registry.histogram(
             withName("Histogram"),

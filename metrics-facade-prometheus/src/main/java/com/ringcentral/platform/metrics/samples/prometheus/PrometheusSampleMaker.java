@@ -93,6 +93,7 @@ public class PrometheusSampleMaker implements SampleMaker<
         return new PrometheusSample(
             childInstanceSampleNameSuffix,
             childInstanceSampleType,
+            null,
             nameSuffix,
             labelNames,
             labelValues,

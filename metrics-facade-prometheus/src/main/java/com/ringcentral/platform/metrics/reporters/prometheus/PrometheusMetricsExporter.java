@@ -214,10 +214,7 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
     }
 
     private MetricFamilySamples toMetricFamilySamples(PrometheusInstanceSample is) {
-        String name =
-            convertNameToLowercase ?
-            sanitizeMetricName(join(NAME_PARTS_DELIMITER, is.name())).toLowerCase(locale) :
-            sanitizeMetricName(join(NAME_PARTS_DELIMITER, is.name()));
+        String name = buildName(is.name());
 
         return new MetricFamilySamples(
             name,
@@ -228,15 +225,9 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
                     String sampleName = name;
 
                     if (s.hasName()) {
-                        sampleName =
-                            convertNameToLowercase ?
-                            sanitizeMetricName(join(NAME_PARTS_DELIMITER, s.name())).toLowerCase(locale) :
-                            sanitizeMetricName(join(NAME_PARTS_DELIMITER, s.name()));
+                        sampleName = buildName(s.name());
                     } else if (s.hasNameSuffix()) {
-                        sampleName +=
-                            convertNameToLowercase ?
-                            sanitizeMetricName(s.nameSuffix()).toLowerCase(locale) :
-                            sanitizeMetricName(s.nameSuffix());
+                        sampleName += buildNameSuffix(s);
                     }
 
                     return new MetricFamilySamples.Sample(
@@ -246,6 +237,17 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
                         s.value());
                 })
                 .collect(toList()));
+    }
+
+    private String buildName(MetricName name) {
+        final var sanitizedName = sanitizeMetricName(join(NAME_PARTS_DELIMITER, name));
+        return convertNameToLowercase ? sanitizedName.toLowerCase(locale) : sanitizedName;
+    }
+
+    private String buildNameSuffix(PrometheusSample ps) {
+        final var suffix = ps.nameSuffix();
+        final var sanitizedSuffix = sanitizeMetricName(suffix);
+        return convertNameToLowercase ? sanitizedSuffix.toLowerCase(locale) : sanitizedSuffix;
     }
 
     private static String helpFor(PrometheusInstanceSample is) {

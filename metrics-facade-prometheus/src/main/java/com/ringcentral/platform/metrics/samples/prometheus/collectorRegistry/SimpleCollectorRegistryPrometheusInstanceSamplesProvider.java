@@ -9,6 +9,7 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Predicate;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
@@ -16,7 +17,7 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProvider implements
     PrometheusSample,
     PrometheusInstanceSample> {
 
-    private final MetricName namePrefix;
+    private final Function<String, MetricName> nameBuilder;
     private final Predicate<String> metricFamilyNameFilter;
     private final Predicate<String> metricFamilySampleNameFilter;
     private final Collection<? extends CollectorRegistry> collectorRegistries;
@@ -75,7 +76,29 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProvider implements
         Predicate<String> metricFamilySampleNameFilter,
         Collection<? extends CollectorRegistry> collectorRegistries) {
 
-        this.namePrefix = namePrefix;
+        this(
+            n -> MetricName.of(namePrefix, n),
+            metricFamilyNameFilter,
+            metricFamilySampleNameFilter,
+            collectorRegistries);
+    }
+
+    /**
+     * @param nameBuilder the function to be applied to each MetricFamilySample.name when building PrometheusInstanceSample.instanceName/name
+     *                    and to be applied to each MetricFamilySample.Sample.name when building PrometheusSample.name.
+     *                    Optional
+     *
+     * @param metricFamilyNameFilter optional
+     * @param metricFamilySampleNameFilter optional
+     * @param collectorRegistries must be not empty
+     */
+    public SimpleCollectorRegistryPrometheusInstanceSamplesProvider(
+        Function<String, MetricName> nameBuilder,
+        Predicate<String> metricFamilyNameFilter,
+        Predicate<String> metricFamilySampleNameFilter,
+        Collection<? extends CollectorRegistry> collectorRegistries) {
+
+        this.nameBuilder = nameBuilder != null ? nameBuilder : MetricName::of;
         this.metricFamilyNameFilter = metricFamilyNameFilter;
         this.metricFamilySampleNameFilter = metricFamilySampleNameFilter;
 
@@ -101,12 +124,7 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProvider implements
 
         while (fsEnumeration.hasMoreElements()) {
             MetricFamilySamples fs = fsEnumeration.nextElement();
-
-            MetricName name =
-                hasNamePrefix() ?
-                MetricName.of(namePrefix, fs.name) :
-                MetricName.of(fs.name);
-
+            MetricName name = nameBuilder.apply(fs.name);
             PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(name, name, fs.help, fs.type);
 
             fs.samples.forEach(fsSample -> {
@@ -114,10 +132,7 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProvider implements
                     return;
                 }
 
-                MetricName sampleName =
-                    hasNamePrefix() ?
-                    MetricName.of(namePrefix, fsSample.name) :
-                    MetricName.of(fsSample.name);
+                MetricName sampleName = nameBuilder.apply(fsSample.name);
 
                 PrometheusSample sample = new PrometheusSample(
                     null,
@@ -131,13 +146,9 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProvider implements
                 instanceSample.add(sample);
             });
 
-            if (instanceSample.samples() != null && !instanceSample.samples().isEmpty()) {
+            if (!instanceSample.samples().isEmpty()) {
                 result.add(instanceSample);
             }
         }
-    }
-
-    private boolean hasNamePrefix() {
-        return namePrefix != null && !namePrefix.isEmpty();
     }
 }

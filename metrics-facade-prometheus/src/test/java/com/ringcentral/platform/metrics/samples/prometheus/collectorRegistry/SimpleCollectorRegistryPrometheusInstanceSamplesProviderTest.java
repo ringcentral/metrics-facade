@@ -24,6 +24,9 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProviderTest {
         SimpleCollectorRegistryPrometheusInstanceSamplesProvider instanceSamplesProvider = new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(
             name("defaultRegistry"), // optional prefix
             new SampleNameFilter.Builder().nameMustNotStartWith("counter_1").build(), // optional filter
+            // A typical Prometheus collector adds a MetricsFamilySamples.Sample for its creation time.
+            // That sample has an unpredictable and hard to verify value.
+            // That's why we remove it with !sampleName.endsWith("created").
             sampleName -> !sampleName.contains("summary") || !sampleName.endsWith("created"), // optional filter
             collectorRegistry);
 

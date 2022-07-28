@@ -3,8 +3,9 @@ package com.ringcentral.platform.metrics.reporters.prometheus;
 import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSample;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSample;
-import com.ringcentral.platform.metrics.samples.prometheus.collectorRegistry.SimpleCollectorRegistryPrometheusInstanceSamplesProvider;
-import io.prometheus.client.*;
+import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Summary;
 import org.junit.Test;
 
 import java.util.LinkedHashSet;
@@ -227,12 +228,6 @@ public class PrometheusMetricsExporterTest {
         instanceSamples.add(instanceSample);
         CollectorRegistry collectorRegistry = new CollectorRegistry(true);
 
-        SimpleCollectorRegistryPrometheusInstanceSamplesProvider collectorRegistryInstanceSamplesProvider = new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(
-            name("defaultRegistry"), // optional prefix
-            new SampleNameFilter.Builder().nameMustNotStartWith("counter_1").build(), // optional filter
-            sampleName -> !sampleName.endsWith("created"), // optional filter
-            collectorRegistry);
-
         Summary summary = Summary.build()
             .name("summary")
             .labelNames("label_1", "label_2")
@@ -245,8 +240,7 @@ public class PrometheusMetricsExporterTest {
 
         PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(
             PROMETHEUS_TEXT_O_O_4,
-            instanceSamplesProvider,
-            collectorRegistryInstanceSamplesProvider);
+            instanceSamplesProvider);
 
         assertThat(exporter.exportMetrics(), is(
             "# HELP a Generated from metric instances with name counter.a\n" +
@@ -282,11 +276,7 @@ public class PrometheusMetricsExporterTest {
             "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 11.0\n" +
             "# HELP a_b_c_d_e_mean Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e_mean gauge\n" +
-            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 12.0\n" +
-            "# HELP defaultRegistry_summary Summary from defaultRegistry\n" +
-            "# TYPE defaultRegistry_summary summary\n" +
-            "defaultRegistry_summary_count{label_1=\"label_1_value\",label_2=\"label_2_value\",} 3.0\n" +
-            "defaultRegistry_summary_sum{label_1=\"label_1_value\",label_2=\"label_2_value\",} 60.0\n"));
+            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 12.0\n"));
 
         exporter = new PrometheusMetricsExporter(OPENMETRICS_TEXT_1_0_0, instanceSamplesProvider);
 

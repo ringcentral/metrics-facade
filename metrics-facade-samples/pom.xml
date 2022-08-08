@@ -15,7 +15,7 @@
     <artifactId>metrics-facade-samples</artifactId>
 
     <properties>
-        <prometheus.version>0.10.0</prometheus.version>
+        <prometheus.version>0.16.0</prometheus.version>
         <micrometer-registry-metrics-facade.version>2.1.0-SNAPSHOT</micrometer-registry-metrics-facade.version>
         <micrometer.version>1.7.3</micrometer.version>
     </properties>
@@ -37,6 +37,13 @@
             <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-prometheus</artifactId>
             <version>${project.version}</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>io.prometheus</groupId>
+                    <artifactId>simpleclient_common</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -70,6 +77,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_common</artifactId>
+            <version>${prometheus.version}</version>
         </dependency>
 
         <dependency>

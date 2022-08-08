@@ -3,19 +3,27 @@ package com.ringcentral.platform.metrics.reporters.prometheus;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.reporters.MetricsExporter;
-import com.ringcentral.platform.metrics.samples.*;
-import com.ringcentral.platform.metrics.samples.prometheus.*;
+import com.ringcentral.platform.metrics.samples.CompositeInstanceSamplesProvider;
+import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSample;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProvider;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSample;
+import com.ringcentral.platform.metrics.samples.prometheus.collectorRegistry.SimpleCollectorRegistryPrometheusInstanceSamplesProvider;
 import com.ringcentral.platform.metrics.utils.StringBuilderWriter;
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.PROMETHEUS_TEXT_O_O_4;
-import static io.prometheus.client.Collector.*;
-import static java.lang.String.*;
-import static java.util.Collections.*;
+import static io.prometheus.client.Collector.MetricFamilySamples;
+import static io.prometheus.client.Collector.sanitizeMetricName;
+import static java.lang.String.join;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.enumeration;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -46,6 +54,12 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
 
     public PrometheusMetricsExporter(MetricRegistry registry) {
         this(new PrometheusInstanceSamplesProvider(registry));
+    }
+
+    public PrometheusMetricsExporter(MetricRegistry registry, CollectorRegistry... collectorRegistries) {
+        this(
+            new PrometheusInstanceSamplesProvider(registry),
+            new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(collectorRegistries));
     }
 
     public PrometheusMetricsExporter(
@@ -200,10 +214,7 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
     }
 
     private MetricFamilySamples toMetricFamilySamples(PrometheusInstanceSample is) {
-        String name =
-            convertNameToLowercase ?
-            sanitizeMetricName(join(NAME_PARTS_DELIMITER, is.name())).toLowerCase(locale) :
-            sanitizeMetricName(join(NAME_PARTS_DELIMITER, is.name()));
+        String name = buildName(is.name());
 
         return new MetricFamilySamples(
             name,
@@ -213,11 +224,10 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
                 .map(s -> {
                     String sampleName = name;
 
-                    if (s.hasNameSuffix()) {
-                        sampleName +=
-                            convertNameToLowercase ?
-                            sanitizeMetricName(s.nameSuffix()).toLowerCase(locale) :
-                            sanitizeMetricName(s.nameSuffix());
+                    if (s.hasName()) {
+                        sampleName = buildName(s.name());
+                    } else if (s.hasNameSuffix()) {
+                        sampleName += buildNameSuffix(s);
                     }
 
                     return new MetricFamilySamples.Sample(
@@ -227,6 +237,17 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
                         s.value());
                 })
                 .collect(toList()));
+    }
+
+    private String buildName(MetricName name) {
+        final var sanitizedName = sanitizeMetricName(join(NAME_PARTS_DELIMITER, name));
+        return convertNameToLowercase ? sanitizedName.toLowerCase(locale) : sanitizedName;
+    }
+
+    private String buildNameSuffix(PrometheusSample ps) {
+        final var suffix = ps.nameSuffix();
+        final var sanitizedSuffix = sanitizeMetricName(suffix);
+        return convertNameToLowercase ? sanitizedSuffix.toLowerCase(locale) : sanitizedSuffix;
     }
 
     private static String helpFor(PrometheusInstanceSample is) {

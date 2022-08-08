@@ -1724,6 +1724,31 @@ Dependencies:
 </dependency>
 ```
 
+Note that ```metrics-facade-prometheus``` uses
+```xml
+<dependency>
+    <groupId>io.prometheus</groupId>
+    <artifactId>simpleclient_common</artifactId>
+    <version>...</version>
+</dependency>
+```
+
+In case of conflict between the ```simpleclient_common``` version used in ```Metrics Facade``` and the one used in your project, you can resolve it with ```dependency.exclusions``` or any other available means. For example, see ```metrics-facade-samples/pom.xml```:
+```xml
+<dependency>
+    <groupId>com.ringcentral.platform.metrics</groupId>
+    <artifactId>metrics-facade-prometheus</artifactId>
+    <version>${project.version}</version>
+
+    <exclusions>
+        <exclusion>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_common</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
 Example:
 ```java
 MetricRegistry registry = new DefaultMetricRegistry();

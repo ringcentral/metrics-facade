@@ -23,6 +23,7 @@ public class PrometheusInstanceSampleTest {
         instanceSample.add(new PrometheusSample(
             null,
             null,
+            null,
             "suffix_1",
             Collections.emptyList(),
             Collections.emptyList(),
@@ -31,6 +32,7 @@ public class PrometheusInstanceSampleTest {
         instanceSample.add(new PrometheusSample(
             name("childSuffix_1"),
             Collector.Type.SUMMARY,
+            null,
             "suffix_2",
             List.of("dimension_1", "dimension_2"),
             List.of("dimension_1_value", "dimension_2_value"),
@@ -40,6 +42,7 @@ public class PrometheusInstanceSampleTest {
             name("childSuffix_2"),
             Collector.Type.HISTOGRAM,
             null,
+            null,
             List.of("dimension_1"),
             List.of("dimension_1_value"),
             3.0));
@@ -47,12 +50,14 @@ public class PrometheusInstanceSampleTest {
         instanceSample.add(new PrometheusSample(
             name("childSuffix_1"),
             Collector.Type.SUMMARY,
+            null,
             "suffix_2",
             List.of("dimension_1", "dimension_2"),
             List.of("dimension_1_value", "dimension_2_value"),
             4.0));
 
         instanceSample.add(new PrometheusSample(
+            null,
             null,
             null,
             "suffix_3",
@@ -67,6 +72,7 @@ public class PrometheusInstanceSampleTest {
             new PrometheusSample(
                 null,
                 null,
+                null,
                 "suffix_1",
                 Collections.emptyList(),
                 Collections.emptyList(),
@@ -75,6 +81,7 @@ public class PrometheusInstanceSampleTest {
         check(
             instanceSample.samples().get(1),
             new PrometheusSample(
+                null,
                 null,
                 null,
                 "suffix_3",
@@ -94,6 +101,7 @@ public class PrometheusInstanceSampleTest {
             new PrometheusSample(
                 null,
                 null,
+                null,
                 "suffix_2",
                 List.of("dimension_1", "dimension_2"),
                 List.of("dimension_1_value", "dimension_2_value"),
@@ -102,6 +110,7 @@ public class PrometheusInstanceSampleTest {
         check(
             child.samples().get(1),
             new PrometheusSample(
+                null,
                 null,
                 null,
                 "suffix_2",
@@ -116,6 +125,7 @@ public class PrometheusInstanceSampleTest {
         check(
             child.samples().get(0),
             new PrometheusSample(
+                null,
                 null,
                 null,
                 null,

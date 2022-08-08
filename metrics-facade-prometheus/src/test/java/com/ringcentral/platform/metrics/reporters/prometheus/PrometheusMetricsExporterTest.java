@@ -1,19 +1,27 @@
 package com.ringcentral.platform.metrics.reporters.prometheus;
 
 import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
-import com.ringcentral.platform.metrics.samples.prometheus.*;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSample;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSample;
 import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Summary;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.ringcentral.platform.metrics.names.MetricName.name;
-import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.*;
-import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleMaker.*;
+import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.OPENMETRICS_TEXT_1_0_0;
+import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.PROMETHEUS_TEXT_O_O_4;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleMaker.DEFAULT_MAX_CHILD_NAME_SUFFIX;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleMaker.DEFAULT_MEAN_CHILD_NAME_SUFFIX;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 public class PrometheusMetricsExporterTest {
@@ -53,6 +61,7 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
+            null,
             emptyList(),
             emptyList(),
             1.0));
@@ -66,6 +75,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.GAUGE);
 
         instanceSample.add(new PrometheusSample(
+            null,
             null,
             null,
             null,
@@ -86,6 +96,7 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
+            null,
             emptyList(),
             emptyList(),
             3.0));
@@ -99,6 +110,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.COUNTER);
 
         instanceSample.add(new PrometheusSample(
+            null,
             null,
             null,
             null,
@@ -118,6 +130,7 @@ public class PrometheusMetricsExporterTest {
         instanceSample.add(new PrometheusSample(
             null,
             null,
+            null,
             "_count",
             emptyList(),
             emptyList(),
@@ -127,6 +140,7 @@ public class PrometheusMetricsExporterTest {
             DEFAULT_MAX_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
             null,
+            null,
             emptyList(),
             emptyList(),
             6.0));
@@ -134,6 +148,7 @@ public class PrometheusMetricsExporterTest {
         instanceSample.add(new PrometheusSample(
             DEFAULT_MEAN_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
+            null,
             null,
             emptyList(),
             emptyList(),
@@ -143,11 +158,13 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
+            null,
             List.of("quantile"),
             List.of("0.50"),
             8.0));
 
         instanceSample.add(new PrometheusSample(
+            null,
             null,
             null,
             null,
@@ -166,6 +183,7 @@ public class PrometheusMetricsExporterTest {
         instanceSample.add(new PrometheusSample(
             null,
             null,
+            null,
             "_count",
             List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
             List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
@@ -175,6 +193,7 @@ public class PrometheusMetricsExporterTest {
             DEFAULT_MAX_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
             null,
+            null,
             List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
             List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
             11.0));
@@ -183,11 +202,13 @@ public class PrometheusMetricsExporterTest {
             DEFAULT_MEAN_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
             null,
+            null,
             List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
             List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
             12.0));
 
         instanceSample.add(new PrometheusSample(
+            null,
             null,
             null,
             null,
@@ -199,13 +220,27 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
+            null,
             List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3, "quantile"),
             List.of("dimension_1_value", "dimension_2_value", "dimension_3_value", "0.75"),
             14.0));
 
         instanceSamples.add(instanceSample);
+        CollectorRegistry collectorRegistry = new CollectorRegistry(true);
 
-        PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(PROMETHEUS_TEXT_O_O_4, instanceSamplesProvider);
+        Summary summary = Summary.build()
+            .name("summary")
+            .labelNames("label_1", "label_2")
+            .help("Summary from defaultRegistry")
+            .register(collectorRegistry);
+
+        summary.labels("label_1_value", "label_2_value").observe(10);
+        summary.labels("label_1_value", "label_2_value").observe(20);
+        summary.labels("label_1_value", "label_2_value").observe(30);
+
+        PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(
+            PROMETHEUS_TEXT_O_O_4,
+            instanceSamplesProvider);
 
         assertThat(exporter.exportMetrics(), is(
             "# HELP a Generated from metric instances with name counter.a\n" +

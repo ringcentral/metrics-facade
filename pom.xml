@@ -57,6 +57,18 @@
             <name>Gleb Smirnov</name>
             <url>https://github.com/gleb4646</url>
         </developer>
+
+        <developer>
+            <id>mairovichaa</id>
+            <name>Andrei Mairovich</name>
+            <url>https://github.com/mairovichaa</url>
+        </developer>
+
+        <developer>
+            <id>kkolyan</id>
+            <name>Nikolay Plekhanov</name>
+            <url>https://github.com/kkolyan</url>
+        </developer>
     </developers>
 
     <modules>

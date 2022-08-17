@@ -1,4 +1,4 @@
-package com.ringcentral.platform.metrics.producers.nondimensional;
+package com.ringcentral.platform.metrics.producers;
 
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;

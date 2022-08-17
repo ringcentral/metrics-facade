@@ -4,6 +4,7 @@ import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.producers.dimensional.DimensionalBufferPoolsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.dimensional.DimensionalGarbageCollectorsMetricsProducer;
+import com.ringcentral.platform.metrics.producers.dimensional.DimensionalMemoryMetricsProducer;
 import com.ringcentral.platform.metrics.producers.dimensional.DimensionalThreadsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.nondimensional.*;
 
@@ -57,7 +58,7 @@ public class SystemMetricsProducer implements MetricsProducer {
                 RuntimeMetricsProducer.DEFAULT_NAME_PREFIX,
                 OperatingSystemMetricsProducer.DEFAULT_NAME_PREFIX,
                 AbstractGarbageCollectorsMetricsProducer.DEFAULT_NAME_PREFIX,
-                MemoryMetricsProducer.DEFAULT_NAME_PREFIX,
+                DefaultMemoryMetricsProducer.DEFAULT_NAME_PREFIX,
                 AbstractThreadsMetricsProducer.DEFAULT_NAME_PREFIX,
                 AbstractBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
                 ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
@@ -80,7 +81,7 @@ public class SystemMetricsProducer implements MetricsProducer {
             new RuntimeMetricsProducer(runtimeMetricNamePrefix, metricModBuilder),
             new OperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder),
                 getGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder, isDimensional),
-            new MemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder),
+                getMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder, isDimensional),
                 getThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, isDimensional),
                 getBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, isDimensional),
             new ClassesMetricsProducer(classesMetricNamePrefix, metricModBuilder));
@@ -90,6 +91,12 @@ public class SystemMetricsProducer implements MetricsProducer {
         return isDimensional ?
                 new DimensionalGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder) :
                 new DefaultGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder);
+    }
+
+    private static MemoryMetricsProducer getMemoryMetricsProducer(final MetricName memoryMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
+        return isDimensional?
+                new DimensionalMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder):
+                new DefaultMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder);
     }
 
     private static BufferPoolsMetricsProducer getBufferPoolsMetricsProducer(final MetricName bufferPoolsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {

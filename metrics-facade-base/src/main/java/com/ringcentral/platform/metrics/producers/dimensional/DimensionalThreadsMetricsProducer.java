@@ -14,6 +14,7 @@ import java.util.Locale;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
 
 public class DimensionalThreadsMetricsProducer extends AbstractThreadsMetricsProducer {
+    // TODO move to constants?
     private final static MetricDimension STATE_DIMENSION = new MetricDimension("state");
 
     public DimensionalThreadsMetricsProducer() {

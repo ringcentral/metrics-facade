@@ -16,7 +16,7 @@ public class MetricsProducersSample extends AbstractSample {
         new SystemMetricsProducer().produceMetrics(registry);
 
         new OperatingSystemMetricsProducer().produceMetrics(registry);
-        new GarbageCollectorsMetricsProducer().produceMetrics(registry);
+        new DefaultGarbageCollectorsMetricsProducer().produceMetrics(registry);
         new MemoryMetricsProducer().produceMetrics(registry);
         new DefaultThreadsMetricsProducer().produceMetrics(registry);
         new DefaultBufferPoolsMetricsProducer().produceMetrics(registry);

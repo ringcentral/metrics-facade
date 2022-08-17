@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.producers;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.producers.dimensional.DimensionalBufferPoolsMetricsProducer;
+import com.ringcentral.platform.metrics.producers.dimensional.DimensionalGarbageCollectorsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.dimensional.DimensionalThreadsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.nondimensional.*;
 
@@ -53,14 +54,14 @@ public class SystemMetricsProducer implements MetricsProducer {
             boolean isDimensional
     ) {
         this(
-            RuntimeMetricsProducer.DEFAULT_NAME_PREFIX,
-            OperatingSystemMetricsProducer.DEFAULT_NAME_PREFIX,
-            GarbageCollectorsMetricsProducer.DEFAULT_NAME_PREFIX,
-            MemoryMetricsProducer.DEFAULT_NAME_PREFIX,
-            DefaultThreadsMetricsProducer.DEFAULT_NAME_PREFIX,
-            DefaultBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
-            ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
-            metricModBuilder,
+                RuntimeMetricsProducer.DEFAULT_NAME_PREFIX,
+                OperatingSystemMetricsProducer.DEFAULT_NAME_PREFIX,
+                AbstractGarbageCollectorsMetricsProducer.DEFAULT_NAME_PREFIX,
+                MemoryMetricsProducer.DEFAULT_NAME_PREFIX,
+                AbstractThreadsMetricsProducer.DEFAULT_NAME_PREFIX,
+                AbstractBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
+                ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
+                metricModBuilder,
                 isDimensional);
     }
 
@@ -78,11 +79,17 @@ public class SystemMetricsProducer implements MetricsProducer {
         this(
             new RuntimeMetricsProducer(runtimeMetricNamePrefix, metricModBuilder),
             new OperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder),
-            new GarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder),
+                getGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder, isDimensional),
             new MemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder),
                 getThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, isDimensional),
                 getBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, isDimensional),
             new ClassesMetricsProducer(classesMetricNamePrefix, metricModBuilder));
+    }
+
+    private static GarbageCollectorsMetricsProducer getGarbageCollectorsMetricsProducer(final MetricName garbageCollectorsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
+        return isDimensional ?
+                new DimensionalGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder) :
+                new DefaultGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder);
     }
 
     private static BufferPoolsMetricsProducer getBufferPoolsMetricsProducer(final MetricName bufferPoolsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {

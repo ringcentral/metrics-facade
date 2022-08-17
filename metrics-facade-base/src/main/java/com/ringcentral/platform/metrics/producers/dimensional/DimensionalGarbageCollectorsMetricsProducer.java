@@ -4,62 +4,51 @@ import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.producers.AbstractMetricsProducer;
+import com.ringcentral.platform.metrics.producers.AbstractGarbageCollectorsMetricsProducer;
 import com.ringcentral.platform.metrics.var.Var;
 
 import java.lang.management.GarbageCollectorMXBean;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
-import static com.ringcentral.platform.metrics.names.MetricName.name;
-import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.withLongVar;
 import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
-import static org.apache.commons.lang3.StringUtils.split;
 
-public class GarbageCollectorsMetricsProducer extends AbstractMetricsProducer {
+public class DimensionalGarbageCollectorsMetricsProducer extends AbstractGarbageCollectorsMetricsProducer {
     // TODO move to constants?
     private final static MetricDimension NAME_DIMENSION = new MetricDimension("name");
 
-    public static final MetricName DEFAULT_NAME_PREFIX = MetricName.of("GarbageCollectors");
-    private final List<GarbageCollectorMXBean> gcMxBeans;
-
-    public GarbageCollectorsMetricsProducer() {
+    public DimensionalGarbageCollectorsMetricsProducer() {
         this(DEFAULT_NAME_PREFIX);
     }
 
-    public GarbageCollectorsMetricsProducer(MetricName namePrefix) {
+    public DimensionalGarbageCollectorsMetricsProducer(MetricName namePrefix) {
         this(namePrefix, null);
     }
 
-    public GarbageCollectorsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
+    public DimensionalGarbageCollectorsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
         this(namePrefix, metricModBuilder, getGarbageCollectorMXBeans());
     }
 
-    public GarbageCollectorsMetricsProducer(
+    public DimensionalGarbageCollectorsMetricsProducer(
             MetricName namePrefix,
             MetricModBuilder metricModBuilder,
             Collection<GarbageCollectorMXBean> gcMxBeans) {
 
-        super(namePrefix, metricModBuilder);
-        this.gcMxBeans = new ArrayList<>(gcMxBeans);
+        super(namePrefix, metricModBuilder, gcMxBeans);
     }
 
     @Override
     public void produceMetrics(MetricRegistry registry) {
         final var collectionCount = registry.longVar(
-                nameWithSuffix("collection", "count", "total"),
+                nameWithSuffix("collection", "count"),
                 Var.noTotal(),
-                // TODO use longVarConfigBuilderSupplier
-                () -> withLongVar().dimensions(NAME_DIMENSION)
+                longVarConfigBuilderSupplier(COLLECTION_COUNT_DESCRIPTION, NAME_DIMENSION)
         );
 
         final var collectionTime = registry.longVar(
                 nameWithSuffix("collection", "time", "ms"),
                 Var.noTotal(),
-                // TODO use longVarConfigBuilderSupplier
-                () -> withLongVar().dimensions(NAME_DIMENSION)
+                longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION, NAME_DIMENSION)
         );
 
         for (GarbageCollectorMXBean gcMxBean : gcMxBeans) {

@@ -2,10 +2,7 @@ package com.ringcentral.platform.metrics.producers;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.producers.dimensional.DimensionalBufferPoolsMetricsProducer;
-import com.ringcentral.platform.metrics.producers.dimensional.DimensionalGarbageCollectorsMetricsProducer;
-import com.ringcentral.platform.metrics.producers.dimensional.DimensionalMemoryMetricsProducer;
-import com.ringcentral.platform.metrics.producers.dimensional.DimensionalThreadsMetricsProducer;
+import com.ringcentral.platform.metrics.producers.dimensional.*;
 import com.ringcentral.platform.metrics.producers.nondimensional.*;
 
 import static java.util.Objects.requireNonNull;
@@ -56,9 +53,9 @@ public class SystemMetricsProducer implements MetricsProducer {
     ) {
         this(
                 RuntimeMetricsProducer.DEFAULT_NAME_PREFIX,
-                OperatingSystemMetricsProducer.DEFAULT_NAME_PREFIX,
+                AbstractOperatingSystemMetricsProducer.DEFAULT_NAME_PREFIX,
                 AbstractGarbageCollectorsMetricsProducer.DEFAULT_NAME_PREFIX,
-                DefaultMemoryMetricsProducer.DEFAULT_NAME_PREFIX,
+                AbstractMemoryMetricsProducer.DEFAULT_NAME_PREFIX,
                 AbstractThreadsMetricsProducer.DEFAULT_NAME_PREFIX,
                 AbstractBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
                 ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
@@ -79,12 +76,18 @@ public class SystemMetricsProducer implements MetricsProducer {
 
         this(
             new RuntimeMetricsProducer(runtimeMetricNamePrefix, metricModBuilder),
-            new OperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder),
+                getOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder, isDimensional),
                 getGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder, isDimensional),
                 getMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder, isDimensional),
                 getThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, isDimensional),
                 getBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, isDimensional),
             new ClassesMetricsProducer(classesMetricNamePrefix, metricModBuilder));
+    }
+
+    private static OperatingSystemMetricsProducer getOperatingSystemMetricsProducer(final MetricName operatingSystemMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
+        return isDimensional ?
+                new DimensionalOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder) :
+                new DefaultOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder);
     }
 
     private static GarbageCollectorsMetricsProducer getGarbageCollectorsMetricsProducer(final MetricName garbageCollectorsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {

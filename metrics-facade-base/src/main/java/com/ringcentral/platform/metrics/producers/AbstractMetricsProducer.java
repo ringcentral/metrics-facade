@@ -92,6 +92,18 @@ public abstract class AbstractMetricsProducer implements MetricsProducer {
         return () -> modified(doubleVarConfigBuilder());
     }
 
+    protected Supplier<StringVarConfigBuilder> stringVarConfigBuilderSupplier(
+            String description, MetricDimension... dimensions
+    ) {
+        final var builder = stringVarConfigBuilder().description(description);
+
+        if (dimensions.length != 0) {
+            builder.dimensions(dimensions);
+        }
+
+        return () -> modified(builder);
+    }
+
     protected Supplier<StringVarConfigBuilder> stringVarConfigBuilderSupplier() {
         return () -> modified(stringVarConfigBuilder());
     }

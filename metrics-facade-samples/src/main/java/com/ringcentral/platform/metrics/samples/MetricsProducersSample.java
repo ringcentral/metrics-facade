@@ -15,7 +15,7 @@ public class MetricsProducersSample extends AbstractSample {
         // Adds some system metrics
         new SystemMetricsProducer().produceMetrics(registry);
 
-        new OperatingSystemMetricsProducer().produceMetrics(registry);
+        new DefaultOperatingSystemMetricsProducer().produceMetrics(registry);
         new DefaultGarbageCollectorsMetricsProducer().produceMetrics(registry);
         new DefaultMemoryMetricsProducer().produceMetrics(registry);
         new DefaultThreadsMetricsProducer().produceMetrics(registry);

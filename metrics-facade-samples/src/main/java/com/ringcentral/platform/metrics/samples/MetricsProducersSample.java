@@ -19,7 +19,7 @@ public class MetricsProducersSample extends AbstractSample {
         new GarbageCollectorsMetricsProducer().produceMetrics(registry);
         new MemoryMetricsProducer().produceMetrics(registry);
         new DefaultThreadsMetricsProducer().produceMetrics(registry);
-        new BufferPoolsMetricsProducer().produceMetrics(registry);
+        new DefaultBufferPoolsMetricsProducer().produceMetrics(registry);
 
         export(registry);
         hang();

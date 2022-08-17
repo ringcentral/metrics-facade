@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.producers;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
+import com.ringcentral.platform.metrics.producers.dimensional.DimensionalBufferPoolsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.dimensional.DimensionalThreadsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.nondimensional.*;
 
@@ -57,7 +58,7 @@ public class SystemMetricsProducer implements MetricsProducer {
             GarbageCollectorsMetricsProducer.DEFAULT_NAME_PREFIX,
             MemoryMetricsProducer.DEFAULT_NAME_PREFIX,
             DefaultThreadsMetricsProducer.DEFAULT_NAME_PREFIX,
-            BufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
+            DefaultBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
             ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
             metricModBuilder,
                 isDimensional);
@@ -80,8 +81,14 @@ public class SystemMetricsProducer implements MetricsProducer {
             new GarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder),
             new MemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder),
                 getThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, isDimensional),
-            new BufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder),
+                getBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, isDimensional),
             new ClassesMetricsProducer(classesMetricNamePrefix, metricModBuilder));
+    }
+
+    private static BufferPoolsMetricsProducer getBufferPoolsMetricsProducer(final MetricName bufferPoolsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
+        return isDimensional ?
+                new DimensionalBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder) :
+                new DefaultBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder);
     }
 
     private static ThreadsMetricsProducer getThreadsMetricsProducer(final MetricName threadsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {

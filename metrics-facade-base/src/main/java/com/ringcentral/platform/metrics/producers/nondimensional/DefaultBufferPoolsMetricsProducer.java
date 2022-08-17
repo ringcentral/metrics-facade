@@ -1,55 +1,47 @@
 package com.ringcentral.platform.metrics.producers.nondimensional;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.MetricModBuilder;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.producers.AbstractMetricsProducer;
+import com.ringcentral.platform.metrics.producers.AbstractBufferPoolsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.JmxAttrValueSupplier;
 import org.slf4j.Logger;
 
-import javax.management.*;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
-import static java.lang.management.ManagementFactory.*;
-import static java.util.Objects.*;
-import static org.slf4j.LoggerFactory.*;
+import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
+import static org.slf4j.LoggerFactory.getLogger;
 
-public class BufferPoolsMetricsProducer extends AbstractMetricsProducer {
+public class DefaultBufferPoolsMetricsProducer extends AbstractBufferPoolsMetricsProducer {
 
-    public static final MetricName DEFAULT_NAME_PREFIX = MetricName.of("Buffers");
+    private static final Logger logger = getLogger(DefaultBufferPoolsMetricsProducer.class);
 
-    private static final String[] POOLS = { "direct", "mapped" };
-    private static final String[] ATTRS = { "Count", "MemoryUsed", "TotalCapacity" };
-    private static final String[] ATTR_NAME_PARTS = { "count", "used", "capacity" };
-
-    private final MBeanServer mBeanServer;
-    private static final Logger logger = getLogger(BufferPoolsMetricsProducer.class);
-
-    public BufferPoolsMetricsProducer() {
+    public DefaultBufferPoolsMetricsProducer() {
         this(DEFAULT_NAME_PREFIX, null);
     }
 
-    public BufferPoolsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
+    public DefaultBufferPoolsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
         this(
             namePrefix,
             metricModBuilder,
             getPlatformMBeanServer());
     }
 
-    public BufferPoolsMetricsProducer(
+    public DefaultBufferPoolsMetricsProducer(
         MetricName namePrefix,
         MetricModBuilder metricModBuilder,
         MBeanServer mBeanServer) {
-
-        super(namePrefix, metricModBuilder);
-        this.mBeanServer = requireNonNull(mBeanServer);
+        super(namePrefix, metricModBuilder, mBeanServer);
     }
 
     @Override
     public void produceMetrics(MetricRegistry registry) {
-        for (String pool : POOLS) {
-            for (int i = 0; i < ATTRS.length; ++i) {
-                String attr = ATTRS[i];
-                String attrNamePart = ATTR_NAME_PARTS[i];
-
+        for (int i = 0; i < ATTRS.length; ++i) {
+            String attr = ATTRS[i];
+            String attrNamePart = ATTR_NAME_PARTS[i];
+            final var description = ATTR_DESCRIPTION[i];
+            for (String pool : POOLS) {
                 try {
                     ObjectName objectName = new ObjectName("java.nio:type=BufferPool,name=" + pool);
                     mBeanServer.getMBeanInfo(objectName);
@@ -61,7 +53,7 @@ public class BufferPoolsMetricsProducer extends AbstractMetricsProducer {
                             Object jmxAttrValue = jmxAttrValueSupplier.get();
                             return jmxAttrValue instanceof Number ? ((Number)jmxAttrValue).longValue() : -1L;
                         },
-                        longVarConfigBuilderSupplier());
+                        longVarConfigBuilderSupplier(description));
                 } catch (Exception e) {
                     logger.debug("Failed to get buffer pool MBeans", e);
                 }

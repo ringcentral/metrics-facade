@@ -3,57 +3,49 @@ package com.ringcentral.platform.metrics.producers.dimensional;
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.producers.AbstractMetricsProducer;
+import com.ringcentral.platform.metrics.producers.AbstractBufferPoolsMetricsProducer;
 import com.ringcentral.platform.metrics.producers.JmxAttrValueSupplier;
 import com.ringcentral.platform.metrics.var.Var;
 import org.slf4j.Logger;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
-import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.withLongVar;
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
-import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class BufferPoolsMetricsProducer extends AbstractMetricsProducer {
+public class DimensionalBufferPoolsMetricsProducer extends AbstractBufferPoolsMetricsProducer {
     // TODO move to constants?
     private final static MetricDimension NAME_DIMENSION = new MetricDimension("name");
+    private static final List<MetricDimensionValues> POOL_DIMENSION_VALUES = Arrays.stream(POOLS)
+            .map(NAME_DIMENSION::value)
+            .map(MetricDimensionValues::dimensionValues)
+            .collect(Collectors.toList());
 
-    public static final MetricName DEFAULT_NAME_PREFIX = MetricName.of("Buffers");
+    private static final Logger logger = getLogger(DimensionalBufferPoolsMetricsProducer.class);
 
-    private static final String[] POOLS = {"direct", "mapped"};
-    private static final String[] ATTRS = {"Count", "MemoryUsed", "TotalCapacity"};
-    private static final String[] ATTR_NAME_PARTS = {"count", "used", "capacity"};
-    private static final String[] ATTR_DESCRIPTION = {
-            "An estimate of the number of buffers in the pool",
-            "An estimate of the memory that the Java virtual machine is using for this buffer pool",
-            "An estimate of the total capacity of the buffers in this pool"
-    };
-
-    private final MBeanServer mBeanServer;
-    private static final Logger logger = getLogger(BufferPoolsMetricsProducer.class);
-
-    public BufferPoolsMetricsProducer() {
+    public DimensionalBufferPoolsMetricsProducer() {
         this(DEFAULT_NAME_PREFIX, null);
     }
 
-    public BufferPoolsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
+    public DimensionalBufferPoolsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
         this(
                 namePrefix,
                 metricModBuilder,
                 getPlatformMBeanServer());
     }
 
-    public BufferPoolsMetricsProducer(
+    public DimensionalBufferPoolsMetricsProducer(
             MetricName namePrefix,
             MetricModBuilder metricModBuilder,
             MBeanServer mBeanServer) {
 
-        super(namePrefix, metricModBuilder);
-        this.mBeanServer = requireNonNull(mBeanServer);
+        super(namePrefix, metricModBuilder, mBeanServer);
     }
 
     @Override
@@ -65,17 +57,13 @@ public class BufferPoolsMetricsProducer extends AbstractMetricsProducer {
             final var description = ATTR_DESCRIPTION[i];
             final var attrLongVar = registry.longVar(
                     nameWithSuffix("pool", attrNamePart),
-                    // TODO use longVarConfigBuilderSupplier
                     Var.noTotal(),
-                    () -> withLongVar()
-                            .description(description)
-                            .dimensions(NAME_DIMENSION)
+                    longVarConfigBuilderSupplier(description, NAME_DIMENSION)
             );
 
-            for (String pool : POOLS) {
-                // TODO initialize on start
-                final var nameDimensionValue = NAME_DIMENSION.value(pool);
-                final var metricDimensionValues = dimensionValues(nameDimensionValue);
+            for (int poolIdx = 0; poolIdx < POOLS.length; poolIdx++) {
+                final String pool = POOLS[poolIdx];
+                final var metricDimensionValues = POOL_DIMENSION_VALUES.get(poolIdx);
                 try {
                     ObjectName objectName = new ObjectName("java.nio:type=BufferPool,name=" + pool);
                     mBeanServer.getMBeanInfo(objectName);

@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.producers;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.sun.management.OperatingSystemMXBean;
+import com.sun.management.UnixOperatingSystemMXBean;
 
 import static java.lang.management.ManagementFactory.*;
 import static java.util.Objects.*;
@@ -43,5 +44,16 @@ public class OperatingSystemMetricsProducer extends AbstractMetricsProducer {
         registry.doubleVar(nameWithSuffix("systemLoadAverage"), osMxBean::getSystemLoadAverage, doubleVarConfigBuilderSupplier());
         registry.longVar(nameWithSuffix("totalPhysicalMemorySize"), osMxBean::getTotalPhysicalMemorySize, longVarConfigBuilderSupplier());
         registry.longVar(nameWithSuffix("totalSwapSpaceSize"), osMxBean::getTotalSwapSpaceSize, longVarConfigBuilderSupplier());
+
+        if (osMxBean instanceof UnixOperatingSystemMXBean) {
+            final UnixOperatingSystemMXBean unixMbean = (UnixOperatingSystemMXBean) osMxBean;
+            registry.longVar(nameWithSuffix("descriptor", "file", "open", "total"), unixMbean::getOpenFileDescriptorCount, longVarConfigBuilderSupplier());
+            registry.longVar(nameWithSuffix("descriptor", "file", "limit", "total"), unixMbean::getMaxFileDescriptorCount, longVarConfigBuilderSupplier());
+            registry.doubleVar(nameWithSuffix("descriptor", "file", "usage", "ratio"), () -> {
+                long openedDescriptors = unixMbean.getOpenFileDescriptorCount();
+                long limit = unixMbean.getMaxFileDescriptorCount();
+                return (double) openedDescriptors / limit;
+            }, doubleVarConfigBuilderSupplier());
+        }
     }
 }

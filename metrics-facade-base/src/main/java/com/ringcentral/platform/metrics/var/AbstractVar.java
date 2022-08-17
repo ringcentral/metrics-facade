@@ -173,13 +173,10 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
         }
 
         checkDimensionValues(dimensionValues.list());
-        InstanceKey instanceKey = new InstanceKey(dimensionValues.list());
-
-        if (instances.containsKey(instanceKey)) {
-            return;
-        }
 
         executor.execute(() -> {
+            InstanceKey instanceKey = new InstanceKey(dimensionValues.list());
+
             if (isRemoved() || instances.containsKey(instanceKey)) {
                 return;
             }

@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.producers;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.MetricModBuilder;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.names.MetricName;
 
 import java.lang.management.ClassLoadingMXBean;
@@ -36,8 +37,21 @@ public class ClassesMetricsProducer extends AbstractMetricsProducer {
 
     @Override
     public void produceMetrics(MetricRegistry registry) {
-        registry.longVar(nameWithSuffix("loaded"), () -> (long)classLoadingMxBean.getLoadedClassCount(), longVarConfigBuilderSupplier());
-        registry.longVar(nameWithSuffix("loaded", "total"), classLoadingMxBean::getTotalLoadedClassCount, longVarConfigBuilderSupplier());
-        registry.longVar(nameWithSuffix("unloaded", "total"), classLoadingMxBean::getUnloadedClassCount, longVarConfigBuilderSupplier());
+        registry.longVar(
+                nameWithSuffix("loaded"),
+                () -> (long) classLoadingMxBean.getLoadedClassCount(),
+                longVarConfigBuilderSupplier("The number of classes that are currently loaded in the Java virtual machine")
+        );
+        registry.longVar(
+                nameWithSuffix("loaded", "total"),
+                classLoadingMxBean::getTotalLoadedClassCount,
+                longVarConfigBuilderSupplier("The total number of classes that have been loaded since the Java virtual machine has started execution")
+
+        );
+        registry.longVar(
+                nameWithSuffix("unloaded", "total"),
+                classLoadingMxBean::getUnloadedClassCount,
+                longVarConfigBuilderSupplier("The total number of classes unloaded since the Java virtual machine has started execution")
+        );
     }
 }

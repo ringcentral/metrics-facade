@@ -1,6 +1,8 @@
 package com.ringcentral.platform.metrics.producers;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.MetricMod;
+import com.ringcentral.platform.metrics.MetricModBuilder;
+import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.builders.VarConfigBuilder;
 import com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder;
@@ -43,6 +45,18 @@ public abstract class AbstractMetricsProducer implements MetricsProducer {
 
     protected Supplier<ObjectVarConfigBuilder> objectVarConfigBuilderSupplier() {
         return () -> modified(objectVarConfigBuilder());
+    }
+
+    protected Supplier<LongVarConfigBuilder> longVarConfigBuilderSupplier(
+            String description, MetricDimension... dimensions
+    ) {
+        final var builder = longVarConfigBuilder().description(description);
+
+        if (dimensions.length != 0) {
+            builder.dimensions(dimensions);
+        }
+
+        return () -> modified(builder);
     }
 
     protected Supplier<LongVarConfigBuilder> longVarConfigBuilderSupplier() {

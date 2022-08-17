@@ -49,7 +49,7 @@ public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProdu
     @Override
     public void produceMetrics(MetricRegistry registry) {
         final var initialSize = registry.longVar(
-                nameWithSuffix("init", "bytes"),
+                nameWithSuffix("init"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(INIT_MESSAGE, TYPE_DIMENSION)
         );
@@ -61,7 +61,7 @@ public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProdu
         initialSize.register(memoryMxBean.getNonHeapMemoryUsage()::getInit, NON_HEAP_TYPE_DIMENSION_VALUES);
 
         final var usedSize = registry.longVar(
-                nameWithSuffix("used", "bytes"),
+                nameWithSuffix("used"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(USED_MESSAGE, TYPE_DIMENSION)
         );
@@ -73,7 +73,7 @@ public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProdu
         usedSize.register(memoryMxBean.getNonHeapMemoryUsage()::getUsed, NON_HEAP_TYPE_DIMENSION_VALUES);
 
         final var maxSize = registry.longVar(
-                nameWithSuffix("max", "bytes"),
+                nameWithSuffix("max"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(MAX_MESSAGE, TYPE_DIMENSION)
         );
@@ -83,7 +83,7 @@ public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProdu
         maxSize.register(memoryMxBean.getNonHeapMemoryUsage()::getMax, NON_HEAP_TYPE_DIMENSION_VALUES);
 
         final var committedSize = registry.longVar(
-                nameWithSuffix("committed", "bytes"),
+                nameWithSuffix("committed"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(COMMITTED_MESSAGE, TYPE_DIMENSION)
         );
@@ -96,7 +96,7 @@ public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProdu
 
 
         final var usageRatio = registry.doubleVar(
-                nameWithSuffix("usage", "ratio"),
+                nameWithSuffix("usage"),
                 Var.noTotal(),
                 doubleVarConfigBuilderSupplier(USAGE_MESSAGE, TYPE_DIMENSION)
         );
@@ -117,40 +117,40 @@ public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProdu
 
 
         final var initialPoolSize = registry.longVar(
-                nameWithSuffix("pools", "init", "bytes"),
+                nameWithSuffix("pools", "init"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(INIT_MESSAGE, NAME_DIMENSION)
         );
 
         final var maxPoolSize = registry.longVar(
-                nameWithSuffix("pools", "max", "bytes"),
+                nameWithSuffix("pools", "max"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(MAX_MESSAGE, NAME_DIMENSION)
 
         );
 
         final var committedPoolSize = registry.longVar(
-                nameWithSuffix("pools", "committed", "bytes"),
+                nameWithSuffix("pools", "committed"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(COMMITTED_MESSAGE, NAME_DIMENSION)
 
         );
 
         final var usedPoolSize = registry.longVar(
-                nameWithSuffix("pools", "used", "bytes"),
+                nameWithSuffix("pools", "used"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(USED_MESSAGE, NAME_DIMENSION)
 
         );
 
         final var usagePoolRatio = registry.doubleVar(
-                nameWithSuffix("pools", "usage", "ratio"),
+                nameWithSuffix("pools", "usage"),
                 Var.noTotal(),
                 doubleVarConfigBuilderSupplier(USAGE_MESSAGE, NAME_DIMENSION)
         );
 
         final var usedAfterGcPoolRatio = registry.longVar(
-                nameWithSuffix("usedAfterGc", "ratio"),
+                nameWithSuffix("usedAfterGc"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(USED_AFTER_GC_MESSAGE, NAME_DIMENSION)
         );

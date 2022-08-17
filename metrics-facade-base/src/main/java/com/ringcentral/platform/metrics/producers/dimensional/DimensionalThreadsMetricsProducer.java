@@ -8,8 +8,10 @@ import com.ringcentral.platform.metrics.producers.DeadlockInfoProvider;
 import com.ringcentral.platform.metrics.var.Var;
 
 import java.lang.management.ThreadMXBean;
+import java.util.Locale;
 
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils.STATE_DIMENSION;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
 import static java.lang.management.ManagementFactory.getThreadMXBean;
 import static java.util.Objects.requireNonNull;
 
@@ -42,6 +44,11 @@ public class DimensionalThreadsMetricsProducer extends AbstractThreadsMetricsPro
                 nameWithSuffix("state", "count"),
                 Var.noTotal(), longVarConfigBuilderSupplier(STATE_COUNT_DESCRIPTION, STATE_DIMENSION)
         );
+        for (Thread.State state : Thread.State.values()) {
+            final var stateName = state.toString().toLowerCase(Locale.ENGLISH);
+            final var dimensionValues = dimensionValues(STATE_DIMENSION.value(stateName));
+            stateCount.register(() -> (long) threadCountFor(state), dimensionValues);
+        }
     }
 
 }

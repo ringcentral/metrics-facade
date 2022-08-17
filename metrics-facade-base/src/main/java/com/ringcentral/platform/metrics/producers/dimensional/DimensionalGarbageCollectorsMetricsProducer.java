@@ -45,7 +45,7 @@ public class DimensionalGarbageCollectorsMetricsProducer extends AbstractGarbage
         );
 
         final var collectionTime = registry.longVar(
-                nameWithSuffix("collection", "time", "ms"),
+                nameWithSuffix("collection", "time"),
                 Var.noTotal(),
                 longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION, NAME_DIMENSION)
         );

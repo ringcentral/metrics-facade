@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.producers;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
+import com.ringcentral.platform.metrics.producers.nondimensional.*;
 
 import static java.util.Objects.requireNonNull;
 

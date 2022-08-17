@@ -1,7 +1,9 @@
-package com.ringcentral.platform.metrics.producers;
+package com.ringcentral.platform.metrics.producers.nondimensional;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.names.MetricName;
+import com.ringcentral.platform.metrics.producers.AbstractMetricsProducer;
+import com.ringcentral.platform.metrics.producers.Ratio;
 
 import java.lang.management.*;
 import java.util.List;

@@ -8,14 +8,12 @@ import com.ringcentral.platform.metrics.producers.AbstractOperatingSystemMetrics
 import com.ringcentral.platform.metrics.var.Var;
 import com.sun.management.OperatingSystemMXBean;
 
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils.TYPE_DIMENSION;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
 import static java.lang.management.ManagementFactory.getOperatingSystemMXBean;
 import static java.util.Objects.requireNonNull;
 
 public class DimensionalOperatingSystemMetricsProducer extends AbstractOperatingSystemMetricsProducer {
-
-    // TODO move to common class?
-    private final static MetricDimension TYPE_DIMENSION = new MetricDimension("type");
 
     public DimensionalOperatingSystemMetricsProducer() {
         this(DEFAULT_NAME_PREFIX);

@@ -14,17 +14,16 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.List;
 
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils.NAME_DIMENSION;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils.TYPE_DIMENSION;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
 import static java.lang.management.ManagementFactory.getMemoryMXBean;
 import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
 
 public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProducer {
-    // TODO move to constants?
-    private final static MetricDimension TYPE_DIMENSION = new MetricDimension("type");
-    private final static MetricDimensionValues HEAP_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("heap"));
-    private final static MetricDimensionValues NON_HEAP_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("non-heap"));
-    private final static MetricDimensionValues TOTAL_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("total"));
-    private final static MetricDimension NAME_DIMENSION = new MetricDimension("name");
+    private static final MetricDimensionValues HEAP_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("heap"));
+    private static final MetricDimensionValues NON_HEAP_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("non-heap"));
+    private static final MetricDimensionValues TOTAL_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("total"));
 
     public DimensionalMemoryMetricsProducer() {
         this(DEFAULT_NAME_PREFIX, null);

@@ -32,6 +32,15 @@ public class RuntimeMetricsProducer extends AbstractMetricsProducer {
 
     @Override
     public void produceMetrics(MetricRegistry registry) {
-        registry.longVar(nameWithSuffix("startTime"), runtimeMxBean::getStartTime, longVarConfigBuilderSupplier());
+        registry.longVar(
+                nameWithSuffix("startTime"),
+                runtimeMxBean::getStartTime,
+                longVarConfigBuilderSupplier("The start time of the Java virtual machine in milliseconds")
+        );
+        registry.longVar(
+                nameWithSuffix("uptime", "ms"),
+                runtimeMxBean::getUptime,
+                longVarConfigBuilderSupplier("The uptime of the Java virtual machine in milliseconds")
+        );
     }
 }

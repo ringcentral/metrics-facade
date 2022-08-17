@@ -43,6 +43,18 @@ public abstract class AbstractMetricsProducer implements MetricsProducer {
         return namePrefix.isEmpty() ? MetricName.of(suffix) : MetricName.of(namePrefix, suffix);
     }
 
+    protected Supplier<ObjectVarConfigBuilder> objectVarConfigBuilderSupplier(
+            String description, MetricDimension... dimensions
+    ) {
+        final var builder = objectVarConfigBuilder().description(description);
+
+        if (dimensions.length != 0) {
+            builder.dimensions(dimensions);
+        }
+
+        return () -> modified(builder);
+    }
+
     protected Supplier<ObjectVarConfigBuilder> objectVarConfigBuilderSupplier() {
         return () -> modified(objectVarConfigBuilder());
     }

@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics.samples;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.producers.*;
+import com.ringcentral.platform.metrics.producers.nondimensional.*;
 
 @SuppressWarnings("ALL")
 public class MetricsProducersSample extends AbstractSample {
@@ -17,7 +18,7 @@ public class MetricsProducersSample extends AbstractSample {
         new OperatingSystemMetricsProducer().produceMetrics(registry);
         new GarbageCollectorsMetricsProducer().produceMetrics(registry);
         new MemoryMetricsProducer().produceMetrics(registry);
-        new ThreadsMetricsProducer().produceMetrics(registry);
+        new DefaultThreadsMetricsProducer().produceMetrics(registry);
         new BufferPoolsMetricsProducer().produceMetrics(registry);
 
         export(registry);

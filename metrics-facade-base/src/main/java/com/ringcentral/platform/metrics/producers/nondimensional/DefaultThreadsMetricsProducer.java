@@ -9,27 +9,38 @@ import com.ringcentral.platform.metrics.producers.DeadlockInfoProvider;
 import java.lang.management.ThreadMXBean;
 import java.util.Locale;
 
+import static java.lang.management.ManagementFactory.getThreadMXBean;
+import static java.util.Objects.requireNonNull;
+
 public class DefaultThreadsMetricsProducer extends AbstractThreadsMetricsProducer {
 
     public DefaultThreadsMetricsProducer() {
-        super();
+        this(DEFAULT_NAME_PREFIX, null);
     }
 
     public DefaultThreadsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
-        super(namePrefix, metricModBuilder);
+        this(namePrefix,
+                metricModBuilder,
+                getThreadMXBean(),
+                new DeadlockInfoProvider(getThreadMXBean()
+                )
+        );
     }
 
     public DefaultThreadsMetricsProducer(
-        MetricName namePrefix,
-        MetricModBuilder metricModBuilder,
-        ThreadMXBean threadMxBean,
-        DeadlockInfoProvider deadlockInfoProvider) {
+            MetricName namePrefix,
+            MetricModBuilder metricModBuilder,
+            ThreadMXBean threadMxBean,
+            DeadlockInfoProvider deadlockInfoProvider) {
 
         super(namePrefix, metricModBuilder, threadMxBean, deadlockInfoProvider);
     }
 
     @Override
     public void produceMetrics(MetricRegistry registry) {
+        requireNonNull(registry);
+        produceNonDimensional(registry);
+
         for (Thread.State state : Thread.State.values()) {
             registry.longVar(
                     nameWithSuffix(state.toString().toLowerCase(Locale.ENGLISH), "count"),
@@ -37,43 +48,5 @@ public class DefaultThreadsMetricsProducer extends AbstractThreadsMetricsProduce
                     longVarConfigBuilderSupplier(STATE_COUNT_DESCRIPTION)
             );
         }
-
-        registry.longVar(
-                nameWithSuffix("count"),
-                () -> (long) threadMxBean.getThreadCount(),
-                longVarConfigBuilderSupplier(LIVE_COUNT_DESCRIPTION)
-        );
-
-        registry.longVar(
-                nameWithSuffix("daemon", "count"),
-                () -> (long) threadMxBean.getDaemonThreadCount(),
-                longVarConfigBuilderSupplier(LIVE_DAEMON_COUNT_DESCRIPTION)
-        );
-
-        registry.longVar(
-                nameWithSuffix("peak", "count"),
-                () -> (long) threadMxBean.getPeakThreadCount(),
-                longVarConfigBuilderSupplier(PEAK_THREAD_COUNT_DESCRIPTION)
-        );
-
-        registry.longVar(
-                nameWithSuffix("totalStarted", "count"),
-                threadMxBean::getTotalStartedThreadCount,
-                longVarConfigBuilderSupplier(TOTAL_STARTED_COUNT_DESCRIPTION)
-        );
-
-        registry.longVar(
-                nameWithSuffix("deadlock", "count"),
-                () -> (long)deadlockInfoProvider.deadlockedThreadTextInfos().size(),
-                longVarConfigBuilderSupplier(DEADLOCK_COUNT_DESCRIPTION)
-        );
-
-        registry.objectVar(
-                nameWithSuffix("deadlocks"),
-                deadlockInfoProvider::deadlockedThreadTextInfos,
-                objectVarConfigBuilderSupplier("Deadlocks' descriptions")
-        );
     }
-
-
 }

@@ -9,12 +9,13 @@ import com.ringcentral.platform.metrics.producers.AbstractOperatingSystemMetrics
 import com.ringcentral.platform.metrics.var.Var;
 import com.sun.management.OperatingSystemMXBean;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils.TYPE_DIMENSION;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
 import static java.lang.management.ManagementFactory.getOperatingSystemMXBean;
 import static java.util.Objects.requireNonNull;
 
 public class DimensionalOperatingSystemMetricsProducer extends AbstractOperatingSystemMetricsProducer {
+
+    private static final MetricDimension TYPE_DIMENSION = new MetricDimension("type");
     private static final MetricDimensionValues TOTAL_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("total"));
     private static final MetricDimensionValues FREE_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("free"));
 
@@ -33,7 +34,6 @@ public class DimensionalOperatingSystemMetricsProducer extends AbstractOperating
     public DimensionalOperatingSystemMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder, OperatingSystemMXBean osMxBean) {
         super(namePrefix, metricModBuilder, osMxBean);
     }
-
 
     @Override
     public void produceMetrics(MetricRegistry registry) {

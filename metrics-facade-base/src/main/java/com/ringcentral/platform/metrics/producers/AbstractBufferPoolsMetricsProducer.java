@@ -42,5 +42,4 @@ public abstract class AbstractBufferPoolsMetricsProducer extends AbstractMetrics
         super(namePrefix, metricModBuilder);
         this.mBeanServer = requireNonNull(mBeanServer);
     }
-
 }

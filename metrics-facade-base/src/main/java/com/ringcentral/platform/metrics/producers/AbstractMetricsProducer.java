@@ -52,20 +52,12 @@ public abstract class AbstractMetricsProducer implements MetricsProducer {
         return () -> modified(builder);
     }
 
-    protected Supplier<ObjectVarConfigBuilder> objectVarConfigBuilderSupplier() {
-        return () -> modified(objectVarConfigBuilder());
-    }
-
     protected Supplier<LongVarConfigBuilder> longVarConfigBuilderSupplier(
             String description, MetricDimension... dimensions
     ) {
         final var builder = longVarConfigBuilder();
         setDescriptionAndDimensions(builder, description, dimensions);
         return () -> modified(builder);
-    }
-
-    protected Supplier<LongVarConfigBuilder> longVarConfigBuilderSupplier() {
-        return () -> modified(longVarConfigBuilder());
     }
 
     protected Supplier<DoubleVarConfigBuilder> doubleVarConfigBuilderSupplier(
@@ -76,20 +68,12 @@ public abstract class AbstractMetricsProducer implements MetricsProducer {
         return () -> modified(builder);
     }
 
-    protected Supplier<DoubleVarConfigBuilder> doubleVarConfigBuilderSupplier() {
-        return () -> modified(doubleVarConfigBuilder());
-    }
-
     protected Supplier<StringVarConfigBuilder> stringVarConfigBuilderSupplier(
             String description, MetricDimension... dimensions
     ) {
         final var builder = stringVarConfigBuilder();
         setDescriptionAndDimensions(builder, description, dimensions);
         return () -> modified(builder);
-    }
-
-    protected Supplier<StringVarConfigBuilder> stringVarConfigBuilderSupplier() {
-        return () -> modified(stringVarConfigBuilder());
     }
 
     private void setDescriptionAndDimensions(AbstractVarConfigBuilder<?, ?> builder, String description, MetricDimension... dimensions) {

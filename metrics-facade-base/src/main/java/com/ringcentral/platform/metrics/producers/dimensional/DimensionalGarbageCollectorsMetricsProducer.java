@@ -10,11 +10,12 @@ import com.ringcentral.platform.metrics.var.Var;
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.Collection;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils.NAME_DIMENSION;
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
 import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
 
 public class DimensionalGarbageCollectorsMetricsProducer extends AbstractGarbageCollectorsMetricsProducer {
+
+    private static final MetricDimension NAME_DIMENSION = new MetricDimension("name");
 
     public DimensionalGarbageCollectorsMetricsProducer() {
         this(DEFAULT_NAME_PREFIX);

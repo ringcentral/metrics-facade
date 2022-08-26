@@ -52,7 +52,7 @@ public class DeadlockInfoProvider {
                 info.getThreadName(),
                 info.getLockName(),
                 info.getLockOwnerName(),
-                stackTrace.toString()));
+                stackTrace));
         }
 
         return result;

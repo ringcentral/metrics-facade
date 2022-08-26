@@ -1,8 +1,8 @@
 package com.ringcentral.platform.metrics.producers;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.MetricModBuilder;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.producers.AbstractMetricsProducer;
 
 import java.lang.management.RuntimeMXBean;
 
@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 public class RuntimeMetricsProducer extends AbstractMetricsProducer {
 
     public static final MetricName DEFAULT_NAME_PREFIX = MetricName.of("Runtime");
+
     private final RuntimeMXBean runtimeMxBean;
 
     public RuntimeMetricsProducer() {
@@ -36,12 +37,11 @@ public class RuntimeMetricsProducer extends AbstractMetricsProducer {
         registry.longVar(
                 nameWithSuffix("startTime"),
                 runtimeMxBean::getStartTime,
-                longVarConfigBuilderSupplier("The start time of the Java virtual machine in milliseconds")
-        );
+                longVarConfigBuilderSupplier("The start time of the Java virtual machine in milliseconds"));
+
         registry.longVar(
                 nameWithSuffix("uptime", "ms"),
                 runtimeMxBean::getUptime,
-                longVarConfigBuilderSupplier("The uptime of the Java virtual machine in milliseconds")
-        );
+                longVarConfigBuilderSupplier("The uptime of the Java virtual machine in milliseconds"));
     }
 }

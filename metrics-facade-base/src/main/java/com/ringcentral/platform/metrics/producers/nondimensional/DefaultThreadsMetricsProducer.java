@@ -22,9 +22,7 @@ public class DefaultThreadsMetricsProducer extends AbstractThreadsMetricsProduce
         this(namePrefix,
                 metricModBuilder,
                 getThreadMXBean(),
-                new DeadlockInfoProvider(getThreadMXBean()
-                )
-        );
+                new DeadlockInfoProvider(getThreadMXBean()));
     }
 
     public DefaultThreadsMetricsProducer(
@@ -45,8 +43,7 @@ public class DefaultThreadsMetricsProducer extends AbstractThreadsMetricsProduce
             registry.longVar(
                     nameWithSuffix(state.toString().toLowerCase(Locale.ENGLISH), "count"),
                     () -> (long) threadCountFor(state),
-                    longVarConfigBuilderSupplier(STATE_COUNT_DESCRIPTION)
-            );
+                    longVarConfigBuilderSupplier(STATE_COUNT_DESCRIPTION));
         }
     }
 }

@@ -41,8 +41,15 @@ public class DefaultGarbageCollectorsMetricsProducer extends AbstractGarbageColl
                 WHITESPACE_PATTERN.matcher(gcMxBean.getName()).replaceAll("-"),
                 "."));
 
-            registry.longVar(name(namePrefix, "count"), gcMxBean::getCollectionCount, longVarConfigBuilderSupplier(COLLECTION_COUNT_DESCRIPTION));
-            registry.longVar(name(namePrefix, "time"), gcMxBean::getCollectionTime, longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION));
+            registry.longVar(
+                    name(namePrefix, "count"),
+                    gcMxBean::getCollectionCount,
+                    longVarConfigBuilderSupplier(COLLECTION_COUNT_DESCRIPTION));
+
+            registry.longVar(
+                    name(namePrefix, "time"),
+                    gcMxBean::getCollectionTime,
+                    longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION));
         }
     }
 }

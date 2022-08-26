@@ -11,10 +11,6 @@ import static java.util.stream.Collectors.toMap;
 @SuppressWarnings("ForLoopReplaceableByForEach")
 public class MetricDimensionUtils {
 
-    public static final MetricDimension NAME_DIMENSION = new MetricDimension("name");
-    public static final MetricDimension TYPE_DIMENSION = new MetricDimension("type");
-    public static final MetricDimension STATE_DIMENSION = new MetricDimension("state");
-
     public static boolean hasDimensionValues(List<MetricDimensionValue> dimensionValues) {
         return dimensionValues != null && !dimensionValues.isEmpty();
     }

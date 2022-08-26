@@ -21,8 +21,8 @@ public class SystemMetricsProducer implements MetricsProducer {
         this(null, false);
     }
 
-    public SystemMetricsProducer(boolean isDimensional) {
-        this(null, isDimensional);
+    public SystemMetricsProducer(boolean dimensional) {
+        this(null, dimensional);
     }
 
     public SystemMetricsProducer(
@@ -33,7 +33,7 @@ public class SystemMetricsProducer implements MetricsProducer {
         MetricName threadsMetricNamePrefix,
         MetricName bufferPoolsMetricNamePrefix,
         MetricName classesMetricNamePrefix,
-        boolean isDimensional) {
+        boolean dimensional) {
 
         this(
             runtimeMetricNamePrefix,
@@ -44,12 +44,12 @@ public class SystemMetricsProducer implements MetricsProducer {
             bufferPoolsMetricNamePrefix,
             classesMetricNamePrefix,
             null,
-                isDimensional);
+                dimensional);
     }
 
     public SystemMetricsProducer(
             MetricModBuilder metricModBuilder,
-            boolean isDimensional
+            boolean dimensional
     ) {
         this(
                 RuntimeMetricsProducer.DEFAULT_NAME_PREFIX,
@@ -60,7 +60,7 @@ public class SystemMetricsProducer implements MetricsProducer {
                 AbstractBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
                 ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
                 metricModBuilder,
-                isDimensional);
+                dimensional);
     }
 
     public SystemMetricsProducer(
@@ -72,44 +72,44 @@ public class SystemMetricsProducer implements MetricsProducer {
         MetricName bufferPoolsMetricNamePrefix,
         MetricName classesMetricNamePrefix,
         MetricModBuilder metricModBuilder,
-        boolean isDimensional) {
+        boolean dimensional) {
 
         this(
             new RuntimeMetricsProducer(runtimeMetricNamePrefix, metricModBuilder),
-                getOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder, isDimensional),
-                getGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder, isDimensional),
-                getMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder, isDimensional),
-                getThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, isDimensional),
-                getBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, isDimensional),
+                getOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder, dimensional),
+                getGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder, dimensional),
+                getMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder, dimensional),
+                getThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, dimensional),
+                getBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, dimensional),
             new ClassesMetricsProducer(classesMetricNamePrefix, metricModBuilder));
     }
 
-    private static OperatingSystemMetricsProducer getOperatingSystemMetricsProducer(final MetricName operatingSystemMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
-        return isDimensional ?
+    private static OperatingSystemMetricsProducer getOperatingSystemMetricsProducer(final MetricName operatingSystemMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
+        return dimensional ?
                 new DimensionalOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder) :
                 new DefaultOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder);
     }
 
-    private static GarbageCollectorsMetricsProducer getGarbageCollectorsMetricsProducer(final MetricName garbageCollectorsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
-        return isDimensional ?
+    private static GarbageCollectorsMetricsProducer getGarbageCollectorsMetricsProducer(final MetricName garbageCollectorsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
+        return dimensional ?
                 new DimensionalGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder) :
                 new DefaultGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder);
     }
 
-    private static MemoryMetricsProducer getMemoryMetricsProducer(final MetricName memoryMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
-        return isDimensional?
+    private static MemoryMetricsProducer getMemoryMetricsProducer(final MetricName memoryMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
+        return dimensional?
                 new DimensionalMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder):
                 new DefaultMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder);
     }
 
-    private static BufferPoolsMetricsProducer getBufferPoolsMetricsProducer(final MetricName bufferPoolsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
-        return isDimensional ?
+    private static BufferPoolsMetricsProducer getBufferPoolsMetricsProducer(final MetricName bufferPoolsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
+        return dimensional ?
                 new DimensionalBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder) :
                 new DefaultBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder);
     }
 
-    private static ThreadsMetricsProducer getThreadsMetricsProducer(final MetricName threadsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean isDimensional) {
-        return isDimensional ?
+    private static ThreadsMetricsProducer getThreadsMetricsProducer(final MetricName threadsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
+        return dimensional ?
                 new DimensionalThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder) :
                 new DefaultThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder);
     }

@@ -16,11 +16,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils.NAME_DIMENSION;
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class DimensionalBufferPoolsMetricsProducer extends AbstractBufferPoolsMetricsProducer {
+
+    private static final MetricDimension NAME_DIMENSION = new MetricDimension("name");
     private static final List<MetricDimensionValues> POOL_DIMENSION_VALUES = Arrays.stream(POOLS)
             .map(NAME_DIMENSION::value)
             .map(MetricDimensionValues::dimensionValues)
@@ -57,8 +58,7 @@ public class DimensionalBufferPoolsMetricsProducer extends AbstractBufferPoolsMe
             final var attrLongVar = registry.longVar(
                     nameWithSuffix("pool", attrNamePart),
                     Var.noTotal(),
-                    longVarConfigBuilderSupplier(description, NAME_DIMENSION)
-            );
+                    longVarConfigBuilderSupplier(description, NAME_DIMENSION));
 
             for (int poolIdx = 0; poolIdx < POOLS.length; poolIdx++) {
                 final String pool = POOLS[poolIdx];

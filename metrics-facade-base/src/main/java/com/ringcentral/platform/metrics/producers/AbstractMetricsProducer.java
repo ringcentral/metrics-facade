@@ -1,7 +1,10 @@
 package com.ringcentral.platform.metrics.producers;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.MetricMod;
+import com.ringcentral.platform.metrics.MetricModBuilder;
+import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.names.MetricName;
+import com.ringcentral.platform.metrics.var.configs.builders.AbstractVarConfigBuilder;
 import com.ringcentral.platform.metrics.var.configs.builders.VarConfigBuilder;
 import com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder;
 import com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder;
@@ -41,20 +44,44 @@ public abstract class AbstractMetricsProducer implements MetricsProducer {
         return namePrefix.isEmpty() ? MetricName.of(suffix) : MetricName.of(namePrefix, suffix);
     }
 
-    protected Supplier<ObjectVarConfigBuilder> objectVarConfigBuilderSupplier() {
-        return () -> modified(objectVarConfigBuilder());
+    protected Supplier<ObjectVarConfigBuilder> objectVarConfigBuilderSupplier(
+            String description, MetricDimension... dimensions
+    ) {
+        final var builder = objectVarConfigBuilder();
+        setDescriptionAndDimensions(builder, description, dimensions);
+        return () -> modified(builder);
     }
 
-    protected Supplier<LongVarConfigBuilder> longVarConfigBuilderSupplier() {
-        return () -> modified(longVarConfigBuilder());
+    protected Supplier<LongVarConfigBuilder> longVarConfigBuilderSupplier(
+            String description, MetricDimension... dimensions
+    ) {
+        final var builder = longVarConfigBuilder();
+        setDescriptionAndDimensions(builder, description, dimensions);
+        return () -> modified(builder);
     }
 
-    protected Supplier<DoubleVarConfigBuilder> doubleVarConfigBuilderSupplier() {
-        return () -> modified(doubleVarConfigBuilder());
+    protected Supplier<DoubleVarConfigBuilder> doubleVarConfigBuilderSupplier(
+            String description, MetricDimension... dimensions
+    ) {
+        final var builder = doubleVarConfigBuilder();
+        setDescriptionAndDimensions(builder, description, dimensions);
+        return () -> modified(builder);
     }
 
-    protected Supplier<StringVarConfigBuilder> stringVarConfigBuilderSupplier() {
-        return () -> modified(stringVarConfigBuilder());
+    protected Supplier<StringVarConfigBuilder> stringVarConfigBuilderSupplier(
+            String description, MetricDimension... dimensions
+    ) {
+        final var builder = stringVarConfigBuilder();
+        setDescriptionAndDimensions(builder, description, dimensions);
+        return () -> modified(builder);
+    }
+
+    private void setDescriptionAndDimensions(AbstractVarConfigBuilder<?, ?> builder, String description, MetricDimension... dimensions) {
+        builder.description(description);
+
+        if (dimensions.length != 0) {
+            builder.dimensions(dimensions);
+        }
     }
 
     private <CB extends VarConfigBuilder<?, ?>> CB modified(CB builder) {

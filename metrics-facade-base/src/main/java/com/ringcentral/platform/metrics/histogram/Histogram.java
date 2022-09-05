@@ -237,7 +237,8 @@ public interface Histogram extends Meter {
         private final String upperBoundAsString;
         private final String upperBoundAsStringWithUnit;
         private final Map<TimeUnit, String> unitToUpperBoundAsStringWithUnit = new EnumMap<>(TimeUnit.class);
-        private final String upperBoundSecAsString;
+        private final String upperBoundAsNumberString;
+        private final String upperBoundSecAsNumberString;
         private final int hashCode;
 
         public Bucket(double upperBound) {
@@ -314,13 +315,15 @@ public interface Histogram extends Meter {
                 this.upperBoundAsStringWithUnit = unitToUpperBoundAsStringWithUnit.get(resolvedUpperBoundUnit);
             }
 
-            this.upperBoundSecAsString = String.valueOf(
+            this.upperBoundAsNumberString = upperBoundAsNumberString(upperBound);
+
+            this.upperBoundSecAsNumberString = withoutTrailingZeros(String.valueOf(
                 Double.isInfinite(upperBoundInUnits) || upperBoundUnit == SECONDS ?
                 upperBoundInUnits :
                 // instead of upperBoundInUnits * ((1.0 * (upperBoundUnit != null ? upperBoundUnit : NANOSECONDS).toNanos(1L)) / NANOS_PER_SEC)
                 // for example, 1.7000000000000002 -> 1.7
                 BigDecimal.valueOf(upperBoundInUnits).multiply(
-                    BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000000001))).doubleValue());
+                    BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000000001))).doubleValue()));
 
             this.hashCode = hashCodeFor("Histogram.Bucket", upperBoundInUnits, resolvedUpperBoundUnit);
         }
@@ -334,9 +337,15 @@ public interface Histogram extends Meter {
                 return "negativeInf";
             }
 
-            return Double.toString(b)
-                .replaceAll("\\.0+$", "")
-                .replace('.', 'p');
+            return upperBoundAsNumberString(b).replace('.', 'p');
+        }
+
+        static String upperBoundAsNumberString(double b) {
+            return withoutTrailingZeros(Double.toString(b));
+        }
+
+        static String withoutTrailingZeros(String s) {
+            return s.replaceAll("\\.0+$", "");
         }
 
         public static Bucket of(double upperBound) {
@@ -387,8 +396,17 @@ public interface Histogram extends Meter {
             return unitToUpperBoundAsStringWithUnit.get(unit);
         }
 
-        public String upperBoundSecAsString() {
-            return upperBoundSecAsString;
+        /**
+         * @return the string representation of the upper bound that can converted to {@code Double} via {@code Double.valueOf()}.
+         *         For example, Bucket.of(25.5).upperBoundAsNumberString().equals("25.5").
+         *
+         */
+        public String upperBoundAsNumberString() {
+            return upperBoundAsNumberString;
+        }
+
+        public String upperBoundSecAsNumberString() {
+            return upperBoundSecAsNumberString;
         }
 
         @Override
@@ -414,6 +432,13 @@ public interface Histogram extends Meter {
         @Override
         public int hashCode() {
             return hashCode;
+        }
+
+        @Override
+        public String toString() {
+            return "Bucket{" +
+                "upperBoundAsString='" + upperBoundAsString + '\'' +
+                '}';
         }
     }
 

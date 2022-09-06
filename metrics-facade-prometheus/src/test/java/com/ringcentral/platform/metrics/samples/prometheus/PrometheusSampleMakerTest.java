@@ -305,7 +305,7 @@ public class PrometheusSampleMakerTest {
             null,
             "_bucket",
             List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
-            List.of("value_1", "value_2", "1p0E9"),
+            List.of("value_1", "value_2", "1.0E9"),
             1.0);
 
         check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
@@ -510,7 +510,7 @@ public class PrometheusSampleMakerTest {
             null,
             "_bucket",
             List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
-            List.of("value_1", "value_2", "1.0"),
+            List.of("value_1", "value_2", "1"),
             1.0);
 
         check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);

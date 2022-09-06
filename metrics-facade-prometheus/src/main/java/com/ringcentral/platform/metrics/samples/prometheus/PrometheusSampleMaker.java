@@ -108,8 +108,8 @@ public class PrometheusSampleMaker implements SampleMaker<
         } else {
             return
                 instance instanceof TimerInstance ?
-                bucket.upperBoundSecAsString() :
-                bucket.upperBoundAsString();
+                bucket.upperBoundSecAsNumberString() :
+                bucket.upperBoundAsNumberString();
         }
     }
 }

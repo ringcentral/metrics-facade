@@ -36,6 +36,8 @@ Table of Contents
   * [MemoryMetricsProducer](#memorymetricsproducer)
   * [ThreadsMetricsProducer](#threadsmetricsproducer)
   * [BufferPoolsMetricsProducer](#bufferpoolsmetricsproducer)
+* [Integration](#integration)
+  * [Dropwizard MetricRegistry](#dropwizard-MetricRegistry-integration)
 * [License](#license)  
 
 ## Main Features Overview
@@ -2445,7 +2447,7 @@ It is based on ```java.lang.management.RuntimeMXBean```.
 
 Adds a number of metrics related to operating system:    
 OS name, OS architecture, CPU time used by the process, etc.          
-It is based on ```com.sun.management.OperatingSystemMXBean```.        
+It is based on ```com.sun.management.OperatingSystemMXBean```.     
 
 ### GarbageCollectorsMetricsProducer
 
@@ -2474,6 +2476,137 @@ It is based on the MBeans ```java.nio:type=BufferPool,name=<pool_name>```.
 
 Adds a number of metrics related to the class loading system of the JVM.
 It is based on ```java.lang.management.ClassLoadingMXBean```.
+
+## Integration
+
+### Dropwizard MetricRegistry integration
+
+#### Export using DropwizardMetricRegistryDefaultInstanceSamplesProvider
+
+`DropwizardMetricRegistryDefaultInstanceSamplesProvider` helps to export metrics from existing `com.codahale.metrics.MetricRegistry` using [Metrics Reporters](#metrics-reporters) (except PrometheusMetricsExporter).
+
+For example,
+```java
+MetricRegistry registry = new MetricRegistry();
+
+AtomicInteger g1 = new AtomicInteger();
+registry.gauge("g1", () -> new Gauge<Integer>() {
+  @Override
+  public Integer getValue() {
+    return g1.incrementAndGet();
+  }
+});
+
+Counter c1 = registry.counter("c1");
+c1.inc();
+
+Histogram h1 = registry.histogram("h1");
+h1.update(10);
+h1.update(100);
+h1.update(1000);
+
+Timer t1 = registry.timer("t1");
+t1.update(Duration.ofMinutes(10));
+
+Meter m1 = registry.meter("m1");
+m1.mark();
+m1.mark(10);
+
+DropwizardMetricRegistryDefaultInstanceSamplesProvider provider = new DropwizardMetricRegistryDefaultInstanceSamplesProvider(registry);
+
+TelegrafMetricsJsonExporter telegrafMetricsJsonExporter = new TelegrafMetricsJsonExporter(true, provider);
+MetricsJson metrics = telegrafMetricsJsonExporter.exportMetrics();
+
+ObjectMapper mapper = new ObjectMapper();
+System.out.println(mapper.writeValueAsString(metrics));
+```
+Output:
+```text
+{"instant":{"g1":1.0,"h1.mean":370.0,"h1.max":1000,"h1.min":10,"h1.median":100.0,"h1.std_dev":446.9899327725402,"h1.75_percentile":1000.0,"h1.95_percentile":1000.0,"h1.98_percentile":1000.0,"h1.99_percentile":1000.0,"h1.999_percentile":1000.0,"t1.mean":600.0,"t1.max":600.0,"t1.min":600.0,"t1.median":600.0,"t1.std_dev":0.0,"t1.75_percentile":600.0,"t1.95_percentile":600.0,"t1.98_percentile":600.0,"t1.99_percentile":600.0,"t1.999_percentile":600.0,"m1.1_minute_rate":0.0,"m1.5_minute_rate":0.0,"m1.15_minute_rate":0.0,"m1.mean_rate":288.9463950588065},"delta":{"c1":1,"h1.count":3,"t1.count":1,"m1.total":11}}
+```
+Required dependency:
+```xml
+<dependency>
+  <groupId>com.ringcentral.platform.metrics</groupId>
+  <artifactId>metrics-facade-dropwizard</artifactId>
+  <version>2.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+#### Export using DropwizardMetricRegistryPrometheusInstanceSamplesProvider
+
+`DropwizardMetricRegistryDefaultInstanceSamplesProvider` helps to export metrics from existing `com.codahale.metrics.MetricRegistry` using PrometheusMetricsExporter.
+
+For example,
+```java
+MetricRegistry registry = new MetricRegistry();
+
+AtomicInteger g1 = new AtomicInteger();
+registry.gauge("g1", () -> new Gauge<Integer>() {
+  @Override
+  public Integer getValue() {
+    return g1.incrementAndGet();
+  }
+});
+
+Counter c1 = registry.counter("c1");
+c1.inc();
+
+Histogram h1 = registry.histogram("h1");
+h1.update(10);
+h1.update(100);
+h1.update(1000);
+
+Timer t1 = registry.timer("t1");
+t1.update(Duration.ofMinutes(10));
+
+Meter m1 = registry.meter("m1");
+m1.mark();
+m1.mark(10);
+
+DropwizardMetricRegistryDefaultInstanceSamplesProvider provider = new DropwizardMetricRegistryDefaultInstanceSamplesProvider(registry);
+
+TelegrafMetricsJsonExporter telegrafMetricsJsonExporter = new TelegrafMetricsJsonExporter(true, provider);
+MetricsJson metrics = telegrafMetricsJsonExporter.exportMetrics();
+
+System.out.println(metrics);
+```
+Output:
+```text
+# HELP h1 Generated from Dropwizard metric import (metric=h1, type=com.codahale.metrics.Histogram)
+# TYPE h1 summary
+h1{quantile="0.5",} 100.0
+h1{quantile="0.75",} 1000.0
+h1{quantile="0.95",} 1000.0
+h1{quantile="0.98",} 1000.0
+h1{quantile="0.99",} 1000.0
+h1{quantile="0.999",} 1000.0
+h1_count 3.0
+# HELP g1 Generated from Dropwizard metric import (metric=g1, type=com.ringcentral.platform.metrics.samples.temp.DropwizardMetricRegistryPrometheusInstanceSamplesProviderSample$1)
+# TYPE g1 gauge
+g1 0.0
+# HELP t1 Generated from Dropwizard metric import (metric=t1, type=com.codahale.metrics.Timer)
+# TYPE t1 summary
+t1{quantile="0.5",} 600.0
+t1{quantile="0.75",} 600.0
+t1{quantile="0.95",} 600.0
+t1{quantile="0.98",} 600.0
+t1{quantile="0.99",} 600.0
+t1{quantile="0.999",} 600.0
+t1_count 1.0
+# HELP c1 Generated from Dropwizard metric import (metric=c1, type=com.codahale.metrics.Counter)
+# TYPE c1 gauge
+c1 1.0
+```
+
+Required dependency:
+```xml
+<dependency>
+  <groupId>com.ringcentral.platform.metrics</groupId>
+  <artifactId>metrics-facade-dropwizard-to-prometheus</artifactId>
+  <version>2.1.0-SNAPSHOT</version>
+</dependency>
+```
 
 ## License
 

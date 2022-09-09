@@ -98,4 +98,24 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProviderTest {
         samples = instanceSample.samples();
         assertThat(samples.size(), is(2));
     }
+
+    @Test
+    public void shouldProvideWithoutPrefix() {
+        // given
+        final var collectorRegistry = new CollectorRegistry(true);
+        final var underTest = new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(collectorRegistry);
+
+        final var counter_1 = Counter.build()
+            .name("counter_1")
+            .help("Counter 1 from defaultRegistry")
+            .register(collectorRegistry);
+
+        counter_1.inc(1);
+
+        // when
+        final var instanceSamples = underTest.instanceSamples();
+
+        // then
+        assertThat(instanceSamples.size(), is(1));
+    }
 }

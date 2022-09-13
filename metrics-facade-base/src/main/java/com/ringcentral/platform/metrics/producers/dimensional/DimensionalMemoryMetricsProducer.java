@@ -18,6 +18,158 @@ import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.
 import static java.lang.management.ManagementFactory.getMemoryMXBean;
 import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
 
+/**
+ * Produces<br>
+ * <ul>
+ *     <li>
+ *         <i>init</i> - the amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management.<br>
+ *         Dimensions:<br>
+ *         type = {"heap", "total", "non-heap"}<br>
+ *     </li>
+ *     <li>
+ *         <i>max</i> - the maximum amount of memory in bytes that can be used for memory management.<br>
+ *         Dimensions:<br>
+ *         type = {"heap", "total", "non-heap"}<br>
+ *     </li>
+ *     <li>
+ *         <i>used</i> - the amount of used memory in bytes.<br>
+ *         Dimensions:<br>
+ *         type = {"heap", "total", "non-heap"}<br>
+ *     </li>
+ *     <li>
+ *         <i>usage</i> - used divided by max.<br>
+ *         Dimensions:<br>
+ *         type = {"heap", "non-heap"}<br>
+ *     </li>
+ *     <li>
+ *         <i>committed</i> - the amount of memory in bytes that is committed for the Java virtual machine to use.<br>
+ *         Dimensions:<br>
+ *         type = {"heap", "total", "non-heap"}<br>
+ *     </li>
+ *     <li>
+ *         <i>usedAfterGc</i> - the amount of used memory in bytes after the Java virtual machine most recently expended effort in recycling unused objects in this memory pool.<br>
+ *         Dimensions:<br>
+ *         name = {"G1 Old Gen", "G1 Eden Space", "G1 Survivor Space"}<br>
+ *     </li>
+ *     <li>
+ *         <i>pools.init</i> - the amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management.<br>
+ *         Dimensions:<br>
+ *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
+ *     </li>
+ *     <li>
+ *         <i>pools.max</i> - the maximum amount of memory in bytes that can be used for memory management.<br>
+ *         Dimensions:<br>
+ *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
+ *     </li>
+ *     <li>
+ *         <i>pools.used</i> - the amount of used memory in bytes.<br>
+ *         Dimensions:<br>
+ *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
+ *     </li>
+ *     <li>
+ *         <i>pools.usage</i> - used divided by max.<br>
+ *         Dimensions:<br>
+ *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
+ *     </li>
+ *     <li>
+ *         <i>pools.committed</i> - the amount of memory in bytes that is committed for the Java virtual machine to use.<br>
+ *         Dimensions:<br>
+ *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
+ *     </li>
+ * </ul>
+ *
+ * All metrics have a name prefix. By default it is 'Memory'.<br>
+ * <br>
+ * Example of usage:
+ * <pre>
+ * MetricRegistry registry = new DefaultMetricRegistry();
+ * new DimensionalMemoryMetricsProducer().produceMetrics(registry);
+ * PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
+ * System.out.println(exporter.exportMetrics());
+ * </pre>
+ * Corresponding output:
+ * <pre>
+ * # HELP Memory_committed The amount of memory in bytes that is committed for the Java virtual machine to use
+ * # TYPE Memory_committed gauge
+ * Memory_committed{type="heap",} 2.68435456E8
+ * Memory_committed{type="total",} 2.86851072E8
+ * Memory_committed{type="non-heap",} 1.8153472E7
+ * # HELP Memory_usedAfterGc The amount of used memory in bytes after the Java virtual machine most recently expended effort in recycling unused objects in this memory pool
+ * # TYPE Memory_usedAfterGc gauge
+ * Memory_usedAfterGc{name="G1 Old Gen",} 0.0
+ * Memory_usedAfterGc{name="G1 Eden Space",} 0.0
+ * Memory_usedAfterGc{name="G1 Survivor Space",} 0.0
+ * # HELP Memory_usage Used divided by max
+ * # TYPE Memory_usage gauge
+ * Memory_usage{type="heap",} 0.001953125
+ * Memory_usage{type="non-heap",} -1.2532952E7
+ * # HELP Memory_pools_committed The amount of memory in bytes that is committed for the Java virtual machine to use
+ * # TYPE Memory_pools_committed gauge
+ * Memory_pools_committed{name="G1 Old Gen",} 2.4117248E8
+ * Memory_pools_committed{name="Compressed Class Space",} 1048576.0
+ * Memory_pools_committed{name="G1 Eden Space",} 2.7262976E7
+ * Memory_pools_committed{name="G1 Survivor Space",} 0.0
+ * Memory_pools_committed{name="CodeHeap 'non-profiled nmethods'",} 2555904.0
+ * Memory_pools_committed{name="CodeHeap 'non-nmethods'",} 2555904.0
+ * Memory_pools_committed{name="CodeHeap 'profiled nmethods'",} 2555904.0
+ * Memory_pools_committed{name="Metaspace",} 9437184.0
+ * # HELP Memory_used The amount of used memory in bytes
+ * # TYPE Memory_used gauge
+ * Memory_used{type="heap",} 7340032.0
+ * Memory_used{type="total",} 2.092876E7
+ * Memory_used{type="non-heap",} 1.1884776E7
+ * # HELP Memory_max The maximum amount of memory in bytes that can be used for memory management
+ * # TYPE Memory_max gauge
+ * Memory_max{type="heap",} 4.294967296E9
+ * Memory_max{type="total",} 4.294967295E9
+ * Memory_max{type="non-heap",} -1.0
+ * # HELP Memory_pools_init The amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management
+ * # TYPE Memory_pools_init gauge
+ * Memory_pools_init{name="G1 Old Gen",} 2.4117248E8
+ * Memory_pools_init{name="Compressed Class Space",} 0.0
+ * Memory_pools_init{name="G1 Eden Space",} 2.7262976E7
+ * Memory_pools_init{name="G1 Survivor Space",} 0.0
+ * Memory_pools_init{name="CodeHeap 'non-profiled nmethods'",} 2555904.0
+ * Memory_pools_init{name="CodeHeap 'non-nmethods'",} 2555904.0
+ * Memory_pools_init{name="CodeHeap 'profiled nmethods'",} 2555904.0
+ * Memory_pools_init{name="Metaspace",} 0.0
+ * # HELP Memory_pools_usage Used divided by max
+ * # TYPE Memory_pools_usage gauge
+ * Memory_pools_usage{name="G1 Old Gen",} 0.0
+ * Memory_pools_usage{name="Compressed Class Space",} 8.621141314506531E-4
+ * Memory_pools_usage{name="G1 Eden Space",} 0.3076923076923077
+ * Memory_pools_usage{name="G1 Survivor Space",} NaN
+ * Memory_pools_usage{name="CodeHeap 'non-profiled nmethods'",} 0.0015579178885630498
+ * Memory_pools_usage{name="CodeHeap 'non-nmethods'",} 0.18679824561403507
+ * Memory_pools_usage{name="CodeHeap 'profiled nmethods'",} 0.007654463958409704
+ * Memory_pools_usage{name="Metaspace",} 0.9689644478462838
+ * # HELP Memory_init The amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management
+ * # TYPE Memory_init gauge
+ * Memory_init{type="heap",} 2.68435456E8
+ * Memory_init{type="total",} 2.76103168E8
+ * Memory_init{type="non-heap",} 7667712.0
+ * # HELP Memory_pools_max The maximum amount of memory in bytes that can be used for memory management
+ * # TYPE Memory_pools_max gauge
+ * Memory_pools_max{name="G1 Old Gen",} 4.294967296E9
+ * Memory_pools_max{name="Compressed Class Space",} 1.073741824E9
+ * Memory_pools_max{name="G1 Eden Space",} -1.0
+ * Memory_pools_max{name="G1 Survivor Space",} -1.0
+ * Memory_pools_max{name="CodeHeap 'non-profiled nmethods'",} 1.22912768E8
+ * Memory_pools_max{name="CodeHeap 'non-nmethods'",} 5836800.0
+ * Memory_pools_max{name="CodeHeap 'profiled nmethods'",} 1.22908672E8
+ * Memory_pools_max{name="Metaspace",} -1.0
+ * # HELP Memory_pools_used The amount of used memory in bytes
+ * # TYPE Memory_pools_used gauge
+ * Memory_pools_used{name="G1 Old Gen",} 0.0
+ * Memory_pools_used{name="Compressed Class Space",} 891592.0
+ * Memory_pools_used{name="G1 Eden Space",} 7340032.0
+ * Memory_pools_used{name="G1 Survivor Space",} 0.0
+ * Memory_pools_used{name="CodeHeap 'non-profiled nmethods'",} 167680.0
+ * Memory_pools_used{name="CodeHeap 'non-nmethods'",} 1088896.0
+ * Memory_pools_used{name="CodeHeap 'profiled nmethods'",} 862848.0
+ * Memory_pools_used{name="Metaspace",} 9053760.0
+ * </pre>
+ */
 public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProducer {
 
     private static final MetricDimension NAME_DIMENSION = new MetricDimension("name");

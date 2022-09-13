@@ -19,6 +19,51 @@ import java.util.stream.Collectors;
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * Produces<br>
+ * <ul>
+ *     <li>
+ *         <i>pool.capacity</i> - an estimate of the total capacity of the buffers in this pool.<br>
+ *         Dimensions:<br>
+ *         name = {"direct", "mapped"}<br>
+ *     </li>
+ *     <li>
+ *         <i>pool.used</i> - an estimate of the memory that the Java virtual machine is using for this buffer pool.<br>
+ *         Dimensions:<br>
+ *         name = {"direct", "mapped"}<br>
+ *     </li>
+ *     <li>
+ *         <i>pool.count</i> - an estimate of the number of buffers in the pool.<br>
+ *         Dimensions:<br>
+ *         name = {"direct", "mapped"}<br>
+ *     </li>
+ * </ul>
+ *
+ * All metrics have a name prefix. By default it is 'Buffers'.<br>
+ * <br>
+ * Example of usage:
+ * <pre>
+ * MetricRegistry registry = new DefaultMetricRegistry();
+ * new DimensionalBufferPoolsMetricsProducer().produceMetrics(registry);
+ * PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
+ * System.out.println(exporter.exportMetrics());
+ * </pre>
+ * Corresponding output:
+ * <pre>
+ * # HELP Buffers_pool_capacity An estimate of the total capacity of the buffers in this pool
+ * # TYPE Buffers_pool_capacity gauge
+ * Buffers_pool_capacity{name="direct",} 0.0
+ * Buffers_pool_capacity{name="mapped",} 0.0
+ * # HELP Buffers_pool_used An estimate of the memory that the Java virtual machine is using for this buffer pool
+ * # TYPE Buffers_pool_used gauge
+ * Buffers_pool_used{name="direct",} 0.0
+ * Buffers_pool_used{name="mapped",} 0.0
+ * # HELP Buffers_pool_count An estimate of the number of buffers in the pool
+ * # TYPE Buffers_pool_count gauge
+ * Buffers_pool_count{name="direct",} 0.0
+ * Buffers_pool_count{name="mapped",} 0.0
+ * </pre>
+ */
 public class DimensionalBufferPoolsMetricsProducer extends AbstractBufferPoolsMetricsProducer {
 
     private static final MetricDimension NAME_DIMENSION = new MetricDimension("name");

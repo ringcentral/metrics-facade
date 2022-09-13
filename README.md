@@ -2521,7 +2521,7 @@ ObjectMapper mapper = new ObjectMapper();
 System.out.println(mapper.writeValueAsString(metrics));
 ```
 Output:
-```text
+```json
 {"instant":{"g1":1.0,"h1.mean":370.0,"h1.max":1000,"h1.min":10,"h1.median":100.0,"h1.std_dev":446.9899327725402,"h1.75_percentile":1000.0,"h1.95_percentile":1000.0,"h1.98_percentile":1000.0,"h1.99_percentile":1000.0,"h1.999_percentile":1000.0,"t1.mean":600.0,"t1.max":600.0,"t1.min":600.0,"t1.median":600.0,"t1.std_dev":0.0,"t1.75_percentile":600.0,"t1.95_percentile":600.0,"t1.98_percentile":600.0,"t1.99_percentile":600.0,"t1.999_percentile":600.0,"m1.1_minute_rate":0.0,"m1.5_minute_rate":0.0,"m1.15_minute_rate":0.0,"m1.mean_rate":288.9463950588065},"delta":{"c1":1,"h1.count":3,"t1.count":1,"m1.total":11}}
 ```
 Required dependency:
@@ -2535,7 +2535,7 @@ Required dependency:
 
 #### Export using DropwizardMetricRegistryPrometheusInstanceSamplesProvider
 
-`DropwizardMetricRegistryDefaultInstanceSamplesProvider` helps to export metrics from existing `com.codahale.metrics.MetricRegistry` using PrometheusMetricsExporter.
+`DropwizardMetricRegistryPrometheusInstanceSamplesProvider` helps to export metrics from existing `com.codahale.metrics.MetricRegistry` using PrometheusMetricsExporter.
 
 For example,
 ```java
@@ -2572,7 +2572,7 @@ MetricsJson metrics = telegrafMetricsJsonExporter.exportMetrics();
 System.out.println(metrics);
 ```
 Output:
-```text
+```bash
 # HELP h1 Generated from Dropwizard metric import (metric=h1, type=com.codahale.metrics.Histogram)
 # TYPE h1 summary
 h1{quantile="0.5",} 100.0

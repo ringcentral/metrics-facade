@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import static com.ringcentral.platform.metrics.measurables.DefaultMeasurableNameProvider.*;
 import static com.ringcentral.platform.metrics.samples.SampleTypes.DELTA;
 import static com.ringcentral.platform.metrics.samples.SampleTypes.INSTANT;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -21,7 +22,7 @@ public class DropwizardMetricRegistryDefaultInstanceSamplesProvider implements I
         DefaultInstanceSample> {
 
     private static final Logger logger = getLogger(DropwizardMetricRegistryDefaultInstanceSamplesProvider.class);
-    private static final double TIMER_FACTOR = 1.0D / (double)TimeUnit.SECONDS.toNanos(1L);
+    private static final double DURATION_FACTOR = 1.0D / (double)TimeUnit.MILLISECONDS.toNanos(1L);
 
     private final com.codahale.metrics.MetricRegistry metricRegistry;
 
@@ -88,39 +89,39 @@ public class DropwizardMetricRegistryDefaultInstanceSamplesProvider implements I
                 .forEach((name, histogram) -> {
                     final var defaultInstanceSample = new DefaultInstanceSample();
 
-                    final var countSample = createSample(name, "count", histogram::getCount, DELTA);
+                    final var countSample = createSample(name, COUNT, histogram::getCount, DELTA);
                     defaultInstanceSample.add(countSample);
 
                     final var snapshot = histogram.getSnapshot();
 
-                    final var meanSample = createSample(name, "mean", snapshot::getMean, INSTANT);
+                    final var meanSample = createSample(name, MEAN, snapshot::getMean, INSTANT);
                     defaultInstanceSample.add(meanSample);
 
-                    final var maxSample = createSample(name, "max", snapshot::getMax, INSTANT);
+                    final var maxSample = createSample(name, MAX, snapshot::getMax, INSTANT);
                     defaultInstanceSample.add(maxSample);
 
-                    final var minSample = createSample(name, "min", snapshot::getMin, INSTANT);
+                    final var minSample = createSample(name, MIN, snapshot::getMin, INSTANT);
                     defaultInstanceSample.add(minSample);
 
-                    final var medianSample = createSample(name, "median", snapshot::getMedian, INSTANT);
+                    final var medianSample = createSample(name, MEDIAN, snapshot::getMedian, INSTANT);
                     defaultInstanceSample.add(medianSample);
 
-                    final var stdDevSample = createSample(name, "std_dev", snapshot::getStdDev, INSTANT);
+                    final var stdDevSample = createSample(name, STD_DEV, snapshot::getStdDev, INSTANT);
                     defaultInstanceSample.add(stdDevSample);
 
-                    final var percentile75Sample = createSample(name, "75_percentile", snapshot::get75thPercentile, INSTANT);
+                    final var percentile75Sample = createSample(name, PERCENTILE_75, snapshot::get75thPercentile, INSTANT);
                     defaultInstanceSample.add(percentile75Sample);
 
-                    final var percentile95Sample = createSample(name, "95_percentile", snapshot::get95thPercentile, INSTANT);
+                    final var percentile95Sample = createSample(name, PERCENTILE_95, snapshot::get95thPercentile, INSTANT);
                     defaultInstanceSample.add(percentile95Sample);
 
-                    final var percentile98Sample = createSample(name, "98_percentile", snapshot::get98thPercentile, INSTANT);
+                    final var percentile98Sample = createSample(name, PERCENTILE_98, snapshot::get98thPercentile, INSTANT);
                     defaultInstanceSample.add(percentile98Sample);
 
-                    final var percentile99Sample = createSample(name, "99_percentile", snapshot::get99thPercentile, INSTANT);
+                    final var percentile99Sample = createSample(name, PERCENTILE_99, snapshot::get99thPercentile, INSTANT);
                     defaultInstanceSample.add(percentile99Sample);
 
-                    final var percentile999Sample = createSample(name, "999_percentile", snapshot::get999thPercentile, INSTANT);
+                    final var percentile999Sample = createSample(name, PERCENTILE_999, snapshot::get999thPercentile, INSTANT);
                     defaultInstanceSample.add(percentile999Sample);
 
                     if (!defaultInstanceSample.isEmpty()) {
@@ -134,39 +135,51 @@ public class DropwizardMetricRegistryDefaultInstanceSamplesProvider implements I
                 .forEach((name, timer) -> {
                     final var defaultInstanceSample = new DefaultInstanceSample();
 
-                    final var countSample = createSample(name, "count", timer::getCount, DELTA);
+                    final var countSample = createSample(name, COUNT, timer::getCount, DELTA);
                     defaultInstanceSample.add(countSample);
+
+                    final var oneMinuteRateSample = createSample(name, RATE_1_MINUTE, timer::getOneMinuteRate, INSTANT, DURATION_FACTOR);
+                    defaultInstanceSample.add(oneMinuteRateSample);
+
+                    final var fiveMinutesRateSample = createSample(name, RATE_5_MINUTES, timer::getFiveMinuteRate, INSTANT, DURATION_FACTOR);
+                    defaultInstanceSample.add(fiveMinutesRateSample);
+
+                    final var fifteenMinutesRateSample = createSample(name, RATE_15_MINUTES, timer::getFifteenMinuteRate, INSTANT, DURATION_FACTOR);
+                    defaultInstanceSample.add(fifteenMinutesRateSample);
+
+                    final var meanRateSample = createSample(name, RATE_MEAN, timer::getMeanRate, INSTANT, DURATION_FACTOR);
+                    defaultInstanceSample.add(meanRateSample);
 
                     final var snapshot = timer.getSnapshot();
 
-                    final var meanSample = createSample(name, "mean", snapshot::getMean, INSTANT, TIMER_FACTOR);
+                    final var meanSample = createSample(name, DURATION_MEAN, snapshot::getMean, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(meanSample);
 
-                    final var maxSample = createSample(name, "max", () -> (double)snapshot.getMax(), INSTANT, TIMER_FACTOR);
+                    final var maxSample = createSample(name, DURATION_MAX, () -> (double)snapshot.getMax(), INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(maxSample);
 
-                    final var minSample = createSample(name, "min", () -> (double)snapshot.getMin(), INSTANT, TIMER_FACTOR);
+                    final var minSample = createSample(name, DURATION_MIN, () -> (double)snapshot.getMin(), INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(minSample);
 
-                    final var medianSample = createSample(name, "median", snapshot::getMedian, INSTANT, TIMER_FACTOR);
+                    final var medianSample = createSample(name, DURATION_MEDIAN, snapshot::getMedian, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(medianSample);
 
-                    final var stdDevSample = createSample(name, "std_dev", snapshot::getStdDev, INSTANT, TIMER_FACTOR);
+                    final var stdDevSample = createSample(name, DURATION_STD_DEV, snapshot::getStdDev, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(stdDevSample);
 
-                    final var percentile75Sample = createSample(name, "75_percentile", snapshot::get75thPercentile, INSTANT, TIMER_FACTOR);
+                    final var percentile75Sample = createSample(name, DURATION_75_PERCENTILE, snapshot::get75thPercentile, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(percentile75Sample);
 
-                    final var percentile95Sample = createSample(name, "95_percentile", snapshot::get95thPercentile, INSTANT, TIMER_FACTOR);
+                    final var percentile95Sample = createSample(name, DURATION_95_PERCENTILE, snapshot::get95thPercentile, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(percentile95Sample);
 
-                    final var percentile98Sample = createSample(name, "98_percentile", snapshot::get98thPercentile, INSTANT, TIMER_FACTOR);
+                    final var percentile98Sample = createSample(name, DURATION_98_PERCENTILE, snapshot::get98thPercentile, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(percentile98Sample);
 
-                    final var percentile99Sample = createSample(name, "99_percentile", snapshot::get99thPercentile, INSTANT, TIMER_FACTOR);
+                    final var percentile99Sample = createSample(name, DURATION_99_PERCENTILE, snapshot::get99thPercentile, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(percentile99Sample);
 
-                    final var percentile999Sample = createSample(name, "999_percentile", snapshot::get999thPercentile, INSTANT, TIMER_FACTOR);
+                    final var percentile999Sample = createSample(name, DURATION_999_PERCENTILE, snapshot::get999thPercentile, INSTANT, DURATION_FACTOR);
                     defaultInstanceSample.add(percentile999Sample);
 
                     if (!defaultInstanceSample.isEmpty()) {
@@ -180,19 +193,19 @@ public class DropwizardMetricRegistryDefaultInstanceSamplesProvider implements I
                 .forEach((name, meter) -> {
                     final var defaultInstanceSample = new DefaultInstanceSample();
 
-                    final var totalSample = createSample(name, "total", meter::getCount, DELTA);
+                    final var totalSample = createSample(name, COUNT, meter::getCount, DELTA);
                     defaultInstanceSample.add(totalSample);
 
-                    final var oneMinuteRate = createSample(name, "1_minute_rate", meter::getOneMinuteRate, INSTANT);
+                    final var oneMinuteRate = createSample(name, RATE_1_MINUTE, meter::getOneMinuteRate, INSTANT);
                     defaultInstanceSample.add(oneMinuteRate);
 
-                    final var fiveMinuteRate = createSample(name, "5_minute_rate", meter::getFiveMinuteRate, INSTANT);
+                    final var fiveMinuteRate = createSample(name, RATE_5_MINUTES, meter::getFiveMinuteRate, INSTANT);
                     defaultInstanceSample.add(fiveMinuteRate);
 
-                    final var fifteenMinuteRate = createSample(name, "15_minute_rate", meter::getFifteenMinuteRate, INSTANT);
+                    final var fifteenMinuteRate = createSample(name, RATE_15_MINUTES, meter::getFifteenMinuteRate, INSTANT);
                     defaultInstanceSample.add(fifteenMinuteRate);
 
-                    final var meanRate = createSample(name, "mean_rate", meter::getMeanRate, INSTANT);
+                    final var meanRate = createSample(name, RATE_MEAN, meter::getMeanRate, INSTANT);
                     defaultInstanceSample.add(meanRate);
 
                     if (!defaultInstanceSample.isEmpty()) {

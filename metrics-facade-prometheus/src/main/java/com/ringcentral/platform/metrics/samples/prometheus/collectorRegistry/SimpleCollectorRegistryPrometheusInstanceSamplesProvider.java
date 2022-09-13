@@ -77,7 +77,7 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProvider implements
         Collection<? extends CollectorRegistry> collectorRegistries) {
 
         this(
-                namePrefix == null ? MetricName::of : n -> MetricName.of(namePrefix, n),
+            namePrefix == null ? MetricName::of : n -> MetricName.of(namePrefix, n),
             metricFamilyNameFilter,
             metricFamilySampleNameFilter,
             collectorRegistries);

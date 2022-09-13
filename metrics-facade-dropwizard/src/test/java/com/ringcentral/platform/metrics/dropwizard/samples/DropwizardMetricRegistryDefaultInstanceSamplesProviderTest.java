@@ -82,7 +82,7 @@ public class DropwizardMetricRegistryDefaultInstanceSamplesProviderTest {
             new DefaultSample("h1.max", 42L, "instant"),
             new DefaultSample("h1.min", 42L, "instant"),
             new DefaultSample("h1.median", 42.0D, "instant"),
-            new DefaultSample("h1.std_dev", 0.0D, "instant"),
+            new DefaultSample("h1.stdDev", 0.0D, "instant"),
             new DefaultSample("h1.75_percentile", 42.0D, "instant"),
             new DefaultSample("h1.95_percentile", 42.0D, "instant"),
             new DefaultSample("h1.98_percentile", 42.0D, "instant"),
@@ -107,20 +107,28 @@ public class DropwizardMetricRegistryDefaultInstanceSamplesProviderTest {
         final var samplesList = new ArrayList<>(instanceSamples);
         final var instanceSample = samplesList.get(0);
         final var samples = instanceSample.samples();
-        assertThat(samples, hasItems(
-            new DefaultSample("t1.count", 1L, "delta"),
-            new DefaultSample("t1.mean", 1.5D, "instant"),
-            new DefaultSample("t1.max", 1.5D, "instant"),
-            new DefaultSample("t1.min", 1.5D, "instant"),
-            new DefaultSample("t1.median", 1.5D, "instant"),
-            new DefaultSample("t1.std_dev", 0.0D, "instant"),
-            new DefaultSample("t1.75_percentile", 1.5D, "instant"),
-            new DefaultSample("t1.95_percentile", 1.5D, "instant"),
-            new DefaultSample("t1.98_percentile", 1.5D, "instant"),
-            new DefaultSample("t1.99_percentile", 1.5D, "instant"),
-            new DefaultSample("t1.999_percentile", 1.5D, "instant")
-        ));
-        assertThat(samples.size(), equalTo(11));
+        assertThat(samples.get(0), equalTo(new DefaultSample("t1.count", 1L, "delta")));
+        assertThat(samples.get(1), equalTo(new DefaultSample("t1.rate.1_minute", 0.0D, "instant")));
+        assertThat(samples.get(2), equalTo(new DefaultSample("t1.rate.5_minutes", 0.0D, "instant")));
+        assertThat(samples.get(3), equalTo(new DefaultSample("t1.rate.15_minutes", 0.0D, "instant")));
+
+        // it's difficult to calculate value for mean rate
+        final var meanRateSample = samples.get(4);
+        assertThat(meanRateSample.name(), equalTo("t1.rate.mean"));
+        assertThat((double) meanRateSample.value() > 0, equalTo(true));
+        assertThat(meanRateSample.type(), equalTo("instant"));
+
+        assertThat(samples.get(5), equalTo(new DefaultSample("t1.duration.mean", 1500.0, "instant")));
+        assertThat(samples.get(6), equalTo(new DefaultSample("t1.duration.max", 1500.0, "instant")));
+        assertThat(samples.get(7), equalTo(new DefaultSample("t1.duration.min", 1500.0, "instant")));
+        assertThat(samples.get(8), equalTo(new DefaultSample("t1.duration.median", 1500.0, "instant")));
+        assertThat(samples.get(9), equalTo(new DefaultSample("t1.duration.stdDev", 0.0, "instant")));
+        assertThat(samples.get(10), equalTo(new DefaultSample("t1.duration.75_percentile", 1500.0, "instant")));
+        assertThat(samples.get(11), equalTo(new DefaultSample("t1.duration.95_percentile", 1500.0, "instant")));
+        assertThat(samples.get(12), equalTo(new DefaultSample("t1.duration.98_percentile", 1500.0, "instant")));
+        assertThat(samples.get(13), equalTo(new DefaultSample("t1.duration.99_percentile", 1500.0, "instant")));
+        assertThat(samples.get(14), equalTo(new DefaultSample("t1.duration.999_percentile", 1500.0, "instant")));
+        assertThat(samples.size(), equalTo(15));
     }
 
     @Test
@@ -139,15 +147,15 @@ public class DropwizardMetricRegistryDefaultInstanceSamplesProviderTest {
         final var instanceSample = samplesList.get(0);
         final var samples = instanceSample.samples();
         assertThat(samples, hasItems(
-            new DefaultSample("m1.total", 10L, "delta"),
-            new DefaultSample("m1.1_minute_rate", 0.0D, "instant"),
-            new DefaultSample("m1.5_minute_rate", 0.0D, "instant"),
-            new DefaultSample("m1.15_minute_rate", 0.0D, "instant")
+            new DefaultSample("m1.count", 10L, "delta"),
+            new DefaultSample("m1.rate.1_minute", 0.0D, "instant"),
+            new DefaultSample("m1.rate.5_minutes", 0.0D, "instant"),
+            new DefaultSample("m1.rate.15_minutes", 0.0D, "instant")
         ));
 
         // it's difficult to calculate value for mean rate
         final var meanRateSample = samples.get(4);
-        assertThat(meanRateSample.name(), equalTo("m1.mean_rate"));
+        assertThat(meanRateSample.name(), equalTo("m1.rate.mean"));
         assertThat((double) meanRateSample.value() > 1, equalTo(true));
         assertThat(meanRateSample.type(), equalTo("instant"));
 

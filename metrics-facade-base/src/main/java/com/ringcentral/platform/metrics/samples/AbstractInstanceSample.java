@@ -6,7 +6,7 @@ import static java.util.Objects.*;
 
 public class AbstractInstanceSample<S extends Sample> implements InstanceSample<S> {
 
-    private final List<S> samples;
+    protected final List<S> samples;
 
     public AbstractInstanceSample() {
         this(new ArrayList<>());

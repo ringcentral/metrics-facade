@@ -1,5 +1,6 @@
 package com.ringcentral.platform.metrics.samples.prometheus;
 
+import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.samples.Sample;
 import io.prometheus.client.Collector;
@@ -11,6 +12,7 @@ import static java.util.Collections.emptyList;
 
 public class PrometheusSample implements Sample {
 
+    private final Measurable measurable;
     private final MetricName childInstanceSampleNameSuffix;
     private final Collector.Type childInstanceSampleType;
     private final MetricName name;
@@ -20,6 +22,7 @@ public class PrometheusSample implements Sample {
     private final double value;
 
     public PrometheusSample(
+        Measurable measurable,
         MetricName childInstanceSampleNameSuffix,
         Collector.Type childInstanceSampleType,
         MetricName name,
@@ -27,6 +30,8 @@ public class PrometheusSample implements Sample {
         List<String> labelNames,
         List<String> labelValues,
         double value) {
+
+        this.measurable = measurable;
 
         if (childInstanceSampleNameSuffix != null) {
             checkArgument(!childInstanceSampleNameSuffix.isEmpty(), "childInstanceSampleNameSuffix is empty");
@@ -43,6 +48,14 @@ public class PrometheusSample implements Sample {
         this.value = value;
     }
 
+    public boolean hasMeasurable() {
+        return measurable != null;
+    }
+
+    public Measurable measurable() {
+        return measurable;
+    }
+
     public boolean belongsToChildInstanceSample() {
         return childInstanceSampleNameSuffix != null;
     }
@@ -57,6 +70,7 @@ public class PrometheusSample implements Sample {
 
     public PrometheusSample notBelongingToChildInstanceSample() {
         return new PrometheusSample(
+            measurable,
             null,
             null,
             name,

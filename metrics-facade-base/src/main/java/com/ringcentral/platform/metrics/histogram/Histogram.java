@@ -3,10 +3,14 @@ package com.ringcentral.platform.metrics.histogram;
 import com.ringcentral.platform.metrics.Meter;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
-import com.ringcentral.platform.metrics.scale.*;
+import com.ringcentral.platform.metrics.scale.Scale;
+import com.ringcentral.platform.metrics.scale.ScaleBuilder;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
@@ -131,7 +135,7 @@ public interface Histogram extends Meter {
 
     StandardDeviation STANDARD_DEVIATION = new StandardDeviation();
 
-    class Percentile implements HistogramMeasurable {
+    class Percentile implements HistogramMeasurable, Comparable<Percentile> {
 
         private static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100.0);
 
@@ -202,6 +206,11 @@ public interface Histogram extends Meter {
         public int hashCode() {
             return hashCode;
         }
+
+        @Override
+        public int compareTo(Percentile right) {
+            return Double.compare(quantile, right.quantile);
+        }
     }
 
     Percentile PERCENTILE_1 = Percentile.of(0.01);
@@ -227,10 +236,11 @@ public interface Histogram extends Meter {
     Percentile PERCENTILE_99 = Percentile.of(0.99);
     Percentile PERCENTILE_999 = Percentile.of(0.999);
 
-    class Bucket implements HistogramMeasurable {
+    class Bucket implements HistogramMeasurable, Comparable<Bucket> {
 
         private final double upperBoundInUnits;
         private final TimeUnit upperBoundUnit;
+        private final double upperBound;
         private final long upperBoundAsLong;
         private final boolean inf;
         private final boolean negativeInf;
@@ -249,22 +259,22 @@ public interface Histogram extends Meter {
             this.upperBoundInUnits = upperBoundInUnits;
             this.upperBoundUnit = upperBoundUnit;
 
-            double upperBound =
+            this.upperBound =
                 Double.isInfinite(upperBoundInUnits) || upperBoundUnit == null || upperBoundUnit == NANOSECONDS ?
                 upperBoundInUnits :
                 upperBoundUnit.toNanos(1L) * upperBoundInUnits;
 
-            if (Double.isNaN(upperBound)) {
+            if (Double.isNaN(this.upperBound)) {
                 throw new IllegalArgumentException(
                     upperBoundInUnits
                     + (upperBoundUnit != null ? " " + upperBoundUnit.name().toLowerCase(Locale.ENGLISH) : "")
                     + " in nanos results in an overflow");
             }
 
-            this.upperBoundAsLong = round(upperBound);
+            this.upperBoundAsLong = round(this.upperBound);
             this.inf = (this.upperBoundAsLong == Long.MAX_VALUE);
             this.negativeInf = (this.upperBoundAsLong == Long.MIN_VALUE);
-            this.upperBoundAsString = upperBoundAsString(upperBound);
+            this.upperBoundAsString = upperBoundAsString(this.upperBound);
             TimeUnit resolvedUpperBoundUnit = upperBoundUnit != null ? upperBoundUnit : NANOSECONDS;
 
             if (Double.isInfinite(upperBoundInUnits)) {
@@ -315,7 +325,7 @@ public interface Histogram extends Meter {
                 this.upperBoundAsStringWithUnit = unitToUpperBoundAsStringWithUnit.get(resolvedUpperBoundUnit);
             }
 
-            this.upperBoundAsNumberString = upperBoundAsNumberString(upperBound);
+            this.upperBoundAsNumberString = upperBoundAsNumberString(this.upperBound);
 
             this.upperBoundSecAsNumberString = withoutTrailingZeros(String.valueOf(
                 Double.isInfinite(upperBoundInUnits) || upperBoundUnit == SECONDS ?
@@ -432,6 +442,27 @@ public interface Histogram extends Meter {
         @Override
         public int hashCode() {
             return hashCode;
+        }
+
+        @Override
+        public int compareTo(Bucket right) {
+            if (isInf()) {
+                return right.isInf() ? 0 : 1;
+            }
+
+            if (right.isInf()) {
+                return -1;
+            }
+
+            if (isNegativeInf()) {
+                return right.isNegativeInf() ? 0 : -1;
+            }
+
+            if (right.isNegativeInf()) {
+                return 1;
+            }
+
+            return Double.compare(upperBound, right.upperBound);
         }
 
         @Override

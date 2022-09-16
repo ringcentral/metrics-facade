@@ -5,15 +5,16 @@ import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfo
 import com.ringcentral.platform.metrics.measurables.MeasurableValues;
 import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
 public abstract class AbstractInstanceSamplesProvider<
-    S extends Sample,
+    S extends Sample<S>,
     SS extends SampleSpec,
     SSP extends SampleSpecProvider<SS, ISS>,
-    SM extends SampleMaker<S, SS, ISS>,
+    SM extends SampleMaker<S, SS, ISS, IS>,
     IS extends InstanceSample<S>,
     ISS extends InstanceSampleSpec,
     ISSP extends InstanceSampleSpecProvider<ISS>,
@@ -100,7 +101,7 @@ public abstract class AbstractInstanceSamplesProvider<
                         return;
                     }
 
-                    S sample = sampleMaker.makeSample(sampleSpec, instanceSampleSpec);
+                    S sample = sampleMaker.makeSample(sampleSpec, instanceSampleSpec, instanceSample);
 
                     if (sample != null) {
                         instanceSample.add(sample);

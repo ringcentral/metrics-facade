@@ -25,6 +25,8 @@ public class HistogramTest {
         assertThat(INF_BUCKET.compareTo(Bucket.of(1.7)), is(1));
 
         assertThat(INF_BUCKET.compareTo(INF_BUCKET), is(0));
+        assertThat(INF_BUCKET.compareTo(NEGATIVE_INF_BUCKET), is(1));
+        assertThat(NEGATIVE_INF_BUCKET.compareTo(INF_BUCKET), is(-1));
     }
 
     @Test

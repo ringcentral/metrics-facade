@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.histogram.*;
+import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
 import com.ringcentral.platform.metrics.var.VarInstance;
@@ -15,41 +15,51 @@ import java.util.Set;
 
 import static com.ringcentral.platform.metrics.histogram.Histogram.SEC_1_BUCKET;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
-import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.*;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.DEFAULT_DIMENSIONAL_TOTAL_INSTANCE_NAME_SUFFIX;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.DEFAULT_TOTAL_INSTANCE_NAME_SUFFIX;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class PrometheusInstanceSampleMakerTest {
 
     PrometheusInstanceSampleMaker maker = new PrometheusInstanceSampleMaker();
 
     @Test
-    public void makingInstanceSample() {
+    public void instanceSampleDisabled() {
         assertNull(maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
             false,
             mock(MetricInstance.class),
             name("a"),
             "Description for " + name("a"),
             emptyList())));
+    }
 
+    @Test
+    public void noInstance() {
         assertNull(maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
             true,
             null,
             name("a"),
             "Description for " + name("a"),
             emptyList())));
+    }
 
+    @Test
+    public void noName() {
         assertNull(maker.makeInstanceSample(new PrometheusInstanceSampleSpec(
             true,
             mock(MetricInstance.class),
             null,
             null,
             emptyList())));
+    }
 
-        // var
+    @Test
+    public void var() {
         MetricInstance instance = mock(VarInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
@@ -109,14 +119,16 @@ public class PrometheusInstanceSampleMakerTest {
                 "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
+    }
 
-        // counter
-        instance = mock(CounterInstance.class);
+    @Test
+    public void counter() {
+        MetricInstance instance = mock(CounterInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
         when(instance.isDimensionalTotalInstance()).thenReturn(false);
 
-        expectedInstanceSample = new PrometheusInstanceSample(
+        PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
             "Description for " + name("a", "b"),
@@ -170,14 +182,17 @@ public class PrometheusInstanceSampleMakerTest {
                 "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
+    }
 
+    @Test
+    public void rate() {
         // rate
-        instance = mock(RateInstance.class);
+        MetricInstance instance = mock(RateInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
         when(instance.isDimensionalTotalInstance()).thenReturn(false);
 
-        expectedInstanceSample = new PrometheusInstanceSample(
+        PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b", "total"),
             "Description for " + name("a", "b"),
@@ -231,14 +246,16 @@ public class PrometheusInstanceSampleMakerTest {
                 "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
+    }
 
-        // histogram
-        instance = mock(HistogramInstance.class);
+    @Test
+    public void histogram() {
+        MetricInstance instance = mock(HistogramInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
         when(instance.isDimensionalTotalInstance()).thenReturn(false);
 
-        expectedInstanceSample = new PrometheusInstanceSample(
+        PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
             "Description for " + name("a", "b"),
@@ -292,15 +309,18 @@ public class PrometheusInstanceSampleMakerTest {
                 "Description for " + name("a", "b"),
                 emptyList())),
             expectedInstanceSample);
+    }
 
-        // timer
-        instance = mock(TimerInstance.class);
+    @Test
+    public void makingInstanceSample() {
+        MetricInstance instance = mock(TimerInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
         when(instance.isDimensionalTotalInstance()).thenReturn(false);
         when(instance.measurables()).thenReturn(Set.of(SEC_1_BUCKET));
+        when(instance.isWithBuckets()).thenReturn(true);
 
-        expectedInstanceSample = new PrometheusInstanceSample(
+        PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
             name("a", "b"),
             "Description for " + name("a", "b"),

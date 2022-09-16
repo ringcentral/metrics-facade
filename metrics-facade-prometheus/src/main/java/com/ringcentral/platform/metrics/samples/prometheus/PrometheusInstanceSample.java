@@ -70,7 +70,7 @@ public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusS
                     }
                 }
             } else {
-                children = new ArrayList<>(2);
+                children = new ArrayList<>(4);
             }
 
             MetricName childName = MetricName.of(name, sample.childInstanceSampleNameSuffix());
@@ -85,6 +85,12 @@ public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusS
             children.add(child);
         } else {
             super.add(sample);
+        }
+
+        if (sample.hasChildren()) {
+            for (PrometheusSample childSample : sample.children()) {
+                add(childSample);
+            }
         }
     }
 

@@ -16,7 +16,7 @@ public class PrometheusInstanceSamplesProviderBuilder {
     private InstanceSampleMaker<PrometheusSample, PrometheusInstanceSample, PrometheusInstanceSampleSpec> instanceSampleMaker;
     private SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec> sampleSpecProvider;
     private PredicativeMetricNamedInfoProvider<SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>> sampleSpecModsProvider;
-    private SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec> sampleMaker;
+    private SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> sampleMaker;
     private final MetricRegistry metricRegistry;
 
     public PrometheusInstanceSamplesProviderBuilder(MetricRegistry metricRegistry) {
@@ -56,7 +56,7 @@ public class PrometheusInstanceSamplesProviderBuilder {
         return this;
     }
 
-    public PrometheusInstanceSamplesProviderBuilder sampleMaker(SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec> sampleMaker) {
+    public PrometheusInstanceSamplesProviderBuilder sampleMaker(SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> sampleMaker) {
         this.sampleMaker = requireNonNull(sampleMaker);
         return this;
     }

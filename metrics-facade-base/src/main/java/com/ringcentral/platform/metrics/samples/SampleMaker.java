@@ -1,5 +1,10 @@
 package com.ringcentral.platform.metrics.samples;
 
-public interface SampleMaker<S extends Sample, SS extends SampleSpec, ISS extends InstanceSampleSpec> {
-    S makeSample(SS spec, ISS instanceSampleSpec);
+public interface SampleMaker<
+    S extends Sample<S>,
+    SS extends SampleSpec,
+    ISS extends InstanceSampleSpec,
+    IS extends InstanceSample<S>> {
+
+    S makeSample(SS spec, ISS instanceSampleSpec, IS instanceSample);
 }

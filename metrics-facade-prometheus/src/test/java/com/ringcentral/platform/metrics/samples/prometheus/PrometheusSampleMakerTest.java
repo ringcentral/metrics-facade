@@ -7,7 +7,6 @@ import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
 import com.ringcentral.platform.metrics.var.VarInstance;
-import io.prometheus.client.Collector;
 import org.junit.Test;
 
 import java.util.List;
@@ -16,50 +15,67 @@ import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.rate.Rate.*;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSamplesMakerBuilder.prometheusSamplesMakerBuilder;
 import static com.ringcentral.platform.metrics.timer.Timer.DURATION_UNIT;
 import static com.ringcentral.platform.metrics.var.longVar.LongVar.LONG_VALUE;
+import static io.prometheus.client.Collector.Type.*;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class PrometheusSampleMakerTest {
 
     static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
     static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
 
+    PrometheusInstanceSampleSpec SIMPLE_COUNTER_INSTANCE_SAMPLE_SPEC = new PrometheusInstanceSampleSpec(
+        false,
+        mock(CounterInstance.class),
+        name("name"),
+        "description",
+        emptyList());
+
+    PrometheusSampleMaker maker = prometheusSamplesMakerBuilder().separateHistogramAndSummary(false).build();
+
     @Test
-    public void makingSample() {
-        PrometheusSampleMaker maker = new PrometheusSampleMaker();
-
-        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
-            false,
-            mock(CounterInstance.class),
-            name("a", "b"),
-            "Description for " + name("a", "b"),
-            emptyList());
-
+    public void sampleDisabled() {
         PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(false, COUNT, 1.0);
-        assertNull(maker.makeSample(sampleSpec, instanceSampleSpec));
+        assertNull(maker.makeSample(sampleSpec, SIMPLE_COUNTER_INSTANCE_SAMPLE_SPEC, null));
+    }
 
-        sampleSpec = new PrometheusSampleSpec(true, null, 1.0);
-        assertNull(maker.makeSample(sampleSpec, instanceSampleSpec));
+    @Test
+    public void noMeasurable() {
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, null, 1.0);
+        assertNull(maker.makeSample(sampleSpec, SIMPLE_COUNTER_INSTANCE_SAMPLE_SPEC, null));
+    }
 
-        sampleSpec = new PrometheusSampleSpec(true, COUNT, null);
-        assertNull(maker.makeSample(sampleSpec, instanceSampleSpec));
+    @Test
+    public void noValue() {
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, null);
+        assertNull(maker.makeSample(sampleSpec, SIMPLE_COUNTER_INSTANCE_SAMPLE_SPEC, null));
+    }
 
-        // var
+    @Test
+    public void var() {
         MetricInstance instance = mock(VarInstance.class);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        sampleSpec = new PrometheusSampleSpec(true, LONG_VALUE, 1.0);
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, LONG_VALUE, 1.0);
+
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            GAUGE);
 
         PrometheusSample expectedSample = new PrometheusSample(
             LONG_VALUE,
@@ -71,21 +87,29 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+    }
 
-        // counter
-        instance = mock(CounterInstance.class);
+    @Test
+    public void counter() {
+        MetricInstance instance = mock(CounterInstance.class);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            GAUGE);
 
-        expectedSample = new PrometheusSample(
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+
+        PrometheusSample expectedSample = new PrometheusSample(
             COUNT,
             null,
             null,
@@ -95,21 +119,30 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+    }
 
-        // rate
-        instance = mock(RateInstance.class);
+    @Test
+    public void rate() {
+        MetricInstance instance = mock(RateInstance.class);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            COUNTER);
 
-        expectedSample = new PrometheusSample(
+        // COUNT
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+
+        PrometheusSample expectedSample = new PrometheusSample(
             COUNT,
             null,
             null,
@@ -119,8 +152,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MEAN_RATE
         sampleSpec = new PrometheusSampleSpec(true, MEAN_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -133,8 +167,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // ONE_MINUTE_RATE
         sampleSpec = new PrometheusSampleSpec(true, ONE_MINUTE_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -147,8 +182,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // FIVE_MINUTES_RATE
         sampleSpec = new PrometheusSampleSpec(true, FIVE_MINUTES_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -161,8 +197,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // FIFTEEN_MINUTES_RATE
         sampleSpec = new PrometheusSampleSpec(true, FIFTEEN_MINUTES_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -175,8 +212,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // RATE_UNIT
         sampleSpec = new PrometheusSampleSpec(true, RATE_UNIT, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -189,21 +227,32 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+    }
 
-        // histogram
-        instance = mock(HistogramInstance.class);
+    @Test
+    public void histogram() {
+        MetricInstance instance = mock(HistogramInstance.class);
+        when(instance.isWithPercentiles()).thenReturn(true);
+        when(instance.isWithBuckets()).thenReturn(true);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            HISTOGRAM);
 
-        expectedSample = new PrometheusSample(
+        // COUNT
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+
+        PrometheusSample expectedSample = new PrometheusSample(
             COUNT,
             null,
             null,
@@ -213,8 +262,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // TOTAL_SUM
         sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -227,50 +277,54 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MIN
         sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         expectedSample = new PrometheusSample(
             MIN,
             name("min"),
-            Collector.Type.GAUGE,
+            GAUGE,
             null,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MAX
         sampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
 
         expectedSample = new PrometheusSample(
             MAX,
             name("max"),
-            Collector.Type.GAUGE,
+            GAUGE,
             null,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MEAN
         sampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
 
         expectedSample = new PrometheusSample(
             MEAN,
             name("mean"),
-            Collector.Type.GAUGE,
+            GAUGE,
             null,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // STANDARD_DEVIATION
         sampleSpec = new PrometheusSampleSpec(true, STANDARD_DEVIATION, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -283,8 +337,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // PERCENTILE_50
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -297,8 +352,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2", "0.5"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // PERCENTILE_75
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -311,8 +367,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2", "0.75"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // SEC_1_BUCKET
         sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -325,21 +382,224 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2", "1.0E9"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
-        // timer
-        instance = mock(TimerInstance.class);
+        // +Inf bucket
+        sampleSpec = new PrometheusSampleSpec(true, INF_BUCKET, 1.0);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        expectedSample = new PrometheusSample(
+            SEC_1_BUCKET,
+            null,
+            null,
+            null,
+            "_bucket",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of("value_1", "value_2", "+Inf"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // -Inf bucket
+        sampleSpec = new PrometheusSampleSpec(true, NEGATIVE_INF_BUCKET, 1.0);
+
+        expectedSample = new PrometheusSample(
+            SEC_1_BUCKET,
+            null,
+            null,
+            null,
+            "_bucket",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of("value_1", "value_2", "-Inf"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+    }
+
+    @Test
+    public void histogram_NoDimensions() {
+        MetricInstance instance = mock(HistogramInstance.class);
+        when(instance.isWithPercentiles()).thenReturn(true);
+        when(instance.isWithBuckets()).thenReturn(true);
+
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
+            true,
+            instance,
+            name("a", "b"),
+            "Description for " + name("a", "b"),
+            emptyList());
+
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            HISTOGRAM);
+
+        // COUNT
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+
+        PrometheusSample expectedSample = new PrometheusSample(
+            COUNT,
+            null,
+            null,
+            null,
+            "_count",
+            emptyList(),
+            emptyList(),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // TOTAL_SUM
+        sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
+
+        expectedSample = new PrometheusSample(
+            TOTAL_SUM,
+            null,
+            null,
+            null,
+            "_sum",
+            emptyList(),
+            emptyList(),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MIN
+        sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MIN,
+            name("min"),
+            GAUGE,
+            null,
+            null,
+            emptyList(),
+            emptyList(),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MAX
+        sampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MAX,
+            name("max"),
+            GAUGE,
+            null,
+            null,
+            emptyList(),
+            emptyList(),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MEAN
+        sampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MEAN,
+            name("mean"),
+            GAUGE,
+            null,
+            null,
+            emptyList(),
+            emptyList(),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // STANDARD_DEVIATION
+        sampleSpec = new PrometheusSampleSpec(true, STANDARD_DEVIATION, 1.0);
+
+        expectedSample = new PrometheusSample(
+            STANDARD_DEVIATION,
+            null,
+            null,
+            null,
+            null,
+            emptyList(),
+            emptyList(),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // PERCENTILE_50
+        sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
+
+        expectedSample = new PrometheusSample(
+            PERCENTILE_50,
+            null,
+            null,
+            null,
+            null,
+            List.of("quantile"),
+            List.of("0.5"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // PERCENTILE_75
+        sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
+
+        expectedSample = new PrometheusSample(
+            PERCENTILE_75,
+            null,
+            null,
+            null,
+            null,
+            List.of("quantile"),
+            List.of("0.75"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // SEC_1_BUCKET
+        sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
+
+        expectedSample = new PrometheusSample(
+            SEC_1_BUCKET,
+            null,
+            null,
+            null,
+            "_bucket",
+            List.of("le"),
+            List.of("1.0E9"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+    }
+
+    @Test
+    public void timer() {
+        maker = prometheusSamplesMakerBuilder()
+            .separateHistogramAndSummary(false)
+            .minChildInstanceSampleNameSuffix(name("test", "min"))
+            .maxChildInstanceSampleNameSuffix(name("test", "max"))
+            .meanChildInstanceSampleNameSuffix(name("test", "mean"))
+            .build();
+
+        MetricInstance instance = mock(TimerInstance.class);
+        when(instance.isWithPercentiles()).thenReturn(true);
+        when(instance.isWithBuckets()).thenReturn(true);
+
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            HISTOGRAM);
 
-        expectedSample = new PrometheusSample(
+        // COUNT
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+
+        PrometheusSample expectedSample = new PrometheusSample(
             COUNT,
             null,
             null,
@@ -349,8 +609,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // TOTAL_SUM
         sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -363,8 +624,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MEAN_RATE
         sampleSpec = new PrometheusSampleSpec(true, MEAN_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -377,8 +639,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // ONE_MINUTE_RATE
         sampleSpec = new PrometheusSampleSpec(true, ONE_MINUTE_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -391,8 +654,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // FIVE_MINUTES_RATE
         sampleSpec = new PrometheusSampleSpec(true, FIVE_MINUTES_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -405,8 +669,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // FIFTEEN_MINUTES_RATE
         sampleSpec = new PrometheusSampleSpec(true, FIFTEEN_MINUTES_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -419,8 +684,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // RATE_UNIT
         sampleSpec = new PrometheusSampleSpec(true, RATE_UNIT, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -433,50 +699,54 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MIN
         sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         expectedSample = new PrometheusSample(
             MIN,
-            name("min"),
-            Collector.Type.GAUGE,
+            name("test", "min"),
+            GAUGE,
             null,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MAX
         sampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
 
         expectedSample = new PrometheusSample(
             MAX,
-            name("max"),
-            Collector.Type.GAUGE,
+            name("test", "max"),
+            GAUGE,
             null,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // MEAN
         sampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
 
         expectedSample = new PrometheusSample(
             MEAN,
-            name("mean"),
-            Collector.Type.GAUGE,
+            name("test", "mean"),
+            GAUGE,
             null,
             null,
             List.of(DIMENSION_1.name(), DIMENSION_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // STANDARD_DEVIATION
         sampleSpec = new PrometheusSampleSpec(true, STANDARD_DEVIATION, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -489,8 +759,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // PERCENTILE_50
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -503,8 +774,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2", "0.5"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // PERCENTILE_75
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -517,8 +789,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2", "0.75"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // DURATION_UNIT
         sampleSpec = new PrometheusSampleSpec(true, DURATION_UNIT, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -531,8 +804,9 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
 
+        // SEC_1_BUCKET
         sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
 
         expectedSample = new PrometheusSample(
@@ -545,7 +819,373 @@ public class PrometheusSampleMakerTest {
             List.of("value_1", "value_2", "1"),
             1.0);
 
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+    }
+
+    @Test
+    public void separatingSummaryFromHistogram() {
+        maker = prometheusSamplesMakerBuilder()
+            .separateHistogramAndSummary(true)
+            .histogramChildInstanceSampleNameSuffix(name("test", "histogram"))
+            .summaryChildInstanceSampleNameSuffix(name("test", "summary"))
+            .build();
+
+        MetricInstance instance = mock(HistogramInstance.class);
+        when(instance.isWithPercentiles()).thenReturn(true);
+        when(instance.isWithBuckets()).thenReturn(true);
+
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
+            true,
+            instance,
+            name("a", "b"),
+            "Description for " + name("a", "b"),
+            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            HISTOGRAM);
+
+        // COUNT
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+
+        PrometheusSample expectedChildSample = new PrometheusSample(
+            COUNT,
+            name("test", "summary"),
+            SUMMARY,
+            null,
+            "_count",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        PrometheusSample expectedSample = new PrometheusSample(
+            COUNT,
+            null,
+            null,
+            null,
+            "_count",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0,
+            List.of(expectedChildSample));
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // TOTAL_SUM
+        sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
+
+        expectedChildSample = new PrometheusSample(
+            COUNT,
+            name("test", "summary"),
+            SUMMARY,
+            null,
+            "_sum",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        expectedSample = new PrometheusSample(
+            TOTAL_SUM,
+            null,
+            null,
+            null,
+            "_sum",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0,
+            List.of(expectedChildSample));
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MIN
+        sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MIN,
+            name("min"),
+            GAUGE,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MAX
+        sampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MAX,
+            name("max"),
+            GAUGE,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MEAN
+        sampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MEAN,
+            name("mean"),
+            GAUGE,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // STANDARD_DEVIATION
+        sampleSpec = new PrometheusSampleSpec(true, STANDARD_DEVIATION, 1.0);
+
+        expectedSample = new PrometheusSample(
+            STANDARD_DEVIATION,
+            null,
+            null,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // PERCENTILE_50
+        sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
+
+        expectedSample = new PrometheusSample(
+            PERCENTILE_50,
+            name("test", "summary"),
+            SUMMARY,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of("value_1", "value_2", "0.5"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // PERCENTILE_75
+        sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
+
+        expectedSample = new PrometheusSample(
+            PERCENTILE_75,
+            name("test", "summary"),
+            SUMMARY,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of("value_1", "value_2", "0.75"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // SEC_1_BUCKET
+        sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
+
+        expectedSample = new PrometheusSample(
+            SEC_1_BUCKET,
+            null,
+            null,
+            null,
+            "_bucket",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of("value_1", "value_2", "1.0E9"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+    }
+
+    @Test
+    public void separatingHistogramFromSummary() {
+        maker = prometheusSamplesMakerBuilder()
+            .separateHistogramAndSummary(true)
+            .histogramChildInstanceSampleNameSuffix(name("test", "histogram"))
+            .summaryChildInstanceSampleNameSuffix(name("test", "summary"))
+            .build();
+
+        MetricInstance instance = mock(HistogramInstance.class);
+        when(instance.isWithPercentiles()).thenReturn(true);
+        when(instance.isWithBuckets()).thenReturn(true);
+
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
+            true,
+            instance,
+            name("a", "b"),
+            "Description for " + name("a", "b"),
+            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+
+        PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
+            instanceSampleSpec.name(),
+            instanceSampleSpec.name(),
+            instanceSampleSpec.description(),
+            SUMMARY);
+
+        // COUNT
+        PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+
+        PrometheusSample expectedChildSample = new PrometheusSample(
+            COUNT,
+            name("test", "histogram"),
+            HISTOGRAM,
+            null,
+            "_count",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        PrometheusSample expectedSample = new PrometheusSample(
+            COUNT,
+            null,
+            null,
+            null,
+            "_count",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0,
+            List.of(expectedChildSample));
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // TOTAL_SUM
+        sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
+
+        expectedChildSample = new PrometheusSample(
+            COUNT,
+            name("test", "histogram"),
+            HISTOGRAM,
+            null,
+            "_sum",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        expectedSample = new PrometheusSample(
+            TOTAL_SUM,
+            null,
+            null,
+            null,
+            "_sum",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0,
+            List.of(expectedChildSample));
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MIN
+        sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MIN,
+            name("min"),
+            GAUGE,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MAX
+        sampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MAX,
+            name("max"),
+            GAUGE,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // MEAN
+        sampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
+
+        expectedSample = new PrometheusSample(
+            MEAN,
+            name("mean"),
+            GAUGE,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // STANDARD_DEVIATION
+        sampleSpec = new PrometheusSampleSpec(true, STANDARD_DEVIATION, 1.0);
+
+        expectedSample = new PrometheusSample(
+            STANDARD_DEVIATION,
+            null,
+            null,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // PERCENTILE_50
+        sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
+
+        expectedSample = new PrometheusSample(
+            PERCENTILE_50,
+            null,
+            null,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of("value_1", "value_2", "0.5"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // PERCENTILE_75
+        sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
+
+        expectedSample = new PrometheusSample(
+            PERCENTILE_75,
+            null,
+            null,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of("value_1", "value_2", "0.75"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
+
+        // SEC_1_BUCKET
+        sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
+
+        expectedSample = new PrometheusSample(
+            SEC_1_BUCKET,
+            name("test", "histogram"),
+            HISTOGRAM,
+            null,
+            "_bucket",
+            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of("value_1", "value_2", "1.0E9"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec, instanceSample), expectedSample);
     }
 
     public void check(PrometheusSample actual, PrometheusSample expected) {
@@ -555,5 +1195,12 @@ public class PrometheusSampleMakerTest {
         assertThat(actual.labelNames(), is(expected.labelNames()));
         assertThat(actual.labelValues(), is(expected.labelValues()));
         assertThat(actual.value(), is(expected.value()));
+
+        assertThat(actual.hasChildren(), is(expected.hasChildren()));
+        assertThat(actual.children().size(), is(expected.children().size()));
+
+        for (int i = 0; i < actual.children().size(); ++i) {
+            check(actual.children().get(i), expected.children().get(i));
+        }
     }
 }

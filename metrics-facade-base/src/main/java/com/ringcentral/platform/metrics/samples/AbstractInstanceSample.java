@@ -4,7 +4,7 @@ import java.util.*;
 
 import static java.util.Objects.*;
 
-public class AbstractInstanceSample<S extends Sample> implements InstanceSample<S> {
+public class AbstractInstanceSample<S extends Sample<S>> implements InstanceSample<S> {
 
     protected final List<S> samples;
 

@@ -12,6 +12,41 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
 import static org.apache.commons.lang3.StringUtils.split;
 
+/**
+ * Produces<br>
+ * <ul>
+ *     <li>
+ *     <li><i>G1_Old_Generation.time</i> - the approximate accumulated collection elapsed time in milliseconds.</li>
+ *     <li><i>G1_Old_Generation.count</i> - the total number of collections that have occurred.</li>
+ *     <li><i>G1_Young_Generation.time</i> - the approximate accumulated collection elapsed time in milliseconds.</li>
+ *     <li><i>G1_Young_Generation.count</i> - the total number of collections that have occurred.</li>
+ * </ul>
+ *
+ * All metrics have a name prefix. By default it is 'GarbageCollectors'.<br>
+ * <br>
+ * Example of usage:
+ * <pre>
+ * MetricRegistry registry = new DefaultMetricRegistry();
+ * new DefaultGarbageCollectorsMetricsProducer().produceMetrics(registry);
+ * PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
+ * System.out.println(exporter.exportMetrics());
+ * </pre>
+ * Corresponding output:
+ * <pre>
+ * # HELP GarbageCollectors_G1_Old_Generation_time The approximate accumulated collection elapsed time in milliseconds
+ * # TYPE GarbageCollectors_G1_Old_Generation_time gauge
+ * GarbageCollectors_G1_Old_Generation_time 0.0
+ * # HELP GarbageCollectors_G1_Young_Generation_count The total number of collections that have occurred
+ * # TYPE GarbageCollectors_G1_Young_Generation_count gauge
+ * GarbageCollectors_G1_Young_Generation_count 0.0
+ * # HELP GarbageCollectors_G1_Young_Generation_time The approximate accumulated collection elapsed time in milliseconds
+ * # TYPE GarbageCollectors_G1_Young_Generation_time gauge
+ * GarbageCollectors_G1_Young_Generation_time 0.0
+ * # HELP GarbageCollectors_G1_Old_Generation_count The total number of collections that have occurred
+ * # TYPE GarbageCollectors_G1_Old_Generation_count gauge
+ * GarbageCollectors_G1_Old_Generation_count 0.0
+ * </pre>
+ */
 public class DefaultGarbageCollectorsMetricsProducer extends AbstractGarbageCollectorsMetricsProducer {
 
     public DefaultGarbageCollectorsMetricsProducer() {

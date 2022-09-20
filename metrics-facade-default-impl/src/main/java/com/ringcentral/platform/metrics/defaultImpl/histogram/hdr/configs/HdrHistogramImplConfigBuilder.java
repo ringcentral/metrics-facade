@@ -7,7 +7,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfig.*;
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkState;
 
 @SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "FieldMayBeFinal" })
 public class HdrHistogramImplConfigBuilder extends AbstractHistogramImplConfigBuilder<HdrHistogramImplConfig, HdrHistogramImplConfigBuilder> {
@@ -26,6 +27,10 @@ public class HdrHistogramImplConfigBuilder extends AbstractHistogramImplConfigBu
     }
 
     public static HdrHistogramImplConfigBuilder hdrImpl() {
+        return hdrHistogramImplConfigBuilder();
+    }
+
+    public static HdrHistogramImplConfigBuilder hdrHistogramImpl() {
         return hdrHistogramImplConfigBuilder();
     }
 

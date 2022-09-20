@@ -2,18 +2,20 @@ package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
-import com.ringcentral.platform.metrics.timer.*;
+import com.ringcentral.platform.metrics.timer.Stopwatch;
+import com.ringcentral.platform.metrics.timer.Timer;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdr;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
-import static com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfigBuilder.expMovingAverageImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfigBuilder.expMovingAverage;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.rate.Rate.MEAN_RATE;
@@ -21,7 +23,8 @@ import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfi
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerInstanceConfigBuilder.timerInstance;
 import static java.lang.Thread.sleep;
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @SuppressWarnings("ALL")
 public class TimerSample extends AbstractSample {
@@ -108,22 +111,23 @@ public class TimerSample extends AbstractSample {
                 // default: no properties
                 .put("key_1", "value_1_1")
 
-                // options: expMovingAverageImpl() == ExpMovingAverageRateImplConfigBuilder.expMovingAverageImpl(), custom impl
-                // default: expMovingAverageImpl()
-                .with(expMovingAverageImpl())
+                // options: expMovingAverage() == ExpMovingAverageRateImplConfigBuilder.expMovingAverage(), custom impl
+                // default: expMovingAverage()
+                .withImpl(expMovingAverage())
 
                 // options:
-                //   - hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(),
-                //   - scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+                //   - hdr() == HdrHistogramImplConfigBuilder.hdr(),
+                //   - scale() == ScaleHistogramImplConfigBuilder.scale()
                 //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
                 //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
-                // default: hdrImpl()
-                .with(hdrImpl()
+                // default: hdr()
+                .withImpl(hdr()
                     .resetByChunks(6, Duration.ofMinutes(2))
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))
                     .highestTrackableValue(DAYS.toNanos(7), REDUCE_TO_HIGHEST_TRACKABLE)
                     .significantDigits(2)
                     .snapshotTtl(30, SECONDS))
+                // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

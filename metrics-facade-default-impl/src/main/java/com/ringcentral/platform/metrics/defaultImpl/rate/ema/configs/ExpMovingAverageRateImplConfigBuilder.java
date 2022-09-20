@@ -12,6 +12,10 @@ public class ExpMovingAverageRateImplConfigBuilder implements RateImplConfigBuil
         return expMovingAverageRateImplConfigBuilder();
     }
 
+    public static ExpMovingAverageRateImplConfigBuilder expMovingAverageRateImpl() {
+        return expMovingAverageRateImplConfigBuilder();
+    }
+
     public static ExpMovingAverageRateImplConfigBuilder expMovingAverageRateImplConfigBuilder() {
         return new ExpMovingAverageRateImplConfigBuilder();
     }

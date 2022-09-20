@@ -6,16 +6,19 @@ import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.scale.ScaleBuilder;
 import com.ringcentral.platform.metrics.timer.Timer;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.runner.*;
-import org.openjdk.jmh.runner.options.*;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdr;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleHistogramImpl;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.scale.CompositeScaleBuilder.first;
@@ -65,7 +68,7 @@ public class NeverResetBucketHistogramUpdateBenchmark {
                     SEC_30_BUCKET,
 
                     PERCENTILE_50)
-                .with(hdrImpl()
+                .withImpl(hdr()
                     .neverReset()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -103,7 +106,7 @@ public class NeverResetBucketHistogramUpdateBenchmark {
                     SEC_30_BUCKET,
 
                     PERCENTILE_50)
-                .with(scaleImpl()
+                .withImpl(scaleHistogramImpl()
                     .neverReset()
                     .with(scale())));
 
@@ -138,7 +141,7 @@ public class NeverResetBucketHistogramUpdateBenchmark {
                     SEC_10_BUCKET,
                     SEC_20_BUCKET,
                     SEC_30_BUCKET)
-                .with(hdrImpl()
+                .withImpl(hdr()
                     .resetByChunks()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));

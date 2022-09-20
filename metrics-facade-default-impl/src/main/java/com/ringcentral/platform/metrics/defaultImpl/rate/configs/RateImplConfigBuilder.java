@@ -1,5 +1,7 @@
 package com.ringcentral.platform.metrics.defaultImpl.rate.configs;
 
-public interface RateImplConfigBuilder<C extends RateImplConfig> {
+import com.ringcentral.platform.metrics.impl.MetricImplConfigBuilder;
+
+public interface RateImplConfigBuilder<C extends RateImplConfig> extends MetricImplConfigBuilder {
     C build();
 }

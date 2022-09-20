@@ -1,7 +1,8 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs;
 
 import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.AbstractHistogramImplConfigBuilder;
-import com.ringcentral.platform.metrics.scale.*;
+import com.ringcentral.platform.metrics.scale.Scale;
+import com.ringcentral.platform.metrics.scale.ScaleBuilder;
 
 import java.time.Duration;
 
@@ -25,6 +26,10 @@ public class ScaleHistogramImplConfigBuilder extends AbstractHistogramImplConfig
     }
 
     public static ScaleHistogramImplConfigBuilder scaleImpl() {
+        return scaleHistogramImplConfigBuilder();
+    }
+
+    public static ScaleHistogramImplConfigBuilder scaleHistogramImpl() {
         return scaleHistogramImplConfigBuilder();
     }
 

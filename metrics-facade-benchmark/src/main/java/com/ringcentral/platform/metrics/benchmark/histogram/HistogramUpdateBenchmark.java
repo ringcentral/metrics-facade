@@ -10,17 +10,19 @@ import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.scale.ScaleBuilder;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.runner.*;
-import org.openjdk.jmh.runner.options.*;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdr;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scale;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
@@ -68,7 +70,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(hdrImpl()
+                .withImpl(hdr()
                     .neverReset()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -86,7 +88,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(hdrImpl()
+                .withImpl(hdr()
                     .resetOnSnapshot()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -104,7 +106,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(hdrImpl()
+                .withImpl(hdr()
                     .resetByChunks()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -122,7 +124,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(hdrImpl()
+                .withImpl(hdr()
                     .significantDigits(3)
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -141,7 +143,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(scaleImpl()
+                .withImpl(scale()
                     .neverReset()
                     .with(scale_1())));
 
@@ -158,7 +160,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(scaleImpl()
+                .withImpl(scale()
                     .resetOnSnapshot()
                     .scale(scale_1())));
 
@@ -175,7 +177,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(scaleImpl()
+                .withImpl(scale()
                     .resetByChunks()
                     .scale(scale_1())));
 

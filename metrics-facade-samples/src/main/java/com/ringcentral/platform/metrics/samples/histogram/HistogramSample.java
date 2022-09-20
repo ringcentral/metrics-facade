@@ -7,11 +7,12 @@ import com.ringcentral.platform.metrics.samples.AbstractSample;
 import java.time.Duration;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdr;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramInstanceConfigBuilder.histogramInstance;
@@ -88,16 +89,17 @@ public class HistogramSample extends AbstractSample {
                 .put("key_1", "value_1_1")
 
                 // options:
-                //   - hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(),
-                //   - scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
+                //   - hdr() == HdrHistogramImplConfigBuilder.hdr() ,
+                //   - scale() == ScaleHistogramImplConfigBuilder.scale()
                 //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
                 //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
-                // default: hdrImpl()
-                .with(hdrImpl()
+                // default: hdr()
+                .withImpl(hdr()
                     .resetByChunks(6, Duration.ofMinutes(2))
                     .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
                     .significantDigits(3)
                     .snapshotTtl(30, SECONDS))
+                // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

@@ -1,9 +1,15 @@
 package com.ringcentral.platform.metrics.configs.builders;
 
-import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.configs.*;
+import com.ringcentral.platform.metrics.MetricContext;
+import com.ringcentral.platform.metrics.ModifiableMetricContext;
+import com.ringcentral.platform.metrics.configs.MeterConfig;
+import com.ringcentral.platform.metrics.configs.MeterInstanceConfig;
+import com.ringcentral.platform.metrics.configs.MeterSliceConfig;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValuesPredicate;
+import com.ringcentral.platform.metrics.impl.MetricImplConfigBuilder;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -13,10 +19,13 @@ import java.util.*;
 
 import static com.ringcentral.platform.metrics.names.MetricName.emptyMetricName;
 import static com.ringcentral.platform.metrics.utils.CollectionUtils.containsAllInOrder;
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
-import static java.util.Collections.*;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkState;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings({ "unchecked", "unused", "BooleanMethodIsAlwaysInverted" })
 public abstract class AbstractMeterConfigBuilder<
@@ -340,6 +349,10 @@ public abstract class AbstractMeterConfigBuilder<
             return (Impl)this;
         }
 
+        public Impl withImpl(MetricImplConfigBuilder configBuilder) {
+            return with(configBuilder);
+        }
+
         public Impl with(Object value) {
             context.with(value);
             return (Impl)this;
@@ -518,6 +531,10 @@ public abstract class AbstractMeterConfigBuilder<
         public ICB put(Object key, Object value) {
             context.put(key, value);
             return (ICB)this;
+        }
+
+        public ICB withImpl(MetricImplConfigBuilder configBuilder) {
+            return with(configBuilder);
         }
 
         public ICB with(Object value) {

@@ -81,6 +81,7 @@
         <module>metrics-facade-shared-tests</module>
         <module>metrics-facade-spring</module>
         <module>metrics-facade-benchmark</module>
+        <module>metrics-facade-dropwizard-to-prometheus</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -94,6 +95,8 @@
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+        <prometheus.version>0.15.0</prometheus.version>
+        <dropwizard-metrics.version>4.1.17</dropwizard-metrics.version>
 
         <commons-lang3.version>3.11</commons-lang3.version>
         <jackson.version>2.13.3</jackson.version>

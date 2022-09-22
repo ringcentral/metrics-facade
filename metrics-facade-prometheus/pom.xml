@@ -14,10 +14,6 @@
 
     <artifactId>metrics-facade-prometheus</artifactId>
 
-    <properties>
-        <prometheus.version>0.15.0</prometheus.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>

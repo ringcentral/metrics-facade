@@ -24,7 +24,7 @@ public class PrometheusSampleMaker implements SampleMaker<
     PrometheusInstanceSampleSpec,
     PrometheusInstanceSample> {
 
-    public static boolean DEFAULT_SEPARATE_HISTOGRAM_AND_SUMMARY = true;
+    public static final boolean DEFAULT_SEPARATE_HISTOGRAM_AND_SUMMARY = true;
 
     public static final MetricName DEFAULT_HISTOGRAM_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX = MetricName.of("histogram");
     public static final MetricName DEFAULT_SUMMARY_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX = MetricName.of("summary");

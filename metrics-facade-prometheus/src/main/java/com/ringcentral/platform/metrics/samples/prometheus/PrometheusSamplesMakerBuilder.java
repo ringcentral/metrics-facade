@@ -7,7 +7,7 @@ import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument
 
 public class PrometheusSamplesMakerBuilder {
 
-    private boolean separateHistogramAndSummary = true;
+    private boolean separateHistogramAndSummary = DEFAULT_SEPARATE_HISTOGRAM_AND_SUMMARY;
 
     private MetricName histogramChildInstanceSampleNameSuffix = DEFAULT_HISTOGRAM_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX;
     private MetricName summaryChildInstanceSampleNameSuffix = DEFAULT_SUMMARY_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX;

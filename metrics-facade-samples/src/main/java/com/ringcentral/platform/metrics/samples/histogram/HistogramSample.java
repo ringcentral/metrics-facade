@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics.samples.histogram;
 
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistryBuilder;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 
@@ -25,8 +26,11 @@ public class HistogramSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        DefaultMetricRegistry registry = new DefaultMetricRegistry();
-        registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+        DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+            // You can also register custom metric implementations using the extendWith method:
+            // registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+            .withCustomMetricImplsFromPackages("com.ringcentral.platform.metrics.samples.histogram")
+            .build();
 
         // Default config:
         //   no dimensions
@@ -99,7 +103,7 @@ public class HistogramSample extends AbstractSample {
                     .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
                     .significantDigits(3)
                     .snapshotTtl(30, SECONDS))
-                // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
+                //.withImpl(LastValueHistogramConfigBuilder.lastValueImpl()) // custom impl
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

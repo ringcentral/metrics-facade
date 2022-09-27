@@ -95,6 +95,7 @@
         <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
 
+        <reflections.version>0.10.2</reflections.version>
         <commons-lang3.version>3.11</commons-lang3.version>
         <jackson.version>2.13.3</jackson.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
@@ -105,6 +106,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>

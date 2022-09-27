@@ -1,20 +1,31 @@
 package com.ringcentral.platform.metrics.defaultImpl;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.AbstractMetricRegistry;
+import com.ringcentral.platform.metrics.MetricMod;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
 import com.ringcentral.platform.metrics.defaultImpl.counter.DefaultCounter;
-import com.ringcentral.platform.metrics.defaultImpl.histogram.*;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.CustomHistogramImplMaker;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.CustomHistogramImplSpec;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogram;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.HistogramImplConfig;
-import com.ringcentral.platform.metrics.defaultImpl.rate.*;
+import com.ringcentral.platform.metrics.defaultImpl.rate.CustomRateImplMaker;
+import com.ringcentral.platform.metrics.defaultImpl.rate.CustomRateImplSpec;
+import com.ringcentral.platform.metrics.defaultImpl.rate.DefaultRate;
 import com.ringcentral.platform.metrics.defaultImpl.rate.configs.RateImplConfig;
 import com.ringcentral.platform.metrics.defaultImpl.timer.DefaultTimer;
-import com.ringcentral.platform.metrics.defaultImpl.var.doubleVar.*;
-import com.ringcentral.platform.metrics.defaultImpl.var.longVar.*;
-import com.ringcentral.platform.metrics.defaultImpl.var.objectVar.*;
-import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.*;
+import com.ringcentral.platform.metrics.defaultImpl.var.doubleVar.DefaultCachingDoubleVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.doubleVar.DefaultDoubleVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.longVar.DefaultCachingLongVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.longVar.DefaultLongVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.objectVar.DefaultCachingObjectVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.objectVar.DefaultObjectVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.DefaultCachingStringVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.DefaultStringVar;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.histogram.configs.HistogramConfig;
+import com.ringcentral.platform.metrics.impl.MetricImplConfig;
 import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -22,13 +33,22 @@ import com.ringcentral.platform.metrics.rate.configs.RateConfig;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
-import com.ringcentral.platform.metrics.var.configs.*;
-import com.ringcentral.platform.metrics.var.doubleVar.*;
-import com.ringcentral.platform.metrics.var.longVar.*;
-import com.ringcentral.platform.metrics.var.objectVar.*;
-import com.ringcentral.platform.metrics.var.stringVar.*;
+import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
+import com.ringcentral.platform.metrics.var.configs.VarConfig;
+import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
+import com.ringcentral.platform.metrics.var.doubleVar.DoubleVar;
+import com.ringcentral.platform.metrics.var.longVar.CachingLongVar;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
+import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
+import com.ringcentral.platform.metrics.var.stringVar.CachingStringVar;
+import com.ringcentral.platform.metrics.var.stringVar.StringVar;
 
-import java.util.concurrent.*;
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
 @SuppressWarnings("SameParameterValue")
@@ -276,6 +296,12 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
         customHistogramImplSpecs.put(configType, new CustomHistogramImplSpec<>(implMaker));
     }
 
+    public void extendWith(CustomHistogramImplMaker<?> implMaker) {
+        customHistogramImplSpecs.put(
+            metricImplConfigTypeFor(CustomHistogramImplMaker.class, implMaker.getClass()),
+            new CustomHistogramImplSpec<>(implMaker));
+    }
+
     @SuppressWarnings("unchecked")
     public <C extends HistogramImplConfig> CustomHistogramImplSpec<C> customHistogramImplSpecFor(Class<C> configType) {
         return (CustomHistogramImplSpec<C>)customHistogramImplSpecs.get(configType);
@@ -285,8 +311,23 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
         customRateImplSpecs.put(configType, new CustomRateImplSpec<>(implMaker));
     }
 
+    public <C extends RateImplConfig> void extendWith(CustomRateImplMaker<C> implMaker) {
+        customRateImplSpecs.put(
+            metricImplConfigTypeFor(CustomRateImplMaker.class, implMaker.getClass()),
+            new CustomRateImplSpec<>(implMaker));
+    }
+
     @SuppressWarnings("unchecked")
     public <C extends RateImplConfig> CustomRateImplSpec<C> customRateImplSpecFor(Class<C> configType) {
         return (CustomRateImplSpec<C>)customRateImplSpecs.get(configType);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <C extends MetricImplConfig, M> Class<C> metricImplConfigTypeFor(Class<M> implMakerInterface, Class<? extends M> implMakerClass) {
+        return Arrays.stream(implMakerClass.getGenericInterfaces())
+            .filter(gi -> gi instanceof ParameterizedType && ((ParameterizedType)gi).getRawType() == implMakerInterface)
+            .map(gi -> (Class<C>)((ParameterizedType)gi).getActualTypeArguments()[0])
+            .findFirst()
+            .orElseGet(() -> metricImplConfigTypeFor(implMakerInterface, (Class<? extends M>)implMakerClass.getSuperclass()));
     }
 }

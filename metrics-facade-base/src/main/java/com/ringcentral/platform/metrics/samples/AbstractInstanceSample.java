@@ -1,10 +1,11 @@
 package com.ringcentral.platform.metrics.samples;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static java.util.Objects.*;
+import static java.util.Objects.requireNonNull;
 
-public class AbstractInstanceSample<S extends Sample<S>> implements InstanceSample<S> {
+public class AbstractInstanceSample<S extends Sample> implements InstanceSample<S> {
 
     protected final List<S> samples;
 

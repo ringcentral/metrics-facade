@@ -1,9 +1,10 @@
 package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
-import static java.lang.String.*;
 
-public class DefaultSampleMaker implements SampleMaker<
+import static java.lang.String.join;
+
+public class DefaultSamplesProducer extends AbstractSamplesProducer<
     DefaultSample,
     DefaultSampleSpec,
     DefaultInstanceSampleSpec,
@@ -15,13 +16,13 @@ public class DefaultSampleMaker implements SampleMaker<
     private final String namePartsDelimiter;
     private final String measurableNameDelimiter;
 
-    public DefaultSampleMaker() {
+    public DefaultSamplesProducer() {
         this(
             DEFAULT_NAME_PARTS_DELIMITER,
             DEFAULT_MEASURABLE_NAME_DELIMITER);
     }
 
-    public DefaultSampleMaker(
+    public DefaultSamplesProducer(
         String namePartsDelimiter,
         String measurableNameDelimiter) {
 
@@ -30,7 +31,7 @@ public class DefaultSampleMaker implements SampleMaker<
     }
 
     @Override
-    public DefaultSample makeSample(
+    protected DefaultSample makeSample(
         DefaultSampleSpec spec,
         DefaultInstanceSampleSpec instanceSampleSpec,
         InstanceSample<DefaultSample> instanceSample) {

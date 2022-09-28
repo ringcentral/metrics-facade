@@ -8,7 +8,7 @@ public class PrometheusInstanceSamplesProvider extends AbstractInstanceSamplesPr
     PrometheusSample,
     PrometheusSampleSpec,
     SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>,
-    SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample>,
+    SamplesProducer<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample>,
     PrometheusInstanceSample,
     PrometheusInstanceSampleSpec,
     InstanceSampleSpecProvider<PrometheusInstanceSampleSpec>,
@@ -31,7 +31,7 @@ public class PrometheusInstanceSamplesProvider extends AbstractInstanceSamplesPr
             new PrometheusInstanceSampleMaker(),
             new PrometheusSampleSpecProvider(),
             null,
-            new PrometheusSampleMaker(),
+            new PrometheusSamplesProducer(),
             metricRegistry);
     }
 
@@ -81,7 +81,7 @@ public class PrometheusInstanceSamplesProvider extends AbstractInstanceSamplesPr
             new PrometheusInstanceSampleMaker(),
             sampleSpecProvider,
             sampleSpecModsProvider,
-            new PrometheusSampleMaker(),
+            new PrometheusSamplesProducer(),
             metricRegistry);
     }
 
@@ -91,7 +91,7 @@ public class PrometheusInstanceSamplesProvider extends AbstractInstanceSamplesPr
         InstanceSampleMaker<PrometheusSample, PrometheusInstanceSample, PrometheusInstanceSampleSpec> instanceSampleMaker,
         SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec> sampleSpecProvider,
         PredicativeMetricNamedInfoProvider<SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>> sampleSpecModsProvider,
-        SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> sampleMaker,
+        SamplesProducer<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> samplesProducer,
         MetricRegistry metricRegistry) {
 
         super(
@@ -100,7 +100,7 @@ public class PrometheusInstanceSamplesProvider extends AbstractInstanceSamplesPr
             instanceSampleMaker,
             sampleSpecProvider,
             sampleSpecModsProvider,
-            sampleMaker,
+            samplesProducer,
             metricRegistry);
     }
 }

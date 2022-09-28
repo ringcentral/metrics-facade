@@ -17,7 +17,7 @@ import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.OPENMETRICS_TEXT_1_0_0;
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.PROMETHEUS_TEXT_O_O_4;
-import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleMaker.*;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSamplesProducer.*;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;

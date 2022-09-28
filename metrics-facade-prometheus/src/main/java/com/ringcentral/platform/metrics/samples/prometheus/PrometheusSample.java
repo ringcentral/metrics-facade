@@ -10,7 +10,7 @@ import java.util.List;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
-public class PrometheusSample implements Sample<PrometheusSample> {
+public class PrometheusSample implements Sample {
 
     private final Measurable measurable;
     private final MetricName childInstanceSampleNameSuffix;
@@ -20,7 +20,6 @@ public class PrometheusSample implements Sample<PrometheusSample> {
     private final List<String> labelNames;
     private final List<String> labelValues;
     private final double value;
-    private final List<PrometheusSample> children;
 
     public PrometheusSample(
         Measurable measurable,
@@ -31,29 +30,6 @@ public class PrometheusSample implements Sample<PrometheusSample> {
         List<String> labelNames,
         List<String> labelValues,
         double value) {
-
-        this(
-            measurable,
-            childInstanceSampleNameSuffix,
-            childInstanceSampleType,
-            name,
-            nameSuffix,
-            labelNames,
-            labelValues,
-            value,
-            emptyList());
-    }
-
-    public PrometheusSample(
-        Measurable measurable,
-        MetricName childInstanceSampleNameSuffix,
-        Collector.Type childInstanceSampleType,
-        MetricName name,
-        String nameSuffix,
-        List<String> labelNames,
-        List<String> labelValues,
-        double value,
-        List<PrometheusSample> children) {
 
         this.measurable = measurable;
 
@@ -70,8 +46,6 @@ public class PrometheusSample implements Sample<PrometheusSample> {
         this.labelNames = labelNames != null ? labelNames : emptyList();
         this.labelValues = labelValues != null ? labelValues : emptyList();
         this.value = value;
-
-        this.children = children != null ? children : emptyList();
     }
 
     public boolean hasMeasurable() {
@@ -103,8 +77,7 @@ public class PrometheusSample implements Sample<PrometheusSample> {
             nameSuffix,
             labelNames,
             labelValues,
-            value,
-            children);
+            value);
     }
 
     public boolean hasName() {
@@ -136,7 +109,16 @@ public class PrometheusSample implements Sample<PrometheusSample> {
     }
 
     @Override
-    public List<PrometheusSample> children() {
-        return children;
+    public String toString() {
+        return "PrometheusSample{" +
+            "measurable=" + measurable +
+            ", childInstanceSampleNameSuffix=" + childInstanceSampleNameSuffix +
+            ", childInstanceSampleType=" + childInstanceSampleType +
+            ", name=" + name +
+            ", nameSuffix='" + nameSuffix + '\'' +
+            ", labelNames=" + labelNames +
+            ", labelValues=" + labelValues +
+            ", value=" + value +
+            '}';
     }
 }

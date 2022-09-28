@@ -7,7 +7,7 @@ import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.samples.SampleMaker;
+import com.ringcentral.platform.metrics.samples.SamplesProducer;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
 import io.prometheus.client.Collector;
 
@@ -18,7 +18,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
-public class PrometheusSampleMaker implements SampleMaker<
+public class PrometheusSamplesProducer implements SamplesProducer<
     PrometheusSample,
     PrometheusSampleSpec,
     PrometheusInstanceSampleSpec,
@@ -31,6 +31,7 @@ public class PrometheusSampleMaker implements SampleMaker<
     public static final MetricName DEFAULT_MIN_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX = MetricName.of("min");
     public static final MetricName DEFAULT_MAX_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX = MetricName.of("max");
     public static final MetricName DEFAULT_MEAN_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX = MetricName.of("mean");
+    public static final MetricName DEFAULT_STANDARD_DEVIATION_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX = MetricName.of("stdDev");
 
     private final boolean separateHistogramAndSummary;
 
@@ -39,24 +40,27 @@ public class PrometheusSampleMaker implements SampleMaker<
     private final MetricName minChildInstanceSampleNameSuffix;
     private final MetricName maxChildInstanceSampleNameSuffix;
     private final MetricName meanChildInstanceSampleNameSuffix;
+    private final MetricName standardDeviationChildInstanceSampleNameSuffix;
 
-    public PrometheusSampleMaker() {
+    public PrometheusSamplesProducer() {
         this(
             DEFAULT_SEPARATE_HISTOGRAM_AND_SUMMARY,
             DEFAULT_HISTOGRAM_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX,
             DEFAULT_SUMMARY_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX,
             DEFAULT_MIN_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX,
             DEFAULT_MAX_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX,
-            DEFAULT_MEAN_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX);
+            DEFAULT_MEAN_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX,
+            DEFAULT_STANDARD_DEVIATION_CHILD_INSTANCE_SAMPLE_NAME_SUFFIX);
     }
 
-    public PrometheusSampleMaker(
+    public PrometheusSamplesProducer(
         boolean separateHistogramAndSummary,
         MetricName histogramChildInstanceSampleNameSuffix,
         MetricName summaryChildInstanceSampleNameSuffix,
         MetricName minChildInstanceSampleNameSuffix,
         MetricName maxChildInstanceSampleNameSuffix,
-        MetricName meanChildInstanceSampleNameSuffix) {
+        MetricName meanChildInstanceSampleNameSuffix,
+        MetricName standardDeviationChildInstanceSampleNameSuffix) {
 
         this.separateHistogramAndSummary = separateHistogramAndSummary;
 
@@ -65,16 +69,17 @@ public class PrometheusSampleMaker implements SampleMaker<
         this.minChildInstanceSampleNameSuffix = minChildInstanceSampleNameSuffix;
         this.maxChildInstanceSampleNameSuffix = maxChildInstanceSampleNameSuffix;
         this.meanChildInstanceSampleNameSuffix = meanChildInstanceSampleNameSuffix;
+        this.standardDeviationChildInstanceSampleNameSuffix = standardDeviationChildInstanceSampleNameSuffix;
     }
 
     @Override
-    public PrometheusSample makeSample(
+    public void produceSamples(
         PrometheusSampleSpec spec,
         PrometheusInstanceSampleSpec instanceSampleSpec,
         PrometheusInstanceSample instanceSample) {
 
         if (!spec.isEnabled() || !spec.hasMeasurable() || !spec.hasValue()) {
-            return null;
+            return;
         }
 
         MetricInstance instance = instanceSampleSpec.instance();
@@ -92,6 +97,9 @@ public class PrometheusSampleMaker implements SampleMaker<
             childInstanceSampleType = GAUGE;
         } else if (m instanceof Mean) {
             childInstanceSampleNameSuffix = meanChildInstanceSampleNameSuffix;
+            childInstanceSampleType = GAUGE;
+        } else if (m instanceof StandardDeviation) {
+            childInstanceSampleNameSuffix = standardDeviationChildInstanceSampleNameSuffix;
             childInstanceSampleType = GAUGE;
         }
 
@@ -139,7 +147,7 @@ public class PrometheusSampleMaker implements SampleMaker<
         if (!separateHistogramAndSummary
             || !((type == HISTOGRAM && instance.isWithPercentiles()) || (type == SUMMARY && instance.isWithBuckets()))) {
 
-            return new PrometheusSample(
+            instanceSample.add(new PrometheusSample(
                 m,
                 childInstanceSampleNameSuffix,
                 childInstanceSampleType,
@@ -147,49 +155,50 @@ public class PrometheusSampleMaker implements SampleMaker<
                 nameSuffix,
                 labelNames,
                 labelValues,
-                spec.value());
+                spec.value()));
+
+            return;
         }
 
-        MetricName childSampleChildInstanceSampleNameSuffix =
+        MetricName additionalSampleChildInstanceSampleNameSuffix =
             type == HISTOGRAM ?
             summaryChildInstanceSampleNameSuffix :
             histogramChildInstanceSampleNameSuffix;
 
-        Collector.Type childSampleChildInstanceSampleType = type == HISTOGRAM ? SUMMARY : HISTOGRAM;
+        Collector.Type additionalSampleChildInstanceSampleType = type == HISTOGRAM ? SUMMARY : HISTOGRAM;
 
         if (m instanceof Count || m instanceof TotalSum) {
-            PrometheusSample childSample = new PrometheusSample(
+            instanceSample.add(new PrometheusSample(
                 m,
-                childSampleChildInstanceSampleNameSuffix,
-                childSampleChildInstanceSampleType,
+                childInstanceSampleNameSuffix,
+                childInstanceSampleType,
                 null,
                 nameSuffix,
                 labelNames,
                 labelValues,
-                spec.value());
+                spec.value()));
 
-            return new PrometheusSample(
+            instanceSample.add(new PrometheusSample(
                 m,
-                childInstanceSampleNameSuffix,
-                childInstanceSampleType,
+                additionalSampleChildInstanceSampleNameSuffix,
+                additionalSampleChildInstanceSampleType,
                 null,
                 nameSuffix,
                 labelNames,
                 labelValues,
-                spec.value(),
-                List.of(childSample));
+                spec.value()));
         } else if (type == HISTOGRAM && m instanceof Percentile || type == SUMMARY && m instanceof Bucket) {
-            return new PrometheusSample(
+            instanceSample.add(new PrometheusSample(
                 m,
-                childSampleChildInstanceSampleNameSuffix,
-                childSampleChildInstanceSampleType,
+                additionalSampleChildInstanceSampleNameSuffix,
+                additionalSampleChildInstanceSampleType,
                 null,
                 nameSuffix,
                 labelNames,
                 labelValues,
-                spec.value());
+                spec.value()));
         } else {
-            return new PrometheusSample(
+            instanceSample.add(new PrometheusSample(
                 m,
                 childInstanceSampleNameSuffix,
                 childInstanceSampleType,
@@ -197,7 +206,7 @@ public class PrometheusSampleMaker implements SampleMaker<
                 nameSuffix,
                 labelNames,
                 labelValues,
-                spec.value());
+                spec.value()));
         }
     }
 

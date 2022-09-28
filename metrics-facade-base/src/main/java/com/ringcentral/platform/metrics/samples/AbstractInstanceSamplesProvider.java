@@ -11,10 +11,10 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 
 public abstract class AbstractInstanceSamplesProvider<
-    S extends Sample<S>,
+    S extends Sample,
     SS extends SampleSpec,
     SSP extends SampleSpecProvider<SS, ISS>,
-    SM extends SampleMaker<S, SS, ISS, IS>,
+    SP extends SamplesProducer<S, SS, ISS, IS>,
     IS extends InstanceSample<S>,
     ISS extends InstanceSampleSpec,
     ISSP extends InstanceSampleSpecProvider<ISS>,
@@ -26,7 +26,7 @@ public abstract class AbstractInstanceSamplesProvider<
 
     private final SSP sampleSpecProvider;
     private final PredicativeMetricNamedInfoProvider<SSP> sampleSpecModsProvider;
-    private final SM sampleMaker;
+    private final SP samplesProducer;
 
     private final MetricRegistry metricRegistry;
 
@@ -36,7 +36,7 @@ public abstract class AbstractInstanceSamplesProvider<
         ISM instanceSampleMaker,
         SSP sampleSpecProvider,
         PredicativeMetricNamedInfoProvider<SSP> sampleSpecModsProvider,
-        SM sampleMaker,
+        SP samplesProducer,
         MetricRegistry metricRegistry) {
 
         this.instanceSampleSpecProvider = requireNonNull(instanceSampleSpecProvider);
@@ -45,7 +45,7 @@ public abstract class AbstractInstanceSamplesProvider<
 
         this.sampleSpecProvider = requireNonNull(sampleSpecProvider);
         this.sampleSpecModsProvider = sampleSpecModsProvider;
-        this.sampleMaker = requireNonNull(sampleMaker);
+        this.samplesProducer = requireNonNull(samplesProducer);
 
         this.metricRegistry = requireNonNull(metricRegistry);
     }
@@ -101,11 +101,7 @@ public abstract class AbstractInstanceSamplesProvider<
                         return;
                     }
 
-                    S sample = sampleMaker.makeSample(sampleSpec, instanceSampleSpec, instanceSample);
-
-                    if (sample != null) {
-                        instanceSample.add(sample);
-                    }
+                    samplesProducer.produceSamples(sampleSpec, instanceSampleSpec, instanceSample);
                 });
 
                 if (!instanceSample.isEmpty()) {

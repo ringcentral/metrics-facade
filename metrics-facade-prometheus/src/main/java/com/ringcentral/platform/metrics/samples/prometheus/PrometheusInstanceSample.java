@@ -86,12 +86,6 @@ public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusS
         } else {
             super.add(sample);
         }
-
-        if (sample.hasChildren()) {
-            for (PrometheusSample childSample : sample.children()) {
-                add(childSample);
-            }
-        }
     }
 
     @Override

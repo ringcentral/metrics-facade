@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.samples;
 
-public class DefaultSample implements Sample<DefaultSample> {
+public class DefaultSample implements Sample {
 
     private final String name;
     private final Object value;

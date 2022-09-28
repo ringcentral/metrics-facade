@@ -4,8 +4,8 @@ import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.samples.InstanceSampleMaker;
 import com.ringcentral.platform.metrics.samples.InstanceSampleSpecProvider;
-import com.ringcentral.platform.metrics.samples.SampleMaker;
 import com.ringcentral.platform.metrics.samples.SampleSpecProvider;
+import com.ringcentral.platform.metrics.samples.SamplesProducer;
 
 import static java.util.Objects.requireNonNull;
 
@@ -16,7 +16,7 @@ public class PrometheusInstanceSamplesProviderBuilder {
     private InstanceSampleMaker<PrometheusSample, PrometheusInstanceSample, PrometheusInstanceSampleSpec> instanceSampleMaker;
     private SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec> sampleSpecProvider;
     private PredicativeMetricNamedInfoProvider<SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>> sampleSpecModsProvider;
-    private SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> sampleMaker;
+    private SamplesProducer<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> samplesProducer;
     private final MetricRegistry metricRegistry;
 
     public PrometheusInstanceSamplesProviderBuilder(MetricRegistry metricRegistry) {
@@ -24,7 +24,7 @@ public class PrometheusInstanceSamplesProviderBuilder {
         this.instanceSampleSpecProvider = new PrometheusInstanceSampleSpecProvider();
         this.instanceSampleMaker = new PrometheusInstanceSampleMaker();
         this.sampleSpecProvider = new PrometheusSampleSpecProvider();
-        this.sampleMaker = new PrometheusSampleMaker();
+        this.samplesProducer = new PrometheusSamplesProducer();
     }
 
     public static PrometheusInstanceSamplesProviderBuilder prometheusInstanceSamplesProvider(MetricRegistry metricRegistry) {
@@ -56,8 +56,8 @@ public class PrometheusInstanceSamplesProviderBuilder {
         return this;
     }
 
-    public PrometheusInstanceSamplesProviderBuilder sampleMaker(SampleMaker<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> sampleMaker) {
-        this.sampleMaker = requireNonNull(sampleMaker);
+    public PrometheusInstanceSamplesProviderBuilder samplesProducer(SamplesProducer<PrometheusSample, PrometheusSampleSpec, PrometheusInstanceSampleSpec, PrometheusInstanceSample> samplesProducer) {
+        this.samplesProducer = requireNonNull(samplesProducer);
         return this;
     }
 
@@ -68,7 +68,7 @@ public class PrometheusInstanceSamplesProviderBuilder {
             instanceSampleMaker,
             sampleSpecProvider,
             sampleSpecModsProvider,
-            sampleMaker,
+            samplesProducer,
             metricRegistry);
     }
 }

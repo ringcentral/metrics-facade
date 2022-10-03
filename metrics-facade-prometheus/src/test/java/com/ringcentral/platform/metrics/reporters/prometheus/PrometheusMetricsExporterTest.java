@@ -12,6 +12,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
+import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.OPENMETRICS_TEXT_1_0_0;
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.PROMETHEUS_TEXT_O_O_4;
@@ -58,6 +60,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.GAUGE);
 
         instanceSample.add(new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -75,6 +78,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.GAUGE);
 
         instanceSample.add(new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -93,6 +97,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.COUNTER);
 
         instanceSample.add(new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -110,6 +115,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.COUNTER);
 
         instanceSample.add(new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -128,6 +134,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.SUMMARY);
 
         instanceSample.add(new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -137,6 +144,7 @@ public class PrometheusMetricsExporterTest {
             5.0));
 
         instanceSample.add(new PrometheusSample(
+            MAX,
             DEFAULT_MAX_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
             null,
@@ -146,6 +154,7 @@ public class PrometheusMetricsExporterTest {
             6.0));
 
         instanceSample.add(new PrometheusSample(
+            MEAN,
             DEFAULT_MEAN_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
             null,
@@ -155,6 +164,7 @@ public class PrometheusMetricsExporterTest {
             7.0));
 
         instanceSample.add(new PrometheusSample(
+            PERCENTILE_50,
             null,
             null,
             null,
@@ -164,6 +174,7 @@ public class PrometheusMetricsExporterTest {
             8.0));
 
         instanceSample.add(new PrometheusSample(
+            PERCENTILE_75,
             null,
             null,
             null,
@@ -181,6 +192,7 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.SUMMARY);
 
         instanceSample.add(new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -190,6 +202,7 @@ public class PrometheusMetricsExporterTest {
             10.0));
 
         instanceSample.add(new PrometheusSample(
+            MAX,
             DEFAULT_MAX_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
             null,
@@ -199,6 +212,7 @@ public class PrometheusMetricsExporterTest {
             11.0));
 
         instanceSample.add(new PrometheusSample(
+            MEAN,
             DEFAULT_MEAN_CHILD_NAME_SUFFIX,
             Collector.Type.GAUGE,
             null,
@@ -208,6 +222,7 @@ public class PrometheusMetricsExporterTest {
             12.0));
 
         instanceSample.add(new PrometheusSample(
+            PERCENTILE_50,
             null,
             null,
             null,
@@ -217,6 +232,7 @@ public class PrometheusMetricsExporterTest {
             13.0));
 
         instanceSample.add(new PrometheusSample(
+            PERCENTILE_75,
             null,
             null,
             null,
@@ -257,9 +273,9 @@ public class PrometheusMetricsExporterTest {
             "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 4.0\n" +
             "# HELP a_b_c_d Description for a.b.c.d\n" +
             "# TYPE a_b_c_d summary\n" +
-            "a_b_c_d_count 5.0\n" +
             "a_b_c_d{quantile=\"0.50\",} 8.0\n" +
             "a_b_c_d{quantile=\"0.75\",} 9.0\n" +
+            "a_b_c_d_count 5.0\n" +
             "# HELP a_b_c_d_max Description for a.b.c.d\n" +
             "# TYPE a_b_c_d_max gauge\n" +
             "a_b_c_d_max 6.0\n" +
@@ -268,9 +284,9 @@ public class PrometheusMetricsExporterTest {
             "a_b_c_d_mean 7.0\n" +
             "# HELP a_b_c_d_e Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e summary\n" +
-            "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 10.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.50\",} 13.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.75\",} 14.0\n" +
+            "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 10.0\n" +
             "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e_max gauge\n" +
             "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 11.0\n" +
@@ -295,9 +311,9 @@ public class PrometheusMetricsExporterTest {
             "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 4.0\n" +
             "# TYPE a_b_c_d summary\n" +
             "# HELP a_b_c_d Description for a.b.c.d\n" +
-            "a_b_c_d_count 5.0\n" +
             "a_b_c_d{quantile=\"0.50\"} 8.0\n" +
             "a_b_c_d{quantile=\"0.75\"} 9.0\n" +
+            "a_b_c_d_count 5.0\n" +
             "# TYPE a_b_c_d_max gauge\n" +
             "# HELP a_b_c_d_max Description for a.b.c.d\n" +
             "a_b_c_d_max 6.0\n" +
@@ -306,9 +322,9 @@ public class PrometheusMetricsExporterTest {
             "a_b_c_d_mean 7.0\n" +
             "# TYPE a_b_c_d_e summary\n" +
             "# HELP a_b_c_d_e Description for a.b.c.d.e\n" +
-            "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 10.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.50\"} 13.0\n" +
             "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.75\"} 14.0\n" +
+            "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 10.0\n" +
             "# TYPE a_b_c_d_e_max gauge\n" +
             "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
             "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 11.0\n" +

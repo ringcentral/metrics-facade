@@ -1,13 +1,38 @@
 package com.ringcentral.platform.metrics.histogram;
 
-import com.ringcentral.platform.metrics.histogram.Histogram.Bucket;
 import org.junit.Test;
 
+import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@SuppressWarnings("EqualsWithItself")
 public class HistogramTest {
+
+    @Test
+    public void sortingBuckets() {
+        assertThat(Bucket.of(1).compareTo(Bucket.of(1)), is(0));
+        assertThat(Bucket.of(1).compareTo(Bucket.of(2)), is(-1));
+        assertThat(Bucket.of(2).compareTo(Bucket.of(1)), is(1));
+        assertThat(Bucket.of(1).compareTo(INF_BUCKET), is(-1));
+        assertThat(INF_BUCKET.compareTo(Bucket.of(2)), is(1));
+
+        assertThat(Bucket.of(1.5).compareTo(Bucket.of(1.5)), is(0));
+        assertThat(Bucket.of(1.5).compareTo(Bucket.of(1.7)), is(-1));
+        assertThat(Bucket.of(1.7).compareTo(Bucket.of(1.5)), is(1));
+        assertThat(Bucket.of(1.5).compareTo(INF_BUCKET), is(-1));
+        assertThat(INF_BUCKET.compareTo(Bucket.of(1.7)), is(1));
+
+        assertThat(INF_BUCKET.compareTo(INF_BUCKET), is(0));
+    }
+
+    @Test
+    public void sortingPercentiles() {
+        assertThat(PERCENTILE_1.compareTo(PERCENTILE_1), is(0));
+        assertThat(PERCENTILE_1.compareTo(PERCENTILE_5), is(-1));
+        assertThat(PERCENTILE_5.compareTo(PERCENTILE_1), is(1));
+    }
 
     @Test
     public void bucketStringRepresentations() {

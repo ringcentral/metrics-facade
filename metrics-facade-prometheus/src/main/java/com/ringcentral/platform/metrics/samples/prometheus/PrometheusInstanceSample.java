@@ -1,10 +1,16 @@
 package com.ringcentral.platform.metrics.samples.prometheus;
 
+import com.ringcentral.platform.metrics.counter.Counter.Count;
+import com.ringcentral.platform.metrics.histogram.Histogram.Bucket;
+import com.ringcentral.platform.metrics.histogram.Histogram.Percentile;
+import com.ringcentral.platform.metrics.histogram.Histogram.TotalSum;
+import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.samples.AbstractInstanceSample;
 import io.prometheus.client.Collector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -80,6 +86,76 @@ public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusS
         } else {
             super.add(sample);
         }
+    }
+
+    @Override
+    public List<PrometheusSample> samples() {
+        if (type != Collector.Type.HISTOGRAM && type != Collector.Type.SUMMARY) {
+            return super.samples();
+        }
+
+        if (samples.isEmpty()) {
+            return samples;
+        }
+
+        samples.sort((left, right) -> {
+            if (!left.hasMeasurable()) {
+                return right.hasMeasurable() ? 1 : 0;
+            }
+
+            if (!right.hasMeasurable()) {
+                return -1;
+            }
+
+            Measurable leftM = left.measurable();
+            Measurable rightM = right.measurable();
+
+            // Bucket
+            if (leftM instanceof Bucket) {
+                return
+                    rightM instanceof Bucket ?
+                    ((Bucket)leftM).compareTo(((Bucket)rightM)) :
+                    -1;
+            }
+
+            if (rightM instanceof Bucket) {
+                return 1;
+            }
+
+            // Percentile
+            if (leftM instanceof Percentile) {
+                return
+                    rightM instanceof Percentile ?
+                    ((Percentile)leftM).compareTo(((Percentile)rightM)) :
+                    -1;
+            }
+
+            if (rightM instanceof Percentile) {
+                return 1;
+            }
+
+            // Count
+            if (leftM instanceof Count) {
+                return rightM instanceof Count ? 0 : -1;
+            }
+
+            if (rightM instanceof Count) {
+                return 1;
+            }
+
+            // TotalSum
+            if (leftM instanceof TotalSum) {
+                return rightM instanceof TotalSum ? 0 : -1;
+            }
+
+            if (rightM instanceof TotalSum) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        return samples;
     }
 
     @Override

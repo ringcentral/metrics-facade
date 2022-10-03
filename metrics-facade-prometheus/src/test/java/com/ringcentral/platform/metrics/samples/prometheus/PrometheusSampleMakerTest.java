@@ -62,6 +62,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, LONG_VALUE, 1.0);
 
         PrometheusSample expectedSample = new PrometheusSample(
+            LONG_VALUE,
             null,
             null,
             null,
@@ -85,6 +86,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         expectedSample = new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -108,6 +110,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         expectedSample = new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -121,6 +124,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MEAN_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
+            MEAN_RATE,
             null,
             null,
             null,
@@ -134,6 +138,21 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, ONE_MINUTE_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
+            ONE_MINUTE_RATE,
+            null,
+            null,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+
+        sampleSpec = new PrometheusSampleSpec(true, FIVE_MINUTES_RATE, 1.0);
+
+        expectedSample = new PrometheusSample(
+            FIVE_MINUTES_RATE,
             null,
             null,
             null,
@@ -147,19 +166,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, FIFTEEN_MINUTES_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
-            null,
-            null,
-            null,
-            null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
-            List.of("value_1", "value_2"),
-            1.0);
-
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
-
-        sampleSpec = new PrometheusSampleSpec(true, FIFTEEN_MINUTES_RATE, 1.0);
-
-        expectedSample = new PrometheusSample(
+            FIFTEEN_MINUTES_RATE,
             null,
             null,
             null,
@@ -173,6 +180,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, RATE_UNIT, 1.0);
 
         expectedSample = new PrometheusSample(
+            RATE_UNIT,
             null,
             null,
             null,
@@ -196,6 +204,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         expectedSample = new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -209,6 +218,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
 
         expectedSample = new PrometheusSample(
+            TOTAL_SUM,
             null,
             null,
             null,
@@ -222,6 +232,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         expectedSample = new PrometheusSample(
+            MIN,
             name("min"),
             Collector.Type.GAUGE,
             null,
@@ -235,6 +246,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
 
         expectedSample = new PrometheusSample(
+            MAX,
             name("max"),
             Collector.Type.GAUGE,
             null,
@@ -248,6 +260,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
 
         expectedSample = new PrometheusSample(
+            MEAN,
             name("mean"),
             Collector.Type.GAUGE,
             null,
@@ -261,6 +274,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, STANDARD_DEVIATION, 1.0);
 
         expectedSample = new PrometheusSample(
+            STANDARD_DEVIATION,
             null,
             null,
             null,
@@ -274,6 +288,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
 
         expectedSample = new PrometheusSample(
+            PERCENTILE_50,
             null,
             null,
             null,
@@ -287,6 +302,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
 
         expectedSample = new PrometheusSample(
+            PERCENTILE_75,
             null,
             null,
             null,
@@ -300,6 +316,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
 
         expectedSample = new PrometheusSample(
+            SEC_1_BUCKET,
             null,
             null,
             null,
@@ -323,6 +340,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         expectedSample = new PrometheusSample(
+            COUNT,
             null,
             null,
             null,
@@ -336,6 +354,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, TOTAL_SUM, 1.0);
 
         expectedSample = new PrometheusSample(
+            TOTAL_SUM,
             null,
             null,
             null,
@@ -349,6 +368,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MEAN_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
+            MEAN_RATE,
             null,
             null,
             null,
@@ -362,6 +382,21 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, ONE_MINUTE_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
+            ONE_MINUTE_RATE,
+            null,
+            null,
+            null,
+            null,
+            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of("value_1", "value_2"),
+            1.0);
+
+        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
+
+        sampleSpec = new PrometheusSampleSpec(true, FIVE_MINUTES_RATE, 1.0);
+
+        expectedSample = new PrometheusSample(
+            FIVE_MINUTES_RATE,
             null,
             null,
             null,
@@ -375,19 +410,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, FIFTEEN_MINUTES_RATE, 1.0);
 
         expectedSample = new PrometheusSample(
-            null,
-            null,
-            null,
-            null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
-            List.of("value_1", "value_2"),
-            1.0);
-
-        check(maker.makeSample(sampleSpec, instanceSampleSpec), expectedSample);
-
-        sampleSpec = new PrometheusSampleSpec(true, FIFTEEN_MINUTES_RATE, 1.0);
-
-        expectedSample = new PrometheusSample(
+            FIFTEEN_MINUTES_RATE,
             null,
             null,
             null,
@@ -401,6 +424,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, RATE_UNIT, 1.0);
 
         expectedSample = new PrometheusSample(
+            RATE_UNIT,
             null,
             null,
             null,
@@ -414,6 +438,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MIN, 1.0);
 
         expectedSample = new PrometheusSample(
+            MIN,
             name("min"),
             Collector.Type.GAUGE,
             null,
@@ -427,6 +452,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MAX, 1.0);
 
         expectedSample = new PrometheusSample(
+            MAX,
             name("max"),
             Collector.Type.GAUGE,
             null,
@@ -440,6 +466,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, MEAN, 1.0);
 
         expectedSample = new PrometheusSample(
+            MEAN,
             name("mean"),
             Collector.Type.GAUGE,
             null,
@@ -453,6 +480,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, STANDARD_DEVIATION, 1.0);
 
         expectedSample = new PrometheusSample(
+            STANDARD_DEVIATION,
             null,
             null,
             null,
@@ -466,6 +494,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_50, 1.0);
 
         expectedSample = new PrometheusSample(
+            PERCENTILE_50,
             null,
             null,
             null,
@@ -479,6 +508,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, PERCENTILE_75, 1.0);
 
         expectedSample = new PrometheusSample(
+            PERCENTILE_75,
             null,
             null,
             null,
@@ -492,6 +522,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, DURATION_UNIT, 1.0);
 
         expectedSample = new PrometheusSample(
+            DURATION_UNIT,
             null,
             null,
             null,
@@ -505,6 +536,7 @@ public class PrometheusSampleMakerTest {
         sampleSpec = new PrometheusSampleSpec(true, SEC_1_BUCKET, 1.0);
 
         expectedSample = new PrometheusSample(
+            SEC_1_BUCKET,
             null,
             null,
             null,

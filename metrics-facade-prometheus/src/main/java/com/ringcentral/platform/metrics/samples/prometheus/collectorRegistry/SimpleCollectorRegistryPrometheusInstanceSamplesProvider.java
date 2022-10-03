@@ -137,6 +137,7 @@ public class SimpleCollectorRegistryPrometheusInstanceSamplesProvider implements
                 PrometheusSample sample = new PrometheusSample(
                     null,
                     null,
+                    null,
                     sampleName,
                     null,
                     fsSample.labelNames,

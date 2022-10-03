@@ -1819,7 +1819,7 @@ miSampleSpecModsProvider.addMod(
     (metric, instance, currSpec) ->
         instanceSampleSpec().name(currSpec.name().replaceLast(currSpec.name().lastPart() + "_svc")));
 
-PrometheusInstanceSampleMaker miSampleMaker = new PrometheusInstanceSampleMaker(
+PrometheusInstanceSamplesProducer miSamplesProducer = new PrometheusInstanceSamplesProducer(
     null, // totalInstanceNameSuffix. defaults to null that means no suffix
     "all"); // dimensionalTotalInstanceNameSuffix. defaults to "all"
 
@@ -1833,15 +1833,15 @@ sampleSpecModsProvider.addMod(
     (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
         measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
-PrometheusSampleMaker sampleMaker = new PrometheusSampleMaker();
+PrometheusSamplesProducer samplesProducer = new PrometheusSamplesProducer();
 
 PrometheusInstanceSamplesProvider miSamplesProvider = new PrometheusInstanceSamplesProvider(
     miSampleSpecProvider,
     miSampleSpecModsProvider,
-    miSampleMaker,
+    miSamplesProducer,
     sampleSpecProvider,
     sampleSpecModsProvider,
-    sampleMaker,
+    samplesProducer,
     registry);
 
 PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(

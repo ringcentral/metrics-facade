@@ -1,23 +1,33 @@
 package com.ringcentral.platform.metrics;
 
-import com.ringcentral.platform.metrics.configs.*;
-import com.ringcentral.platform.metrics.dimensions.*;
-import com.ringcentral.platform.metrics.measurables.*;
+import com.ringcentral.platform.metrics.configs.MeterConfig;
+import com.ringcentral.platform.metrics.configs.MeterInstanceConfig;
+import com.ringcentral.platform.metrics.configs.MeterSliceConfig;
+import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValuesPredicate;
+import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.measurables.Measurable;
+import com.ringcentral.platform.metrics.measurables.MeasurableValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Collections.*;
-import static java.util.concurrent.TimeUnit.*;
-import static java.util.stream.Collectors.*;
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractMeter<
@@ -450,6 +460,8 @@ public abstract class AbstractMeter<
         private final MeasurableValuesProvider measurableValuesProvider;
         private final Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders;
         private final Set<Measurable> measurables;
+        private final boolean withPercentiles;
+        private final boolean withBuckets;
         private final MI meterImpl;
 
         protected AbstractMeterInstance(
@@ -476,6 +488,8 @@ public abstract class AbstractMeter<
             this.measurableValuesProvider = measurableValuesProvider;
             this.measurableValueProviders = measurableValueProviders;
             this.measurables = measurableValueProviders.keySet();
+            this.withPercentiles = measurables().stream().anyMatch(m -> m instanceof Histogram.Percentile);
+            this.withBuckets = measurables().stream().anyMatch(m -> m instanceof Histogram.Bucket);
             this.meterImpl = meterImpl;
         }
 
@@ -512,6 +526,16 @@ public abstract class AbstractMeter<
         @Override
         public Set<Measurable> measurables() {
             return measurables;
+        }
+
+        @Override
+        public boolean isWithPercentiles() {
+            return withPercentiles;
+        }
+
+        @Override
+        public boolean isWithBuckets() {
+            return withBuckets;
         }
 
         protected MI meterImpl() {

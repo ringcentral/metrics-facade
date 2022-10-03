@@ -78,7 +78,7 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
                 measurable instanceof Max ? sampleSpec().disable() : sampleSpec());
 
-        PrometheusSampleMaker sampleMaker = new PrometheusSampleMaker();
+        PrometheusSamplesProducer samplesProducer = new PrometheusSamplesProducer();
 
         PrometheusInstanceSamplesProvider miSamplesProvider = prometheusInstanceSamplesProvider(registry)
             .instanceSampleSpecProvider(miSampleSpecProvider)
@@ -86,7 +86,7 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             .instanceSampleMaker(miSampleMaker)
             .sampleSpecProvider(sampleSpecProvider)
             .sampleSpecModsProvider(sampleSpecModsProvider)
-            .sampleMaker(sampleMaker)
+            .samplesProducer(samplesProducer)
             .build();
 
         PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(

@@ -1,6 +1,8 @@
 package com.ringcentral.platform.metrics.samples;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class CompositeInstanceSamplesProvider<
     S extends Sample,

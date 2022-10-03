@@ -3,6 +3,7 @@ package com.ringcentral.platform.metrics;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils;
 import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.measurables.MeasurableValues;
 import com.ringcentral.platform.metrics.names.MetricNamed;
@@ -39,6 +40,15 @@ public interface MetricInstance extends MetricNamed {
     boolean isLevelInstance();
 
     Set<Measurable> measurables();
+
+    default boolean isWithPercentiles() {
+        return measurables().stream().anyMatch(m -> m instanceof Histogram.Percentile);
+    }
+
+    default boolean isWithBuckets() {
+        return measurables().stream().anyMatch(m -> m instanceof Histogram.Bucket);
+    }
+
     MeasurableValues measurableValues();
     <V> V valueOf(Measurable measurable) throws NotMeasuredException;
 

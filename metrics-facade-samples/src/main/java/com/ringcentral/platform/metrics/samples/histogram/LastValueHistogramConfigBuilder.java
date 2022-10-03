@@ -5,7 +5,7 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.HistogramI
 public class LastValueHistogramConfigBuilder implements HistogramImplConfigBuilder<LastValueHistogramImplConfig> {
 
     // DSL method
-    public static LastValueHistogramConfigBuilder lastValueImpl() {
+    public static LastValueHistogramConfigBuilder lastValue() {
         return new LastValueHistogramConfigBuilder();
     }
 

@@ -69,19 +69,22 @@ public class DefaultMetricRegistryBuilder {
     }
 
     void addCustomMetricImpls(DefaultMetricRegistry registry) {
-        Reflections reflections = new Reflections(
-            new ConfigurationBuilder().forPackages(customMetricImplsPackages.toArray(new String[0])));
+        Reflections reflections = new Reflections(new ConfigurationBuilder().forPackages(customMetricImplsPackages.toArray(new String[0])));
 
         reflections.getSubTypesOf(CustomHistogramImplMaker.class).stream()
-            .filter(implMakerType -> !implMakerType.isInterface() && !isAbstract(implMakerType.getModifiers()))
+            .filter(this::isConcrete)
             .forEach(implMakerClass -> registry.extendWith(makeCustomMetricImplMaker(implMakerClass)));
 
         reflections.getSubTypesOf(CustomRateImplMaker.class).stream()
-            .filter(implMakerType -> !implMakerType.isInterface() && !isAbstract(implMakerType.getModifiers()))
+            .filter(this::isConcrete)
             .forEach(implMakerClass -> registry.extendWith(makeCustomMetricImplMaker(implMakerClass)));
     }
 
-    private <M> M makeCustomMetricImplMaker(Class<M> implMakerClass) {
+    private boolean isConcrete(Class<?> type) {
+        return !type.isInterface() && !isAbstract(type.getModifiers());
+    }
+
+    private <M extends CustomMetricImplMaker<?>> M makeCustomMetricImplMaker(Class<M> implMakerClass) {
         try {
             return implMakerClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

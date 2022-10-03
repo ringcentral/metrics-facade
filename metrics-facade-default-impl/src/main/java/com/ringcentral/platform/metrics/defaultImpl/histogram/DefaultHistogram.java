@@ -320,16 +320,16 @@ public class DefaultHistogram extends AbstractHistogram<HistogramImpl> {
             ScheduledExecutorService executor,
             MetricRegistry registry) {
 
-            CustomHistogramImplSpec<? extends HistogramImplConfig> customImplSpec =
+            CustomHistogramImplSpec<? extends HistogramImplConfig> implSpec =
                 ((DefaultMetricRegistry)registry).customHistogramImplSpecFor(config.getClass());
 
-            if (customImplSpec == null) {
+            if (implSpec == null) {
                 return null;
             }
 
-            CustomHistogramImplMaker customImplMaker = customImplSpec.implMaker();
+            CustomHistogramImplMaker implMaker = implSpec.implMaker();
 
-            return customImplMaker.makeHistogramImpl(
+            return implMaker.makeHistogramImpl(
                 config,
                 instanceContext,
                 sliceContext,

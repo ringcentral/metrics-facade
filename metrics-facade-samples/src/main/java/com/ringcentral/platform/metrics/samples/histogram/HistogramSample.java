@@ -28,7 +28,7 @@ public class HistogramSample extends AbstractSample {
         // MetricRegistry registry = new DropwizardMetricRegistry();
         DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
             // You can also register custom metric implementations using the extendWith method:
-            // registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+            // registry.extendWith(new LastValueHistogramImplMaker());
             .withCustomMetricImplsFromPackages("com.ringcentral.platform.metrics.samples.histogram")
             .build();
 
@@ -96,14 +96,14 @@ public class HistogramSample extends AbstractSample {
                 //   - hdr() == HdrHistogramImplConfigBuilder.hdr() ,
                 //   - scale() == ScaleHistogramImplConfigBuilder.scale()
                 //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
-                //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+                //     Custom impls must be registered: registry.extendWith(new LastValueHistogramImplMaker());
                 // default: hdr()
                 .withImpl(hdr()
                     .resetByChunks(6, Duration.ofMinutes(2))
                     .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
                     .significantDigits(3)
                     .snapshotTtl(30, SECONDS))
-                //.withImpl(LastValueHistogramConfigBuilder.lastValueImpl()) // custom impl
+                // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

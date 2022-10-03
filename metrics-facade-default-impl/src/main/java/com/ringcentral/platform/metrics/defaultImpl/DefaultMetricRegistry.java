@@ -43,13 +43,17 @@ import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
 import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
 import com.ringcentral.platform.metrics.var.stringVar.CachingStringVar;
 import com.ringcentral.platform.metrics.var.stringVar.StringVar;
+import org.slf4j.Logger;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 @SuppressWarnings("SameParameterValue")
 public class DefaultMetricRegistry extends AbstractMetricRegistry {
@@ -246,6 +250,8 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
     private final ConcurrentMap<Class<? extends RateImplConfig>, CustomRateImplSpec<?>> customRateImplSpecs = new ConcurrentHashMap<>();
     private final ConcurrentMap<Class<? extends HistogramImplConfig>, CustomHistogramImplSpec<?>> customHistogramImplSpecs = new ConcurrentHashMap<>();
 
+    private static final Logger logger = getLogger(DefaultMetricRegistry.class);
+
     public DefaultMetricRegistry() {
         super(MetricMakerImpl.INSTANCE);
     }
@@ -292,14 +298,10 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
 
     /* ***** Extensions ***** */
 
-    public <C extends HistogramImplConfig> void extendWith(Class<C> configType, CustomHistogramImplMaker<C> implMaker) {
-        customHistogramImplSpecs.put(configType, new CustomHistogramImplSpec<>(implMaker));
-    }
-
     public void extendWith(CustomHistogramImplMaker<?> implMaker) {
-        customHistogramImplSpecs.put(
-            metricImplConfigTypeFor(CustomHistogramImplMaker.class, implMaker.getClass()),
-            new CustomHistogramImplSpec<>(implMaker));
+        Class<? extends HistogramImplConfig> configType = metricImplConfigTypeFor(CustomHistogramImplMaker.class, implMaker.getClass());
+        logCustomMetricImplRegistered("histogram", configType, implMaker);
+        customHistogramImplSpecs.put(configType, new CustomHistogramImplSpec<>(implMaker));
     }
 
     @SuppressWarnings("unchecked")
@@ -307,14 +309,10 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
         return (CustomHistogramImplSpec<C>)customHistogramImplSpecs.get(configType);
     }
 
-    public <C extends RateImplConfig> void extendWith(Class<C> configType, CustomRateImplMaker<C> implMaker) {
+    public void extendWith(CustomRateImplMaker<?> implMaker) {
+        Class<? extends RateImplConfig> configType = metricImplConfigTypeFor(CustomRateImplMaker.class, implMaker.getClass());
+        logCustomMetricImplRegistered("rate", configType, implMaker);
         customRateImplSpecs.put(configType, new CustomRateImplSpec<>(implMaker));
-    }
-
-    public <C extends RateImplConfig> void extendWith(CustomRateImplMaker<C> implMaker) {
-        customRateImplSpecs.put(
-            metricImplConfigTypeFor(CustomRateImplMaker.class, implMaker.getClass()),
-            new CustomRateImplSpec<>(implMaker));
     }
 
     @SuppressWarnings("unchecked")
@@ -323,11 +321,30 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    private static <C extends MetricImplConfig, M> Class<C> metricImplConfigTypeFor(Class<M> implMakerInterface, Class<? extends M> implMakerClass) {
-        return Arrays.stream(implMakerClass.getGenericInterfaces())
+    private static <C extends MetricImplConfig> Class<C> metricImplConfigTypeFor(Class<?> implMakerInterface, Class<?> implMakerClass) {
+        return Arrays
+            .stream(implMakerClass.getGenericInterfaces())
             .filter(gi -> gi instanceof ParameterizedType && ((ParameterizedType)gi).getRawType() == implMakerInterface)
-            .map(gi -> (Class<C>)((ParameterizedType)gi).getActualTypeArguments()[0])
-            .findFirst()
-            .orElseGet(() -> metricImplConfigTypeFor(implMakerInterface, (Class<? extends M>)implMakerClass.getSuperclass()));
+            .map(gi -> (Class<C>)metricImplConfigTypeFor((ParameterizedType)gi))
+            .findFirst().orElseGet(() -> metricImplConfigTypeFor(implMakerInterface, implMakerClass.getSuperclass()));
+    }
+
+    private static Type metricImplConfigTypeFor(ParameterizedType parametrizedImplMakerInterface) {
+        return Arrays
+            .stream(parametrizedImplMakerInterface.getActualTypeArguments())
+            .filter(typeArg -> typeArg instanceof Class && MetricImplConfig.class.isAssignableFrom((Class<?>)typeArg))
+            .findFirst().orElseThrow();
+    }
+
+    private void logCustomMetricImplRegistered(
+        String metricTypeName,
+        Class<? extends MetricImplConfig> configType,
+        CustomMetricImplMaker<?> implMaker) {
+
+        logger.info(
+            "Custom {} impl registered: config type = {}, impl maker type = {}",
+            metricTypeName,
+            configType.getName(),
+            implMaker.getClass().getName());
     }
 }

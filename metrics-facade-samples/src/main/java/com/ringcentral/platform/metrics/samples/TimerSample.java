@@ -119,7 +119,7 @@ public class TimerSample extends AbstractSample {
                 //   - hdr() == HdrHistogramImplConfigBuilder.hdr(),
                 //   - scale() == ScaleHistogramImplConfigBuilder.scale()
                 //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
-                //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+                //     Custom impls must be registered: registry.extendWith(new LastValueHistogramImplMaker());
                 // default: hdr()
                 .withImpl(hdr()
                     .resetByChunks(6, Duration.ofMinutes(2))

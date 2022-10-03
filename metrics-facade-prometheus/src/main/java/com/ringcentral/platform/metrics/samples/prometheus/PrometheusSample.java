@@ -107,4 +107,18 @@ public class PrometheusSample implements Sample {
     public double value() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "PrometheusSample{" +
+            "measurable=" + measurable +
+            ", childInstanceSampleNameSuffix=" + childInstanceSampleNameSuffix +
+            ", childInstanceSampleType=" + childInstanceSampleType +
+            ", name=" + name +
+            ", nameSuffix='" + nameSuffix + '\'' +
+            ", labelNames=" + labelNames +
+            ", labelValues=" + labelValues +
+            ", value=" + value +
+            '}';
+    }
 }

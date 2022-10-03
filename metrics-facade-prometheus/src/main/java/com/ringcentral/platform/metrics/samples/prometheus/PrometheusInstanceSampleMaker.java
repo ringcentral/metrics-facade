@@ -79,10 +79,7 @@ public class PrometheusInstanceSampleMaker implements InstanceSampleMaker<
         if (instance instanceof TimerInstance || instance instanceof HistogramInstance) {
             // io.micrometer.prometheus.PrometheusMeterRegistry:
             // "Prometheus doesn't balk at a metric being BOTH a histogram and a summary"
-            type =
-                instance.measurables().stream().anyMatch(m -> m instanceof Histogram.Bucket) ?
-                HISTOGRAM :
-                SUMMARY;
+            type = instance.isWithBuckets() ? HISTOGRAM : SUMMARY;
         } else if (instance instanceof CounterInstance) {
             type = GAUGE;
         } else if (instance instanceof RateInstance) {

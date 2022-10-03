@@ -7,7 +7,7 @@ public class DefaultInstanceSamplesProvider extends AbstractInstanceSamplesProvi
     DefaultSample,
     DefaultSampleSpec,
     SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec>,
-    SampleMaker<DefaultSample, DefaultSampleSpec, DefaultInstanceSampleSpec>,
+    SamplesProducer<DefaultSample, DefaultSampleSpec, DefaultInstanceSampleSpec, InstanceSample<DefaultSample>>,
     InstanceSample<DefaultSample>,
     DefaultInstanceSampleSpec,
     InstanceSampleSpecProvider<DefaultInstanceSampleSpec>,
@@ -66,7 +66,7 @@ public class DefaultInstanceSamplesProvider extends AbstractInstanceSamplesProvi
             new DefaultInstanceSampleMaker(),
             sampleSpecProvider,
             sampleSpecModsProvider,
-            new DefaultSampleMaker(),
+            new DefaultSamplesProducer(),
             metricRegistry);
     }
 
@@ -76,7 +76,7 @@ public class DefaultInstanceSamplesProvider extends AbstractInstanceSamplesProvi
         InstanceSampleMaker<DefaultSample, InstanceSample<DefaultSample>, DefaultInstanceSampleSpec> instanceSampleMaker,
         SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec> sampleSpecProvider,
         PredicativeMetricNamedInfoProvider<SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec>> sampleSpecModsProvider,
-        SampleMaker<DefaultSample, DefaultSampleSpec, DefaultInstanceSampleSpec> sampleMaker,
+        SamplesProducer<DefaultSample, DefaultSampleSpec, DefaultInstanceSampleSpec, InstanceSample<DefaultSample>> samplesProducer,
         MetricRegistry metricRegistry) {
 
         super(
@@ -85,7 +85,7 @@ public class DefaultInstanceSamplesProvider extends AbstractInstanceSamplesProvi
             instanceSampleMaker,
             sampleSpecProvider,
             sampleSpecModsProvider,
-            sampleMaker,
+            samplesProducer,
             metricRegistry);
     }
 }

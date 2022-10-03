@@ -499,6 +499,7 @@ public interface Histogram extends Meter {
     Bucket SEC_30_BUCKET = Bucket.of(30, SECONDS);
 
     Bucket INF_BUCKET = Bucket.of(Double.POSITIVE_INFINITY);
+    Bucket NEGATIVE_INF_BUCKET = Bucket.of(Double.NEGATIVE_INFINITY);
 
     class Buckets implements HistogramMeasurable {
 

@@ -8,6 +8,7 @@ import com.ringcentral.platform.metrics.measurables.MeasurableValues;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
 import com.ringcentral.platform.metrics.var.VarInstance;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -29,13 +30,16 @@ public class PrometheusSampleSpecProviderTest {
     static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
     static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
 
-    @Test
-    public void providingSampleSpec() {
-        PrometheusSampleSpecProvider provider = new PrometheusSampleSpecProvider();
-        MeasurableValues measurableValues = mock(MeasurableValues.class);
-        when(measurableValues.valueOf(any())).thenReturn(1L);
+    PrometheusSampleSpecProvider provider = new PrometheusSampleSpecProvider();
+    MeasurableValues measurableValues = mock(MeasurableValues.class);
 
-        // var
+    @Before
+    public void before() {
+        when(measurableValues.valueOf(any())).thenReturn(1L);
+    }
+
+    @Test
+    public void var() {
         MetricInstance instance = mock(VarInstance.class);
 
         PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
@@ -55,18 +59,20 @@ public class PrometheusSampleSpecProviderTest {
                 LONG_VALUE,
                 null),
             expectedSampleSpec);
+    }
 
-        // counter
-        instance = mock(CounterInstance.class);
+    @Test
+    public void counter() {
+        MetricInstance instance = mock(CounterInstance.class);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         check(
             provider.sampleSpecFor(
@@ -76,18 +82,20 @@ public class PrometheusSampleSpecProviderTest {
                 COUNT,
                 null),
             expectedSampleSpec);
+    }
 
-        // rate
-        instance = mock(RateInstance.class);
+    @Test
+    public void rate() {
+        MetricInstance instance = mock(RateInstance.class);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         check(
             provider.sampleSpecFor(
@@ -132,18 +140,20 @@ public class PrometheusSampleSpecProviderTest {
             measurableValues,
             RATE_UNIT,
             null));
+    }
 
-        // histogram
-        instance = mock(HistogramInstance.class);
+    @Test
+    public void histogram() {
+        MetricInstance instance = mock(HistogramInstance.class);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         check(
             provider.sampleSpecFor(
@@ -237,19 +247,21 @@ public class PrometheusSampleSpecProviderTest {
             measurableValues,
             STANDARD_DEVIATION,
             null));
+    }
 
-        // timer
-        instance = mock(TimerInstance.class);
-        when(((TimerInstance)instance).durationUnit()).thenReturn(MILLISECONDS);
+    @Test
+    public void timer() {
+        TimerInstance instance = mock(TimerInstance.class);
+        when(instance.durationUnit()).thenReturn(MILLISECONDS);
 
-        instanceSampleSpec = new PrometheusInstanceSampleSpec(
+        PrometheusInstanceSampleSpec instanceSampleSpec = new PrometheusInstanceSampleSpec(
             true,
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
             List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
 
-        expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
+        PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
         check(
             provider.sampleSpecFor(

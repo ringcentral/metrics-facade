@@ -1102,6 +1102,16 @@ Rate fullConfigRate = registry.rate(
         //   RATE_UNIT
         // }
         .measurables(COUNT)
+        
+        /**
+         * options:
+         *   - expMovingAverage() == {@link ExpMovingAverageRateImplConfigBuilder#expMovingAverage()},
+         *   - custom impl, e.g. countAndMean() == {@link CountScalingRateConfigBuilder#countScaling()}.
+         *     Custom impls must be registered: registry.extendWith(new CountScalingRateConfigBuilder()).
+         * default: expMovingAverage()
+         */
+        .impl(expMovingAverage())
+        // .impl(countScaling().factor(2)) // custom impl
 
         // the properties specific to the metrics implementation
         // default: no properties
@@ -1289,18 +1299,20 @@ Histogram fullConfigHistogram = registry.histogram(
         // default: no properties
         .put("key_1", "value_1_1")
 
-        // options:
-        //   - hdr() == HdrHistogramImplConfigBuilder.hdr() ,
-        //   - scale() == ScaleHistogramImplConfigBuilder.scale()
-        //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
-        //     Custom impls must be registered: registry.extendWith(new LastValueHistogramImplMaker());
-        // default: hdr()
-        .withImpl(hdr()
+        /**
+         * options:
+         *   - hdr() == {@link HdrHistogramImplConfigBuilder#hdr()},
+         *   - scale() == {@link com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder#scale()},
+         *   - custom impl, e.g. countAndTotalSum() == {@link CountAndTotalSumScalingHistogramConfigBuilder#countAndTotalSumScaling()}.
+         *     Custom impls must be registered: registry.extendWith(new CountAndTotalSumScalingHistogramConfigBuilder()).
+         * default: hdr()
+         */
+        .impl(hdr()
             .resetByChunks(6, Duration.ofMinutes(2))
             .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
             .significantDigits(3)
             .snapshotTtl(30, SECONDS))
-        // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
+        // .impl(countAndTotalSumScaling().factor(2)) // custom impl
 
         .allSlice()
             // options: disable(), enabled(boolean)
@@ -1483,23 +1495,31 @@ Timer fullConfigTimer = registry.timer(
         // default: no properties
         .put("key_1", "value_1_1")
 
-        // options: expMovingAverage() == ExpMovingAverageRateImplConfigBuilder.expMovingAverage(), custom impl
-        // default: expMovingAverage()
-        .withImpl(expMovingAverage())
+        /**
+         * options:
+         *   - expMovingAverage() == {@link ExpMovingAverageRateImplConfigBuilder#expMovingAverage()},
+         *   - custom impl, e.g. countAndMean() == {@link CountScalingRateConfigBuilder#countScaling()}.
+         *     Custom impls must be registered: registry.extendWith(new CountScalingRateConfigBuilder()).
+         * default: expMovingAverage()
+         */
+        .impl(expMovingAverage())
+        // .impl(countScaling().factor(2)) // custom impl
 
-        // options:
-        //   - hdr() == HdrHistogramImplConfigBuilder.hdr(),
-        //   - scale() == ScaleHistogramImplConfigBuilder.scale()
-        //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
-        //     Custom impls must be registered: registry.extendWith(new LastValueHistogramImplMaker());
-        // default: hdr()
-        .withImpl(hdr()
+        /**
+         * options:
+         *   - hdr() == {@link HdrHistogramImplConfigBuilder#hdr()},
+         *   - scale() == {@link com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder#scale()},
+         *   - custom impl, e.g. countAndTotalSum() == {@link CountAndTotalSumScalingHistogramConfigBuilder#countAndTotalSumScaling()}.
+         *     Custom impls must be registered: registry.extendWith(new CountAndTotalSumScalingHistogramConfigBuilder()).
+         * default: hdr()
+         */
+        .impl(hdr()
             .resetByChunks(6, Duration.ofMinutes(2))
             .lowestDiscernibleValue(MILLISECONDS.toNanos(1))
             .highestTrackableValue(DAYS.toNanos(7), REDUCE_TO_HIGHEST_TRACKABLE)
             .significantDigits(2)
             .snapshotTtl(30, SECONDS))
-        // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
+        // .impl(countAndTotalSumScaling().factor(2)) // custom impl
 
         .allSlice()
             // options: disable(), enabled(boolean)

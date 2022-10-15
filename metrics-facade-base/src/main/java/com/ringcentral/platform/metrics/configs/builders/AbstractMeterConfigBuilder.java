@@ -344,13 +344,13 @@ public abstract class AbstractMeterConfigBuilder<
             return (Impl)this;
         }
 
+        public Impl impl(MetricImplConfigBuilder configBuilder) {
+            return with(configBuilder);
+        }
+
         public Impl put(Object key, Object value) {
             context.put(key, value);
             return (Impl)this;
-        }
-
-        public Impl withImpl(MetricImplConfigBuilder configBuilder) {
-            return with(configBuilder);
         }
 
         public Impl with(Object value) {
@@ -528,13 +528,13 @@ public abstract class AbstractMeterConfigBuilder<
             return (ICB)this;
         }
 
+        public ICB impl(MetricImplConfigBuilder configBuilder) {
+            return with(configBuilder);
+        }
+
         public ICB put(Object key, Object value) {
             context.put(key, value);
             return (ICB)this;
-        }
-
-        public ICB withImpl(MetricImplConfigBuilder configBuilder) {
-            return with(configBuilder);
         }
 
         public ICB with(Object value) {

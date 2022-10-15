@@ -70,7 +70,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(hdr()
+                .impl(hdr()
                     .neverReset()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -88,7 +88,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(hdr()
+                .impl(hdr()
                     .resetOnSnapshot()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -106,7 +106,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(hdr()
+                .impl(hdr()
                     .resetByChunks()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -124,7 +124,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(hdr()
+                .impl(hdr()
                     .significantDigits(3)
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -143,7 +143,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(scale()
+                .impl(scale()
                     .neverReset()
                     .with(scale_1())));
 
@@ -160,7 +160,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(scale()
+                .impl(scale()
                     .resetOnSnapshot()
                     .scale(scale_1())));
 
@@ -177,7 +177,7 @@ public class HistogramUpdateBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(scale()
+                .impl(scale()
                     .resetByChunks()
                     .scale(scale_1())));
 

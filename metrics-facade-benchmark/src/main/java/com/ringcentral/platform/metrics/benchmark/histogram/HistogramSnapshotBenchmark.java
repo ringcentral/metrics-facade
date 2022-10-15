@@ -71,7 +71,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(hdr()
+                .impl(hdr()
                     .neverReset()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -89,7 +89,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(hdr()
+                .impl(hdr()
                     .eventuallyConsistentTotals()
                     .resetByChunks()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
@@ -108,7 +108,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(hdr()
+                .impl(hdr()
                     .resetByChunks()
                     .significantDigits(3)
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
@@ -128,7 +128,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(scaleImpl()
+                .impl(scaleImpl()
                     .neverReset()
                     .with(scale_1())));
 
@@ -145,7 +145,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .withImpl(scale()
+                .impl(scale()
                     .resetByChunks()
                     .with(scale_1())));
 

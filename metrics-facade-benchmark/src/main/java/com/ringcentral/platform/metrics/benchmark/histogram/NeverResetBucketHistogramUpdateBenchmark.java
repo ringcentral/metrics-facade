@@ -68,7 +68,7 @@ public class NeverResetBucketHistogramUpdateBenchmark {
                     SEC_30_BUCKET,
 
                     PERCENTILE_50)
-                .withImpl(hdr()
+                .impl(hdr()
                     .neverReset()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -106,7 +106,7 @@ public class NeverResetBucketHistogramUpdateBenchmark {
                     SEC_30_BUCKET,
 
                     PERCENTILE_50)
-                .withImpl(scaleHistogramImpl()
+                .impl(scaleHistogramImpl()
                     .neverReset()
                     .with(scale())));
 
@@ -141,7 +141,7 @@ public class NeverResetBucketHistogramUpdateBenchmark {
                     SEC_10_BUCKET,
                     SEC_20_BUCKET,
                     SEC_30_BUCKET)
-                .withImpl(hdr()
+                .impl(hdr()
                     .resetByChunks()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));

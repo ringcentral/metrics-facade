@@ -26,6 +26,14 @@ public class DefaultMetricRegistryBuilder {
     private ScheduledExecutorService executor;
     private final Set<String> customMetricImplsPackages = new LinkedHashSet<>();
 
+    public static DefaultMetricRegistryBuilder defaultMetricRegistry() {
+        return defaultMetricRegistryBuilder();
+    }
+
+    public static DefaultMetricRegistryBuilder defaultMetricRegistryBuilder() {
+        return new DefaultMetricRegistryBuilder();
+    }
+
     public DefaultMetricRegistryBuilder preModsProvider(PredicativeMetricNamedInfoProvider<MetricMod> preModsProvider) {
         this.preModsProvider = preModsProvider;
         return this;
@@ -49,6 +57,12 @@ public class DefaultMetricRegistryBuilder {
         return this;
     }
 
+    /**
+     * Adds custom metric implementations from the specified packages recursively.
+     * For more details on how to define custom metric implementations,
+     * please see {@link DefaultMetricRegistry#extendWith(CustomRateImplMaker)} and
+     * {@link DefaultMetricRegistry#extendWith(CustomHistogramImplMaker)}.
+     */
     public DefaultMetricRegistryBuilder withCustomMetricImplsFromPackages(String... packages) {
         customMetricImplsPackages.addAll(List.of(packages));
         return this;
@@ -71,11 +85,11 @@ public class DefaultMetricRegistryBuilder {
     void addCustomMetricImpls(DefaultMetricRegistry registry) {
         Reflections reflections = new Reflections(new ConfigurationBuilder().forPackages(customMetricImplsPackages.toArray(new String[0])));
 
-        reflections.getSubTypesOf(CustomHistogramImplMaker.class).stream()
+        reflections.getSubTypesOf(CustomRateImplMaker.class).stream()
             .filter(this::isConcrete)
             .forEach(implMakerClass -> registry.extendWith(makeCustomMetricImplMaker(implMakerClass)));
 
-        reflections.getSubTypesOf(CustomRateImplMaker.class).stream()
+        reflections.getSubTypesOf(CustomHistogramImplMaker.class).stream()
             .filter(this::isConcrete)
             .forEach(implMakerClass -> registry.extendWith(makeCustomMetricImplMaker(implMakerClass)));
     }

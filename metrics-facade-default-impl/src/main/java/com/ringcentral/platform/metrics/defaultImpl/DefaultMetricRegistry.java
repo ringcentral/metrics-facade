@@ -25,11 +25,14 @@ import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.DefaultCaching
 import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.DefaultStringVar;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.histogram.configs.HistogramConfig;
+import com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder;
 import com.ringcentral.platform.metrics.impl.MetricImplConfig;
+import com.ringcentral.platform.metrics.impl.MetricImplConfigBuilder;
 import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.rate.configs.RateConfig;
+import com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
@@ -298,19 +301,50 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
 
     /* ***** Extensions ***** */
 
-    public void extendWith(CustomHistogramImplMaker<?> implMaker) {
-        Class<? extends HistogramImplConfig> configType = metricImplConfigTypeFor(CustomHistogramImplMaker.class, implMaker.getClass());
-        logCustomMetricImplRegistered("histogram", configType, implMaker);
-        customHistogramImplSpecs.put(configType, new CustomHistogramImplSpec<>(implMaker));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <C extends HistogramImplConfig> CustomHistogramImplSpec<C> customHistogramImplSpecFor(Class<C> configType) {
-        return (CustomHistogramImplSpec<C>)customHistogramImplSpecs.get(configType);
-    }
-
+    /**
+     * You can extend {@link DefaultMetricRegistry} with custom rate implementations
+     * (the CountScalingRate* classes and the RateSample class can be found in the metrics-facade-samples module):
+     * <ol>
+     *   <li>Define an implementation type: {@code class I extends RateImpl}.
+     *       <p>Example: {@code CountScalingRateImpl}.
+     *
+     *   <li>Define an implementation configuration type: {@code C extends RateImplConfig}.
+     *       <p>Example: {@code CountScalingRateImplConfig}.
+     *
+     *   <li>Define an implementation configuration builder type: {@code CB extends RateImplConfigBuilder<C>}.
+     *       <p>Example: {@code CountScalingRateConfigBuilder}.
+     *
+     *   <li>Define an implementation maker type: {@code IM extends CustomRateImplMaker<C>}.
+     *       <p>Example: {@code CountScalingRateImplMaker}.
+     *
+     *   <li>Register the implementation maker type: {@code registry.extendWith(new IM())}.
+     *       <p>Example: {@code registry.extendWith(new CountScalingRateImplMaker())}.
+     *       <p>You can also use automatic discovery of implementation maker types:
+     * <pre>
+     * {@code
+     * DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+     *   .withCustomMetricImplsFromPackages("package.to.scan.1", ...)
+     *   .build();
+     * }
+     * </pre>
+     * </ol>
+     *
+     * You can choose the specific implementation using the
+     * {@link RateConfigBuilder#impl(MetricImplConfigBuilder)} method.
+     * <p>See an example in the {@code RateSample} class:
+     * <pre>
+     * {@code
+     * .impl(expMovingAverage())
+     * // .impl(countScaling().factor(2)) // custom impl
+     * }
+     * </pre>
+     */
     public void extendWith(CustomRateImplMaker<?> implMaker) {
-        Class<? extends RateImplConfig> configType = metricImplConfigTypeFor(CustomRateImplMaker.class, implMaker.getClass());
+        Class<? extends RateImplConfig> configType = configTypeForImplMakerClass(
+            RateImplConfig.class,
+            CustomRateImplMaker.class,
+            implMaker.getClass());
+
         logCustomMetricImplRegistered("rate", configType, implMaker);
         customRateImplSpecs.put(configType, new CustomRateImplSpec<>(implMaker));
     }
@@ -320,20 +354,130 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
         return (CustomRateImplSpec<C>)customRateImplSpecs.get(configType);
     }
 
-    @SuppressWarnings("unchecked")
-    private static <C extends MetricImplConfig> Class<C> metricImplConfigTypeFor(Class<?> implMakerInterface, Class<?> implMakerClass) {
-        return Arrays
-            .stream(implMakerClass.getGenericInterfaces())
-            .filter(gi -> gi instanceof ParameterizedType && ((ParameterizedType)gi).getRawType() == implMakerInterface)
-            .map(gi -> (Class<C>)metricImplConfigTypeFor((ParameterizedType)gi))
-            .findFirst().orElseGet(() -> metricImplConfigTypeFor(implMakerInterface, implMakerClass.getSuperclass()));
+    /**
+     * You can extend {@link DefaultMetricRegistry} with custom histogram implementations
+     * (the CountAndTotalSumScalingHistogram* classes, the HistogramSample,
+     * and the TimerSample classes can be found in the metrics-facade-samples module):
+     * <ol>
+     *   <li>Define an implementation type: {@code class I extends HistogramImpl}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramImpl}.
+     *
+     *   <li>Define an implementation configuration type: {@code C extends HistogramImplConfig}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramImplConfig}.
+     *
+     *   <li>Define an implementation configuration builder type: {@code CB extends HistogramImplConfigBuilder<C>}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramConfigBuilder}.
+     *
+     *   <li>Define an implementation maker type: {@code IM extends CustomHistogramImplMaker<C>}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramImplMaker}.
+     *
+     *   <li>Register the implementation maker type: {@code registry.extendWith(new IM())}.
+     *       <p>Example: {@code registry.extendWith(new CountAndTotalSumScalingHistogramImplMaker())}.
+     *       <p>You can also use automatic discovery of implementation maker types:
+     * <pre>
+     * {@code
+     * DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+     *   .withCustomMetricImplsFromPackages("package.to.scan.1", ...)
+     *   .build();
+     * }
+     * </pre>
+     * </ol>
+     *
+     * You can choose the specific implementation using the
+     * {@link HistogramConfigBuilder#impl(MetricImplConfigBuilder)} method.
+     * <p>See an example in the {@code HistogramSample} class:
+     * <pre>
+     * {@code
+     * .impl(hdr()
+     *   .resetByChunks(6, Duration.ofMinutes(2))
+     *   .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
+     *   .significantDigits(3)
+     *   .snapshotTtl(30, SECONDS))
+     * // .impl(countAndTotalSumScaling().factor(2)) // custom impl
+     * }
+     * </pre>
+     *
+     * Another example can be seen in the {@code TimerSample} class:
+     * <pre>
+     * {@code
+     * .impl(hdr()
+     *   .resetByChunks(6, Duration.ofMinutes(2))
+     *   .lowestDiscernibleValue(MILLISECONDS.toNanos(1))
+     *   .highestTrackableValue(DAYS.toNanos(7), REDUCE_TO_HIGHEST_TRACKABLE)
+     *   .significantDigits(2)
+     *   .snapshotTtl(30, SECONDS))
+     * // .impl(countAndTotalSumScaling().factor(2)) // custom impl
+     * }
+     * </pre>
+     */
+    public void extendWith(CustomHistogramImplMaker<?> implMaker) {
+        Class<? extends HistogramImplConfig> configType = configTypeForImplMakerClass(
+            HistogramImplConfig.class,
+            CustomHistogramImplMaker.class,
+            implMaker.getClass());
+
+        logCustomMetricImplRegistered("histogram", configType, implMaker);
+        customHistogramImplSpecs.put(configType, new CustomHistogramImplSpec<>(implMaker));
     }
 
-    private static Type metricImplConfigTypeFor(ParameterizedType parametrizedImplMakerInterface) {
+    @SuppressWarnings("unchecked")
+    public <C extends HistogramImplConfig> CustomHistogramImplSpec<C> customHistogramImplSpecFor(Class<C> configType) {
+        return (CustomHistogramImplSpec<C>)customHistogramImplSpecs.get(configType);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static <C extends MetricImplConfig> Class<C> configTypeForImplMakerClass(
+        Class<? extends MetricImplConfig> implConfigInterface,
+        Class<? extends CustomMetricImplMaker> implMakerInterface,
+        Class<?> implMakerClass) {
+
+        Class<C> configType;
+
+        for (Type gi : implMakerClass.getGenericInterfaces()) {
+            configType = configTypeForGenericType(implConfigInterface, implMakerInterface, gi);
+
+            if (configType != null) {
+                return configType;
+            }
+        }
+
+        configType = configTypeForGenericType(implConfigInterface, implMakerInterface, implMakerClass.getGenericSuperclass());
+
+        return
+            configType != null ?
+            configType :
+            configTypeForImplMakerClass(implConfigInterface, implMakerInterface, implMakerClass.getSuperclass());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <C extends MetricImplConfig> Class<C> configTypeForGenericType(
+        Class<? extends MetricImplConfig> implConfigInterface,
+        Class<? extends CustomMetricImplMaker> implMakerInterface,
+        Type genericType) {
+
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType)genericType;
+
+            if (pt.getRawType() instanceof Class && implMakerInterface.isAssignableFrom((Class<?>)pt.getRawType())) {
+                Type configType = configTypeForParametrizedType(implConfigInterface, pt);
+
+                if (configType != null) {
+                    return (Class<C>)configType;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static Type configTypeForParametrizedType(
+        Class<? extends MetricImplConfig> implConfigInterface,
+        ParameterizedType parametrizedType) {
+
         return Arrays
-            .stream(parametrizedImplMakerInterface.getActualTypeArguments())
-            .filter(typeArg -> typeArg instanceof Class && MetricImplConfig.class.isAssignableFrom((Class<?>)typeArg))
-            .findFirst().orElseThrow();
+            .stream(parametrizedType.getActualTypeArguments())
+            .filter(typeArg -> typeArg instanceof Class && implConfigInterface.isAssignableFrom((Class<?>)typeArg))
+            .findFirst().orElse(null);
     }
 
     private void logCustomMetricImplRegistered(

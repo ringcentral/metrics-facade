@@ -1,7 +1,11 @@
 package com.ringcentral.platform.metrics.samples;
 
-import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistryBuilder;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder;
+import com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfigBuilder;
+import com.ringcentral.platform.metrics.samples.histogram.CountAndTotalSumScalingHistogramConfigBuilder;
+import com.ringcentral.platform.metrics.samples.rate.CountScalingRateConfigBuilder;
 import com.ringcentral.platform.metrics.timer.Stopwatch;
 import com.ringcentral.platform.metrics.timer.Timer;
 
@@ -31,7 +35,12 @@ public class TimerSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new DefaultMetricRegistry();
+        DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+            // You can also register custom metric implementations using the extendWith method:
+            // registry.extendWith(new CountScalingRateImplMaker());
+            // registry.extendWith(new CountAndTotalSumScalingHistogramImplMaker());
+            .withCustomMetricImplsFromPackages("com.ringcentral.platform.metrics.samples")
+            .build();
 
         // Default config:
         //   no dimensions
@@ -107,27 +116,35 @@ public class TimerSample extends AbstractSample {
                 // }
                 .measurables(COUNT, MEAN_RATE, MAX, MEAN)
 
-                // the properties specific to the metrics implementation
-                // default: no properties
-                .put("key_1", "value_1_1")
+                /**
+                 * options:
+                 *   - expMovingAverage() == {@link ExpMovingAverageRateImplConfigBuilder#expMovingAverage()},
+                 *   - custom impl, e.g. countAndMean() == {@link CountScalingRateConfigBuilder#countScaling()}.
+                 *     Custom impls must be registered: registry.extendWith(new CountScalingRateConfigBuilder()).
+                 * default: expMovingAverage()
+                 */
+                .impl(expMovingAverage())
+                // .impl(countScaling().factor(2)) // custom impl
 
-                // options: expMovingAverage() == ExpMovingAverageRateImplConfigBuilder.expMovingAverage(), custom impl
-                // default: expMovingAverage()
-                .withImpl(expMovingAverage())
-
-                // options:
-                //   - hdr() == HdrHistogramImplConfigBuilder.hdr(),
-                //   - scale() == ScaleHistogramImplConfigBuilder.scale()
-                //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
-                //     Custom impls must be registered: registry.extendWith(new LastValueHistogramImplMaker());
-                // default: hdr()
-                .withImpl(hdr()
+                /**
+                 * options:
+                 *   - hdr() == {@link HdrHistogramImplConfigBuilder#hdr()},
+                 *   - scale() == {@link com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder#scale()},
+                 *   - custom impl, e.g. countAndTotalSum() == {@link CountAndTotalSumScalingHistogramConfigBuilder#countAndTotalSumScaling()}.
+                 *     Custom impls must be registered: registry.extendWith(new CountAndTotalSumScalingHistogramConfigBuilder()).
+                 * default: hdr()
+                 */
+                .impl(hdr()
                     .resetByChunks(6, Duration.ofMinutes(2))
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))
                     .highestTrackableValue(DAYS.toNanos(7), REDUCE_TO_HIGHEST_TRACKABLE)
                     .significantDigits(2)
                     .snapshotTtl(30, SECONDS))
-                // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
+                // .impl(countAndTotalSumScaling().factor(2)) // custom impl
+
+                // the properties specific to the metrics implementation
+                // default: no properties
+                .put("key_1", "value_1_1")
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

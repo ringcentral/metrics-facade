@@ -2,6 +2,7 @@ package com.ringcentral.platform.metrics.samples.histogram;
 
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistryBuilder;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 
@@ -28,8 +29,8 @@ public class HistogramSample extends AbstractSample {
         // MetricRegistry registry = new DropwizardMetricRegistry();
         DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
             // You can also register custom metric implementations using the extendWith method:
-            // registry.extendWith(new LastValueHistogramImplMaker());
-            .withCustomMetricImplsFromPackages("com.ringcentral.platform.metrics.samples.histogram")
+            // registry.extendWith(new CountAndTotalSumScalingHistogramImplMaker());
+            .withCustomMetricImplsFromPackages("com.ringcentral.platform.metrics.samples")
             .build();
 
         // Default config:
@@ -88,22 +89,24 @@ public class HistogramSample extends AbstractSample {
                 // }
                 .measurables(COUNT, MEAN)
 
-                // the properties specific to the metrics implementation
-                // default: no properties
-                .put("key_1", "value_1_1")
-
-                // options:
-                //   - hdr() == HdrHistogramImplConfigBuilder.hdr() ,
-                //   - scale() == ScaleHistogramImplConfigBuilder.scale()
-                //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
-                //     Custom impls must be registered: registry.extendWith(new LastValueHistogramImplMaker());
-                // default: hdr()
-                .withImpl(hdr()
+                /**
+                 * options:
+                 *   - hdr() == {@link HdrHistogramImplConfigBuilder#hdr()},
+                 *   - scale() == {@link com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder#scale()},
+                 *   - custom impl, e.g. countAndTotalSum() == {@link CountAndTotalSumScalingHistogramConfigBuilder#countAndTotalSumScaling()}.
+                 *     Custom impls must be registered: registry.extendWith(new CountAndTotalSumScalingHistogramConfigBuilder()).
+                 * default: hdr()
+                 */
+                .impl(hdr()
                     .resetByChunks(6, Duration.ofMinutes(2))
                     .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
                     .significantDigits(3)
                     .snapshotTtl(30, SECONDS))
-                // .withImpl(LastValueHistogramConfigBuilder.lastValue()) // custom impl
+                // .impl(countAndTotalSumScaling().factor(2)) // custom impl
+
+                // the properties specific to the metrics implementation
+                // default: no properties
+                .put("key_1", "value_1_1")
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

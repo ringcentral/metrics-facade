@@ -98,6 +98,7 @@
         <prometheus.version>0.15.0</prometheus.version>
         <dropwizard-metrics.version>4.1.17</dropwizard-metrics.version>
 
+        <reflections.version>0.10.2</reflections.version>
         <commons-lang3.version>3.11</commons-lang3.version>
         <jackson.version>2.13.3</jackson.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
@@ -108,6 +109,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>

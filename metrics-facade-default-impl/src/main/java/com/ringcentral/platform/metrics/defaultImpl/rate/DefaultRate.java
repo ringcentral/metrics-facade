@@ -207,16 +207,16 @@ public class DefaultRate extends AbstractRate<RateImpl> {
             ScheduledExecutorService executor,
             MetricRegistry registry) {
 
-            CustomRateImplSpec<? extends RateImplConfig> customImplSpec =
+            CustomRateImplSpec<? extends RateImplConfig> implSpec =
                 ((DefaultMetricRegistry)registry).customRateImplSpecFor(config.getClass());
 
-            if (customImplSpec == null) {
+            if (implSpec == null) {
                 return null;
             }
 
-            CustomRateImplMaker customImplMaker = customImplSpec.implMaker();
+            CustomRateImplMaker implMaker = implSpec.implMaker();
 
-            return customImplMaker.makeRateImpl(
+            return implMaker.makeRateImpl(
                 config,
                 instanceContext,
                 sliceContext,

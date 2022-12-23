@@ -33,6 +33,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-test-support</artifactId>
             <version>${project.version}</version>

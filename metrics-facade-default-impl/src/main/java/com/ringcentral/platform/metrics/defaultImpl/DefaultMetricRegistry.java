@@ -1,35 +1,62 @@
 package com.ringcentral.platform.metrics.defaultImpl;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.AbstractMetricRegistry;
+import com.ringcentral.platform.metrics.MetricMod;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
 import com.ringcentral.platform.metrics.defaultImpl.counter.DefaultCounter;
-import com.ringcentral.platform.metrics.defaultImpl.histogram.*;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.CustomHistogramImplMaker;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.CustomHistogramImplSpec;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogram;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.HistogramImplConfig;
-import com.ringcentral.platform.metrics.defaultImpl.rate.*;
+import com.ringcentral.platform.metrics.defaultImpl.rate.CustomRateImplMaker;
+import com.ringcentral.platform.metrics.defaultImpl.rate.CustomRateImplSpec;
+import com.ringcentral.platform.metrics.defaultImpl.rate.DefaultRate;
 import com.ringcentral.platform.metrics.defaultImpl.rate.configs.RateImplConfig;
 import com.ringcentral.platform.metrics.defaultImpl.timer.DefaultTimer;
-import com.ringcentral.platform.metrics.defaultImpl.var.doubleVar.*;
-import com.ringcentral.platform.metrics.defaultImpl.var.longVar.*;
-import com.ringcentral.platform.metrics.defaultImpl.var.objectVar.*;
-import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.*;
+import com.ringcentral.platform.metrics.defaultImpl.var.doubleVar.DefaultCachingDoubleVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.doubleVar.DefaultDoubleVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.longVar.DefaultCachingLongVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.longVar.DefaultLongVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.objectVar.DefaultCachingObjectVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.objectVar.DefaultObjectVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.DefaultCachingStringVar;
+import com.ringcentral.platform.metrics.defaultImpl.var.stringVar.DefaultStringVar;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.histogram.configs.HistogramConfig;
+import com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder;
+import com.ringcentral.platform.metrics.impl.MetricImplConfig;
+import com.ringcentral.platform.metrics.impl.MetricImplConfigBuilder;
 import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.rate.configs.RateConfig;
+import com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
-import com.ringcentral.platform.metrics.var.configs.*;
-import com.ringcentral.platform.metrics.var.doubleVar.*;
-import com.ringcentral.platform.metrics.var.longVar.*;
-import com.ringcentral.platform.metrics.var.objectVar.*;
-import com.ringcentral.platform.metrics.var.stringVar.*;
+import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
+import com.ringcentral.platform.metrics.var.configs.VarConfig;
+import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
+import com.ringcentral.platform.metrics.var.doubleVar.DoubleVar;
+import com.ringcentral.platform.metrics.var.longVar.CachingLongVar;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
+import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
+import com.ringcentral.platform.metrics.var.stringVar.CachingStringVar;
+import com.ringcentral.platform.metrics.var.stringVar.StringVar;
+import org.slf4j.Logger;
 
-import java.util.concurrent.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 @SuppressWarnings("SameParameterValue")
 public class DefaultMetricRegistry extends AbstractMetricRegistry {
@@ -226,6 +253,8 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
     private final ConcurrentMap<Class<? extends RateImplConfig>, CustomRateImplSpec<?>> customRateImplSpecs = new ConcurrentHashMap<>();
     private final ConcurrentMap<Class<? extends HistogramImplConfig>, CustomHistogramImplSpec<?>> customHistogramImplSpecs = new ConcurrentHashMap<>();
 
+    private static final Logger logger = getLogger(DefaultMetricRegistry.class);
+
     public DefaultMetricRegistry() {
         super(MetricMakerImpl.INSTANCE);
     }
@@ -272,7 +301,122 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
 
     /* ***** Extensions ***** */
 
-    public <C extends HistogramImplConfig> void extendWith(Class<C> configType, CustomHistogramImplMaker<C> implMaker) {
+    /**
+     * You can extend {@link DefaultMetricRegistry} with custom rate implementations
+     * (the CountScalingRate* classes and the RateSample class can be found in the metrics-facade-samples module):
+     * <ol>
+     *   <li>Define an implementation type: {@code class I extends RateImpl}.
+     *       <p>Example: {@code CountScalingRateImpl}.
+     *
+     *   <li>Define an implementation configuration type: {@code C extends RateImplConfig}.
+     *       <p>Example: {@code CountScalingRateImplConfig}.
+     *
+     *   <li>Define an implementation configuration builder type: {@code CB extends RateImplConfigBuilder<C>}.
+     *       <p>Example: {@code CountScalingRateConfigBuilder}.
+     *
+     *   <li>Define an implementation maker type: {@code IM extends CustomRateImplMaker<C>}.
+     *       <p>Example: {@code CountScalingRateImplMaker}.
+     *
+     *   <li>Register the implementation maker type: {@code registry.extendWith(new IM())}.
+     *       <p>Example: {@code registry.extendWith(new CountScalingRateImplMaker())}.
+     *       <p>You can also use automatic discovery of implementation maker types:
+     * <pre>
+     * {@code
+     * DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+     *   .withCustomMetricImplsFromPackages("package.to.scan.1", ...)
+     *   .build();
+     * }
+     * </pre>
+     * </ol>
+     *
+     * You can choose the specific implementation using the
+     * {@link RateConfigBuilder#impl(MetricImplConfigBuilder)} method.
+     * <p>See an example in the {@code RateSample} class:
+     * <pre>
+     * {@code
+     * .impl(expMovingAverage())
+     * // .impl(countScaling().factor(2)) // custom impl
+     * }
+     * </pre>
+     */
+    public void extendWith(CustomRateImplMaker<?> implMaker) {
+        Class<? extends RateImplConfig> configType = configTypeForImplMakerClass(
+            RateImplConfig.class,
+            CustomRateImplMaker.class,
+            implMaker.getClass());
+
+        logCustomMetricImplRegistered("rate", configType, implMaker);
+        customRateImplSpecs.put(configType, new CustomRateImplSpec<>(implMaker));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C extends RateImplConfig> CustomRateImplSpec<C> customRateImplSpecFor(Class<C> configType) {
+        return (CustomRateImplSpec<C>)customRateImplSpecs.get(configType);
+    }
+
+    /**
+     * You can extend {@link DefaultMetricRegistry} with custom histogram implementations
+     * (the CountAndTotalSumScalingHistogram* classes, the HistogramSample,
+     * and the TimerSample classes can be found in the metrics-facade-samples module):
+     * <ol>
+     *   <li>Define an implementation type: {@code class I extends HistogramImpl}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramImpl}.
+     *
+     *   <li>Define an implementation configuration type: {@code C extends HistogramImplConfig}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramImplConfig}.
+     *
+     *   <li>Define an implementation configuration builder type: {@code CB extends HistogramImplConfigBuilder<C>}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramConfigBuilder}.
+     *
+     *   <li>Define an implementation maker type: {@code IM extends CustomHistogramImplMaker<C>}.
+     *       <p>Example: {@code CountAndTotalSumScalingHistogramImplMaker}.
+     *
+     *   <li>Register the implementation maker type: {@code registry.extendWith(new IM())}.
+     *       <p>Example: {@code registry.extendWith(new CountAndTotalSumScalingHistogramImplMaker())}.
+     *       <p>You can also use automatic discovery of implementation maker types:
+     * <pre>
+     * {@code
+     * DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+     *   .withCustomMetricImplsFromPackages("package.to.scan.1", ...)
+     *   .build();
+     * }
+     * </pre>
+     * </ol>
+     *
+     * You can choose the specific implementation using the
+     * {@link HistogramConfigBuilder#impl(MetricImplConfigBuilder)} method.
+     * <p>See an example in the {@code HistogramSample} class:
+     * <pre>
+     * {@code
+     * .impl(hdr()
+     *   .resetByChunks(6, Duration.ofMinutes(2))
+     *   .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
+     *   .significantDigits(3)
+     *   .snapshotTtl(30, SECONDS))
+     * // .impl(countAndTotalSumScaling().factor(2)) // custom impl
+     * }
+     * </pre>
+     *
+     * Another example can be seen in the {@code TimerSample} class:
+     * <pre>
+     * {@code
+     * .impl(hdr()
+     *   .resetByChunks(6, Duration.ofMinutes(2))
+     *   .lowestDiscernibleValue(MILLISECONDS.toNanos(1))
+     *   .highestTrackableValue(DAYS.toNanos(7), REDUCE_TO_HIGHEST_TRACKABLE)
+     *   .significantDigits(2)
+     *   .snapshotTtl(30, SECONDS))
+     * // .impl(countAndTotalSumScaling().factor(2)) // custom impl
+     * }
+     * </pre>
+     */
+    public void extendWith(CustomHistogramImplMaker<?> implMaker) {
+        Class<? extends HistogramImplConfig> configType = configTypeForImplMakerClass(
+            HistogramImplConfig.class,
+            CustomHistogramImplMaker.class,
+            implMaker.getClass());
+
+        logCustomMetricImplRegistered("histogram", configType, implMaker);
         customHistogramImplSpecs.put(configType, new CustomHistogramImplSpec<>(implMaker));
     }
 
@@ -281,12 +425,70 @@ public class DefaultMetricRegistry extends AbstractMetricRegistry {
         return (CustomHistogramImplSpec<C>)customHistogramImplSpecs.get(configType);
     }
 
-    public <C extends RateImplConfig> void extendWith(Class<C> configType, CustomRateImplMaker<C> implMaker) {
-        customRateImplSpecs.put(configType, new CustomRateImplSpec<>(implMaker));
+    @SuppressWarnings("rawtypes")
+    private static <C extends MetricImplConfig> Class<C> configTypeForImplMakerClass(
+        Class<? extends MetricImplConfig> implConfigInterface,
+        Class<? extends CustomMetricImplMaker> implMakerInterface,
+        Class<?> implMakerClass) {
+
+        Class<C> configType;
+
+        for (Type gi : implMakerClass.getGenericInterfaces()) {
+            configType = configTypeForGenericType(implConfigInterface, implMakerInterface, gi);
+
+            if (configType != null) {
+                return configType;
+            }
+        }
+
+        configType = configTypeForGenericType(implConfigInterface, implMakerInterface, implMakerClass.getGenericSuperclass());
+
+        return
+            configType != null ?
+            configType :
+            configTypeForImplMakerClass(implConfigInterface, implMakerInterface, implMakerClass.getSuperclass());
     }
 
-    @SuppressWarnings("unchecked")
-    public <C extends RateImplConfig> CustomRateImplSpec<C> customRateImplSpecFor(Class<C> configType) {
-        return (CustomRateImplSpec<C>)customRateImplSpecs.get(configType);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <C extends MetricImplConfig> Class<C> configTypeForGenericType(
+        Class<? extends MetricImplConfig> implConfigInterface,
+        Class<? extends CustomMetricImplMaker> implMakerInterface,
+        Type genericType) {
+
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType)genericType;
+
+            if (pt.getRawType() instanceof Class && implMakerInterface.isAssignableFrom((Class<?>)pt.getRawType())) {
+                Type configType = configTypeForParametrizedType(implConfigInterface, pt);
+
+                if (configType != null) {
+                    return (Class<C>)configType;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static Type configTypeForParametrizedType(
+        Class<? extends MetricImplConfig> implConfigInterface,
+        ParameterizedType parametrizedType) {
+
+        return Arrays
+            .stream(parametrizedType.getActualTypeArguments())
+            .filter(typeArg -> typeArg instanceof Class && implConfigInterface.isAssignableFrom((Class<?>)typeArg))
+            .findFirst().orElse(null);
+    }
+
+    private void logCustomMetricImplRegistered(
+        String metricTypeName,
+        Class<? extends MetricImplConfig> configType,
+        CustomMetricImplMaker<?> implMaker) {
+
+        logger.info(
+            "Custom {} impl registered: config type = {}, impl maker type = {}",
+            metricTypeName,
+            configType.getName(),
+            implMaker.getClass().getName());
     }
 }

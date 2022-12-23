@@ -2,7 +2,9 @@ package com.ringcentral.platform.metrics.configs.builders;
 
 import com.ringcentral.platform.metrics.ModifiableMetricContext;
 import com.ringcentral.platform.metrics.configs.MetricConfig;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.impl.MetricImplConfigBuilder;
 
 import java.util.List;
 
@@ -103,6 +105,10 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
 
     protected MetricDimensionValues prefixDimensionValues() {
         return prefixDimensionValues;
+    }
+
+    public CB impl(MetricImplConfigBuilder configBuilder) {
+        return with(configBuilder);
     }
 
     public CB put(Object key, Object value) {

@@ -47,7 +47,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     static final MetricDimension DIMENSION_4 = new MetricDimension("dimension_4");
     static final MetricDimension DIMENSION_5 = new MetricDimension("dimension_5");
 
-    protected final R registry;
+    protected R registry;
     MetricRegistryListener listener = mock(MetricRegistryListener.class);
 
     public AbstractMetricRegistryTest(R registry) {

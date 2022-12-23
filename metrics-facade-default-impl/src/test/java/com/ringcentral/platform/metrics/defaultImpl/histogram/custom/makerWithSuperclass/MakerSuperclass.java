@@ -1,0 +1,5 @@
+package com.ringcentral.platform.metrics.defaultImpl.histogram.custom.makerWithSuperclass;
+
+import com.ringcentral.platform.metrics.defaultImpl.histogram.custom.AbstractTestCustomHistogramImplMaker;
+
+public abstract class MakerSuperclass extends AbstractTestCustomHistogramImplMaker<TestCustomHistogramImplConfigForMakerWithSuperclass> {}

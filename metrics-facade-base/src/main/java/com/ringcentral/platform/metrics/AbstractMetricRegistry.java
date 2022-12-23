@@ -1,6 +1,7 @@
 package com.ringcentral.platform.metrics;
 
-import com.ringcentral.platform.metrics.configs.builders.*;
+import com.ringcentral.platform.metrics.configs.builders.MetricConfigBuilder;
+import com.ringcentral.platform.metrics.configs.builders.MetricConfigBuilderProvider;
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
 import com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder;
@@ -8,7 +9,8 @@ import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.histogram.configs.HistogramConfig;
 import com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder;
-import com.ringcentral.platform.metrics.infoProviders.*;
+import com.ringcentral.platform.metrics.infoProviders.ConcurrentMaskTreeMetricNamedInfoProvider;
+import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -17,25 +19,42 @@ import com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
 import com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder;
-import com.ringcentral.platform.metrics.utils.*;
-import com.ringcentral.platform.metrics.var.configs.*;
-import com.ringcentral.platform.metrics.var.doubleVar.*;
-import com.ringcentral.platform.metrics.var.doubleVar.configs.*;
-import com.ringcentral.platform.metrics.var.doubleVar.configs.builders.*;
-import com.ringcentral.platform.metrics.var.longVar.*;
-import com.ringcentral.platform.metrics.var.longVar.configs.*;
-import com.ringcentral.platform.metrics.var.longVar.configs.builders.*;
-import com.ringcentral.platform.metrics.var.objectVar.*;
-import com.ringcentral.platform.metrics.var.objectVar.configs.*;
-import com.ringcentral.platform.metrics.var.objectVar.configs.builders.*;
-import com.ringcentral.platform.metrics.var.stringVar.*;
-import com.ringcentral.platform.metrics.var.stringVar.configs.*;
-import com.ringcentral.platform.metrics.var.stringVar.configs.builders.*;
+import com.ringcentral.platform.metrics.utils.SystemTimeMsProvider;
+import com.ringcentral.platform.metrics.utils.TimeMsProvider;
+import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
+import com.ringcentral.platform.metrics.var.configs.VarConfig;
+import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
+import com.ringcentral.platform.metrics.var.doubleVar.DoubleVar;
+import com.ringcentral.platform.metrics.var.doubleVar.configs.CachingDoubleVarConfig;
+import com.ringcentral.platform.metrics.var.doubleVar.configs.DoubleVarConfig;
+import com.ringcentral.platform.metrics.var.doubleVar.configs.builders.CachingDoubleVarConfigBuilder;
+import com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder;
+import com.ringcentral.platform.metrics.var.longVar.CachingLongVar;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
+import com.ringcentral.platform.metrics.var.longVar.configs.CachingLongVarConfig;
+import com.ringcentral.platform.metrics.var.longVar.configs.LongVarConfig;
+import com.ringcentral.platform.metrics.var.longVar.configs.builders.CachingLongVarConfigBuilder;
+import com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder;
+import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.configs.CachingObjectVarConfig;
+import com.ringcentral.platform.metrics.var.objectVar.configs.ObjectVarConfig;
+import com.ringcentral.platform.metrics.var.objectVar.configs.builders.CachingObjectVarConfigBuilder;
+import com.ringcentral.platform.metrics.var.objectVar.configs.builders.ObjectVarConfigBuilder;
+import com.ringcentral.platform.metrics.var.stringVar.CachingStringVar;
+import com.ringcentral.platform.metrics.var.stringVar.StringVar;
+import com.ringcentral.platform.metrics.var.stringVar.configs.CachingStringVarConfig;
+import com.ringcentral.platform.metrics.var.stringVar.configs.StringVarConfig;
+import com.ringcentral.platform.metrics.var.stringVar.configs.builders.CachingStringVarConfigBuilder;
+import com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
 import static com.ringcentral.platform.metrics.configs.builders.BaseMetricConfigBuilder.withMetric;
@@ -162,11 +181,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
     private static final Logger logger = getLogger(AbstractMetricRegistry.class);
 
     protected AbstractMetricRegistry(MetricMaker metricMaker) {
-        this(metricMaker, makeExecutor());
-    }
-
-    private static ScheduledExecutorService makeExecutor() {
-        return newSingleThreadScheduledExecutor(new BasicThreadFactory.Builder().daemon(true).build());
+        this(metricMaker, makeDefaultExecutor());
     }
 
     /**
@@ -175,8 +190,8 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
     protected AbstractMetricRegistry(MetricMaker metricMaker, ScheduledExecutorService executor) {
         this(
             metricMaker,
-            new ConcurrentMaskTreeMetricNamedInfoProvider<>(),
-            new ConcurrentMaskTreeMetricNamedInfoProvider<>(),
+            makeDefaultModsProvider(),
+            makeDefaultModsProvider(),
             executor);
     }
 
@@ -189,7 +204,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             metricMaker,
             preModsProvider,
             postModsProvider,
-            makeExecutor());
+            makeDefaultExecutor());
     }
 
     /**
@@ -224,6 +239,14 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
         this.postModsProvider = requireNonNull(postModsProvider);
         this.timeMsProvider = requireNonNull(timeMsProvider);
         this.executor = requireNonNull(executor);
+    }
+
+    public static ScheduledExecutorService makeDefaultExecutor() {
+        return newSingleThreadScheduledExecutor(new BasicThreadFactory.Builder().daemon(true).build());
+    }
+
+    public static PredicativeMetricNamedInfoProvider<MetricMod> makeDefaultModsProvider() {
+        return new ConcurrentMaskTreeMetricNamedInfoProvider<>();
     }
 
     @Override

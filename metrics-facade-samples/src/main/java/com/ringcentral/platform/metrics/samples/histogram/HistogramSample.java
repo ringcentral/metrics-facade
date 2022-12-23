@@ -1,17 +1,20 @@
 package com.ringcentral.platform.metrics.samples.histogram;
 
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistryBuilder;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.samples.AbstractSample;
 
 import java.time.Duration;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdr;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramInstanceConfigBuilder.histogramInstance;
@@ -24,8 +27,11 @@ public class HistogramSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        DefaultMetricRegistry registry = new DefaultMetricRegistry();
-        registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
+        DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+            // You can also register custom metric implementations using the extendWith method:
+            // registry.extendWith(new CountAndTotalSumScalingHistogramImplMaker());
+            .withCustomMetricImplsFromPackages("com.ringcentral.platform.metrics.samples")
+            .build();
 
         // Default config:
         //   no dimensions
@@ -83,21 +89,24 @@ public class HistogramSample extends AbstractSample {
                 // }
                 .measurables(COUNT, MEAN)
 
-                // the properties specific to the metrics implementation
-                // default: no properties
-                .put("key_1", "value_1_1")
-
-                // options:
-                //   - hdrImpl() == HdrHistogramImplConfigBuilder.hdrImpl(),
-                //   - scaleImpl() == ScaleHistogramImplConfigBuilder.scaleImpl()
-                //   - custom impl, e.g. LastValueHistogramImpl: lastValueImpl().
-                //     Custom impls must be registered: registry.extendWith(LastValueHistogramImplConfig.class, new LastValueHistogramImplMaker());
-                // default: hdrImpl()
-                .with(hdrImpl()
+                /**
+                 * options:
+                 *   - hdr() == {@link HdrHistogramImplConfigBuilder#hdr()},
+                 *   - scale() == {@link com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder#scale()},
+                 *   - custom impl, e.g. countAndTotalSum() == {@link CountAndTotalSumScalingHistogramConfigBuilder#countAndTotalSumScaling()}.
+                 *     Custom impls must be registered: registry.extendWith(new CountAndTotalSumScalingHistogramConfigBuilder()).
+                 * default: hdr()
+                 */
+                .impl(hdr()
                     .resetByChunks(6, Duration.ofMinutes(2))
                     .highestTrackableValue(1000, REDUCE_TO_HIGHEST_TRACKABLE)
                     .significantDigits(3)
                     .snapshotTtl(30, SECONDS))
+                // .impl(countAndTotalSumScaling().factor(2)) // custom impl
+
+                // the properties specific to the metrics implementation
+                // default: no properties
+                .put("key_1", "value_1_1")
 
                 .allSlice()
                     // options: disable(), enabled(boolean)

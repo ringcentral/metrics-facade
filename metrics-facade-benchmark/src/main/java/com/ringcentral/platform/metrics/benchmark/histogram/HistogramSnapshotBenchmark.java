@@ -9,16 +9,19 @@ import com.ringcentral.platform.metrics.dropwizard.DropwizardMetricRegistry;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.scale.ScaleBuilder;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.runner.*;
-import org.openjdk.jmh.runner.options.*;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdrImpl;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.HdrHistogramImplConfigBuilder.hdr;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.configs.OverflowBehavior.REDUCE_TO_HIGHEST_TRACKABLE;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scale;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleImpl;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
@@ -68,7 +71,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(hdrImpl()
+                .impl(hdr()
                     .neverReset()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
                     .lowestDiscernibleValue(MILLISECONDS.toNanos(1))));
@@ -86,7 +89,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(hdrImpl()
+                .impl(hdr()
                     .eventuallyConsistentTotals()
                     .resetByChunks()
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
@@ -105,7 +108,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(hdrImpl()
+                .impl(hdr()
                     .resetByChunks()
                     .significantDigits(3)
                     .highestTrackableValue(HOURS.toNanos(3), REDUCE_TO_HIGHEST_TRACKABLE)
@@ -125,7 +128,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(scaleImpl()
+                .impl(scaleImpl()
                     .neverReset()
                     .with(scale_1())));
 
@@ -142,7 +145,7 @@ public class HistogramSnapshotBenchmark {
                     PERCENTILE_75,
                     PERCENTILE_90,
                     PERCENTILE_99)
-                .with(scaleImpl()
+                .impl(scale()
                     .resetByChunks()
                     .with(scale_1())));
 

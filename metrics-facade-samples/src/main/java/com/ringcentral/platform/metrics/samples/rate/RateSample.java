@@ -1,13 +1,17 @@
-package com.ringcentral.platform.metrics.samples;
+package com.ringcentral.platform.metrics.samples.rate;
 
-import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
+import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistryBuilder;
+import com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfigBuilder;
 import com.ringcentral.platform.metrics.rate.Rate;
+import com.ringcentral.platform.metrics.samples.AbstractSample;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
+import static com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfigBuilder.expMovingAverage;
 import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
 import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
+import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.rate.Rate.*;
 import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder.withRate;
@@ -19,7 +23,11 @@ public class RateSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
-        MetricRegistry registry = new DefaultMetricRegistry();
+        DefaultMetricRegistry registry = new DefaultMetricRegistryBuilder()
+            // You can also register custom metric implementations using the extendWith method:
+            // registry.extendWith(new CountScalingRateImplMaker());
+            .withCustomMetricImplsFromPackages("com.ringcentral.platform.metrics.samples")
+            .build();
 
         // Default config:
         //   no dimensions
@@ -73,6 +81,16 @@ public class RateSample extends AbstractSample {
                 //   RATE_UNIT
                 // }
                 .measurables(COUNT)
+
+                /**
+                 * options:
+                 *   - expMovingAverage() == {@link ExpMovingAverageRateImplConfigBuilder#expMovingAverage()},
+                 *   - custom impl, e.g. countAndMean() == {@link CountScalingRateConfigBuilder#countScaling()}.
+                 *     Custom impls must be registered: registry.extendWith(new CountScalingRateConfigBuilder()).
+                 * default: expMovingAverage()
+                 */
+                .impl(expMovingAverage())
+                // .impl(countScaling().factor(2)) // custom impl
 
                 // the properties specific to the metrics implementation
                 // default: no properties

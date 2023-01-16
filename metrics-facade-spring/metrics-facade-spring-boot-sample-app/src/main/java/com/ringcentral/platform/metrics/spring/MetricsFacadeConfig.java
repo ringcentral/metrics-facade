@@ -1,29 +1,40 @@
 package com.ringcentral.platform.metrics.spring;
 
-import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.infoProviders.*;
+import com.ringcentral.platform.metrics.infoProviders.ConcurrentMaskTreeMetricNamedInfoProvider;
+import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.micrometer.MfMeterRegistry;
-import com.ringcentral.platform.metrics.reporters.zabbix.ZabbixLldMetricsReporter.*;
+import com.ringcentral.platform.metrics.reporters.zabbix.ZabbixLldMetricsReporter.Rule;
+import com.ringcentral.platform.metrics.reporters.zabbix.ZabbixLldMetricsReporter.RuleItem;
 import com.ringcentral.platform.metrics.samples.DefaultInstanceSamplesProvider;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleSpecModsProvider;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProvider;
-import com.ringcentral.platform.metrics.spring.jmx.*;
-import com.ringcentral.platform.metrics.spring.prometheus.*;
-import com.ringcentral.platform.metrics.spring.telegraf.*;
-import com.ringcentral.platform.metrics.spring.zabbix.*;
-import com.ringcentral.platform.metrics.spring.zabbix.lld.*;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleSpecModsProvider;
+import com.ringcentral.platform.metrics.spring.jmx.JmxMetricsReporterCustomizer;
+import com.ringcentral.platform.metrics.spring.jmx.MfJmxConfigBuilder;
+import com.ringcentral.platform.metrics.spring.prometheus.MfPrometheusConfigBuilder;
+import com.ringcentral.platform.metrics.spring.prometheus.PrometheusMetricsExporterCustomizer;
+import com.ringcentral.platform.metrics.spring.telegraf.MfTelegrafConfigBuilder;
+import com.ringcentral.platform.metrics.spring.telegraf.TelegrafMetricsJsonExporterCustomizer;
+import com.ringcentral.platform.metrics.spring.zabbix.MfZabbixConfigBuilder;
+import com.ringcentral.platform.metrics.spring.zabbix.ZabbixMetricsJsonExporterCustomizer;
+import com.ringcentral.platform.metrics.spring.zabbix.lld.MfZabbixLldConfigBuilder;
+import com.ringcentral.platform.metrics.spring.zabbix.lld.ZGroupMBeansExporterCustomizer;
+import com.ringcentral.platform.metrics.spring.zabbix.lld.ZabbixLldMetricsReporterCustomizer;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
-import org.springframework.context.annotation.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 import static com.ringcentral.platform.metrics.MetricModBuilder.modifying;
-import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.counter;
 import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.withCounter;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.metricWithName;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.nameMask;
 import static com.ringcentral.platform.metrics.predicates.DefaultMetricInstancePredicate.forMetricInstancesMatching;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProviderBuilder.prometheusInstanceSamplesProvider;
 
 @Configuration
 public class MetricsFacadeConfig {
@@ -54,9 +65,18 @@ public class MetricsFacadeConfig {
     // Prometheus
 
     @Bean
-    public MfPrometheusConfigBuilder mfPrometheusConfigBuilder(MetricRegistry registry) {
+    @ConditionalOnMissingBean
+    public MfPrometheusConfigBuilder mfPrometheusConfigBuilder(
+        MetricRegistry registry,
+        PrometheusInstanceSampleSpecModsProvider instanceSampleSpecModsProvider,
+        PrometheusSampleSpecModsProvider sampleSpecModsProvider) {
+
         // See PrometheusMetricsExporterSample for more details about building PrometheusInstanceSamplesProvider.
-        PrometheusInstanceSamplesProvider instanceSamplesProvider = new PrometheusInstanceSamplesProvider(registry);
+        PrometheusInstanceSamplesProvider instanceSamplesProvider = prometheusInstanceSamplesProvider(registry)
+            .instanceSampleSpecModsProvider(instanceSampleSpecModsProvider)
+            .sampleSpecModsProvider(sampleSpecModsProvider)
+            .build();
+
         return new MfPrometheusConfigBuilder().instanceSamplesProvider(instanceSamplesProvider);
     }
 

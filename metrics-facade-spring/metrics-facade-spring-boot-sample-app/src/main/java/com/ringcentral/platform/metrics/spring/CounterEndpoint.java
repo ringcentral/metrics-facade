@@ -41,12 +41,15 @@ public class CounterEndpoint {
     public synchronized void modifyPrometheusValue(@PathVariable String value) {
         sampleSpecModsProvider.removeMod("testTriggerFor.counter");
 
-        if (!"real".equalsIgnoreCase(value)) {
-            sampleSpecModsProvider.addMod(
-                "testTriggerFor.counter",
-                forMetricWithName("counter"),
-                (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
-                    measurable instanceof Count ? sampleSpec().value(parseDouble(value)) : null);
-        }
+        sampleSpecModsProvider.addMod(
+            "testTriggerFor.counter",
+            forMetricWithName("counter"),
+            (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
+                measurable instanceof Count ? sampleSpec().value(parseDouble(value)) : null);
+    }
+
+    @RequestMapping(value = "/counter/prometheus/realValue", method = POST)
+    public synchronized void setRealPrometheusValue() {
+        sampleSpecModsProvider.removeMod("testTriggerFor.counter");
     }
 }

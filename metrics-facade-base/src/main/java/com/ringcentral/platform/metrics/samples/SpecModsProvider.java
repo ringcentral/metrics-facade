@@ -6,6 +6,7 @@ import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicateBuilder;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public interface SpecModsProvider<M, MP extends SpecModsProvider<M, MP>> extends PredicativeMetricNamedInfoProvider<M> {
     default MP addMod(MetricNamedPredicateBuilder<?> predicateBuilder, M mod) {
@@ -53,6 +54,19 @@ public interface SpecModsProvider<M, MP extends SpecModsProvider<M, MP>> extends
      */
     @Override
     MP removeInfo(String key);
+
+    /**
+     * @see #removeInfos(Predicate)
+     */
+    default MP removeMods(Predicate<String> keyPredicate) {
+        return removeInfos(keyPredicate);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    MP removeInfos(Predicate<String> keyPredicate);
 
     default List<M> modsFor(MetricInstance instance) {
         return infosFor(instance);

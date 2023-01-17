@@ -8,6 +8,7 @@ import com.ringcentral.platform.metrics.samples.SampleSpecProvider;
 import com.ringcentral.platform.metrics.samples.SpecModsProvider;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class PrometheusSampleSpecModsProvider implements SpecModsProvider<
     SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>,
@@ -42,6 +43,15 @@ public class PrometheusSampleSpecModsProvider implements SpecModsProvider<
     @Override
     public PrometheusSampleSpecModsProvider removeInfo(String key) {
         parent.removeInfo(key);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PrometheusSampleSpecModsProvider removeInfos(Predicate<String> keyPredicate) {
+        parent.removeInfos(keyPredicate);
         return this;
     }
 

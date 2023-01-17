@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -32,7 +33,7 @@ public class DefaultMetricNamedInfoProvider<I> implements PredicativeMetricNamed
 
     @Override
     public DefaultMetricNamedInfoProvider<I> addInfo(String key, MetricNamedPredicate predicate, I info) {
-        Entry<I> entry = new Entry<>(predicate, info);
+        Entry<I> entry = new Entry<>(key, predicate, info);
 
         if (key != null) {
             if (keyToEntry.containsKey(key)) {
@@ -58,16 +59,25 @@ public class DefaultMetricNamedInfoProvider<I> implements PredicativeMetricNamed
     }
 
     @Override
+    public PredicativeMetricNamedInfoProvider<I> removeInfos(Predicate<String> keyPredicate) {
+        keyToEntry.keySet().removeIf(keyPredicate);
+        entries.removeIf(e -> keyPredicate.test(e.key));
+        return this;
+    }
+
+    @Override
     public List<I> infosFor(MetricNamed named) {
         return entries.stream().filter(e -> e.predicate.matches(named)).map(e -> e.info).collect(toList());
     }
 
     private static class Entry<I> {
 
+        final String key;
         final MetricNamedPredicate predicate;
         final I info;
 
-        Entry(MetricNamedPredicate predicate, I info) {
+        Entry(String key, MetricNamedPredicate predicate, I info) {
+            this.key = key;
             this.predicate = predicate;
             this.info = info;
         }

@@ -3,6 +3,8 @@ package com.ringcentral.platform.metrics.infoProviders;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicateBuilder;
 
+import java.util.function.Predicate;
+
 public interface PredicativeMetricNamedInfoProvider<I> extends MetricNamedInfoProvider<I> {
     default PredicativeMetricNamedInfoProvider<I> addInfo(MetricNamedPredicateBuilder<?> predicateBuilder, I info) {
         return addInfo(predicateBuilder.build(), info);
@@ -29,4 +31,9 @@ public interface PredicativeMetricNamedInfoProvider<I> extends MetricNamedInfoPr
      * Removes the info previously added by the specified key.
      */
     PredicativeMetricNamedInfoProvider<I> removeInfo(String key);
+
+    /**
+     * Removes all the information previously added by the specified keys that satisfy the given predicate.
+     */
+    PredicativeMetricNamedInfoProvider<I> removeInfos(Predicate<String> keyPredicate);
 }

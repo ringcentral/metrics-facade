@@ -4,6 +4,7 @@ import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 
 public class DefaultConcurrentMetricNamedInfoProvider<I>
     extends DefaultMetricNamedInfoProvider<I>
@@ -22,6 +23,12 @@ public class DefaultConcurrentMetricNamedInfoProvider<I>
     @Override
     public synchronized DefaultConcurrentMetricNamedInfoProvider<I> removeInfo(String key) {
         super.removeInfo(key);
+        return this;
+    }
+
+    @Override
+    public synchronized DefaultConcurrentMetricNamedInfoProvider<I> removeInfos(Predicate<String> keyPredicate) {
+        super.removeInfos(keyPredicate);
         return this;
     }
 }

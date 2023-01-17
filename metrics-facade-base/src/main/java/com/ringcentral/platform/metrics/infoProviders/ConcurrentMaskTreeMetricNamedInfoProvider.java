@@ -6,6 +6,7 @@ import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
 
 public class ConcurrentMaskTreeMetricNamedInfoProvider<I>
     extends MaskTreeMetricNamedInfoProvider<I>
@@ -28,6 +29,16 @@ public class ConcurrentMaskTreeMetricNamedInfoProvider<I>
         try {
             rwLock.writeLock().lock();
             return super.removeInfo(key);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public PredicativeMetricNamedInfoProvider<I> removeInfos(Predicate<String> keyPredicate) {
+        try {
+            rwLock.writeLock().lock();
+            return super.removeInfos(keyPredicate);
         } finally {
             rwLock.writeLock().unlock();
         }

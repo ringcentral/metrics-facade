@@ -154,7 +154,7 @@ public abstract class AbstractMetricNamedInfoProviderTest {
         assertThat(infoProvider.infosFor(name("k", "l_2", "m")), is(List.of("info_6")));
 
         // remove key_3, key_5
-        infoProvider.removeInfo("key_3").removeInfo("key_5");
+        infoProvider.removeInfos(key -> key.endsWith("3") || key.endsWith("5"));
 
         // check infos
         assertThat(infoProvider.infosFor(name("a", "b")), is(emptyList()));

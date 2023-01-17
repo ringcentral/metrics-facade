@@ -6,6 +6,7 @@ import com.ringcentral.platform.metrics.names.MetricNamed;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class DefaultSampleSpecModsProvider implements SpecModsProvider<
     SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec>,
@@ -40,6 +41,15 @@ public class DefaultSampleSpecModsProvider implements SpecModsProvider<
     @Override
     public DefaultSampleSpecModsProvider removeInfo(String key) {
         parent.removeInfo(key);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DefaultSampleSpecModsProvider removeInfos(Predicate<String> keyPredicate) {
+        parent.removeInfos(keyPredicate);
         return this;
     }
 

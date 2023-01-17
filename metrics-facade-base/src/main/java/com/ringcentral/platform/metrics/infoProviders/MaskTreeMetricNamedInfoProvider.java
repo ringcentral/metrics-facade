@@ -8,6 +8,7 @@ import com.ringcentral.platform.metrics.predicates.DefaultMetricNamedPredicate;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static com.ringcentral.platform.metrics.names.MetricNameMask.ItemType.FIXED_PART;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.anyMetricNameMask;
@@ -186,6 +187,12 @@ public class MaskTreeMetricNamedInfoProvider<I> implements PredicativeMetricName
             });
         }
 
+        return this;
+    }
+
+    @Override
+    public PredicativeMetricNamedInfoProvider<I> removeInfos(Predicate<String> keyPredicate) {
+        new HashSet<>(keyToEntries.keySet()).stream().filter(keyPredicate).forEach(this::removeInfo);
         return this;
     }
 

@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 public class DefaultMetricNamedInfoProvider<I> implements PredicativeMetricNamedInfoProvider<I> {
 
     private final List<Entry<I>> entries;
-    public final Map<String, Entry<I>> keyToEntry;
+    private final Map<String, Entry<I>> keyToEntry;
 
     public DefaultMetricNamedInfoProvider() {
         this(new ArrayList<>(), new HashMap<>());

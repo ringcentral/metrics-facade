@@ -1,14 +1,16 @@
 package com.ringcentral.platform.metrics.samples;
 
-import com.ringcentral.platform.metrics.MetricInstance;
-import com.ringcentral.platform.metrics.infoProviders.*;
+import com.ringcentral.platform.metrics.infoProviders.MaskTreeMetricNamedInfoProvider;
+import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.names.MetricNamed;
-import com.ringcentral.platform.metrics.predicates.*;
+import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 
 import java.util.List;
+import java.util.function.Predicate;
 
-public class DefaultSampleSpecModsProvider implements PredicativeMetricNamedInfoProvider<
-    SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec>> {
+public class DefaultSampleSpecModsProvider implements SpecModsProvider<
+    SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec>,
+    DefaultSampleSpecModsProvider> {
 
     private final PredicativeMetricNamedInfoProvider<SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec>> parent;
 
@@ -20,32 +22,35 @@ public class DefaultSampleSpecModsProvider implements PredicativeMetricNamedInfo
         this.parent = parent;
     }
 
-    public DefaultSampleSpecModsProvider addMod(
-        MetricNamedPredicateBuilder<?> predicateBuilder,
-        SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec> mod) {
-
-        return addMod(predicateBuilder.build(), mod);
-    }
-
-    public DefaultSampleSpecModsProvider addMod(
-        MetricNamedPredicate predicate,
-        SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec> mod) {
-
-        parent.addInfo(predicate, mod);
-        return this;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DefaultSampleSpecModsProvider addInfo(
+        String key,
         MetricNamedPredicate predicate,
         SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec> info) {
 
-        parent.addInfo(predicate, info);
+        parent.addInfo(key, predicate, info);
         return this;
     }
 
-    public List<SampleSpecProvider<DefaultSampleSpec, DefaultInstanceSampleSpec>> modsFor(MetricInstance instance) {
-        return infosFor(instance);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DefaultSampleSpecModsProvider removeInfo(String key) {
+        parent.removeInfo(key);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DefaultSampleSpecModsProvider removeInfos(Predicate<String> keyPredicate) {
+        parent.removeInfos(keyPredicate);
+        return this;
     }
 
     @Override

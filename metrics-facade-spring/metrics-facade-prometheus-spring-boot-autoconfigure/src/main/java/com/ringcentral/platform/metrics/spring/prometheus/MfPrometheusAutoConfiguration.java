@@ -1,17 +1,21 @@
 package com.ringcentral.platform.metrics.spring.prometheus;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.infoProviders.ConcurrentMaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter;
 import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
 import com.ringcentral.platform.metrics.samples.prometheus.*;
 import com.ringcentral.platform.metrics.spring.MfMetricsExportAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.DEFAULT_LOCALE;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProviderBuilder.prometheusInstanceSamplesProvider;
 
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(MfMetricsExportAutoConfiguration.class)
@@ -21,8 +25,29 @@ public class MfPrometheusAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MfPrometheusConfigBuilder mfPrometheusConfigBuilder(MetricRegistry registry) {
-        return new MfPrometheusConfigBuilder().instanceSamplesProvider(new PrometheusInstanceSamplesProvider(registry));
+    public PrometheusInstanceSampleSpecModsProvider prometheusInstanceSampleSpecModsProvider() {
+        return new PrometheusInstanceSampleSpecModsProvider(new ConcurrentMaskTreeMetricNamedInfoProvider<>());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PrometheusSampleSpecModsProvider prometheusSampleSpecModsProvider() {
+        return new PrometheusSampleSpecModsProvider(new ConcurrentMaskTreeMetricNamedInfoProvider<>());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MfPrometheusConfigBuilder mfPrometheusConfigBuilder(
+        MetricRegistry registry,
+        PrometheusInstanceSampleSpecModsProvider instanceSampleSpecModsProvider,
+        PrometheusSampleSpecModsProvider sampleSpecModsProvider) {
+
+        PrometheusInstanceSamplesProvider instanceSamplesProvider = prometheusInstanceSamplesProvider(registry)
+            .instanceSampleSpecModsProvider(instanceSampleSpecModsProvider)
+            .sampleSpecModsProvider(sampleSpecModsProvider)
+            .build();
+
+        return new MfPrometheusConfigBuilder().instanceSamplesProvider(instanceSamplesProvider);
     }
 
     @Bean

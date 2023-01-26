@@ -1,15 +1,18 @@
 package com.ringcentral.platform.metrics.samples.prometheus;
 
-import com.ringcentral.platform.metrics.MetricInstance;
-import com.ringcentral.platform.metrics.infoProviders.*;
+import com.ringcentral.platform.metrics.infoProviders.MaskTreeMetricNamedInfoProvider;
+import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.names.MetricNamed;
-import com.ringcentral.platform.metrics.predicates.*;
+import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 import com.ringcentral.platform.metrics.samples.SampleSpecProvider;
+import com.ringcentral.platform.metrics.samples.SpecModsProvider;
 
 import java.util.List;
+import java.util.function.Predicate;
 
-public class PrometheusSampleSpecModsProvider implements PredicativeMetricNamedInfoProvider<
-    SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>> {
+public class PrometheusSampleSpecModsProvider implements SpecModsProvider<
+    SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>,
+    PrometheusSampleSpecModsProvider> {
 
     private final PredicativeMetricNamedInfoProvider<SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>> parent;
 
@@ -21,32 +24,35 @@ public class PrometheusSampleSpecModsProvider implements PredicativeMetricNamedI
         this.parent = parent;
     }
 
-    public PrometheusSampleSpecModsProvider addMod(
-        MetricNamedPredicateBuilder<?> predicateBuilder,
-        SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec> mod) {
-
-        return addMod(predicateBuilder.build(), mod);
-    }
-
-    public PrometheusSampleSpecModsProvider addMod(
-        MetricNamedPredicate predicate,
-        SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec> mod) {
-
-        parent.addInfo(predicate, mod);
-        return this;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PrometheusSampleSpecModsProvider addInfo(
+        String key,
         MetricNamedPredicate predicate,
         SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec> info) {
 
-        parent.addInfo(predicate, info);
+        parent.addInfo(key, predicate, info);
         return this;
     }
 
-    public List<SampleSpecProvider<PrometheusSampleSpec, PrometheusInstanceSampleSpec>> modsFor(MetricInstance instance) {
-        return infosFor(instance);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PrometheusSampleSpecModsProvider removeInfo(String key) {
+        parent.removeInfo(key);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PrometheusSampleSpecModsProvider removeInfos(Predicate<String> keyPredicate) {
+        parent.removeInfos(keyPredicate);
+        return this;
     }
 
     @Override

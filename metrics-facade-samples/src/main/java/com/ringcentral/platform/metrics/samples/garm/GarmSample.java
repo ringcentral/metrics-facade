@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.samples.garm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.infoProviders.MaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.producers.SystemMetricsProducer;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -22,10 +22,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.ringcentral.platform.metrics.MetricModBuilder.modifying;
-import static com.ringcentral.platform.metrics.PrefixDimensionValuesMetricKey.withKey;
+import static com.ringcentral.platform.metrics.PrefixLabelValuesMetricKey.withKey;
 import static com.ringcentral.platform.metrics.configs.builders.BaseMeterConfigBuilder.withMeter;
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.labels.LabelValues.*;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.names.MetricName.*;
@@ -47,7 +47,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @SuppressWarnings("ALL")
 public class GarmSample extends AbstractSample {
 
-    static final MetricDimension METHOD = new MetricDimension("method");
+    static final Label METHOD = new Label("method");
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();
@@ -74,10 +74,10 @@ public class GarmSample extends AbstractSample {
         DefaultInstanceSampleSpecModsProvider instanceSampleSpecModsProvider = new DefaultInstanceSampleSpecModsProvider();
 
         instanceSampleSpecModsProvider.addMod(
-            forMetricInstancesMatching(nameMask("allEndpoints.clientRequestProcessingTime"), instance -> instance.hasDimension(METHOD)),
+            forMetricInstancesMatching(nameMask("allEndpoints.clientRequestProcessingTime"), instance -> instance.hasLabel(METHOD)),
             (metric, instance, currSpec) -> instanceSampleSpec()
                 .name(instance.name().withNewPart(instance.valueOf(METHOD), 1))
-                .dimensionValues(instance.dimensionValuesWithout(METHOD)));
+                .labelValues(instance.labelValuesWithout(METHOD)));
 
         instanceSampleSpecModsProvider.addMod(
             forMetricsWithNamePrefix("longVar"),
@@ -130,10 +130,10 @@ public class GarmSample extends AbstractSample {
         MaskTreeMetricNamedInfoProvider<MBeanSpecProvider> mBeanSpecs = new MaskTreeMetricNamedInfoProvider<>();
 
         mBeanSpecs.addInfo(
-            forMetricInstancesMatching(nameMask("allEndpoints.clientRequestProcessingTime"), instance -> instance.hasDimension(METHOD)),
+            forMetricInstancesMatching(nameMask("allEndpoints.clientRequestProcessingTime"), instance -> instance.hasLabel(METHOD)),
             instance -> mBeanSpec()
                 .name(instance.name().withNewPart(instance.valueOf(METHOD), 1))
-                .dimensionValues(instance.dimensionValuesWithout(METHOD)));
+                .labelValues(instance.labelValuesWithout(METHOD)));
 
         JmxMetricsReporter jmxReporter = new JmxMetricsReporter(
             mBeanSpecs,
@@ -143,22 +143,22 @@ public class GarmSample extends AbstractSample {
 
         // Metrics
         Timer allEndpointsRequestTimer_garm_4 = registry.timer(
-            withKey(name("allEndpoints", "clientRequestProcessingTime"), dimensionValues(SAMPLE.value("garm_4"))),
+            withKey(name("allEndpoints", "clientRequestProcessingTime"), labelValues(SAMPLE.value("garm_4"))),
             () -> withTimer()
-                .dimensions(METHOD)
-                .expireDimensionalInstanceAfter(50L, SECONDS));
+                .labels(METHOD)
+                .expireLabeledInstanceAfter(50L, SECONDS));
 
         Timer allEndpointsRequestTimer_garm_5 = registry.timer(
-            withKey(name("allEndpoints", "clientRequestProcessingTime"), dimensionValues(SAMPLE.value("garm_5"))),
+            withKey(name("allEndpoints", "clientRequestProcessingTime"), labelValues(SAMPLE.value("garm_5"))),
             () -> withTimer()
-                .dimensions(METHOD)
-                .expireDimensionalInstanceAfter(50L, SECONDS));
+                .labels(METHOD)
+                .expireLabeledInstanceAfter(50L, SECONDS));
 
-        allEndpointsRequestTimer_garm_4.update(10L, dimensionValues(METHOD.value("POST")));
-        allEndpointsRequestTimer_garm_4.update(20L, dimensionValues(METHOD.value("POST")));
-        allEndpointsRequestTimer_garm_4.update(30L, dimensionValues(METHOD.value("HEAD")));
+        allEndpointsRequestTimer_garm_4.update(10L, labelValues(METHOD.value("POST")));
+        allEndpointsRequestTimer_garm_4.update(20L, labelValues(METHOD.value("POST")));
+        allEndpointsRequestTimer_garm_4.update(30L, labelValues(METHOD.value("HEAD")));
 
-        allEndpointsRequestTimer_garm_5.update(30L, dimensionValues(METHOD.value("TEST")));
+        allEndpointsRequestTimer_garm_5.update(30L, labelValues(METHOD.value("TEST")));
 
         registry.counter(withName("allEndpoints", "activeClientConnectionsCount"));
         registry.counter(withName("allEndpoints", "activeRequestsCount"));
@@ -167,7 +167,7 @@ public class GarmSample extends AbstractSample {
         LongVar longVar = registry.longVar(
             withName("longVar"),
             noTotal(),
-            () -> longVar().dimensions(SERVICE));
+            () -> longVar().labels(SERVICE));
 
         ObjectVar objectVar = registry.objectVar(
             withName("stringSet"),
@@ -176,18 +176,18 @@ public class GarmSample extends AbstractSample {
         LongVar ensuredGroupVar = registry.longVar(
             withName("ensuredGroup"),
             noTotal(),
-            () -> longVar().dimensions(METHOD));
+            () -> longVar().labels(METHOD));
 
         AtomicLong valueSupplier_1 = new AtomicLong();
-        longVar.register(valueSupplier_1::incrementAndGet, dimensionValues(SERVICE.value("agw")));
+        longVar.register(valueSupplier_1::incrementAndGet, labelValues(SERVICE.value("agw")));
 
         AtomicLong valueSupplier_2 = new AtomicLong(500);
-        longVar.register(valueSupplier_2::incrementAndGet, dimensionValues(SERVICE.value("wsg")));
+        longVar.register(valueSupplier_2::incrementAndGet, labelValues(SERVICE.value("wsg")));
 
-        Rate rate = registry.rate(withName("rate"), () -> withRate().dimensions(SERVICE));
-        rate.mark(forDimensionValues(SERVICE.value("amd")));
+        Rate rate = registry.rate(withName("rate"), () -> withRate().labels(SERVICE));
+        rate.mark(forLabelValues(SERVICE.value("amd")));
 
-        longVar.deregister(forDimensionValues(SERVICE.value("agw")));
+        longVar.deregister(forLabelValues(SERVICE.value("agw")));
 
         System.out.println("Telegraf 1:");
         System.out.println(new ObjectMapper().writeValueAsString(telegrafMetricsJsonExporter.exportMetrics()));
@@ -197,7 +197,7 @@ public class GarmSample extends AbstractSample {
         System.out.println(new ObjectMapper().writeValueAsString(zabbixMetricsJsonExporter.exportMetrics()));
         System.out.println("**********\n\n");
 
-        allEndpointsRequestTimer_garm_4.update(30L, dimensionValues(METHOD.value("GET")));
+        allEndpointsRequestTimer_garm_4.update(30L, labelValues(METHOD.value("GET")));
         sleep(55L * 1000L);
 
         System.out.println("Telegraf 2:");

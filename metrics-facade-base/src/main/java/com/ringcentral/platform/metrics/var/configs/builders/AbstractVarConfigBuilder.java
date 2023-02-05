@@ -1,13 +1,16 @@
 package com.ringcentral.platform.metrics.var.configs.builders;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.configs.builders.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.configs.builders.AbstractMetricConfigBuilder;
+import com.ringcentral.platform.metrics.configs.builders.MetricConfigBuilder;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.var.configs.VarConfig;
 
 import java.util.List;
 
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkState;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends VarConfigBuilder<C, CB>>
@@ -15,7 +18,7 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
 
     public static final boolean DEFAULT_NON_DECREASING = false;
 
-    private List<MetricDimension> dimensions;
+    private List<Label> labels;
     private Boolean nonDecreasing;
 
     @Override
@@ -23,11 +26,11 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
         if (base instanceof AbstractVarConfigBuilder) {
             AbstractVarConfigBuilder<?, ?> varBase = (AbstractVarConfigBuilder<?, ?>)base;
 
-            if (prefixDimensionValues() == null
-                && varBase.prefixDimensionValues() != null
-                && dimensions != null) {
+            if (prefixLabelValues() == null
+                && varBase.prefixLabelValues() != null
+                && labels != null) {
 
-                checkDimensionsUnique(varBase.prefixDimensionValues(), dimensions);
+                checkLabelsUnique(varBase.prefixLabelValues(), labels);
             }
 
             if (varBase.hasNonDecreasing() && !hasNonDecreasing()) {
@@ -43,8 +46,8 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
         if (mod instanceof AbstractVarConfigBuilder) {
             AbstractVarConfigBuilder<?, ?> varMod = (AbstractVarConfigBuilder<?, ?>)mod;
 
-            if (varMod.prefixDimensionValues() != null && dimensions != null) {
-                checkDimensionsUnique(varMod.prefixDimensionValues(), dimensions);
+            if (varMod.prefixLabelValues() != null && labels != null) {
+                checkLabelsUnique(varMod.prefixLabelValues(), labels);
             }
 
             if (varMod.hasNonDecreasing()) {
@@ -56,25 +59,25 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
     }
 
     @Override
-    public CB prefix(MetricDimensionValues dimensionValues) {
-        checkDimensionsUnique(dimensionValues, dimensions);
-        return super.prefix(dimensionValues);
+    public CB prefix(LabelValues labelValues) {
+        checkLabelsUnique(labelValues, labels);
+        return super.prefix(labelValues);
     }
 
-    public CB dimensions(MetricDimension... dimensions) {
-        return dimensions(List.of(dimensions));
+    public CB labels(Label... labels) {
+        return labels(List.of(labels));
     }
 
-    public CB dimensions(List<MetricDimension> dimensions) {
-        checkState(this.dimensions == null, "Dimensions change is not allowed");
-        checkArgument(dimensions != null && !dimensions.isEmpty(), "dimensions is null or empty");
-        checkDimensionsUnique(prefixDimensionValues(), dimensions);
-        this.dimensions = dimensions;
+    public CB labels(List<Label> labels) {
+        checkState(this.labels == null, "Labels change is not allowed");
+        checkArgument(labels != null && !labels.isEmpty(), "labels is null or empty");
+        checkLabelsUnique(prefixLabelValues(), labels);
+        this.labels = labels;
         return builder();
     }
 
-    protected List<MetricDimension> dimensions() {
-        return dimensions;
+    protected List<Label> labels() {
+        return labels;
     }
 
     public boolean hasNonDecreasing() {
@@ -99,8 +102,8 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
         return buildImpl(
             hasEnabled() ? getEnabled() : DEFAULT_ENABLED,
             description(),
-            prefixDimensionValues(),
-            dimensions,
+            prefixLabelValues(),
+            labels,
             hasNonDecreasing() ? getNonDecreasing() : DEFAULT_NON_DECREASING,
             context().unmodifiable());
     }
@@ -108,8 +111,8 @@ public abstract class AbstractVarConfigBuilder<C extends VarConfig, CB extends V
     protected abstract C buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
         boolean nonDecreasing,
         MetricContext context);
 

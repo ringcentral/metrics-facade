@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.rate.configs.builders;
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder.AllSliceConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.RateMeasurable;
 import com.ringcentral.platform.metrics.rate.configs.*;
@@ -28,15 +28,15 @@ public class RateAllSliceConfigBuilder extends AllSliceConfigBuilder<
     public RateSliceConfig buildImpl(
         boolean enabled,
         MetricName name,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<RateMeasurable> measurables,
         boolean totalEnabled,
         RateInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, RateInstanceConfig> levelInstanceConfigs,
+        Map<Label, RateInstanceConfig> levelInstanceConfigs,
         RateInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -45,9 +45,9 @@ public class RateAllSliceConfigBuilder extends AllSliceConfigBuilder<
             enabled,
             name,
             null,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

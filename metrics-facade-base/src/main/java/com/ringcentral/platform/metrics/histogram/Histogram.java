@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.histogram;
 
 import com.ringcentral.platform.metrics.Meter;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
 import com.ringcentral.platform.metrics.scale.Scale;
 import com.ringcentral.platform.metrics.scale.ScaleBuilder;
@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
+import static com.ringcentral.platform.metrics.labels.LabelValues.NO_LABEL_VALUES;
 import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
 import static com.ringcentral.platform.metrics.scale.ExpScaleBuilder.expScale;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
@@ -582,8 +582,8 @@ public interface Histogram extends Meter {
     }
 
     default void update(long value) {
-        update(value, NO_DIMENSION_VALUES);
+        update(value, NO_LABEL_VALUES);
     }
 
-    void update(long value, MetricDimensionValues dimensionValues);
+    void update(long value, LabelValues labelValues);
 }

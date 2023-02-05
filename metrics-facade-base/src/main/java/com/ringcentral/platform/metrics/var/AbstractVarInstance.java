@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.var;
 
 import com.ringcentral.platform.metrics.NotMeasuredException;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -13,26 +13,26 @@ import static java.util.Collections.emptyList;
 public abstract class AbstractVarInstance<V> implements VarInstance<V> {
 
     private final MetricName name;
-    private final List<MetricDimensionValue> dimensionValues;
+    private final List<LabelValue> labelValues;
     private final boolean totalInstance;
-    private final boolean dimensionalTotalInstance;
+    private final boolean labeledMetricTotalInstance;
     private final boolean nonDecreasing;
     private final Set<Measurable> measurables;
     private final MeasurableValues measurableValues;
 
     public AbstractVarInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean nonDecreasing,
         Measurable valueMeasurable,
         Supplier<V> valueSupplier) {
 
         this.name = name;
-        this.dimensionValues = dimensionValues != null ? dimensionValues : emptyList();
+        this.labelValues = labelValues != null ? labelValues : emptyList();
         this.totalInstance = totalInstance;
-        this.dimensionalTotalInstance = dimensionalTotalInstance;
+        this.labeledMetricTotalInstance = labeledMetricTotalInstance;
         this.nonDecreasing = nonDecreasing;
         this.measurables = Set.of(valueMeasurable);
 
@@ -56,8 +56,8 @@ public abstract class AbstractVarInstance<V> implements VarInstance<V> {
     }
 
     @Override
-    public List<MetricDimensionValue> dimensionValues() {
-        return dimensionValues;
+    public List<LabelValue> labelValues() {
+        return labelValues;
     }
 
     @Override
@@ -66,8 +66,8 @@ public abstract class AbstractVarInstance<V> implements VarInstance<V> {
     }
 
     @Override
-    public boolean isDimensionalTotalInstance() {
-        return dimensionalTotalInstance;
+    public boolean isLabeledMetricTotalInstance() {
+        return labeledMetricTotalInstance;
     }
 
     @Override

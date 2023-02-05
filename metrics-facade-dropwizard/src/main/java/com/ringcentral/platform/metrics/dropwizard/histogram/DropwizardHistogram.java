@@ -4,7 +4,7 @@ import com.codahale.metrics.*;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.histogram.AbstractHistogram;
 import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.measurables.*;
@@ -204,18 +204,18 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
         @Override
         public AbstractMeterInstance<Histogram> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Histogram>> measurableValueProviders,
             Histogram histogram) {
 
             return new DropwizardHistogramInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(histogram, measurableValueProviders),
                 measurableValueProviders,
@@ -225,9 +225,9 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
         @Override
         public AbstractExpirableMeterInstance<Histogram> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Histogram>> measurableValueProviders,
             Histogram histogram,
@@ -235,9 +235,9 @@ public class DropwizardHistogram extends AbstractHistogram<Histogram> {
 
             return new DropwizardExpirableHistogramInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(histogram, measurableValueProviders),
                 measurableValueProviders,

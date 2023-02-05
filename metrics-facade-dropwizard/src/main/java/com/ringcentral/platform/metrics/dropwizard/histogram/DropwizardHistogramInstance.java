@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.dropwizard.histogram;
 import java.util.*;
 import com.codahale.metrics.Histogram;
 import com.ringcentral.platform.metrics.AbstractMeter.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -12,9 +12,9 @@ public class DropwizardHistogramInstance extends AbstractMeterInstance<Histogram
 
     protected DropwizardHistogramInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<Histogram>> measurableValueProviders,
@@ -22,9 +22,9 @@ public class DropwizardHistogramInstance extends AbstractMeterInstance<Histogram
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

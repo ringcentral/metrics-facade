@@ -5,9 +5,9 @@ import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.timer.Timer;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
+import static com.ringcentral.platform.metrics.labels.AllLabelValuesPredicate.labelValuesMatchingAll;
+import static com.ringcentral.platform.metrics.labels.LabelValues.forLabelValues;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerInstanceConfigBuilder.timerInstance;
@@ -23,34 +23,34 @@ public class SlicesAndLevelsSample extends AbstractSample {
         Timer t = registry.timer(
             withName("ActiveHealthChecker", "healthCheck"),
             () -> withTimer()
-                .dimensions(SERVICE, SERVER, PORT)
-                .maxDimensionalInstancesPerSlice(5)
+                .labels(SERVICE, SERVER, PORT)
+                .maxLabeledInstancesPerSlice(5)
                 .measurables(
                     COUNT, MIN, MAX, MEAN,
                     PERCENTILE_50, PERCENTILE_75, PERCENTILE_90, PERCENTILE_95, PERCENTILE_99)
                 .allSlice()
-                    .maxDimensionalInstances(15)
-                    .notExpireDimensionalInstances()
+                    .maxLabeledInstances(15)
+                    .notExpireLabeledInstances()
                     .total(timerInstance().measurables(COUNT, MEAN, PERCENTILE_95, MAX))
                 .slice("byServer")
-                    .dimensions(SERVER)
+                    .labels(SERVER)
                     .measurables(COUNT, MEAN, MAX, PERCENTILE_95)
                 .slice("server_1_or_2_1", "port_not_7002")
-                    .predicate(dimensionValuesMatchingAll(
+                    .predicate(labelValuesMatchingAll(
                         SERVER.mask("server_1_*|*2_1*"),
                         PORT.predicate(p -> !p.equals("7002"))))
-                    .dimensions(SERVICE, SERVER)
-                    .maxDimensionalInstances(25)
-                    .expireDimensionalInstanceAfter(75, SECONDS)
+                    .labels(SERVICE, SERVER)
+                    .maxLabeledInstances(25)
+                    .expireLabeledInstanceAfter(75, SECONDS)
                     .measurables(COUNT, MEAN, MAX, PERCENTILE_95)
                     .enableLevels());
 
-        t.update(25, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("7001")));
-        t.update(25, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("7002")));
-        t.update(75, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("7001")));
-        t.update(25, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("8001")));
-        t.update(75, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_2"), PORT.value("8001")));
-        t.update(1000, forDimensionValues(SERVICE.value("service_3"), SERVER.value("server_3_1"), PORT.value("9001")));
+        t.update(25, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("7001")));
+        t.update(25, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("7002")));
+        t.update(75, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("7001")));
+        t.update(25, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("8001")));
+        t.update(75, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_2"), PORT.value("8001")));
+        t.update(1000, forLabelValues(SERVICE.value("service_3"), SERVER.value("server_3_1"), PORT.value("9001")));
 
         export(registry);
         hang();

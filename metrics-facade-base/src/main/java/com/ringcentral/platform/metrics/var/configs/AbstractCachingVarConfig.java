@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.var.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -16,8 +16,8 @@ public abstract class AbstractCachingVarConfig extends AbstractVarConfig impleme
     protected AbstractCachingVarConfig(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
         boolean nonDecreasing,
         MetricContext context,
         long ttl,
@@ -26,8 +26,8 @@ public abstract class AbstractCachingVarConfig extends AbstractVarConfig impleme
         super(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             nonDecreasing,
             context);
 

@@ -3,10 +3,10 @@ package com.ringcentral.platform.metrics;
 import com.ringcentral.platform.metrics.configs.MeterConfig;
 import com.ringcentral.platform.metrics.configs.MeterInstanceConfig;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValuesPredicate;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValue;
+import com.ringcentral.platform.metrics.labels.LabelValues;
+import com.ringcentral.platform.metrics.labels.LabelValuesPredicate;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.measurables.MeasurableValues;
@@ -75,18 +75,18 @@ public abstract class AbstractMeter<
     public interface InstanceMaker<MI> {
         AbstractMeterInstance<MI> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders,
             MI meterImpl);
 
         AbstractExpirableMeterInstance<MI> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders,
             MI meterImpl,
@@ -102,12 +102,12 @@ public abstract class AbstractMeter<
     private final AtomicBoolean removed = new AtomicBoolean();
     private final List<MetricListener> listeners;
 
-    private final MetricDimension[] dimensions;
-    private final int dimensionCount;
-    private final boolean dimensionalInstanceExpirationEnabled;
-    private final boolean dimensionalInstanceAutoRemovalEnabled;
-    private final long minDimensionalInstanceExpirationTimeMs;
-    private final MetricDimensionValuesPredicate exclusionPredicate;
+    private final Label[] labels;
+    private final int labelCount;
+    private final boolean labeledInstanceExpirationEnabled;
+    private final boolean labeledInstanceAutoRemovalEnabled;
+    private final long minLabeledInstanceExpirationTimeMs;
+    private final LabelValuesPredicate exclusionPredicate;
 
     private final Slice<MI, IC, SC, C> allSlice;
     private final Slice<MI, IC, SC, C>[] slices;
@@ -134,11 +134,11 @@ public abstract class AbstractMeter<
 
         if (!config.isEnabled()) {
             this.listeners = null;
-            this.dimensions = null;
-            this.dimensionCount = 0;
-            this.dimensionalInstanceExpirationEnabled = false;
-            this.dimensionalInstanceAutoRemovalEnabled = false;
-            this.minDimensionalInstanceExpirationTimeMs = 0L;
+            this.labels = null;
+            this.labelCount = 0;
+            this.labeledInstanceExpirationEnabled = false;
+            this.labeledInstanceAutoRemovalEnabled = false;
+            this.minLabeledInstanceExpirationTimeMs = 0L;
             this.exclusionPredicate = null;
             this.allSlice = null;
             this.slices = null;
@@ -149,9 +149,9 @@ public abstract class AbstractMeter<
 
         this.listeners = new ArrayList<>();
 
-        if (config.hasDimensions()) {
-            this.dimensions = config.dimensions().toArray(new MetricDimension[0]);
-            this.dimensionCount = this.dimensions.length;
+        if (config.hasLabels()) {
+            this.labels = config.labels().toArray(new Label[0]);
+            this.labelCount = this.labels.length;
             this.exclusionPredicate = config.exclusionPredicate();
             SC allSliceConfig = config.allSliceConfig();
 
@@ -160,18 +160,18 @@ public abstract class AbstractMeter<
                 config.sliceConfigs().stream().filter(MeterSliceConfig::isEnabled).collect(toCollection(LinkedHashSet::new)) :
                 emptySet();
 
-            this.dimensionalInstanceExpirationEnabled =
-                (allSliceConfig.isEnabled() && allSliceConfig.isDimensionalInstanceExpirationEnabled())
-                || enabledSliceConfigs.stream().anyMatch(MeterSliceConfig::isDimensionalInstanceExpirationEnabled);
+            this.labeledInstanceExpirationEnabled =
+                (allSliceConfig.isEnabled() && allSliceConfig.isLabeledInstanceExpirationEnabled())
+                || enabledSliceConfigs.stream().anyMatch(MeterSliceConfig::isLabeledInstanceExpirationEnabled);
 
-            this.dimensionalInstanceAutoRemovalEnabled =
-                this.dimensionalInstanceExpirationEnabled
-                || (allSliceConfig.isEnabled() && allSliceConfig.hasEffectiveMaxDimensionalInstances())
-                || enabledSliceConfigs.stream().anyMatch(MeterSliceConfig::hasEffectiveMaxDimensionalInstances);
+            this.labeledInstanceAutoRemovalEnabled =
+                this.labeledInstanceExpirationEnabled
+                || (allSliceConfig.isEnabled() && allSliceConfig.hasEffectiveMaxLabeledInstances())
+                || enabledSliceConfigs.stream().anyMatch(MeterSliceConfig::hasEffectiveMaxLabeledInstances);
 
-            this.minDimensionalInstanceExpirationTimeMs =
-                this.dimensionalInstanceExpirationEnabled ?
-                minDimensionalInstanceExpirationTimeMs(allSliceConfig, enabledSliceConfigs) :
+            this.minLabeledInstanceExpirationTimeMs =
+                this.labeledInstanceExpirationEnabled ?
+                minLabeledInstanceExpirationTimeMs(allSliceConfig, enabledSliceConfigs) :
                 0L;
 
             SliceContext<MI, IC, SC, C> sliceContext = new SliceContext<>(
@@ -179,8 +179,8 @@ public abstract class AbstractMeter<
                 config,
                 removed,
                 listeners,
-                dimensions,
-                dimensionCount,
+                labels,
+                labelCount,
                 measurableValueProvidersProvider,
                 meterImplMaker,
                 instanceMaker,
@@ -198,11 +198,11 @@ public abstract class AbstractMeter<
                 enabledSliceConfigs.stream().map(sc -> new Slice<>(sliceContext, sc, registry)).toArray(Slice[]::new) :
                 null;
         } else {
-            this.dimensions = null;
-            this.dimensionCount = 0;
-            this.dimensionalInstanceExpirationEnabled = false;
-            this.dimensionalInstanceAutoRemovalEnabled = false;
-            this.minDimensionalInstanceExpirationTimeMs = 0L;
+            this.labels = null;
+            this.labelCount = 0;
+            this.labeledInstanceExpirationEnabled = false;
+            this.labeledInstanceAutoRemovalEnabled = false;
+            this.minLabeledInstanceExpirationTimeMs = 0L;
             this.exclusionPredicate = null;
             SC allSliceConfig = config.allSliceConfig();
 
@@ -213,7 +213,7 @@ public abstract class AbstractMeter<
                     removed,
                     listeners,
                     null,
-                    dimensionCount,
+                    labelCount,
                     measurableValueProvidersProvider,
                     meterImplMaker,
                     instanceMaker,
@@ -232,17 +232,17 @@ public abstract class AbstractMeter<
         this.executor = executor;
     }
 
-    private static long minDimensionalInstanceExpirationTimeMs(
+    private static long minLabeledInstanceExpirationTimeMs(
         MeterSliceConfig<?> allSliceConfig,
         Set<? extends MeterSliceConfig<?>> enabledSliceConfigs) {
 
         Optional<Long> slicesResult = enabledSliceConfigs.stream()
-            .filter(MeterSliceConfig::isDimensionalInstanceExpirationEnabled)
-            .map(sc -> sc.dimensionalInstanceExpirationTime().toMillis())
+            .filter(MeterSliceConfig::isLabeledInstanceExpirationEnabled)
+            .map(sc -> sc.labeledInstanceExpirationTime().toMillis())
             .min(Long::compareTo);
 
-        if (allSliceConfig.isEnabled() && allSliceConfig.isDimensionalInstanceExpirationEnabled()) {
-            long allSliceResult = allSliceConfig.dimensionalInstanceExpirationTime().toMillis();
+        if (allSliceConfig.isEnabled() && allSliceConfig.isLabeledInstanceExpirationEnabled()) {
+            long allSliceResult = allSliceConfig.labeledInstanceExpirationTime().toMillis();
             return min(allSliceResult, slicesResult.orElse(allSliceResult));
         } else {
             return slicesResult.orElseThrow();
@@ -276,10 +276,10 @@ public abstract class AbstractMeter<
 
     @Override
     public void metricAdded() {
-        if (dimensionalInstanceExpirationEnabled) {
+        if (labeledInstanceExpirationEnabled) {
             executor.schedule(
                 this::removeExpiredInstancesAndSchedule,
-                minDimensionalInstanceExpirationTimeMs + EXPIRED_INSTANCES_REMOVAL_ADDITIONAL_DELAY_MS, MILLISECONDS);
+                minLabeledInstanceExpirationTimeMs + EXPIRED_INSTANCES_REMOVAL_ADDITIONAL_DELAY_MS, MILLISECONDS);
         }
     }
 
@@ -290,11 +290,11 @@ public abstract class AbstractMeter<
         }
 
         removeExpiredInstances(true);
-        long baseDelayMs = minDimensionalInstanceExpirationTimeMs;
+        long baseDelayMs = minLabeledInstanceExpirationTimeMs;
         long nowMs = timeMsProvider.timeMs();
 
         if (allSlice != null
-            && allSlice.dimensionalInstanceExpirationEnabled
+            && allSlice.labeledInstanceExpirationEnabled
             && allSlice.instanceExpirationManager.hasInstanceExpirations()) {
 
             baseDelayMs = min(baseDelayMs, max(allSlice.instanceExpirationManager.minInstanceExpirationTimeMs - nowMs, 0L));
@@ -304,7 +304,7 @@ public abstract class AbstractMeter<
             for (int i = 0; i < slices.length; ++i) {
                 Slice<MI, IC, SC, C> slice = slices[i];
 
-                if (slice.dimensionalInstanceExpirationEnabled && slice.instanceExpirationManager.hasInstanceExpirations()) {
+                if (slice.labeledInstanceExpirationEnabled && slice.instanceExpirationManager.hasInstanceExpirations()) {
                     baseDelayMs = min(baseDelayMs, max(slice.instanceExpirationManager.minInstanceExpirationTimeMs - nowMs, 0L));
                 }
             }
@@ -349,13 +349,13 @@ public abstract class AbstractMeter<
 
     @SuppressWarnings("ForLoopReplaceableByForEach")
     private void removeExpiredInstances(boolean inExecutorThread) {
-        if (!dimensionalInstanceExpirationEnabled || isRemoved()) {
+        if (!labeledInstanceExpirationEnabled || isRemoved()) {
             return;
         }
 
         long nowMs = timeMsProvider.timeMs();
 
-        if (allSlice != null && allSlice.dimensionalInstanceExpirationEnabled) {
+        if (allSlice != null && allSlice.labeledInstanceExpirationEnabled) {
             allSlice.instanceExpirationManager.wake(false, nowMs, inExecutorThread);
         }
 
@@ -363,26 +363,26 @@ public abstract class AbstractMeter<
             for (int i = 0; i < slices.length; ++i) {
                 Slice<MI, IC, SC, C> slice = slices[i];
 
-                if (slice.dimensionalInstanceExpirationEnabled) {
+                if (slice.labeledInstanceExpirationEnabled) {
                     slice.instanceExpirationManager.wake(false, nowMs, inExecutorThread);
                 }
             }
         }
     }
 
-    protected void update(long value, MetricDimensionValues dimensionValues) {
+    protected void update(long value, LabelValues labelValues) {
         if (!isEnabled() || isRemoved()) {
             return;
         }
 
-        List<MetricDimensionValue> valueList = dimensionValues.list();
-        checkDimensionValues(valueList);
+        List<LabelValue> valueList = labelValues.list();
+        checkLabelValues(valueList);
 
-        if (areExcluded(dimensionValues)) {
+        if (areExcluded(labelValues)) {
             return;
         }
 
-        long updateTimeMs = dimensionalInstanceAutoRemovalEnabled ? timeMsProvider.timeMs() : 0L;
+        long updateTimeMs = labeledInstanceAutoRemovalEnabled ? timeMsProvider.timeMs() : 0L;
 
         if (allSlice != null) {
             allSlice.update(value, valueList, updateTimeMs);
@@ -390,60 +390,60 @@ public abstract class AbstractMeter<
 
         if (slices != null) {
             for (Slice<MI, IC, SC, C> slice : slices) {
-                if (slice.matches(dimensionValues)) {
+                if (slice.matches(labelValues)) {
                     slice.update(value, valueList, updateTimeMs);
                 }
             }
         }
     }
 
-    private void checkDimensionValues(List<MetricDimensionValue> dimensionValues) {
-        if (dimensions != null) {
-            if (dimensionValues == null || dimensionValues.size() != dimensions.length) {
-                unexpected(dimensionValues);
+    private void checkLabelValues(List<LabelValue> labelValues) {
+        if (labels != null) {
+            if (labelValues == null || labelValues.size() != labels.length) {
+                unexpected(labelValues);
             }
 
-            for (int i = 0; i < dimensionCount; ++i) {
-                if (!dimensions[i].equals(dimensionValues.get(i).dimension())) {
-                    unexpected(dimensionValues);
+            for (int i = 0; i < labelCount; ++i) {
+                if (!labels[i].equals(labelValues.get(i).label())) {
+                    unexpected(labelValues);
                 }
             }
-        } else if (dimensionValues != null && !dimensionValues.isEmpty()) {
-            unexpected(dimensionValues);
+        } else if (labelValues != null && !labelValues.isEmpty()) {
+            unexpected(labelValues);
         }
     }
 
-    private void unexpected(List<MetricDimensionValue> dimensionValues) {
+    private void unexpected(List<LabelValue> labelValues) {
         throw new IllegalArgumentException(
-            "dimensionValues = " + dimensionValues +
-            " do not match dimensions = " + Arrays.toString(dimensions));
+            "labelValues = " + labelValues +
+            " do not match labels = " + Arrays.toString(labels));
     }
 
-    private boolean areExcluded(MetricDimensionValues dimensionValues) {
-        return exclusionPredicate != null && exclusionPredicate.matches(dimensionValues);
+    private boolean areExcluded(LabelValues labelValues) {
+        return exclusionPredicate != null && exclusionPredicate.matches(labelValues);
     }
 
     @Override
-    public void removeInstancesFor(MetricDimensionValues dimensionValues) {
+    public void removeInstancesFor(LabelValues labelValues) {
         if (!isEnabled() || isRemoved()) {
             return;
         }
 
-        List<MetricDimensionValue> valueList = dimensionValues.list();
-        checkDimensionValues(valueList);
+        List<LabelValue> valueList = labelValues.list();
+        checkLabelValues(valueList);
 
-        if (areExcluded(dimensionValues)) {
+        if (areExcluded(labelValues)) {
             return;
         }
 
         if (allSlice != null) {
-            allSlice.removeInstancesFor(dimensionValues);
+            allSlice.removeInstancesFor(labelValues);
         }
 
         if (slices != null) {
             for (Slice<MI, IC, SC, C> slice : slices) {
-                if (slice.matches(dimensionValues)) {
-                    slice.removeInstancesFor(dimensionValues);
+                if (slice.matches(labelValues)) {
+                    slice.removeInstancesFor(labelValues);
                 }
             }
         }
@@ -452,10 +452,10 @@ public abstract class AbstractMeter<
     public static abstract class AbstractMeterInstance<MI> implements MeterInstance {
 
         private final MetricName name;
-        private final List<MetricDimensionValue> dimensionValues;
-        private final Map<MetricDimension, MetricDimensionValue> dimensionToValue;
+        private final List<LabelValue> labelValues;
+        private final Map<Label, LabelValue> labelToValue;
         private final boolean totalInstance;
-        private final boolean dimensionalTotalInstance;
+        private final boolean labeledMetricTotalInstance;
         private final boolean levelInstance;
         private final MeasurableValuesProvider measurableValuesProvider;
         private final Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders;
@@ -466,24 +466,24 @@ public abstract class AbstractMeter<
 
         protected AbstractMeterInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             MeasurableValuesProvider measurableValuesProvider,
             Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders,
             MI meterImpl) {
 
             this.name = name;
-            this.dimensionValues = dimensionValues;
+            this.labelValues = labelValues;
 
-            this.dimensionToValue =
-                !dimensionValues.isEmpty() ?
-                dimensionValues.stream().collect(toMap(MetricDimensionValue::dimension, dv -> dv)) :
+            this.labelToValue =
+                !labelValues.isEmpty() ?
+                labelValues.stream().collect(toMap(LabelValue::label, lv -> lv)) :
                 emptyMap();
 
             this.totalInstance = totalInstance;
-            this.dimensionalTotalInstance = dimensionalTotalInstance;
+            this.labeledMetricTotalInstance = labeledMetricTotalInstance;
             this.levelInstance = levelInstance;
             this.measurableValuesProvider = measurableValuesProvider;
             this.measurableValueProviders = measurableValueProviders;
@@ -499,13 +499,13 @@ public abstract class AbstractMeter<
         }
 
         @Override
-        public List<MetricDimensionValue> dimensionValues() {
-            return dimensionValues;
+        public List<LabelValue> labelValues() {
+            return labelValues;
         }
 
         @Override
-        public Map<MetricDimension, MetricDimensionValue> dimensionToValue() {
-            return dimensionToValue;
+        public Map<Label, LabelValue> labelToValue() {
+            return labelToValue;
         }
 
         @Override
@@ -514,8 +514,8 @@ public abstract class AbstractMeter<
         }
 
         @Override
-        public boolean isDimensionalTotalInstance() {
-            return dimensionalTotalInstance;
+        public boolean isLabeledMetricTotalInstance() {
+            return labeledMetricTotalInstance;
         }
 
         @Override
@@ -568,9 +568,9 @@ public abstract class AbstractMeter<
 
         protected AbstractExpirableMeterInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             MeasurableValuesProvider measurableValuesProvider,
             Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders,
@@ -579,9 +579,9 @@ public abstract class AbstractMeter<
 
             super(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 measurableValuesProvider,
                 measurableValueProviders,
@@ -607,17 +607,14 @@ public abstract class AbstractMeter<
 
     private static class InstanceKey {
 
-        final List<MetricDimensionValue> dimensionValues;
-        final MetricDimension[] dimensionsMask;
+        final List<LabelValue> labelValues;
+        final Label[] labelsMask;
         final int hashCode;
 
-        InstanceKey(
-            List<MetricDimensionValue> dimensionValues,
-            MetricDimension[] dimensionsMask) {
-
-            this.dimensionValues = dimensionValues;
-            this.dimensionsMask = dimensionsMask;
-            this.hashCode = hashCodeFor(dimensionValues, dimensionsMask);
+        InstanceKey(List<LabelValue> labelValues, Label[] labelsMask) {
+            this.labelValues = labelValues;
+            this.labelsMask = labelsMask;
+            this.hashCode = hashCodeFor(labelValues, labelsMask);
         }
 
         @Override
@@ -636,13 +633,13 @@ public abstract class AbstractMeter<
                 return false;
             }
 
-            if (dimensionsMask != that.dimensionsMask) {
+            if (labelsMask != that.labelsMask) {
                 return false;
             }
 
-            for (int i = 0; i < dimensionsMask.length; ++i) {
-                if (dimensionsMask[i] != null
-                    && !dimensionValues.get(i).value().equals(that.dimensionValues.get(i).value())) {
+            for (int i = 0; i < labelsMask.length; ++i) {
+                if (labelsMask[i] != null
+                    && !labelValues.get(i).value().equals(that.labelValues.get(i).value())) {
 
                     return false;
                 }
@@ -656,12 +653,12 @@ public abstract class AbstractMeter<
             return hashCode;
         }
 
-        static int hashCodeFor(List<MetricDimensionValue> dimensionValues, MetricDimension[] dimensionsMask) {
+        static int hashCodeFor(List<LabelValue> labelValues, Label[] labelsMask) {
             HashCodeBuilder builder = new HashCodeBuilder(17, 37);
 
-            for (int i = 0; i < dimensionsMask.length; ++i) {
-                if (dimensionsMask[i] != null) {
-                    builder.append(dimensionValues.get(i));
+            for (int i = 0; i < labelsMask.length; ++i) {
+                if (labelsMask[i] != null) {
+                    builder.append(labelValues.get(i));
                 }
             }
 
@@ -679,8 +676,8 @@ public abstract class AbstractMeter<
         final C parentConfig;
         final AtomicBoolean parentRemoved;
         final List<MetricListener> listeners;
-        final MetricDimension[] parentDimensions;
-        final int parentDimensionCount;
+        final Label[] parentLabels;
+        final int parentLabelCount;
         final MeasurableValueProvidersProvider<MI, IC, SC, C> measurableValueProvidersProvider;
         final MeterImplMaker<MI, IC, SC, C> meterImplMaker;
         final InstanceMaker<MI> instanceMaker;
@@ -693,8 +690,8 @@ public abstract class AbstractMeter<
             C parentConfig,
             AtomicBoolean parentRemoved,
             List<MetricListener> listeners,
-            MetricDimension[] parentDimensions,
-            int parentDimensionCount,
+            Label[] parentLabels,
+            int parentLabelCount,
             MeasurableValueProvidersProvider<MI, IC, SC, C> measurableValueProvidersProvider,
             MeterImplMaker<MI, IC, SC, C> meterImplMaker,
             InstanceMaker<MI> instanceMaker,
@@ -706,8 +703,8 @@ public abstract class AbstractMeter<
             this.parentConfig = parentConfig;
             this.parentRemoved = parentRemoved;
             this.listeners = listeners;
-            this.parentDimensions = parentDimensions;
-            this.parentDimensionCount = parentDimensionCount;
+            this.parentLabels = parentLabels;
+            this.parentLabelCount = parentLabelCount;
             this.measurableValueProvidersProvider = measurableValueProvidersProvider;
             this.meterImplMaker = meterImplMaker;
             this.instanceMaker = instanceMaker;
@@ -716,8 +713,8 @@ public abstract class AbstractMeter<
             this.executor = executor;
         }
 
-        boolean hasPrefixDimensionValues() {
-            return parentConfig.hasPrefixDimensionValues();
+        boolean hasPrefixLabelValues() {
+            return parentConfig.hasPrefixLabelValues();
         }
 
         boolean isParentRemoved() {
@@ -728,8 +725,8 @@ public abstract class AbstractMeter<
             listeners.forEach(l -> notifyListener(l, action));
         }
 
-        MetricDimension parentDimension(int i) {
-            return parentDimensions[i];
+        Label parentLabel(int i) {
+            return parentLabels[i];
         }
 
         void execute(Runnable task) {
@@ -748,26 +745,26 @@ public abstract class AbstractMeter<
         SC extends MeterSliceConfig<IC>,
         C extends MeterConfig<IC, SC>> implements Iterable<MetricInstance> {
 
-        static final long INFINITE_DIMENSIONAL_INSTANCE_EXPIRATION_TIME_MS = DAYS.toMillis(10000L);
+        static final long INFINITE_LABELED_INSTANCE_EXPIRATION_TIME_MS = DAYS.toMillis(10000L);
 
         final MetricRegistry registry;
         final SliceContext<MI, IC, SC, C> context;
-        final int parentDimensionCount;
+        final int parentLabelCount;
         final SC config;
         final MetricName name;
 
-        final MetricDimensionValuesPredicate predicate;
-        final List<MetricDimension> dimensions;
-        final boolean dimensionalInstanceAutoRemovalEnabled;
-        final boolean dimensionalInstanceExpirationEnabled;
-        final long dimensionalInstanceExpirationTimeMs;
+        final LabelValuesPredicate predicate;
+        final List<Label> labels;
+        final boolean labeledInstanceAutoRemovalEnabled;
+        final boolean labeledInstanceExpirationEnabled;
+        final long labeledInstanceExpirationTimeMs;
         final InstanceExpirationManager instanceExpirationManager;
-        final MetricDimension[] dimensionsMask;
+        final Label[] labelsMask;
         final Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders;
 
         final AbstractMeterInstance<MI> totalInstance;
         final ConcurrentHashMap<InstanceKey, AbstractMeterInstance<MI>> levelsInstances;
-        final List<MetricDimension[]> levelsDimensionsMasks;
+        final List<Label[]> levelsLabelsMasks;
         final List<Map<Measurable, MeasurableValueProvider<MI>>> levelsMeasurableValueProviders;
 
         final ConcurrentHashMap<InstanceKey, AbstractMeterInstance<MI>> instances;
@@ -775,39 +772,39 @@ public abstract class AbstractMeter<
         Slice(SliceContext<MI, IC, SC, C> context, SC config, MetricRegistry registry) {
             this.registry = registry;
             this.context = context;
-            this.parentDimensionCount = context.parentDimensionCount;
+            this.parentLabelCount = context.parentLabelCount;
             this.config = config;
             this.name = MetricName.of(context.parentName, config.name());
             this.predicate = config.predicate();
-            this.dimensions = config.hasDimensions() ? config.dimensions() : emptyList();
-            this.dimensionalInstanceAutoRemovalEnabled = config.hasEffectiveMaxDimensionalInstances() || config.isDimensionalInstanceExpirationEnabled();
-            this.dimensionalInstanceExpirationEnabled = config.isDimensionalInstanceExpirationEnabled();
+            this.labels = config.hasLabels() ? config.labels() : emptyList();
+            this.labeledInstanceAutoRemovalEnabled = config.hasEffectiveMaxLabeledInstances() || config.isLabeledInstanceExpirationEnabled();
+            this.labeledInstanceExpirationEnabled = config.isLabeledInstanceExpirationEnabled();
 
-            if (this.dimensionalInstanceAutoRemovalEnabled) {
-                this.dimensionalInstanceExpirationTimeMs =
-                    this.dimensionalInstanceExpirationEnabled ?
-                    config.dimensionalInstanceExpirationTime().toMillis() :
-                    INFINITE_DIMENSIONAL_INSTANCE_EXPIRATION_TIME_MS;
+            if (this.labeledInstanceAutoRemovalEnabled) {
+                this.labeledInstanceExpirationTimeMs =
+                    this.labeledInstanceExpirationEnabled ?
+                    config.labeledInstanceExpirationTime().toMillis() :
+                    INFINITE_LABELED_INSTANCE_EXPIRATION_TIME_MS;
             } else {
-                this.dimensionalInstanceExpirationTimeMs = 0L;
+                this.labeledInstanceExpirationTimeMs = 0L;
             }
 
             this.instanceExpirationManager =
-                this.dimensionalInstanceAutoRemovalEnabled ?
+                this.labeledInstanceAutoRemovalEnabled ?
                 new InstanceExpirationManager(
-                    config.hasMaxDimensionalInstances() ? config.maxDimensionalInstances() : Integer.MAX_VALUE,
+                    config.hasMaxLabeledInstances() ? config.maxLabeledInstances() : Integer.MAX_VALUE,
                     context.executor) :
                 null;
 
-            if (!this.dimensions.isEmpty()) {
-                this.dimensionsMask = new MetricDimension[this.parentDimensionCount];
+            if (!this.labels.isEmpty()) {
+                this.labelsMask = new Label[this.parentLabelCount];
 
-                for (int i = 0; i < this.parentDimensionCount; ++i) {
-                    MetricDimension dimension = context.parentDimension(i);
-                    this.dimensionsMask[i] = this.dimensions.contains(dimension) ? dimension : null;
+                for (int i = 0; i < this.parentLabelCount; ++i) {
+                    Label label = context.parentLabel(i);
+                    this.labelsMask[i] = this.labels.contains(label) ? label : null;
                 }
             } else {
-                this.dimensionsMask = null;
+                this.labelsMask = null;
             }
 
             this.measurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(
@@ -819,9 +816,9 @@ public abstract class AbstractMeter<
             if (config.isTotalEnabled()) {
                 IC totalInstanceConfig = config.totalInstanceConfig();
 
-                List<MetricDimensionValue> dimensionValues =
-                    context.hasPrefixDimensionValues() ?
-                    context.parentConfig.prefixDimensionValues().list() :
+                List<LabelValue> labelValues =
+                    context.hasPrefixLabelValues() ?
+                    context.parentConfig.prefixLabelValues().list() :
                     emptyList();
 
                 if (totalInstanceConfig != null) {
@@ -844,9 +841,9 @@ public abstract class AbstractMeter<
 
                     this.totalInstance = context.instanceMaker.makeInstance(
                         totalInstanceConfig.hasName() ? MetricName.of(this.name, totalInstanceConfig.name()) : this.name,
-                        dimensionValues,
+                        labelValues,
                         true,
-                        !this.dimensions.isEmpty(),
+                        !this.labels.isEmpty(),
                         false,
                         mvps,
                         meterImpl);
@@ -861,9 +858,9 @@ public abstract class AbstractMeter<
 
                     this.totalInstance = context.instanceMaker.makeInstance(
                         this.name,
-                        dimensionValues,
+                        labelValues,
                         true,
-                        !this.dimensions.isEmpty(),
+                        !this.labels.isEmpty(),
                         false,
                         this.measurableValueProviders,
                         meterImpl);
@@ -872,38 +869,38 @@ public abstract class AbstractMeter<
                 this.totalInstance = null;
             }
 
-            this.instances = this.dimensions.isEmpty() ? null : new ConcurrentHashMap<>();
-            int dimensionCount = this.dimensions.size();
+            this.instances = this.labels.isEmpty() ? null : new ConcurrentHashMap<>();
+            int labelCount = this.labels.size();
 
-            if (config.areLevelsEnabled() && dimensionCount > 1) {
+            if (config.areLevelsEnabled() && labelCount > 1) {
                 this.levelsInstances = new ConcurrentHashMap<>();
-                this.levelsDimensionsMasks = new ArrayList<>(dimensionCount - 1);
-                this.levelsMeasurableValueProviders = new ArrayList<>(dimensionCount - 1);
+                this.levelsLabelsMasks = new ArrayList<>(labelCount - 1);
+                this.levelsMeasurableValueProviders = new ArrayList<>(labelCount - 1);
 
-                for (int i = 0; i < dimensionCount - 1; ++i) {
-                    MetricDimension dimension = this.dimensions.get(i);
+                for (int i = 0; i < labelCount - 1; ++i) {
+                    Label label = this.labels.get(i);
 
-                    if (config.areOnlyConfiguredLevelsEnabled() && !config.hasLevelInstanceConfigFor(dimension)) {
-                        this.levelsDimensionsMasks.add(null);
+                    if (config.areOnlyConfiguredLevelsEnabled() && !config.hasLevelInstanceConfigFor(label)) {
+                        this.levelsLabelsMasks.add(null);
                         continue;
                     }
 
-                    MetricDimension[] levelDimensionsMask = new MetricDimension[this.parentDimensionCount];
+                    Label[] levelLabelsMask = new Label[this.parentLabelCount];
                     int k = i;
 
-                    for (int j = 0; j < this.parentDimensionCount; ++j) {
-                        MetricDimension parentDimension = context.parentDimension(j);
+                    for (int j = 0; j < this.parentLabelCount; ++j) {
+                        Label parentLabel = context.parentLabel(j);
 
-                        if (this.dimensions.contains(parentDimension) && k-- >= 0) {
-                            levelDimensionsMask[j] = parentDimension;
+                        if (this.labels.contains(parentLabel) && k-- >= 0) {
+                            levelLabelsMask[j] = parentLabel;
                         } else {
-                            levelDimensionsMask[j] = null;
+                            levelLabelsMask[j] = null;
                         }
                     }
 
-                    this.levelsDimensionsMasks.add(levelDimensionsMask);
+                    this.levelsLabelsMasks.add(levelLabelsMask);
                     Map<Measurable, MeasurableValueProvider<MI>> levelMeasurableValueProviders;
-                    IC levelInstanceConfig = config.levelInstanceConfigs().get(dimension);
+                    IC levelInstanceConfig = config.levelInstanceConfigs().get(label);
 
                     if (levelInstanceConfig != null && levelInstanceConfig.hasMeasurables()) {
                         levelMeasurableValueProviders = context.measurableValueProvidersProvider.valueProvidersFor(
@@ -925,29 +922,29 @@ public abstract class AbstractMeter<
                 }
             } else {
                 this.levelsInstances = null;
-                this.levelsDimensionsMasks = null;
+                this.levelsLabelsMasks = null;
                 this.levelsMeasurableValueProviders = null;
             }
         }
 
-        boolean matches(MetricDimensionValues dimensionValues) {
-            return predicate == null || predicate.matches(dimensionValues);
+        boolean matches(LabelValues labelValues) {
+            return predicate == null || predicate.matches(labelValues);
         }
 
-        void update(long value, List<MetricDimensionValue> dimensionValues, long updateTimeMs) {
+        void update(long value, List<LabelValue> labelValues, long updateTimeMs) {
             if (totalInstance != null) {
                 totalInstance.update(value, context.meterImplUpdater);
             }
 
             if (levelsInstances != null) {
-                for (int i = 0; i < levelsDimensionsMasks.size(); ++i) {
-                    MetricDimension[] levelDimensionsMask = levelsDimensionsMasks.get(i);
+                for (int i = 0; i < levelsLabelsMasks.size(); ++i) {
+                    Label[] levelLabelsMask = levelsLabelsMasks.get(i);
 
-                    if (levelDimensionsMask == null) {
+                    if (levelLabelsMask == null) {
                         continue;
                     }
 
-                    InstanceKey instanceKey = new InstanceKey(dimensionValues, levelDimensionsMask);
+                    InstanceKey instanceKey = new InstanceKey(labelValues, levelLabelsMask);
                     AbstractMeterInstance<MI> instance = levelsInstances.get(instanceKey);
 
                     if (instance != null) {
@@ -965,29 +962,29 @@ public abstract class AbstractMeter<
                             if (instance2 != null) {
                                 updateInstance(instance2, value, updateTimeMs);
                             } else {
-                                List<MetricDimensionValue> instanceDimensionValues;
+                                List<LabelValue> instanceLabelValues;
 
-                                if (context.hasPrefixDimensionValues()) {
-                                    MetricDimensionValues prefixDimensionValues = context.parentConfig.prefixDimensionValues();
-                                    instanceDimensionValues = new ArrayList<>(prefixDimensionValues.size() + i2 + 1);
-                                    instanceDimensionValues.addAll(prefixDimensionValues.list());
+                                if (context.hasPrefixLabelValues()) {
+                                    LabelValues prefixLabelValues = context.parentConfig.prefixLabelValues();
+                                    instanceLabelValues = new ArrayList<>(prefixLabelValues.size() + i2 + 1);
+                                    instanceLabelValues.addAll(prefixLabelValues.list());
                                 } else {
-                                    instanceDimensionValues = new ArrayList<>(i2 + 1);
+                                    instanceLabelValues = new ArrayList<>(i2 + 1);
                                 }
 
-                                for (int j = 0; j < levelDimensionsMask.length; ++j) {
-                                    if (levelDimensionsMask[j] != null) {
-                                        instanceDimensionValues.add(dimensionValues.get(j));
+                                for (int j = 0; j < levelLabelsMask.length; ++j) {
+                                    if (levelLabelsMask[j] != null) {
+                                        instanceLabelValues.add(labelValues.get(j));
                                     }
                                 }
 
                                 MetricName nameSuffix = null;
-                                IC instanceConfig = config.levelInstanceConfigs().getOrDefault(dimensions.get(i2), config.defaultLevelInstanceConfig());
+                                IC instanceConfig = config.levelInstanceConfigs().getOrDefault(labels.get(i2), config.defaultLevelInstanceConfig());
 
                                 if (instanceConfig != null && instanceConfig.hasName()) {
                                     nameSuffix = instanceConfig.name();
                                 } else if (config.hasLevelInstanceNameProvider()) {
-                                    nameSuffix = config.levelInstanceNameProvider().nameForLevelInstance(instanceDimensionValues);
+                                    nameSuffix = config.levelInstanceNameProvider().nameForLevelInstance(instanceLabelValues);
 
                                     if (nameSuffix == null && config.hasDefaultLevelInstanceConfig() && config.defaultLevelInstanceConfig().hasName()) {
                                         nameSuffix = config.defaultLevelInstanceConfig().name();
@@ -1006,10 +1003,10 @@ public abstract class AbstractMeter<
                                     context.executor,
                                     registry);
 
-                                if (dimensionalInstanceAutoRemovalEnabled) {
+                                if (labeledInstanceAutoRemovalEnabled) {
                                     newInstance = context.instanceMaker.makeExpirableInstance(
                                         instanceName,
-                                        instanceDimensionValues,
+                                        instanceLabelValues,
                                         false,
                                         false,
                                         true,
@@ -1019,7 +1016,7 @@ public abstract class AbstractMeter<
                                 } else {
                                     newInstance = context.instanceMaker.makeInstance(
                                         instanceName,
-                                        instanceDimensionValues,
+                                        instanceLabelValues,
                                         false,
                                         false,
                                         true,
@@ -1035,7 +1032,7 @@ public abstract class AbstractMeter<
             }
 
             if (instances != null) {
-                InstanceKey instanceKey = new InstanceKey(dimensionValues, dimensionsMask);
+                InstanceKey instanceKey = new InstanceKey(labelValues, labelsMask);
                 AbstractMeterInstance<MI> instance = instances.get(instanceKey);
 
                 if (instance != null) {
@@ -1051,19 +1048,19 @@ public abstract class AbstractMeter<
                         if (instance2 != null) {
                             updateInstance(instance2, value, updateTimeMs);
                         } else {
-                            List<MetricDimensionValue> instanceDimensionValues;
+                            List<LabelValue> instanceLabelValues;
 
-                            if (context.hasPrefixDimensionValues()) {
-                                MetricDimensionValues prefixDimensionValues = context.parentConfig.prefixDimensionValues();
-                                instanceDimensionValues = new ArrayList<>(prefixDimensionValues.size() + dimensions.size());
-                                instanceDimensionValues.addAll(prefixDimensionValues.list());
+                            if (context.hasPrefixLabelValues()) {
+                                LabelValues prefixLabelValues = context.parentConfig.prefixLabelValues();
+                                instanceLabelValues = new ArrayList<>(prefixLabelValues.size() + labels.size());
+                                instanceLabelValues.addAll(prefixLabelValues.list());
                             } else {
-                                instanceDimensionValues = new ArrayList<>(dimensions.size());
+                                instanceLabelValues = new ArrayList<>(labels.size());
                             }
 
-                            for (int i = 0; i < dimensionValues.size(); ++i) {
-                                if (dimensionsMask[i] != null) {
-                                    instanceDimensionValues.add(dimensionValues.get(i));
+                            for (int i = 0; i < labelValues.size(); ++i) {
+                                if (labelsMask[i] != null) {
+                                    instanceLabelValues.add(labelValues.get(i));
                                 }
                             }
 
@@ -1077,10 +1074,10 @@ public abstract class AbstractMeter<
                                 context.executor,
                                 registry);
 
-                            if (dimensionalInstanceAutoRemovalEnabled) {
+                            if (labeledInstanceAutoRemovalEnabled) {
                                 newInstance = context.instanceMaker.makeExpirableInstance(
                                     name,
-                                    instanceDimensionValues,
+                                    instanceLabelValues,
                                     false,
                                     false,
                                     false,
@@ -1090,7 +1087,7 @@ public abstract class AbstractMeter<
                             } else {
                                 newInstance = context.instanceMaker.makeInstance(
                                     name,
-                                    instanceDimensionValues,
+                                    instanceLabelValues,
                                     false,
                                     false,
                                     false,
@@ -1104,7 +1101,7 @@ public abstract class AbstractMeter<
                 }
             }
 
-            if (dimensionalInstanceExpirationEnabled) {
+            if (labeledInstanceExpirationEnabled) {
                 instanceExpirationManager.wake(false, updateTimeMs, false);
             }
         }
@@ -1119,10 +1116,10 @@ public abstract class AbstractMeter<
             updateInstance(instance, value, creationTimeMs);
             instances.put(instanceKey, instance);
 
-            if (dimensionalInstanceAutoRemovalEnabled) {
+            if (labeledInstanceAutoRemovalEnabled) {
                 AbstractExpirableMeterInstance<MI> expirableInstance = (AbstractExpirableMeterInstance<MI>)instance;
                 long instanceUpdateTimeMs = expirableInstance.updateTimeMs();
-                long instanceExpirationTimeMs = instanceUpdateTimeMs + dimensionalInstanceExpirationTimeMs;
+                long instanceExpirationTimeMs = instanceUpdateTimeMs + labeledInstanceExpirationTimeMs;
 
                 instanceExpirationManager.addInstanceExpiration(new InstanceExpiration(
                     this,
@@ -1162,10 +1159,10 @@ public abstract class AbstractMeter<
             }
         }
 
-        public void removeInstancesFor(MetricDimensionValues dimensionValues) {
-            if (dimensionsMask != null) {
+        public void removeInstancesFor(LabelValues labelValues) {
+            if (labelsMask != null) {
                 context.execute(() -> {
-                    InstanceKey key = new InstanceKey(dimensionValues.list(), dimensionsMask);
+                    InstanceKey key = new InstanceKey(labelValues.list(), labelsMask);
                     removeInstance(key);
                 });
             }
@@ -1327,7 +1324,7 @@ public abstract class AbstractMeter<
                 return levelResult;
             }
 
-            return Integer.compare(right.instance.dimensionValues().size(), instance.dimensionValues().size());
+            return Integer.compare(right.instance.labelValues().size(), instance.labelValues().size());
         }
     }
 
@@ -1383,7 +1380,7 @@ public abstract class AbstractMeter<
                         ie.slice,
                         ie.instanceKey,
                         ie.instance,
-                        instanceUpdateTimeMs + ie.slice.dimensionalInstanceExpirationTimeMs,
+                        instanceUpdateTimeMs + ie.slice.labeledInstanceExpirationTimeMs,
                         instanceUpdateTimeMs));
                 }
 

@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.reporters.zabbix;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.infoProviders.*;
 import com.ringcentral.platform.metrics.predicates.MetricInstancePredicate;
@@ -30,8 +30,8 @@ public class ZabbixLldMetricsReporter implements MetricsReporter, MetricRegistry
         private final Function<MetricInstance, String> attrValueProvider;
         private final String attrName;
 
-        public RuleItem(MetricDimension dimension, String attrName) {
-            this(instance -> instance.valueOf(dimension), attrName);
+        public RuleItem(Label label, String attrName) {
+            this(instance -> instance.valueOf(label), attrName);
         }
 
         public RuleItem(Function<MetricInstance, String> attrValueProvider, String attrName) {
@@ -86,7 +86,7 @@ public class ZabbixLldMetricsReporter implements MetricsReporter, MetricRegistry
 
         @Override
         public synchronized void metricInstanceAdded(MetricInstance instance) {
-            if (!instance.hasDimensionValues()) {
+            if (!instance.hasLabelValues()) {
                 return;
             }
 
@@ -135,7 +135,7 @@ public class ZabbixLldMetricsReporter implements MetricsReporter, MetricRegistry
 
         @Override
         public synchronized void metricInstanceRemoved(MetricInstance instance) {
-            if (!instance.hasDimensionValues()) {
+            if (!instance.hasLabelValues()) {
                 return;
             }
 

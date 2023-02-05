@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -14,10 +14,10 @@ public interface MetricConfig {
 
     String description();
 
-    default boolean hasPrefixDimensionValues() {
-        return prefixDimensionValues() != null && !prefixDimensionValues().isEmpty();
+    default boolean hasPrefixLabelValues() {
+        return prefixLabelValues() != null && !prefixLabelValues().isEmpty();
     }
 
-    MetricDimensionValues prefixDimensionValues();
+    LabelValues prefixLabelValues();
     MetricContext context();
 }

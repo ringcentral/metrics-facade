@@ -51,14 +51,14 @@ public class MfDoubleGauge<A> extends AbstractMeter implements MfMeter, Gauge {
 
         this.mfDoubleVar = mfRegistry.doubleVar(
             this.base.name(),
-            this.base.hasDimensions() ? noTotal() : this.valueSupplier,
+            this.base.hasLabels() ? noTotal() : this.valueSupplier,
             () ->
-                this.base.hasDimensions() ?
-                withDoubleVar().dimensions(this.base.dimensions()).nonDecreasing(nonDecreasing) :
+                this.base.hasLabels() ?
+                withDoubleVar().labels(this.base.labels()).nonDecreasing(nonDecreasing) :
                 withDoubleVar().nonDecreasing(nonDecreasing));
 
-        if (this.base.hasDimensions()) {
-            this.mfDoubleVar.register(this.valueSupplier, this.base.dimensionValues());
+        if (this.base.hasLabels()) {
+            this.mfDoubleVar.register(this.valueSupplier, this.base.labelValues());
         }
     }
 
@@ -81,8 +81,8 @@ public class MfDoubleGauge<A> extends AbstractMeter implements MfMeter, Gauge {
 
     @Override
     public void meterRemoved() {
-        if (base.hasDimensions()) {
-            mfDoubleVar.deregister(base.dimensionValues());
+        if (base.hasLabels()) {
+            mfDoubleVar.deregister(base.labelValues());
         } else {
             base.mfRegistry().remove(base.name());
         }

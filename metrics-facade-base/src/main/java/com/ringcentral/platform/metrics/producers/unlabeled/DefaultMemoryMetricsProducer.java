@@ -1,4 +1,4 @@
-package com.ringcentral.platform.metrics.producers.nondimensional;
+package com.ringcentral.platform.metrics.producers.unlabeled;
 
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
@@ -275,44 +275,44 @@ public class DefaultMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
     @Override
     public void produceMetrics(MetricRegistry registry) {
         registry.longVar(
-                nameWithSuffix("total", "init"),
-                () -> memoryMxBean.getHeapMemoryUsage().getInit() + memoryMxBean.getNonHeapMemoryUsage().getInit(),
-                longVarConfigBuilderSupplier(INIT_DESCRIPTION));
+            nameWithSuffix("total", "init"),
+            () -> memoryMxBean.getHeapMemoryUsage().getInit() + memoryMxBean.getNonHeapMemoryUsage().getInit(),
+            longVarConfigBuilderSupplier(INIT_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("total", "used"),
-                () -> memoryMxBean.getHeapMemoryUsage().getUsed() + memoryMxBean.getNonHeapMemoryUsage().getUsed(),
-                longVarConfigBuilderSupplier(USED_DESCRIPTION));
+            nameWithSuffix("total", "used"),
+            () -> memoryMxBean.getHeapMemoryUsage().getUsed() + memoryMxBean.getNonHeapMemoryUsage().getUsed(),
+            longVarConfigBuilderSupplier(USED_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("total", "max"),
-                () -> memoryMxBean.getHeapMemoryUsage().getMax() + memoryMxBean.getNonHeapMemoryUsage().getMax(),
-                longVarConfigBuilderSupplier(MAX_DESCRIPTION));
+            nameWithSuffix("total", "max"),
+            () -> memoryMxBean.getHeapMemoryUsage().getMax() + memoryMxBean.getNonHeapMemoryUsage().getMax(),
+            longVarConfigBuilderSupplier(MAX_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("total", "committed"),
-                () -> memoryMxBean.getHeapMemoryUsage().getCommitted() + memoryMxBean.getNonHeapMemoryUsage().getCommitted(),
-                longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
+            nameWithSuffix("total", "committed"),
+            () -> memoryMxBean.getHeapMemoryUsage().getCommitted() + memoryMxBean.getNonHeapMemoryUsage().getCommitted(),
+            longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("heap", "init"),
-                () -> memoryMxBean.getHeapMemoryUsage().getInit(),
-                longVarConfigBuilderSupplier(INIT_DESCRIPTION));
+            nameWithSuffix("heap", "init"),
+            () -> memoryMxBean.getHeapMemoryUsage().getInit(),
+            longVarConfigBuilderSupplier(INIT_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("heap", "used"),
-                () -> memoryMxBean.getHeapMemoryUsage().getUsed(),
-                longVarConfigBuilderSupplier(USED_DESCRIPTION));
+            nameWithSuffix("heap", "used"),
+            () -> memoryMxBean.getHeapMemoryUsage().getUsed(),
+            longVarConfigBuilderSupplier(USED_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("heap", "max"),
-                () -> memoryMxBean.getHeapMemoryUsage().getMax(),
-                longVarConfigBuilderSupplier(MAX_DESCRIPTION));
+            nameWithSuffix("heap", "max"),
+            () -> memoryMxBean.getHeapMemoryUsage().getMax(),
+            longVarConfigBuilderSupplier(MAX_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("heap", "committed"),
-                () -> memoryMxBean.getHeapMemoryUsage().getCommitted(),
-                longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
+            nameWithSuffix("heap", "committed"),
+            () -> memoryMxBean.getHeapMemoryUsage().getCommitted(),
+            longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
 
         registry.doubleVar(
             nameWithSuffix("heap", "usage"),
@@ -323,24 +323,24 @@ public class DefaultMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
             doubleVarConfigBuilderSupplier(USAGE_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("non-heap", "init"),
-                () -> memoryMxBean.getNonHeapMemoryUsage().getInit(),
-                longVarConfigBuilderSupplier(INIT_DESCRIPTION));
+            nameWithSuffix("non-heap", "init"),
+            () -> memoryMxBean.getNonHeapMemoryUsage().getInit(),
+            longVarConfigBuilderSupplier(INIT_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("non-heap", "used"),
-                () -> memoryMxBean.getNonHeapMemoryUsage().getUsed(),
-                longVarConfigBuilderSupplier(USED_DESCRIPTION));
+            nameWithSuffix("non-heap", "used"),
+            () -> memoryMxBean.getNonHeapMemoryUsage().getUsed(),
+            longVarConfigBuilderSupplier(USED_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("non-heap", "max"),
-                () -> memoryMxBean.getNonHeapMemoryUsage().getMax(),
-                longVarConfigBuilderSupplier(MAX_DESCRIPTION));
+            nameWithSuffix("non-heap", "max"),
+            () -> memoryMxBean.getNonHeapMemoryUsage().getMax(),
+            longVarConfigBuilderSupplier(MAX_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("non-heap", "committed"),
-                () -> memoryMxBean.getNonHeapMemoryUsage().getCommitted(),
-                longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
+            nameWithSuffix("non-heap", "committed"),
+            () -> memoryMxBean.getNonHeapMemoryUsage().getCommitted(),
+            longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
 
         registry.doubleVar(
             nameWithSuffix("non-heap", "usage"),
@@ -364,31 +364,31 @@ public class DefaultMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
                 doubleVarConfigBuilderSupplier(USAGE_DESCRIPTION));
 
             registry.longVar(
-                    name(namePrefix, "max"),
-                    () -> pool.getUsage().getMax(),
-                    longVarConfigBuilderSupplier(MAX_DESCRIPTION));
+                name(namePrefix, "max"),
+                () -> pool.getUsage().getMax(),
+                longVarConfigBuilderSupplier(MAX_DESCRIPTION));
 
             registry.longVar(
-                    name(namePrefix, "used"),
-                    () -> pool.getUsage().getUsed(),
-                    longVarConfigBuilderSupplier(USED_DESCRIPTION));
+                name(namePrefix, "used"),
+                () -> pool.getUsage().getUsed(),
+                longVarConfigBuilderSupplier(USED_DESCRIPTION));
 
             registry.longVar(
-                    name(namePrefix, "committed"),
-                    () -> pool.getUsage().getCommitted(),
-                    longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
+                name(namePrefix, "committed"),
+                () -> pool.getUsage().getCommitted(),
+                longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION));
 
             if (pool.getCollectionUsage() != null) {
                 registry.longVar(
-                        name(namePrefix, "used-after-gc"),
-                        () -> pool.getCollectionUsage().getUsed(),
-                        longVarConfigBuilderSupplier(USED_AFTER_GC_DESCRIPTION));
+                    name(namePrefix, "used-after-gc"),
+                    () -> pool.getCollectionUsage().getUsed(),
+                    longVarConfigBuilderSupplier(USED_AFTER_GC_DESCRIPTION));
             }
 
             registry.longVar(
-                    name(namePrefix, "init"),
-                    () -> pool.getUsage().getInit(),
-                    longVarConfigBuilderSupplier(INIT_DESCRIPTION));
+                name(namePrefix, "init"),
+                () -> pool.getUsage().getInit(),
+                longVarConfigBuilderSupplier(INIT_DESCRIPTION));
         }
     }
 }

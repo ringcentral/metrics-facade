@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.var;
 
 import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.test.time.*;
 import com.ringcentral.platform.metrics.var.configs.builders.BaseVarConfigBuilder;
@@ -12,7 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
 import static com.ringcentral.platform.metrics.TestMetricListener.NotificationType.*;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.labels.LabelValues.*;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.utils.CollectionUtils.iterToSet;
 import static com.ringcentral.platform.metrics.var.Var.noTotal;
@@ -35,9 +35,9 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
         Supplier<V> makeValueSupplier();
     }
 
-    protected static final MetricDimension SUBSYSTEM = new MetricDimension("subsystem");
-    protected static final MetricDimension SERVICE = new MetricDimension("service");
-    protected static final MetricDimension SERVER = new MetricDimension("server");
+    protected static final Label SUBSYSTEM = new Label("subsystem");
+    protected static final Label SERVICE = new Label("service");
+    protected static final Label SERVER = new Label("server");
 
     protected VarMaker<V, T> varMaker;
     protected ValueSupplierMaker<V> valueSupplierMaker;
@@ -71,9 +71,9 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
 
         MetricInstance instance = listener.instances().iterator().next();
         assertThat(instance.name(), is(var.name()));
-        assertFalse(instance.hasDimensionValues());
+        assertFalse(instance.hasLabelValues());
         assertTrue(instance.isTotalInstance());
-        assertFalse(instance.isDimensionalTotalInstance());
+        assertFalse(instance.isLabeledMetricTotalInstance());
         assertFalse(instance.isLevelInstance());
         assertThat(instance.measurables(), is(Set.of(var.valueMeasurable())));
         instance.valueOf(var.valueMeasurable());
@@ -109,12 +109,12 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
     }
 
     @Test
-    public void dimensional() {
+    public void labeled() {
         CountingValueSupplier<V> valueSupplier_1 = new CountingValueSupplier<>(valueSupplierMaker.makeValueSupplier());
 
         T var = varMaker.makeVar(
             name("var"),
-            variable().dimensions(SERVICE, SERVER),
+            variable().labels(SERVICE, SERVER),
             valueSupplier_1,
             executor);
 
@@ -126,9 +126,9 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
 
         MetricInstance instance = listener.notification(0).instance();
         assertThat(instance.name(), is(var.name()));
-        assertFalse(instance.hasDimensionValues());
+        assertFalse(instance.hasLabelValues());
         assertTrue(instance.isTotalInstance());
-        assertTrue(instance.isDimensionalTotalInstance());
+        assertTrue(instance.isLabeledMetricTotalInstance());
         assertFalse(instance.isLevelInstance());
         assertThat(instance.measurables(), is(Set.of(var.valueMeasurable())));
         instance.valueOf(var.valueMeasurable());
@@ -136,16 +136,16 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
         assertThat(iterToSet(var.iterator()), is(Set.of(instance)));
 
         CountingValueSupplier<V> valueSupplier_2 = new CountingValueSupplier<>(valueSupplierMaker.makeValueSupplier());
-        var.register(valueSupplier_2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1")));
+        var.register(valueSupplier_2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1")));
 
         assertThat(listener.notificationCount(), is(2));
         assertThat(listener.notification(1).type(), is(INSTANCE_ADDED));
 
         instance = listener.notification(1).instance();
         assertThat(instance.name(), is(var.name()));
-        assertThat(instance.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1"))));
+        assertThat(instance.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1"))));
         assertFalse(instance.isTotalInstance());
-        assertFalse(instance.isDimensionalTotalInstance());
+        assertFalse(instance.isLabeledMetricTotalInstance());
         assertFalse(instance.isLevelInstance());
         assertThat(instance.measurables(), is(Set.of(var.valueMeasurable())));
         instance.valueOf(var.valueMeasurable());
@@ -157,16 +157,16 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
             listener.notification(1).instance())));
 
         CountingValueSupplier<V> valueSupplier_3 = new CountingValueSupplier<>(valueSupplierMaker.makeValueSupplier());
-        var.register(valueSupplier_3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2")));
+        var.register(valueSupplier_3, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2")));
 
         assertThat(listener.notificationCount(), is(3));
         assertThat(listener.notification(2).type(), is(INSTANCE_ADDED));
 
         instance = listener.notification(2).instance();
         assertThat(instance.name(), is(var.name()));
-        assertThat(instance.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2"))));
+        assertThat(instance.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2"))));
         assertFalse(instance.isTotalInstance());
-        assertFalse(instance.isDimensionalTotalInstance());
+        assertFalse(instance.isLabeledMetricTotalInstance());
         assertFalse(instance.isLevelInstance());
         assertThat(instance.measurables(), is(Set.of(var.valueMeasurable())));
         instance.valueOf(var.valueMeasurable());
@@ -179,7 +179,7 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
             listener.notification(1).instance(),
             listener.notification(2).instance())));
 
-        var.deregister(forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1")));
+        var.deregister(forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1")));
 
         assertThat(listener.notificationCount(), is(4));
         assertThat(listener.notification(3).type(), is(INSTANCE_REMOVED));
@@ -200,14 +200,14 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
     }
 
     @Test
-    public void dimensional_noTotal() {
+    public void labeled_noTotal() {
         CountingValueSupplier<V> valueSupplier_1 = new CountingValueSupplier<>(valueSupplierMaker.makeValueSupplier());
 
         T var = varMaker.makeVar(
             name("var"),
             variable()
-                .prefix(dimensionValues(SUBSYSTEM.value("sub")))
-                .dimensions(SERVICE, SERVER),
+                .prefix(labelValues(SUBSYSTEM.value("sub")))
+                .labels(SERVICE, SERVER),
             noTotal(),
             executor);
 
@@ -216,16 +216,16 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
         var.addListener(listener);
         assertThat(listener.notificationCount(), is(0));
 
-        var.register(valueSupplier_1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1")));
+        var.register(valueSupplier_1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1")));
 
         assertThat(listener.notificationCount(), is(1));
         assertThat(listener.notification(0).type(), is(INSTANCE_ADDED));
 
         MetricInstance instance = listener.notification(0).instance();
         assertThat(instance.name(), is(var.name()));
-        assertThat(instance.dimensionValues(), is(List.of(SUBSYSTEM.value("sub"), SERVICE.value("service_1"), SERVER.value("server_1"))));
+        assertThat(instance.labelValues(), is(List.of(SUBSYSTEM.value("sub"), SERVICE.value("service_1"), SERVER.value("server_1"))));
         assertFalse(instance.isTotalInstance());
-        assertFalse(instance.isDimensionalTotalInstance());
+        assertFalse(instance.isLabeledMetricTotalInstance());
         assertFalse(instance.isLevelInstance());
         assertThat(instance.measurables(), is(Set.of(var.valueMeasurable())));
         instance.valueOf(var.valueMeasurable());
@@ -241,12 +241,12 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void invalidDimensionValues() {
+    public void invalidLabelValues() {
         CountingValueSupplier<V> valueSupplier_1 = new CountingValueSupplier<>(valueSupplierMaker.makeValueSupplier());
 
         T var = varMaker.makeVar(
             name("var"),
-            variable().dimensions(SERVICE, SERVER),
+            variable().labels(SERVICE, SERVER),
             noTotal(),
             executor);
 
@@ -255,6 +255,6 @@ public abstract class AbstractVarTest<V, T extends AbstractVar<V>> {
         var.addListener(listener);
         assertThat(listener.notificationCount(), is(0));
 
-        var.register(valueSupplier_1, forDimensionValues(SERVER.value("server_1"), SERVICE.value("service_1")));
+        var.register(valueSupplier_1, forLabelValues(SERVER.value("server_1"), SERVICE.value("service_1")));
     }
 }

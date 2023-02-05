@@ -15,7 +15,7 @@ import java.util.Set;
 
 import static com.ringcentral.platform.metrics.histogram.Histogram.SEC_1_BUCKET;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
-import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.DEFAULT_DIMENSIONAL_TOTAL_INSTANCE_NAME_SUFFIX;
+import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.DEFAULT_LABELED_METRIC_TOTAL_INSTANCE_NAME_SUFFIX;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleMaker.DEFAULT_TOTAL_INSTANCE_NAME_SUFFIX;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
@@ -63,7 +63,7 @@ public class PrometheusInstanceSampleMakerTest {
         MetricInstance instance = mock(VarInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -83,7 +83,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(VarInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(true);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(true);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -103,7 +103,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(VarInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(false);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -126,7 +126,7 @@ public class PrometheusInstanceSampleMakerTest {
         MetricInstance instance = mock(CounterInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -146,7 +146,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(VarInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(true);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(true);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -166,7 +166,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(VarInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(false);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -190,7 +190,7 @@ public class PrometheusInstanceSampleMakerTest {
         MetricInstance instance = mock(RateInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -210,7 +210,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(RateInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(true);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(true);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -230,7 +230,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(RateInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(false);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -253,7 +253,7 @@ public class PrometheusInstanceSampleMakerTest {
         MetricInstance instance = mock(HistogramInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -273,7 +273,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(HistogramInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(true);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(true);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -293,7 +293,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(HistogramInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(false);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -316,7 +316,7 @@ public class PrometheusInstanceSampleMakerTest {
         MetricInstance instance = mock(TimerInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
         when(instance.measurables()).thenReturn(Set.of(SEC_1_BUCKET));
         when(instance.isWithBuckets()).thenReturn(true);
 
@@ -338,7 +338,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(TimerInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(true);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(true);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -358,7 +358,7 @@ public class PrometheusInstanceSampleMakerTest {
         instance = mock(TimerInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(false);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
 
         expectedInstanceSample = new PrometheusInstanceSample(
             name("a", "b"),
@@ -389,7 +389,7 @@ public class PrometheusInstanceSampleMakerTest {
         LongVarInstance instance = mock(LongVarInstance.class);
         when(instance.name()).thenReturn(name("a", "b"));
         when(instance.isTotalInstance()).thenReturn(true);
-        when(instance.isDimensionalTotalInstance()).thenReturn(false);
+        when(instance.isLabeledMetricTotalInstance()).thenReturn(false);
         when(instance.isNonDecreasing()).thenReturn(true);
 
         PrometheusInstanceSample expectedInstanceSample = new PrometheusInstanceSample(
@@ -409,7 +409,7 @@ public class PrometheusInstanceSampleMakerTest {
 
         maker = new PrometheusInstanceSampleMaker(
             DEFAULT_TOTAL_INSTANCE_NAME_SUFFIX,
-            DEFAULT_DIMENSIONAL_TOTAL_INSTANCE_NAME_SUFFIX,
+            DEFAULT_LABELED_METRIC_TOTAL_INSTANCE_NAME_SUFFIX,
             false);
 
         expectedInstanceSample = new PrometheusInstanceSample(
@@ -431,7 +431,7 @@ public class PrometheusInstanceSampleMakerTest {
         DoubleVarInstance doubleVarInstance = mock(DoubleVarInstance.class);
         when(doubleVarInstance.name()).thenReturn(name("a", "b"));
         when(doubleVarInstance.isTotalInstance()).thenReturn(true);
-        when(doubleVarInstance.isDimensionalTotalInstance()).thenReturn(false);
+        when(doubleVarInstance.isLabeledMetricTotalInstance()).thenReturn(false);
         when(doubleVarInstance.isNonDecreasing()).thenReturn(true);
 
         expectedInstanceSample = new PrometheusInstanceSample(

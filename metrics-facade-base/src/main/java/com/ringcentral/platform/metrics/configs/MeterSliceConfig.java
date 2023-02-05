@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -11,7 +11,7 @@ import java.util.*;
 public interface MeterSliceConfig<IC extends MeterInstanceConfig> {
 
     interface LevelInstanceNameProvider {
-        MetricName nameForLevelInstance(List<MetricDimensionValue> values);
+        MetricName nameForLevelInstance(List<LabelValue> values);
     }
 
     boolean isEnabled();
@@ -21,30 +21,30 @@ public interface MeterSliceConfig<IC extends MeterInstanceConfig> {
         return predicate() != null;
     }
 
-    MetricDimensionValuesPredicate predicate();
+    LabelValuesPredicate predicate();
 
-    default boolean hasDimensions() {
-        return dimensions() != null && !dimensions().isEmpty();
+    default boolean hasLabels() {
+        return labels() != null && !labels().isEmpty();
     }
 
-    List<MetricDimension> dimensions();
+    List<Label> labels();
 
-    default boolean hasEffectiveMaxDimensionalInstances() {
-        return hasMaxDimensionalInstances() && maxDimensionalInstances() < Integer.MAX_VALUE;
+    default boolean hasEffectiveMaxLabeledInstances() {
+        return hasMaxLabeledInstances() && maxLabeledInstances() < Integer.MAX_VALUE;
     }
 
-    default boolean hasMaxDimensionalInstances() {
-        return maxDimensionalInstances() != null;
+    default boolean hasMaxLabeledInstances() {
+        return maxLabeledInstances() != null;
     }
 
-    Integer maxDimensionalInstances();
+    Integer maxLabeledInstances();
 
-    default boolean isDimensionalInstanceExpirationEnabled() {
-        Duration t = dimensionalInstanceExpirationTime();
+    default boolean isLabeledInstanceExpirationEnabled() {
+        Duration t = labeledInstanceExpirationTime();
         return t != null && !t.isZero() && !t.isNegative();
     }
 
-    Duration dimensionalInstanceExpirationTime();
+    Duration labeledInstanceExpirationTime();
 
     default boolean hasMeasurables() {
         return measurables() != null && !measurables().isEmpty();
@@ -62,15 +62,15 @@ public interface MeterSliceConfig<IC extends MeterInstanceConfig> {
 
     LevelInstanceNameProvider levelInstanceNameProvider();
 
-    default boolean hasLevelInstanceConfigFor(MetricDimension dimension) {
-        return hasLevelInstanceConfigs() && levelInstanceConfigs().containsKey(dimension);
+    default boolean hasLevelInstanceConfigFor(Label label) {
+        return hasLevelInstanceConfigs() && levelInstanceConfigs().containsKey(label);
     }
 
     default boolean hasLevelInstanceConfigs() {
         return levelInstanceConfigs() != null && !levelInstanceConfigs().isEmpty();
     }
 
-    Map<MetricDimension, IC> levelInstanceConfigs();
+    Map<Label, IC> levelInstanceConfigs();
 
     default boolean hasDefaultLevelInstanceConfig() {
         return defaultLevelInstanceConfig() != null;

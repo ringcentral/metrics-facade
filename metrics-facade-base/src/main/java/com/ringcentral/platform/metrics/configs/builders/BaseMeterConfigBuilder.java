@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.configs.builders;
 
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.NothingMeasurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -52,9 +52,9 @@ public class BaseMeterConfigBuilder extends AbstractMeterConfigBuilder<
     protected BaseMeterConfig buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         BaseMeterSliceConfig allSliceConfig,
         Set<BaseMeterSliceConfig> sliceConfigs,
         MetricContext context) {
@@ -62,8 +62,8 @@ public class BaseMeterConfigBuilder extends AbstractMeterConfigBuilder<
         return new BaseMeterConfig(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,

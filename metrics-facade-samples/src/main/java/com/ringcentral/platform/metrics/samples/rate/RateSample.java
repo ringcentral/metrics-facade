@@ -8,10 +8,10 @@ import com.ringcentral.platform.metrics.samples.AbstractSample;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
 import static com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfigBuilder.expMovingAverage;
-import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
-import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
+import static com.ringcentral.platform.metrics.labels.AllLabelValuesPredicate.labelValuesMatchingAll;
+import static com.ringcentral.platform.metrics.labels.AnyLabelValuesPredicate.labelValuesMatchingAny;
+import static com.ringcentral.platform.metrics.labels.LabelValues.forLabelValues;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.rate.Rate.*;
 import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder.withRate;
@@ -30,7 +30,7 @@ public class RateSample extends AbstractSample {
             .build();
 
         // Default config:
-        //   no dimensions
+        //   no labels
         //   measurables: {
         //     COUNT,
         //     MEAN_RATE,
@@ -52,24 +52,24 @@ public class RateSample extends AbstractSample {
                 // default: enabled
                 .enable()
 
-                // default: no prefix dimension values
-                .prefix(dimensionValues(SAMPLE.value("rate")))
+                // default: no prefix label values
+                .prefix(labelValues(SAMPLE.value("rate")))
 
-                // default: no dimensions
-                .dimensions(SERVICE, SERVER, PORT)
+                // default: no labels
+                .labels(SERVICE, SERVER, PORT)
 
                 // options: noExclusions()
                 // default: no exclusions
-                .exclude(dimensionValuesMatchingAny(
+                .exclude(labelValuesMatchingAny(
                     SERVICE.mask("serv*2|serv*4*"),
                     SERVER.mask("server_5")))
 
                 // default: unlimited
-                .maxDimensionalInstancesPerSlice(5)
+                .maxLabeledInstancesPerSlice(5)
 
-                // options: notExpireDimensionalInstances()
+                // options: notExpireLabeledInstances()
                 // default: no expiration
-                .expireDimensionalInstanceAfter(25, SECONDS)
+                .expireLabeledInstanceAfter(25, SECONDS)
 
                 // options: noMeasurables()
                 // default: {
@@ -101,16 +101,16 @@ public class RateSample extends AbstractSample {
                     // default: enabled
                     .enable()
 
-                    // default: the metric's dimensions [ SERVICE, SERVER, PORT ]
-                    .dimensions(SERVICE, SERVER)
+                    // default: the metric's labels [ SERVICE, SERVER, PORT ]
+                    .labels(SERVICE, SERVER)
 
-                    // options: noMaxDimensionalInstances()
-                    // default: the metric's maxDimensionalInstancesPerSlice = 5
-                    .maxDimensionalInstances(10)
+                    // options: noMaxLabeledInstances()
+                    // default: the metric's maxLabeledInstancesPerSlice = 5
+                    .maxLabeledInstances(10)
 
-                    // options: notExpireDimensionalInstances()
-                    // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-                    .expireDimensionalInstanceAfter(42, SECONDS)
+                    // options: notExpireLabeledInstances()
+                    // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+                    .expireLabeledInstanceAfter(42, SECONDS)
 
                     // options: noMeasurables()
                     // default: the metric's measurables { COUNT }
@@ -150,20 +150,20 @@ public class RateSample extends AbstractSample {
                     .enable()
 
                     // default: no predicate
-                    .predicate(dimensionValuesMatchingAll(
+                    .predicate(labelValuesMatchingAll(
                         SERVICE.mask("serv*_1*"),
                         SERVER.predicate(s -> s.equals("server_1_1"))))
 
-                    // default: no dimensions
-                    .dimensions(SERVICE)
+                    // default: no labels
+                    .labels(SERVICE)
 
-                    // options: noMaxDimensionalInstances()
-                    // default: the metric's maxDimensionalInstancesPerSlice = 5
-                    .maxDimensionalInstances(2)
+                    // options: noMaxLabeledInstances()
+                    // default: the metric's maxLabeledInstancesPerSlice = 5
+                    .maxLabeledInstances(2)
 
-                    // options: notExpireDimensionalInstances()
-                    // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-                    .expireDimensionalInstanceAfter(42, SECONDS)
+                    // options: notExpireLabeledInstances()
+                    // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+                    .expireLabeledInstanceAfter(42, SECONDS)
 
                     // options: noMeasurables()
                     // default: the metric's measurables { COUNT }
@@ -199,11 +199,11 @@ public class RateSample extends AbstractSample {
                         .put("key_2", "value_2_2")) // overrides "key_2" -> "value_2_1"
         );
 
-        fullConfigRate.mark(forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        fullConfigRate.mark(forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-        fullConfigRate.mark(8, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
-        fullConfigRate.mark(forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_2"), PORT.value("221")));
-        fullConfigRate.mark(2, forDimensionValues(SERVICE.value("service_3"), SERVER.value("server_3_1"), PORT.value("311")));
+        fullConfigRate.mark(forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        fullConfigRate.mark(forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+        fullConfigRate.mark(8, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+        fullConfigRate.mark(forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_2"), PORT.value("221")));
+        fullConfigRate.mark(2, forLabelValues(SERVICE.value("service_3"), SERVER.value("server_3_1"), PORT.value("311")));
 
         export(registry);
         hang();

@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.timer;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 
 public interface Stopwatch {
     /**
@@ -11,5 +11,5 @@ public interface Stopwatch {
     /**
      * @return elapsed time in nanos.
      */
-    long stop(MetricDimensionValues dimensionValues);
+    long stop(LabelValues labelValues);
 }

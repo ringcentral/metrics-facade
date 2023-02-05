@@ -1,39 +1,58 @@
 package com.ringcentral.platform.metrics;
 
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.timer.Timer;
-import com.ringcentral.platform.metrics.var.doubleVar.*;
-import com.ringcentral.platform.metrics.var.longVar.*;
-import com.ringcentral.platform.metrics.var.objectVar.*;
-import com.ringcentral.platform.metrics.var.stringVar.*;
-import org.junit.*;
+import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
+import com.ringcentral.platform.metrics.var.doubleVar.DoubleVar;
+import com.ringcentral.platform.metrics.var.longVar.CachingLongVar;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
+import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
+import com.ringcentral.platform.metrics.var.stringVar.CachingStringVar;
+import com.ringcentral.platform.metrics.var.stringVar.StringVar;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
 import static com.ringcentral.platform.metrics.MetricModBuilder.modifying;
-import static com.ringcentral.platform.metrics.PrefixDimensionValuesMetricKey.withKey;
+import static com.ringcentral.platform.metrics.PrefixLabelValuesMetricKey.withKey;
 import static com.ringcentral.platform.metrics.configs.builders.BaseMeterConfigBuilder.withMeter;
 import static com.ringcentral.platform.metrics.configs.builders.BaseMetricConfigBuilder.withMetric;
-import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.*;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
-import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.*;
-import static com.ringcentral.platform.metrics.names.MetricName.*;
-import static com.ringcentral.platform.metrics.names.MetricNameMask.*;
-import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder.*;
-import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.*;
+import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.counterConfigBuilder;
+import static com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder.withCounter;
+import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.histogramConfigBuilder;
+import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
+import static com.ringcentral.platform.metrics.names.MetricName.name;
+import static com.ringcentral.platform.metrics.names.MetricName.withName;
+import static com.ringcentral.platform.metrics.names.MetricNameMask.metricWithName;
+import static com.ringcentral.platform.metrics.names.MetricNameMask.metricsWithNamePrefix;
+import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder.rateConfigBuilder;
+import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder.withRate;
+import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.timerConfigBuilder;
+import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
 import static com.ringcentral.platform.metrics.var.configs.builders.BaseCachingVarConfigBuilder.withCachingVar;
 import static com.ringcentral.platform.metrics.var.configs.builders.BaseVarConfigBuilder.withVar;
-import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.CachingDoubleVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.longVar.configs.builders.CachingLongVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.CachingObjectVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.ObjectVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.CachingStringVarConfigBuilder.*;
-import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder.*;
+import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.CachingDoubleVarConfigBuilder.cachingDoubleVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.CachingDoubleVarConfigBuilder.withCachingDoubleVar;
+import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder.doubleVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.DoubleVarConfigBuilder.withDoubleVar;
+import static com.ringcentral.platform.metrics.var.longVar.configs.builders.CachingLongVarConfigBuilder.cachingLongVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.longVar.configs.builders.CachingLongVarConfigBuilder.withCachingLongVar;
+import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.longVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.withLongVar;
+import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.CachingObjectVarConfigBuilder.cachingObjectVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.CachingObjectVarConfigBuilder.withCachingObjectVar;
+import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.ObjectVarConfigBuilder.objectVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.objectVar.configs.builders.ObjectVarConfigBuilder.withObjectVar;
+import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.CachingStringVarConfigBuilder.cachingStringVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.CachingStringVarConfigBuilder.withCachingStringVar;
+import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder.stringVarConfigBuilder;
+import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder.withStringVar;
 import static junit.framework.TestCase.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,11 +60,11 @@ import static org.mockito.Mockito.*;
 
 public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
-    static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
-    static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
-    static final MetricDimension DIMENSION_3 = new MetricDimension("dimension_3");
-    static final MetricDimension DIMENSION_4 = new MetricDimension("dimension_4");
-    static final MetricDimension DIMENSION_5 = new MetricDimension("dimension_5");
+    static final Label LABEL_1 = new Label("label_1");
+    static final Label LABEL_2 = new Label("label_2");
+    static final Label LABEL_3 = new Label("label_3");
+    static final Label LABEL_4 = new Label("label_4");
+    static final Label LABEL_5 = new Label("label_5");
 
     protected R registry;
     MetricRegistryListener listener = mock(MetricRegistryListener.class);
@@ -103,19 +122,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void objectVar_PrefixDimensionValuesKey() {
+    public void objectVar_PrefixLabelValuesKey() {
         ObjectVar objectVar = registry.objectVar(
-            withKey(name("objectVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("objectVar"), labelValues(LABEL_1.value("1"))),
             () -> 1,
-            () -> withObjectVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withObjectVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(objectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(objectVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         objectVar = registry.newObjectVar(
-            withKey(name("objectVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("objectVar"), labelValues(LABEL_1.value("1"))),
             () -> 1);
 
-        assertThat(objectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(objectVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -123,11 +142,11 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("objectVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("objectVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_2.value("2")))));
 
         ObjectVar objectVar = registry.objectVar(withName("objectVar"), () -> 1);
         assertFalse(objectVar.isEnabled());
@@ -142,16 +161,16 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         objectVar = registry.newObjectVar(withName("objectVar"), () -> 1);
 
         assertTrue(objectVar.isEnabled());
-        assertThat(objectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(objectVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("objectVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_3.value("3")))));
 
         registry.postConfigure(
             metricsWithNamePrefix("objectVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_4.value("4")))));
 
         objectVar = registry.newObjectVar(withName("objectVar"), () -> 1);
         assertFalse(objectVar.isEnabled());
@@ -163,7 +182,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         objectVar = registry.newObjectVar(withName("objectVar"), () -> 1);
 
         assertTrue(objectVar.isEnabled());
-        assertThat(objectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(objectVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
     }
 
     /* Caching object var */
@@ -214,19 +233,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void cachingObjectVar_PrefixDimensionValuesKey() {
+    public void cachingObjectVar_PrefixLabelValuesKey() {
         CachingObjectVar cachingObjectVar = registry.cachingObjectVar(
-            withKey(name("cachingObjectVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingObjectVar"), labelValues(LABEL_1.value("1"))),
             () -> 1,
-            () -> withCachingObjectVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withCachingObjectVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(cachingObjectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingObjectVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         cachingObjectVar = registry.newCachingObjectVar(
-            withKey(name("cachingObjectVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingObjectVar"), labelValues(LABEL_1.value("1"))),
             () -> 1);
 
-        assertThat(cachingObjectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingObjectVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -234,18 +253,18 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("cachingObjectVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("cachingObjectVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_2.value("2")))));
 
         CachingObjectVar cachingObjectVar = registry.cachingObjectVar(withName("cachingObjectVar"), () -> 1);
-        assertThat(cachingObjectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(cachingObjectVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("cachingObjectVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         cachingObjectVar = registry.newCachingObjectVar(withName("cachingObjectVar"), () -> 1);
         assertFalse(cachingObjectVar.isEnabled());
@@ -259,19 +278,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         cachingObjectVar = registry.newCachingObjectVar(withName("cachingObjectVar"), () -> 1);
         assertTrue(cachingObjectVar.isEnabled());
-        assertThat(cachingObjectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(cachingObjectVar.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("cachingObjectVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_4.value("4")))));
 
         cachingObjectVar = registry.newCachingObjectVar(withName("cachingObjectVar"), () -> 1);
-        assertThat(cachingObjectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(cachingObjectVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("cachingObjectVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         cachingObjectVar = registry.newCachingObjectVar(withName("cachingObjectVar"), () -> 1);
         assertFalse(cachingObjectVar.isEnabled());
@@ -281,7 +300,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         cachingObjectVar = registry.newCachingObjectVar(withName("cachingObjectVar"), () -> 1);
-        assertThat(cachingObjectVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(cachingObjectVar.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* Long var */
@@ -328,19 +347,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void longVar_PrefixDimensionValuesKey() {
+    public void longVar_PrefixLabelValuesKey() {
         LongVar longVar = registry.longVar(
-            withKey(name("longVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("longVar"), labelValues(LABEL_1.value("1"))),
             () -> 1L,
-            () -> withLongVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withLongVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(longVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(longVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         longVar = registry.newLongVar(
-            withKey(name("longVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("longVar"), labelValues(LABEL_1.value("1"))),
             () -> 1L);
 
-        assertThat(longVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(longVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -348,11 +367,11 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("longVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("longVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_2.value("2")))));
 
         LongVar longVar = registry.longVar(withName("longVar"), () -> 1L);
         assertFalse(longVar.isEnabled());
@@ -367,16 +386,16 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         longVar = registry.newLongVar(withName("longVar"), () -> 1L);
 
         assertTrue(longVar.isEnabled());
-        assertThat(longVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(longVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("longVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_3.value("3")))));
 
         registry.postConfigure(
             metricsWithNamePrefix("longVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_4.value("4")))));
 
         longVar = registry.newLongVar(withName("longVar"), () -> 1L);
         assertFalse(longVar.isEnabled());
@@ -388,7 +407,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         longVar = registry.newLongVar(withName("longVar"), () -> 1L);
 
         assertTrue(longVar.isEnabled());
-        assertThat(longVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(longVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
     }
 
     /* Caching long var */
@@ -439,19 +458,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void cachingLongVar_PrefixDimensionValuesKey() {
+    public void cachingLongVar_PrefixLabelValuesKey() {
         CachingLongVar cachingLongVar = registry.cachingLongVar(
-            withKey(name("cachingLongVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingLongVar"), labelValues(LABEL_1.value("1"))),
             () -> 1L,
-            () -> withCachingLongVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withCachingLongVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(cachingLongVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingLongVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         cachingLongVar = registry.newCachingLongVar(
-            withKey(name("cachingLongVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingLongVar"), labelValues(LABEL_1.value("1"))),
             () -> 1L);
 
-        assertThat(cachingLongVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingLongVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -459,21 +478,21 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("cachingLongVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("cachingLongVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_2.value("2")))));
 
         CachingLongVar cachingLongVar = registry.cachingLongVar(
             withName("cachingLongVar"),
             () -> 1L);
 
-        assertThat(cachingLongVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(cachingLongVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("cachingLongVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         cachingLongVar = registry.newCachingLongVar(withName("cachingLongVar"), () -> 1L);
         assertFalse(cachingLongVar.isEnabled());
@@ -487,19 +506,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         cachingLongVar = registry.newCachingLongVar(withName("cachingLongVar"), () -> 1L);
         assertTrue(cachingLongVar.isEnabled());
-        assertThat(cachingLongVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(cachingLongVar.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("cachingLongVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_4.value("4")))));
 
         cachingLongVar = registry.newCachingLongVar(withName("cachingLongVar"), () -> 1L);
-        assertThat(cachingLongVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(cachingLongVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("cachingLongVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         cachingLongVar = registry.newCachingLongVar(withName("cachingLongVar"), () -> 1L);
         assertFalse(cachingLongVar.isEnabled());
@@ -509,7 +528,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         cachingLongVar = registry.newCachingLongVar(withName("cachingLongVar"), () -> 1L);
-        assertThat(cachingLongVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(cachingLongVar.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* Double var */
@@ -556,19 +575,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void doubleVar_PrefixDimensionValuesKey() {
+    public void doubleVar_PrefixLabelValuesKey() {
         DoubleVar doubleVar = registry.doubleVar(
-            withKey(name("doubleVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("doubleVar"), labelValues(LABEL_1.value("1"))),
             () -> 1.0,
-            () -> withDoubleVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withDoubleVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(doubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(doubleVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         doubleVar = registry.newDoubleVar(
-            withKey(name("doubleVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("doubleVar"), labelValues(LABEL_1.value("1"))),
             () -> 1.0);
 
-        assertThat(doubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(doubleVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -576,11 +595,11 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("doubleVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("doubleVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_2.value("2")))));
 
         DoubleVar doubleVar = registry.doubleVar(withName("doubleVar"), () -> 1.0);
         assertFalse(doubleVar.isEnabled());
@@ -595,16 +614,16 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         doubleVar = registry.newDoubleVar(withName("doubleVar"), () -> 1.0);
 
         assertTrue(doubleVar.isEnabled());
-        assertThat(doubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(doubleVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("doubleVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_3.value("3")))));
 
         registry.postConfigure(
             metricsWithNamePrefix("doubleVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_4.value("4")))));
 
         doubleVar = registry.newDoubleVar(withName("doubleVar"), () -> 1.0);
         assertFalse(doubleVar.isEnabled());
@@ -616,7 +635,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         doubleVar = registry.newDoubleVar(withName("doubleVar"), () -> 1.0);
 
         assertTrue(doubleVar.isEnabled());
-        assertThat(doubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(doubleVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
     }
 
     /* Caching double var */
@@ -667,19 +686,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void cachingDoubleVar_PrefixDimensionValuesKey() {
+    public void cachingDoubleVar_PrefixLabelValuesKey() {
         CachingDoubleVar cachingDoubleVar = registry.cachingDoubleVar(
-            withKey(name("cachingDoubleVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingDoubleVar"), labelValues(LABEL_1.value("1"))),
             () -> 1.0,
-            () -> withCachingDoubleVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withCachingDoubleVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(cachingDoubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingDoubleVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         cachingDoubleVar = registry.newCachingDoubleVar(
-            withKey(name("cachingDoubleVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingDoubleVar"), labelValues(LABEL_1.value("1"))),
             () -> 1.0);
 
-        assertThat(cachingDoubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingDoubleVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -687,18 +706,18 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("cachingDoubleVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("cachingDoubleVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_2.value("2")))));
 
         CachingDoubleVar cachingDoubleVar = registry.cachingDoubleVar(withName("cachingDoubleVar"), () -> 1.0);
-        assertThat(cachingDoubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(cachingDoubleVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("cachingDoubleVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         cachingDoubleVar = registry.newCachingDoubleVar(withName("cachingDoubleVar"), () -> 1.0);
         assertFalse(cachingDoubleVar.isEnabled());
@@ -712,19 +731,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         cachingDoubleVar = registry.newCachingDoubleVar(withName("cachingDoubleVar"), () -> 1.0);
         assertTrue(cachingDoubleVar.isEnabled());
-        assertThat(cachingDoubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(cachingDoubleVar.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("cachingDoubleVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_4.value("4")))));
 
         cachingDoubleVar = registry.newCachingDoubleVar(withName("cachingDoubleVar"), () -> 1.0);
-        assertThat(cachingDoubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(cachingDoubleVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("cachingDoubleVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         cachingDoubleVar = registry.newCachingDoubleVar(withName("cachingDoubleVar"), () -> 1.0);
         assertFalse(cachingDoubleVar.isEnabled());
@@ -734,7 +753,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         cachingDoubleVar = registry.newCachingDoubleVar(withName("cachingDoubleVar"), () -> 1.0);
-        assertThat(cachingDoubleVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(cachingDoubleVar.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* String var */
@@ -781,19 +800,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void stringVar_PrefixDimensionValuesKey() {
+    public void stringVar_PrefixLabelValuesKey() {
         StringVar stringVar = registry.stringVar(
-            withKey(name("stringVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("stringVar"), labelValues(LABEL_1.value("1"))),
             () -> "1",
-            () -> withStringVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withStringVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(stringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(stringVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         stringVar = registry.newStringVar(
-            withKey(name("stringVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("stringVar"), labelValues(LABEL_1.value("1"))),
             () -> "1");
 
-        assertThat(stringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(stringVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -801,11 +820,11 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("stringVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("stringVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_2.value("2")))));
 
         StringVar stringVar = registry.stringVar(withName("stringVar"), () -> "1");
         assertFalse(stringVar.isEnabled());
@@ -820,16 +839,16 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         stringVar = registry.newStringVar(withName("stringVar"), () -> "1");
 
         assertTrue(stringVar.isEnabled());
-        assertThat(stringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(stringVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("stringVar"),
-            modifying().variable(withVar().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().prefix(labelValues(LABEL_3.value("3")))));
 
         registry.postConfigure(
             metricsWithNamePrefix("stringVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_4.value("4")))));
 
         stringVar = registry.newStringVar(withName("stringVar"), () -> "1");
         assertFalse(stringVar.isEnabled());
@@ -841,7 +860,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         stringVar = registry.newStringVar(withName("stringVar"), () -> "1");
 
         assertTrue(stringVar.isEnabled());
-        assertThat(stringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(stringVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
     }
 
     /* Caching string var */
@@ -892,19 +911,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void cachingStringVar_PrefixDimensionValuesKey() {
+    public void cachingStringVar_PrefixLabelValuesKey() {
         CachingStringVar cachingStringVar = registry.cachingStringVar(
-            withKey(name("cachingStringVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingStringVar"), labelValues(LABEL_1.value("1"))),
             () -> "1",
-            () -> withCachingStringVar().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            () -> withCachingStringVar().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(cachingStringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingStringVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
         cachingStringVar = registry.newCachingStringVar(
-            withKey(name("cachingStringVar"), dimensionValues(DIMENSION_1.value("1"))),
+            withKey(name("cachingStringVar"), labelValues(LABEL_1.value("1"))),
             () -> "1");
 
-        assertThat(cachingStringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(cachingStringVar.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -912,18 +931,18 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("cachingStringVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("cachingStringVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_2.value("2")))));
 
         CachingStringVar cachingStringVar = registry.cachingStringVar(withName("cachingStringVar"), () -> "1");
-        assertThat(cachingStringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(cachingStringVar.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("cachingStringVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         cachingStringVar = registry.newCachingStringVar(withName("cachingStringVar"), () -> "1");
         assertFalse(cachingStringVar.isEnabled());
@@ -937,19 +956,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         cachingStringVar = registry.newCachingStringVar(withName("cachingStringVar"), () -> "1");
         assertTrue(cachingStringVar.isEnabled());
-        assertThat(cachingStringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(cachingStringVar.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("cachingStringVar"),
-            modifying().cachingVar(withCachingVar().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().cachingVar(withCachingVar().prefix(labelValues(LABEL_4.value("4")))));
 
         cachingStringVar = registry.newCachingStringVar(withName("cachingStringVar"), () -> "1");
-        assertThat(cachingStringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(cachingStringVar.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("cachingStringVar"),
-            modifying().variable(withVar().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().variable(withVar().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         cachingStringVar = registry.newCachingStringVar(withName("cachingStringVar"), () -> "1");
         assertFalse(cachingStringVar.isEnabled());
@@ -959,7 +978,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         cachingStringVar = registry.newCachingStringVar(withName("cachingStringVar"), () -> "1");
-        assertThat(cachingStringVar.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(cachingStringVar.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* Counter */
@@ -1004,15 +1023,15 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void counter_PrefixDimensionValuesKey() {
+    public void counter_PrefixLabelValuesKey() {
         Counter counter = registry.counter(
-            withKey(name("counter"), dimensionValues(DIMENSION_1.value("1"))),
-            () -> withCounter().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            withKey(name("counter"), labelValues(LABEL_1.value("1"))),
+            () -> withCounter().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(counter.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(counter.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
-        counter = registry.newCounter(withKey(name("counter"), dimensionValues(DIMENSION_1.value("1"))));
-        assertThat(counter.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        counter = registry.newCounter(withKey(name("counter"), labelValues(LABEL_1.value("1"))));
+        assertThat(counter.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -1020,18 +1039,18 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("counter"),
-            modifying().counter(withCounter().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().counter(withCounter().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("counter"),
-            modifying().counter(withCounter().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().counter(withCounter().prefix(labelValues(LABEL_2.value("2")))));
 
         Counter counter = registry.counter(withName("counter"));
-        assertThat(counter.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(counter.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("counter"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         counter = registry.newCounter(withName("counter"));
         assertFalse(counter.isEnabled());
@@ -1045,19 +1064,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         counter = registry.newCounter(withName("counter"));
         assertTrue(counter.isEnabled());
-        assertThat(counter.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(counter.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("counter"),
-            modifying().counter(withCounter().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().counter(withCounter().prefix(labelValues(LABEL_4.value("4")))));
 
         counter = registry.newCounter(withName("counter"));
-        assertThat(counter.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(counter.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("counter"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         counter = registry.newCounter(withName("counter"));
         assertFalse(counter.isEnabled());
@@ -1067,7 +1086,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         counter = registry.newCounter(withName("counter"));
-        assertThat(counter.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(counter.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* Rate */
@@ -1112,15 +1131,15 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void rate_PrefixDimensionValuesKey() {
+    public void rate_PrefixLabelValuesKey() {
         Rate rate = registry.rate(
-            withKey(name("rate"), dimensionValues(DIMENSION_1.value("1"))),
-            () -> withRate().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            withKey(name("rate"), labelValues(LABEL_1.value("1"))),
+            () -> withRate().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(rate.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(rate.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
-        rate = registry.newRate(withKey(name("rate"), dimensionValues(DIMENSION_1.value("1"))));
-        assertThat(rate.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        rate = registry.newRate(withKey(name("rate"), labelValues(LABEL_1.value("1"))));
+        assertThat(rate.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -1128,18 +1147,18 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("rate"),
-            modifying().rate(withRate().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().rate(withRate().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("rate"),
-            modifying().rate(withRate().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().rate(withRate().prefix(labelValues(LABEL_2.value("2")))));
 
         Rate rate = registry.rate(withName("rate"));
-        assertThat(rate.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(rate.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("rate"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         rate = registry.newRate(withName("rate"));
         assertFalse(rate.isEnabled());
@@ -1153,19 +1172,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         rate = registry.newRate(withName("rate"));
         assertTrue(rate.isEnabled());
-        assertThat(rate.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(rate.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("rate"),
-            modifying().rate(withRate().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().rate(withRate().prefix(labelValues(LABEL_4.value("4")))));
 
         rate = registry.newRate(withName("rate"));
-        assertThat(rate.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(rate.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("rate"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         rate = registry.newRate(withName("rate"));
         assertFalse(rate.isEnabled());
@@ -1175,7 +1194,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         rate = registry.newRate(withName("rate"));
-        assertThat(rate.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(rate.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* Histogram */
@@ -1220,15 +1239,15 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void histogram_PrefixDimensionValuesKey() {
+    public void histogram_PrefixLabelValuesKey() {
         Histogram histogram = registry.histogram(
-            withKey(name("histogram"), dimensionValues(DIMENSION_1.value("1"))),
-            () -> withHistogram().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            withKey(name("histogram"), labelValues(LABEL_1.value("1"))),
+            () -> withHistogram().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(histogram.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(histogram.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
-        histogram = registry.newHistogram(withKey(name("histogram"), dimensionValues(DIMENSION_1.value("1"))));
-        assertThat(histogram.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        histogram = registry.newHistogram(withKey(name("histogram"), labelValues(LABEL_1.value("1"))));
+        assertThat(histogram.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -1236,18 +1255,18 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("histogram"),
-            modifying().histogram(withHistogram().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().histogram(withHistogram().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("histogram"),
-            modifying().histogram(withHistogram().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().histogram(withHistogram().prefix(labelValues(LABEL_2.value("2")))));
 
         Histogram histogram = registry.histogram(withName("histogram"));
-        assertThat(histogram.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(histogram.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("histogram"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         histogram = registry.newHistogram(withName("histogram"));
         assertFalse(histogram.isEnabled());
@@ -1261,19 +1280,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         histogram = registry.newHistogram(withName("histogram"));
         assertTrue(histogram.isEnabled());
-        assertThat(histogram.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(histogram.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("histogram"),
-            modifying().histogram(withHistogram().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().histogram(withHistogram().prefix(labelValues(LABEL_4.value("4")))));
 
         histogram = registry.newHistogram(withName("histogram"));
-        assertThat(histogram.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(histogram.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("histogram"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         histogram = registry.newHistogram(withName("histogram"));
         assertFalse(histogram.isEnabled());
@@ -1283,7 +1302,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         histogram = registry.newHistogram(withName("histogram"));
-        assertThat(histogram.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(histogram.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* Timer */
@@ -1328,15 +1347,15 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test
-    public void timer_PrefixDimensionValuesKey() {
+    public void timer_PrefixLabelValuesKey() {
         Timer timer = registry.timer(
-            withKey(name("timer"), dimensionValues(DIMENSION_1.value("1"))),
-            () -> withTimer().prefix(dimensionValues(DIMENSION_2.value("2"))));
+            withKey(name("timer"), labelValues(LABEL_1.value("1"))),
+            () -> withTimer().prefix(labelValues(LABEL_2.value("2"))));
 
-        assertThat(timer.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        assertThat(timer.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
 
-        timer = registry.newTimer(withKey(name("timer"), dimensionValues(DIMENSION_1.value("1"))));
-        assertThat(timer.iterator().next().dimensionValues(), is(List.of(DIMENSION_1.value("1"))));
+        timer = registry.newTimer(withKey(name("timer"), labelValues(LABEL_1.value("1"))));
+        assertThat(timer.iterator().next().labelValues(), is(List.of(LABEL_1.value("1"))));
     }
 
     @Test
@@ -1344,18 +1363,18 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
         // pre
         registry.preConfigure(
             metricWithName("timer"),
-            modifying().timer(withTimer().prefix(dimensionValues(DIMENSION_1.value("1")))));
+            modifying().timer(withTimer().prefix(labelValues(LABEL_1.value("1")))));
 
         registry.preConfigure(
             metricWithName("timer"),
-            modifying().timer(withTimer().prefix(dimensionValues(DIMENSION_2.value("2")))));
+            modifying().timer(withTimer().prefix(labelValues(LABEL_2.value("2")))));
 
         Timer timer = registry.timer(withName("timer"));
-        assertThat(timer.iterator().next().dimensionValues(), is(List.of(DIMENSION_2.value("2"))));
+        assertThat(timer.iterator().next().labelValues(), is(List.of(LABEL_2.value("2"))));
 
         registry.preConfigure(
             metricWithName("timer"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_3.value("3")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_3.value("3")))));
 
         timer = registry.newTimer(withName("timer"));
         assertFalse(timer.isEnabled());
@@ -1369,19 +1388,19 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
 
         timer = registry.newTimer(withName("timer"));
         assertTrue(timer.isEnabled());
-        assertThat(timer.iterator().next().dimensionValues(), is(List.of(DIMENSION_3.value("3"))));
+        assertThat(timer.iterator().next().labelValues(), is(List.of(LABEL_3.value("3"))));
 
         // and post
         registry.postConfigure(
             metricsWithNamePrefix("timer"),
-            modifying().timer(withTimer().prefix(dimensionValues(DIMENSION_4.value("4")))));
+            modifying().timer(withTimer().prefix(labelValues(LABEL_4.value("4")))));
 
         timer = registry.newTimer(withName("timer"));
-        assertThat(timer.iterator().next().dimensionValues(), is(List.of(DIMENSION_4.value("4"))));
+        assertThat(timer.iterator().next().labelValues(), is(List.of(LABEL_4.value("4"))));
 
         registry.postConfigure(
             metricsWithNamePrefix("timer"),
-            modifying().meter(withMeter().disable().prefix(dimensionValues(DIMENSION_5.value("5")))));
+            modifying().meter(withMeter().disable().prefix(labelValues(LABEL_5.value("5")))));
 
         timer = registry.newTimer(withName("timer"));
         assertFalse(timer.isEnabled());
@@ -1391,7 +1410,7 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
             modifying().metric(withMetric().enable()));
 
         timer = registry.newTimer(withName("timer"));
-        assertThat(timer.iterator().next().dimensionValues(), is(List.of(DIMENSION_5.value("5"))));
+        assertThat(timer.iterator().next().labelValues(), is(List.of(LABEL_5.value("5"))));
     }
 
     /* Metric collision */
@@ -1403,15 +1422,15 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     }
 
     @Test(expected = MetricCollisionException.class)
-    public void collision_PrefixDimensionValuesKey() {
-        registry.histogram(withKey(name("name"), dimensionValues(DIMENSION_1.value("1"))));
-        registry.timer(withKey(name("name"), dimensionValues(DIMENSION_1.value("1"))));
+    public void collision_PrefixLabelValuesKey() {
+        registry.histogram(withKey(name("name"), labelValues(LABEL_1.value("1"))));
+        registry.timer(withKey(name("name"), labelValues(LABEL_1.value("1"))));
     }
 
     @Test
-    public void noCollision_PrefixDimensionValuesKey_With_SameNames_And_DifferentDimensionValues() {
-        registry.histogram(withKey(name("name"), dimensionValues(DIMENSION_1.value("1"))));
-        registry.timer(withKey(name("name"), dimensionValues(DIMENSION_1.value("1_2"))));
-        registry.timer(withKey(name("name"), dimensionValues(DIMENSION_2.value("2"))));
+    public void noCollision_PrefixLabelValuesKey_With_SameNames_And_DifferentLabelValues() {
+        registry.histogram(withKey(name("name"), labelValues(LABEL_1.value("1"))));
+        registry.timer(withKey(name("name"), labelValues(LABEL_1.value("1_2"))));
+        registry.timer(withKey(name("name"), labelValues(LABEL_2.value("2"))));
     }
 }

@@ -20,8 +20,8 @@ public class MfCounter extends AbstractMeter implements MfMeter, Counter {
         this.base = new MfMeterBase(mfRegistry, id);
 
         this.mfRate =
-            this.base.hasDimensions() ?
-            mfRegistry.rate(this.base.name(), () -> withRate().dimensions(this.base.dimensions())) :
+            this.base.hasLabels() ?
+            mfRegistry.rate(this.base.name(), () -> withRate().labels(this.base.labels())) :
             mfRegistry.rate(this.base.name());
     }
 
@@ -30,7 +30,7 @@ public class MfCounter extends AbstractMeter implements MfMeter, Counter {
         long amountLong = (long)amount;
 
         if (amountLong > 0L) {
-            mfRate.mark(amountLong, base.dimensionValues());
+            mfRate.mark(amountLong, base.labelValues());
             count.add(amountLong);
         }
     }
@@ -53,8 +53,8 @@ public class MfCounter extends AbstractMeter implements MfMeter, Counter {
 
     @Override
     public void meterRemoved() {
-        if (base.hasDimensions()) {
-            mfRate.removeInstancesFor(base.dimensionValues());
+        if (base.hasLabels()) {
+            mfRate.removeInstancesFor(base.labelValues());
         } else {
             base.mfRegistry().remove(base.name());
         }

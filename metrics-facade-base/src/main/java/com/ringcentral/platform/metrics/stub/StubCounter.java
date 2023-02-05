@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.stub;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.*;
 import com.ringcentral.platform.metrics.counter.configs.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
@@ -42,18 +42,18 @@ public class StubCounter extends AbstractCounter<Object> implements Counter {
                 @Override
                 public AbstractMeterInstance<Object> makeInstance(
                     MetricName name,
-                    List<MetricDimensionValue> dimensionValues,
+                    List<LabelValue> labelValues,
                     boolean totalInstance,
-                    boolean dimensionalTotalInstance,
+                    boolean labeledMetricTotalInstance,
                     boolean levelInstance,
                     Map<Measurable, MeasurableValueProvider<Object>> measurableValueProviders,
                     Object meterImpl) {
 
                     return new StubMeterInstance(
                         name,
-                        dimensionValues,
+                        labelValues,
                         totalInstance,
-                        dimensionalTotalInstance,
+                        labeledMetricTotalInstance,
                         levelInstance,
                         measurableValueProviders,
                         meterImpl);
@@ -62,9 +62,9 @@ public class StubCounter extends AbstractCounter<Object> implements Counter {
                 @Override
                 public AbstractExpirableMeterInstance<Object> makeExpirableInstance(
                     MetricName name,
-                    List<MetricDimensionValue> dimensionValues,
+                    List<LabelValue> labelValues,
                     boolean totalInstance,
-                    boolean dimensionalTotalInstance,
+                    boolean labeledMetricTotalInstance,
                     boolean levelInstance,
                     Map<Measurable, MeasurableValueProvider<Object>> measurableValueProviders,
                     Object meterImpl,
@@ -72,9 +72,9 @@ public class StubCounter extends AbstractCounter<Object> implements Counter {
 
                     return new StubExpirableMeterInstance(
                         name,
-                        dimensionValues,
+                        labelValues,
                         totalInstance,
-                        dimensionalTotalInstance,
+                        labeledMetricTotalInstance,
                         levelInstance,
                         measurableValueProviders,
                         meterImpl,

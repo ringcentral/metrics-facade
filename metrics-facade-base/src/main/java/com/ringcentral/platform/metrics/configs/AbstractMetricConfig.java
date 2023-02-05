@@ -1,27 +1,27 @@
 package com.ringcentral.platform.metrics.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 
 import static com.ringcentral.platform.metrics.UnmodifiableMetricContext.*;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.labels.LabelValues.*;
 
 public abstract class AbstractMetricConfig implements MetricConfig {
 
     private final boolean enabled;
     private final String description;
-    private final MetricDimensionValues prefixDimensionValues;
+    private final LabelValues prefixLabelValues;
     private final MetricContext context;
 
     protected AbstractMetricConfig(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
+        LabelValues prefixLabelValues,
         MetricContext context) {
 
         this.enabled = enabled;
         this.description = description;
-        this.prefixDimensionValues = prefixDimensionValues != null ? prefixDimensionValues : noDimensionValues();
+        this.prefixLabelValues = prefixLabelValues != null ? prefixLabelValues : noLabelValues();
         this.context = context != null ? context : emptyUnmodifiableMetricContext();
     }
 
@@ -36,8 +36,8 @@ public abstract class AbstractMetricConfig implements MetricConfig {
     }
 
     @Override
-    public MetricDimensionValues prefixDimensionValues() {
-        return prefixDimensionValues;
+    public LabelValues prefixLabelValues() {
+        return prefixLabelValues;
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.ringcentral.platform.metrics.samples;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelUtils;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.names.MetricName;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class DefaultSampleSpec implements SampleSpec {
     private Boolean enabled;
     private MetricName name;
     private String measurableName;
-    private List<MetricDimensionValue> dimensionValues;
+    private List<LabelValue> labelValues;
     private Object value;
     private String type;
 
@@ -31,14 +31,14 @@ public class DefaultSampleSpec implements SampleSpec {
         Boolean enabled,
         MetricName name,
         String measurableName,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         Object value,
         String type) {
 
         this.enabled = enabled;
         this.name = name;
         this.measurableName = measurableName;
-        this.dimensionValues = dimensionValues;
+        this.labelValues = labelValues;
         this.value = value;
         this.type = type;
     }
@@ -98,41 +98,41 @@ public class DefaultSampleSpec implements SampleSpec {
         return measurableName;
     }
 
-    public boolean hasDimensionValues() {
-        return dimensionValues != null && !dimensionValues.isEmpty();
+    public boolean hasLabelValues() {
+        return labelValues != null && !labelValues.isEmpty();
     }
 
-    public DefaultSampleSpec noDimensionValues() {
-        return dimensionValues(emptyList());
+    public DefaultSampleSpec noLabelValues() {
+        return labelValues(emptyList());
     }
 
-    public DefaultSampleSpec dimensionValues(List<MetricDimensionValue> dimensionValues) {
-        this.dimensionValues = dimensionValues;
+    public DefaultSampleSpec labelValues(List<LabelValue> labelValues) {
+        this.labelValues = labelValues;
         return this;
     }
 
-    public List<MetricDimensionValue> dimensionValues() {
-        return dimensionValues;
+    public List<LabelValue> labelValues() {
+        return labelValues;
     }
 
-    public boolean hasDimension(MetricDimension dimension) {
-        return MetricDimensionUtils.hasDimension(dimensionValues, dimension);
+    public boolean hasLabel(Label label) {
+        return LabelUtils.hasLabel(labelValues, label);
     }
 
-    public String valueOf(MetricDimension dimension) {
-        return MetricDimensionUtils.valueOf(dimensionValues, dimension);
+    public String valueOf(Label label) {
+        return LabelUtils.valueOf(labelValues, label);
     }
 
-    public MetricDimensionValue dimensionValueOf(MetricDimension dimension) {
-        return MetricDimensionUtils.dimensionValueOf(dimensionValues, dimension);
+    public LabelValue labelValueOf(Label label) {
+        return LabelUtils.labelValueOf(labelValues, label);
     }
 
-    public Map<MetricDimension, MetricDimensionValue> dimensionToValue() {
-        return MetricDimensionUtils.dimensionToValue(dimensionValues);
+    public Map<Label, LabelValue> labelToValue() {
+        return LabelUtils.labelToValue(labelValues);
     }
 
-    public List<MetricDimensionValue> dimensionValuesWithout(MetricDimension dimension, MetricDimension... dimensions) {
-        return MetricDimensionUtils.dimensionValuesWithout(dimensionValues, dimension, dimensions);
+    public List<LabelValue> labelValuesWithout(Label label, Label... labels) {
+        return LabelUtils.labelValuesWithout(labelValues, label, labels);
     }
 
     public boolean hasValue() {
@@ -181,8 +181,8 @@ public class DefaultSampleSpec implements SampleSpec {
             measurableName = defaultMod.measurableName;
         }
 
-        if (defaultMod.dimensionValues != null) {
-            dimensionValues = defaultMod.dimensionValues;
+        if (defaultMod.labelValues != null) {
+            labelValues = defaultMod.labelValues;
         }
 
         if (defaultMod.value != null) {

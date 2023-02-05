@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.var.stringVar;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.AbstractVar;
@@ -21,18 +21,18 @@ public class AbstractStringVar extends AbstractVar<String> implements StringVar 
         @Override
         public StringVarInstance makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean nonDecreasing,
             Measurable valueMeasurable,
             Supplier<String> valueSupplier) {
 
             return new DefaultStringVarInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 nonDecreasing,
                 valueMeasurable,
                 valueSupplier);

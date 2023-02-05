@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.timer.configs.builders;
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder.AllSliceConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.timer.TimerMeasurable;
 import com.ringcentral.platform.metrics.timer.configs.*;
@@ -28,15 +28,15 @@ public class TimerAllSliceConfigBuilder extends AllSliceConfigBuilder<
     public TimerSliceConfig buildImpl(
         boolean enabled,
         MetricName name,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<TimerMeasurable> measurables,
         boolean totalEnabled,
         TimerInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, TimerInstanceConfig> levelInstanceConfigs,
+        Map<Label, TimerInstanceConfig> levelInstanceConfigs,
         TimerInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -45,9 +45,9 @@ public class TimerAllSliceConfigBuilder extends AllSliceConfigBuilder<
             enabled,
             name,
             null,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

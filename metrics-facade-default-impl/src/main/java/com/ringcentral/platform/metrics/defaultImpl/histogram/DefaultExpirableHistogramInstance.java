@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram;
 
 import com.ringcentral.platform.metrics.AbstractMeter.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -12,9 +12,9 @@ public class DefaultExpirableHistogramInstance extends AbstractExpirableMeterIns
 
     protected DefaultExpirableHistogramInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<HistogramImpl>> measurableValueProviders,
@@ -23,9 +23,9 @@ public class DefaultExpirableHistogramInstance extends AbstractExpirableMeterIns
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

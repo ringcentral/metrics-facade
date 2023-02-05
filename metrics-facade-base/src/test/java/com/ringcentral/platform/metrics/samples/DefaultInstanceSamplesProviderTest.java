@@ -1,39 +1,51 @@
 package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.Metric;
+import com.ringcentral.platform.metrics.MetricInstance;
+import com.ringcentral.platform.metrics.MetricKey;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.meter.*;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.var.DefaultVarInstance;
-import com.ringcentral.platform.metrics.var.doubleVar.*;
-import com.ringcentral.platform.metrics.var.longVar.*;
-import com.ringcentral.platform.metrics.var.objectVar.*;
-import com.ringcentral.platform.metrics.var.stringVar.*;
-import org.junit.*;
+import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
+import com.ringcentral.platform.metrics.var.doubleVar.DoubleVar;
+import com.ringcentral.platform.metrics.var.longVar.CachingLongVar;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
+import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
+import com.ringcentral.platform.metrics.var.stringVar.CachingStringVar;
+import com.ringcentral.platform.metrics.var.stringVar.StringVar;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
-import static com.ringcentral.platform.metrics.names.MetricName.*;
-import static com.ringcentral.platform.metrics.names.MetricNameMask.*;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
+import static com.ringcentral.platform.metrics.names.MetricName.name;
+import static com.ringcentral.platform.metrics.names.MetricName.withName;
+import static com.ringcentral.platform.metrics.names.MetricNameMask.metricWithName;
+import static com.ringcentral.platform.metrics.names.MetricNameMask.nameMask;
 import static com.ringcentral.platform.metrics.predicates.CompositeMetricNamedPredicateBuilder.forMetrics;
 import static com.ringcentral.platform.metrics.predicates.DefaultMetricInstancePredicate.forMetricInstancesMatching;
 import static com.ringcentral.platform.metrics.rate.Rate.*;
 import static com.ringcentral.platform.metrics.samples.DefaultInstanceSampleSpec.instanceSampleSpec;
 import static com.ringcentral.platform.metrics.samples.DefaultSampleSpec.sampleSpec;
-import static com.ringcentral.platform.metrics.samples.SampleTypes.*;
+import static com.ringcentral.platform.metrics.samples.SampleTypes.DELTA;
+import static com.ringcentral.platform.metrics.samples.SampleTypes.INSTANT;
 import static com.ringcentral.platform.metrics.timer.Timer.DURATION_UNIT;
 import static com.ringcentral.platform.metrics.utils.CollectionUtils.linkedHashMapOf;
 import static com.ringcentral.platform.metrics.var.longVar.LongVar.LONG_VALUE;
 import static com.ringcentral.platform.metrics.var.objectVar.ObjectVar.OBJECT_VALUE;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
@@ -41,9 +53,9 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("unchecked")
 public class DefaultInstanceSamplesProviderTest {
 
-    static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
-    static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
-    static final MetricDimension DIMENSION_3 = new MetricDimension("dimension_3");
+    static final Label LABEL_1 = new Label("label_1");
+    static final Label LABEL_2 = new Label("label_2");
+    static final Label LABEL_3 = new Label("label_3");
 
     MetricRegistry registry = mock(MetricRegistry.class);
     Map<MetricKey, Metric> metrics = new LinkedHashMap<>();
@@ -104,10 +116,10 @@ public class DefaultInstanceSamplesProviderTest {
         DefaultInstanceSampleSpecModsProvider instanceSampleSpecModsProvider = new DefaultInstanceSampleSpecModsProvider();
 
         instanceSampleSpecModsProvider.addMod(
-            forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e"), instance -> instance.hasDimension(DIMENSION_3)),
+            forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e"), instance -> instance.hasLabel(LABEL_3)),
             (metric, instance, currSpec) -> instanceSampleSpec()
-                .name(instance.name().withNewPart(instance.valueOf(DIMENSION_3), 1))
-                .dimensionValues(instance.dimensionValuesWithout(DIMENSION_3)));
+                .name(instance.name().withNewPart(instance.valueOf(LABEL_3), 1))
+                .labelValues(instance.labelValuesWithout(LABEL_3)));
 
         instanceSampleSpecModsProvider.addMod(
             forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e")),
@@ -119,7 +131,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         instanceSampleSpecModsProvider.addMod(
             forMetricInstancesMatching(nameMask("longVar.a.b.c.d.e")),
-            (metric, instance, currSpec) -> instanceSampleSpec().dimensionValues(currSpec.dimensionValuesWithout(DIMENSION_1)));
+            (metric, instance, currSpec) -> instanceSampleSpec().labelValues(currSpec.labelValuesWithout(LABEL_1)));
 
         // move certain values to DELTA bucket
         DefaultSampleSpecModsProvider sampleSpecModsProvider = new DefaultSampleSpecModsProvider();
@@ -150,7 +162,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new DefaultVarInstance<>(
             withName("longVar", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             false,
@@ -168,10 +180,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new DefaultVarInstance<>(
             withName("longVar", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             true,
@@ -255,7 +267,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new DefaultVarInstance<>(
             withName("cachingLongVar", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             false,
@@ -273,10 +285,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new DefaultVarInstance<>(
             withName("cachingLongVar", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -318,7 +330,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new DefaultVarInstance<>(
             withName("doubleVar", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             false,
@@ -336,10 +348,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new DefaultVarInstance<>(
             withName("doubleVar", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -405,7 +417,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new DefaultVarInstance<>(
             withName("cachingDoubleVar", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             false,
@@ -423,10 +435,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new DefaultVarInstance<>(
             withName("cachingDoubleVar", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -492,7 +504,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new DefaultVarInstance<>(
             withName("stringVar", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             false,
@@ -510,10 +522,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new DefaultVarInstance<>(
             withName("stringVar", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -579,7 +591,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new DefaultVarInstance<>(
             withName("cachingStringVar", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             false,
@@ -597,10 +609,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new DefaultVarInstance<>(
             withName("cachingStringVar", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -666,7 +678,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new TestCounterInstance(
             withName("counter", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             true,
@@ -684,10 +696,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new TestCounterInstance(
             withName("counter", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -770,7 +782,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new TestRateInstance(
             withName("rate", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             true,
@@ -792,10 +804,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new TestRateInstance(
             withName("rate", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -991,7 +1003,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new TestHistogramInstance(
             withName("histogram", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             true,
@@ -1013,10 +1025,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new TestHistogramInstance(
             withName("histogram", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,
@@ -1278,7 +1290,7 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_2 = new TestTimerInstance(
             withName("timer", "a", "b", "c"),
-            dimensionValues(DIMENSION_1.value("1"), DIMENSION_2.value("2")).list(),
+            labelValues(LABEL_1.value("1"), LABEL_2.value("2")).list(),
             true,
             false,
             true,
@@ -1352,10 +1364,10 @@ public class DefaultInstanceSamplesProviderTest {
 
         MetricInstance instance_4 = new TestTimerInstance(
             withName("timer", "a", "b", "c", "d", "e"),
-            dimensionValues(
-                DIMENSION_1.value("1"),
-                DIMENSION_2.value("2"),
-                DIMENSION_3.value("3")).list(),
+            labelValues(
+                LABEL_1.value("1"),
+                LABEL_2.value("2"),
+                LABEL_3.value("3")).list(),
             false,
             false,
             false,

@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.stub;
 import com.ringcentral.platform.metrics.AbstractMeter.AbstractExpirableMeterInstance;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.measurables.AbstractMeasurableValues;
 import com.ringcentral.platform.metrics.measurables.Measurable;
@@ -20,9 +20,9 @@ public class StubExpirableMeterInstance
 
     protected StubExpirableMeterInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         Map<Measurable, MeasurableValueProvider<Object>> measurableValueProviders,
         Object meter,
@@ -30,9 +30,9 @@ public class StubExpirableMeterInstance
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             () -> new AbstractMeasurableValues(measurableValueProviders.keySet()) {
 

@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.rate;
 
 import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.configs.*;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
@@ -50,8 +50,8 @@ public abstract class AbstractRate<MI> extends AbstractMeter<
     }
 
     @Override
-    public void mark(long count, MetricDimensionValues dimensionValues) {
+    public void mark(long count, LabelValues labelValues) {
         checkArgument(count > 0L, "count <= 0");
-        super.update(count, dimensionValues);
+        super.update(count, labelValues);
     }
 }

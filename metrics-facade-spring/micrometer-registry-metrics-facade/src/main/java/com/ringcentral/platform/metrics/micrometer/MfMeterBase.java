@@ -1,22 +1,22 @@
 package com.ringcentral.platform.metrics.micrometer;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.Tag;
 
 import java.util.*;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.labels.LabelValues.*;
 
 public class MfMeterBase {
 
     private final MetricRegistry mfRegistry;
     private final Id id;
     private final MetricName name;
-    private final List<MetricDimension> dimensions;
-    private final MetricDimensionValues dimensionValues;
+    private final List<Label> labels;
+    private final LabelValues labelValues;
 
     public MfMeterBase(MetricRegistry mfRegistry, Id id) {
         this.mfRegistry = mfRegistry;
@@ -25,19 +25,19 @@ public class MfMeterBase {
         List<Tag> tags = id.getTags();
 
         if (tags.isEmpty()) {
-            this.dimensions = null;
-            this.dimensionValues = NO_DIMENSION_VALUES;
+            this.labels = null;
+            this.labelValues = NO_LABEL_VALUES;
         } else {
-            this.dimensions = new ArrayList<>(tags.size());
-            List<MetricDimensionValue> dimensionValueList = new ArrayList<>(tags.size());
+            this.labels = new ArrayList<>(tags.size());
+            List<LabelValue> labelValueList = new ArrayList<>(tags.size());
 
             tags.forEach(tag -> {
-                MetricDimension dimension = new MetricDimension(tag.getKey());
-                dimensions.add(dimension);
-                dimensionValueList.add(new MetricDimensionValue(dimension, tag.getValue()));
+                Label label = new Label(tag.getKey());
+                labels.add(label);
+                labelValueList.add(new LabelValue(label, tag.getValue()));
             });
 
-            this.dimensionValues = forDimensionValues(dimensionValueList);
+            this.labelValues = forLabelValues(labelValueList);
         }
     }
 
@@ -53,15 +53,15 @@ public class MfMeterBase {
         return name;
     }
 
-    public boolean hasDimensions() {
-        return dimensions != null && !dimensions.isEmpty();
+    public boolean hasLabels() {
+        return labels != null && !labels.isEmpty();
     }
 
-    public List<MetricDimension> dimensions() {
-        return dimensions;
+    public List<Label> labels() {
+        return labels;
     }
 
-    public MetricDimensionValues dimensionValues() {
-        return dimensionValues;
+    public LabelValues labelValues() {
+        return labelValues;
     }
 }

@@ -1,9 +1,9 @@
 package com.ringcentral.platform.metrics.spring;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.infoProviders.ConcurrentMaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.micrometer.MfMeterRegistry;
 import com.ringcentral.platform.metrics.reporters.zabbix.ZabbixLldMetricsReporter.Rule;
 import com.ringcentral.platform.metrics.reporters.zabbix.ZabbixLldMetricsReporter.RuleItem;
@@ -104,9 +104,9 @@ public class MetricsFacadeConfig {
         };
     }
 
-    public static final MetricDimension METHOD = new MetricDimension("method");
-    public static final MetricDimension URI = new MetricDimension("uri");
-    public static final MetricDimension STATUS = new MetricDimension("status");
+    public static final Label METHOD = new Label("method");
+    public static final Label URI = new Label("uri");
+    public static final Label STATUS = new Label("status");
 
     @Bean
     public ZabbixLldMetricsReporterCustomizer zabbixLldMetricsReporterCustomizer() {

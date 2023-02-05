@@ -32,50 +32,51 @@ public abstract class AbstractOperatingSystemMetricsProducer extends AbstractMet
         this.osMxBean = requireNonNull(osMxBean);
     }
 
-    protected void produceNonDimensional(MetricRegistry registry) {
+    protected void produceUnlabeled(MetricRegistry registry) {
         requireNonNull(registry);
 
         registry.stringVar(
-                nameWithSuffix("arch"),
-                osMxBean::getArch,
-                stringVarConfigBuilderSupplier(ARCH_DESCRIPTION));
+            nameWithSuffix("arch"),
+            osMxBean::getArch,
+            stringVarConfigBuilderSupplier(ARCH_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("availableProcessors"),
-                () -> (long) osMxBean.getAvailableProcessors(),
-                longVarConfigBuilderSupplier(AVAILABLE_PROCESSORS_DESCRIPTION));
+            nameWithSuffix("availableProcessors"),
+            () -> (long) osMxBean.getAvailableProcessors(),
+            longVarConfigBuilderSupplier(AVAILABLE_PROCESSORS_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("committedVirtualMemorySize"),
-                osMxBean::getCommittedVirtualMemorySize,
-                longVarConfigBuilderSupplier(COMMITTED_VIRTUAL_MEMORY_SIZE_DESCRIPTION));
+            nameWithSuffix("committedVirtualMemorySize"),
+            osMxBean::getCommittedVirtualMemorySize,
+            longVarConfigBuilderSupplier(COMMITTED_VIRTUAL_MEMORY_SIZE_DESCRIPTION));
 
         registry.stringVar(
-                nameWithSuffix("name"),
-                osMxBean::getName,
-                stringVarConfigBuilderSupplier(OS_NAME_DESCRIPTION));
+            nameWithSuffix("name"),
+            osMxBean::getName,
+            stringVarConfigBuilderSupplier(OS_NAME_DESCRIPTION));
 
         registry.doubleVar(
-                nameWithSuffix("systemLoadAverage"),
-                osMxBean::getSystemLoadAverage,
-                doubleVarConfigBuilderSupplier(SYSTEM_LOAD_AVERAGE_DESCRIPTION));
+            nameWithSuffix("systemLoadAverage"),
+            osMxBean::getSystemLoadAverage,
+            doubleVarConfigBuilderSupplier(SYSTEM_LOAD_AVERAGE_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("processCpuTime"),
-                osMxBean::getProcessCpuTime,
-                longVarConfigBuilderSupplier(PROCESS_CPU_TIME_DESCRIPTION));
+            nameWithSuffix("processCpuTime"),
+            osMxBean::getProcessCpuTime,
+            longVarConfigBuilderSupplier(PROCESS_CPU_TIME_DESCRIPTION));
 
         if (osMxBean instanceof UnixOperatingSystemMXBean) {
-            final UnixOperatingSystemMXBean unixMbean = (UnixOperatingSystemMXBean) osMxBean;
-            registry.longVar(
-                    nameWithSuffix("descriptor", "file", "open", "total"),
-                    unixMbean::getOpenFileDescriptorCount,
-                    longVarConfigBuilderSupplier(OPEN_FILE_DESCRIPTOR_COUNT_DESCRIPTION));
+            final UnixOperatingSystemMXBean unixMbean = (UnixOperatingSystemMXBean)osMxBean;
 
             registry.longVar(
-                    nameWithSuffix("descriptor", "file", "limit", "total"),
-                    unixMbean::getMaxFileDescriptorCount,
-                    longVarConfigBuilderSupplier(FILE_DESCRIPTOR_LIMIT_DESCRIPTION));
+                nameWithSuffix("descriptor", "file", "open", "total"),
+                unixMbean::getOpenFileDescriptorCount,
+                longVarConfigBuilderSupplier(OPEN_FILE_DESCRIPTOR_COUNT_DESCRIPTION));
+
+            registry.longVar(
+                nameWithSuffix("descriptor", "file", "limit", "total"),
+                unixMbean::getMaxFileDescriptorCount,
+                longVarConfigBuilderSupplier(FILE_DESCRIPTOR_LIMIT_DESCRIPTION));
 
             registry.doubleVar(nameWithSuffix("descriptor", "file", "usage", "ratio"), () -> {
                 long openedDescriptors = unixMbean.getOpenFileDescriptorCount();

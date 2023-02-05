@@ -25,10 +25,10 @@ public abstract class AbstractThreadsMetricsProducer extends AbstractMetricsProd
     protected final DeadlockInfoProvider deadlockInfoProvider;
 
     public AbstractThreadsMetricsProducer(
-            MetricName namePrefix,
-            MetricModBuilder metricModBuilder,
-            ThreadMXBean threadMxBean,
-            DeadlockInfoProvider deadlockInfoProvider) {
+        MetricName namePrefix,
+        MetricModBuilder metricModBuilder,
+        ThreadMXBean threadMxBean,
+        DeadlockInfoProvider deadlockInfoProvider) {
 
         super(namePrefix, metricModBuilder);
 
@@ -36,38 +36,38 @@ public abstract class AbstractThreadsMetricsProducer extends AbstractMetricsProd
         this.deadlockInfoProvider = requireNonNull(deadlockInfoProvider);
     }
 
-    protected void produceNonDimensional(MetricRegistry registry) {
+    protected void produceUnlabeled(MetricRegistry registry) {
         requireNonNull(registry);
 
         registry.longVar(
-                nameWithSuffix("count"),
-                () -> (long) threadMxBean.getThreadCount(),
-                longVarConfigBuilderSupplier(LIVE_COUNT_DESCRIPTION));
+            nameWithSuffix("count"),
+            () -> (long) threadMxBean.getThreadCount(),
+            longVarConfigBuilderSupplier(LIVE_COUNT_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("daemon", "count"),
-                () -> (long) threadMxBean.getDaemonThreadCount(),
-                longVarConfigBuilderSupplier(LIVE_DAEMON_COUNT_DESCRIPTION));
+            nameWithSuffix("daemon", "count"),
+            () -> (long) threadMxBean.getDaemonThreadCount(),
+            longVarConfigBuilderSupplier(LIVE_DAEMON_COUNT_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("peak", "count"),
-                () -> (long) threadMxBean.getPeakThreadCount(),
-                longVarConfigBuilderSupplier(PEAK_THREAD_COUNT_DESCRIPTION));
+            nameWithSuffix("peak", "count"),
+            () -> (long) threadMxBean.getPeakThreadCount(),
+            longVarConfigBuilderSupplier(PEAK_THREAD_COUNT_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("totalStarted", "count"),
-                threadMxBean::getTotalStartedThreadCount,
-                longVarConfigBuilderSupplier(TOTAL_STARTED_COUNT_DESCRIPTION));
+            nameWithSuffix("totalStarted", "count"),
+            threadMxBean::getTotalStartedThreadCount,
+            longVarConfigBuilderSupplier(TOTAL_STARTED_COUNT_DESCRIPTION));
 
         registry.longVar(
-                nameWithSuffix("deadlock", "count"),
-                () -> (long)deadlockInfoProvider.deadlockedThreadTextInfos().size(),
-                longVarConfigBuilderSupplier(DEADLOCK_COUNT_DESCRIPTION));
+            nameWithSuffix("deadlock", "count"),
+            () -> (long)deadlockInfoProvider.deadlockedThreadTextInfos().size(),
+            longVarConfigBuilderSupplier(DEADLOCK_COUNT_DESCRIPTION));
 
         registry.objectVar(
-                nameWithSuffix("deadlocks"),
-                deadlockInfoProvider::deadlockedThreadTextInfos,
-                objectVarConfigBuilderSupplier(DEADLOCKS_DETAILS_DESCRIPTION));
+            nameWithSuffix("deadlocks"),
+            deadlockInfoProvider::deadlockedThreadTextInfos,
+            objectVarConfigBuilderSupplier(DEADLOCKS_DETAILS_DESCRIPTION));
     }
 
     protected int threadCountFor(Thread.State state) {

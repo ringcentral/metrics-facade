@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.util.function.Supplier;
 
 import static com.ringcentral.platform.metrics.UnmodifiableMetricContext.emptyUnmodifiableMetricContext;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
+import static com.ringcentral.platform.metrics.labels.LabelValues.NO_LABEL_VALUES;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
@@ -22,7 +22,7 @@ public class DefaultCachingValueSupplierTest {
     static final BaseCachingVarConfig CACHING_VAR_CONFIG = new BaseCachingVarConfig(
         true,
         "description",
-        NO_DIMENSION_VALUES,
+        NO_LABEL_VALUES,
         emptyList(),
         true,
         emptyUnmodifiableMetricContext(),

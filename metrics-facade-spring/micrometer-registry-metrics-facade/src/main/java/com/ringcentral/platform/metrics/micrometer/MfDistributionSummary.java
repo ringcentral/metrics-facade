@@ -35,8 +35,8 @@ public class MfDistributionSummary extends AbstractDistributionSummary implement
         this.base = new MfMeterBase(mfRegistry, id);
 
         this.mfHistogram =
-            this.base.hasDimensions() ?
-            mfRegistry.histogram(this.base.name(), () -> withHistogram().dimensions(this.base.dimensions())) :
+            this.base.hasLabels() ?
+            mfRegistry.histogram(this.base.name(), () -> withHistogram().labels(this.base.labels())) :
             mfRegistry.histogram(this.base.name());
 
         this.max = new TimeWindowMax(clock, distributionStatisticConfig);
@@ -46,7 +46,7 @@ public class MfDistributionSummary extends AbstractDistributionSummary implement
     protected void recordNonNegative(double amount) {
         if (amount >= 0) {
             long amountLong = (long)amount;
-            mfHistogram.update(amountLong, base.dimensionValues());
+            mfHistogram.update(amountLong, base.labelValues());
             count.add(amountLong);
             max.record(amount);
             total.add(amount);
@@ -81,8 +81,8 @@ public class MfDistributionSummary extends AbstractDistributionSummary implement
 
     @Override
     public void meterRemoved() {
-        if (base.hasDimensions()) {
-            mfHistogram.removeInstancesFor(base.dimensionValues());
+        if (base.hasLabels()) {
+            mfHistogram.removeInstancesFor(base.labelValues());
         } else {
             base.mfRegistry().remove(base.name());
         }

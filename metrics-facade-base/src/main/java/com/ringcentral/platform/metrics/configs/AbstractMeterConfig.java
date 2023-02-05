@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 
 import java.util.*;
 
@@ -11,17 +11,17 @@ import static java.util.Objects.requireNonNull;
 public abstract class AbstractMeterConfig<IC extends MeterInstanceConfig, SC extends MeterSliceConfig<IC>>
     extends AbstractMetricConfig implements MeterConfig<IC, SC> {
 
-    private final List<MetricDimension> dimensions;
-    private final MetricDimensionValuesPredicate exclusionPredicate;
+    private final List<Label> labels;
+    private final LabelValuesPredicate exclusionPredicate;
     private final SC allSliceConfig;
     private final Set<SC> sliceConfigs;
 
     protected AbstractMeterConfig(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         SC allSliceConfig,
         Set<SC> sliceConfigs,
         MetricContext context) {
@@ -29,22 +29,22 @@ public abstract class AbstractMeterConfig<IC extends MeterInstanceConfig, SC ext
         super(
             enabled,
             description,
-            prefixDimensionValues,
+            prefixLabelValues,
             context);
 
-        this.dimensions = dimensions != null ? dimensions : emptyList();
+        this.labels = labels != null ? labels : emptyList();
         this.exclusionPredicate = exclusionPredicate;
         this.allSliceConfig = requireNonNull(allSliceConfig);
         this.sliceConfigs = sliceConfigs != null ? sliceConfigs : emptySet();
     }
 
     @Override
-    public List<MetricDimension> dimensions() {
-        return dimensions;
+    public List<Label> labels() {
+        return labels;
     }
 
     @Override
-    public MetricDimensionValuesPredicate exclusionPredicate() {
+    public LabelValuesPredicate exclusionPredicate() {
         return exclusionPredicate;
     }
 

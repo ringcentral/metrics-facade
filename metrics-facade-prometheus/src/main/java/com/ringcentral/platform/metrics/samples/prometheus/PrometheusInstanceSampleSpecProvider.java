@@ -8,34 +8,34 @@ import com.ringcentral.platform.metrics.var.stringVar.StringVar;
 public class PrometheusInstanceSampleSpecProvider implements InstanceSampleSpecProvider<PrometheusInstanceSampleSpec> {
 
     public static final boolean DEFAULT_EXPORT_TOTAL_INSTANCES = true;
-    public static final boolean DEFAULT_EXPORT_DIMENSIONAL_TOTAL_INSTANCES = false;
+    public static final boolean DEFAULT_EXPORT_LABELED_METRIC_TOTAL_INSTANCES = false;
     public static final boolean DEFAULT_EXPORT_LEVEL_INSTANCES = false;
 
     private final boolean exportTotalInstances;
-    private final boolean exportDimensionalTotalInstances;
+    private final boolean exportLabeledMetricTotalInstances;
     private final boolean exportLevelInstances;
 
     public PrometheusInstanceSampleSpecProvider() {
         this(
             DEFAULT_EXPORT_TOTAL_INSTANCES,
-            DEFAULT_EXPORT_DIMENSIONAL_TOTAL_INSTANCES,
+            DEFAULT_EXPORT_LABELED_METRIC_TOTAL_INSTANCES,
             DEFAULT_EXPORT_LEVEL_INSTANCES);
     }
 
-    public PrometheusInstanceSampleSpecProvider(boolean exportDimensionalTotalInstances) {
+    public PrometheusInstanceSampleSpecProvider(boolean exportLabeledMetricTotalInstances) {
         this(
             DEFAULT_EXPORT_TOTAL_INSTANCES,
-            exportDimensionalTotalInstances,
+            exportLabeledMetricTotalInstances,
             DEFAULT_EXPORT_LEVEL_INSTANCES);
     }
 
     public PrometheusInstanceSampleSpecProvider(
         boolean exportTotalInstances,
-        boolean exportDimensionalTotalInstances,
+        boolean exportLabeledMetricTotalInstances,
         boolean exportLevelInstances) {
 
         this.exportTotalInstances = exportTotalInstances;
-        this.exportDimensionalTotalInstances = exportDimensionalTotalInstances;
+        this.exportLabeledMetricTotalInstances = exportLabeledMetricTotalInstances;
         this.exportLevelInstances = exportLevelInstances;
     }
 
@@ -54,7 +54,7 @@ public class PrometheusInstanceSampleSpecProvider implements InstanceSampleSpecP
                 return null;
             }
 
-            if (instance.isDimensionalTotalInstance() && !exportDimensionalTotalInstances) {
+            if (instance.isLabeledMetricTotalInstance() && !exportLabeledMetricTotalInstances) {
                 return null;
             }
         }
@@ -68,6 +68,6 @@ public class PrometheusInstanceSampleSpecProvider implements InstanceSampleSpecP
             instance,
             instance.name(),
             metric.hasDescription() ? metric.description() : null,
-            instance.dimensionValues());
+            instance.labelValues());
     }
 }

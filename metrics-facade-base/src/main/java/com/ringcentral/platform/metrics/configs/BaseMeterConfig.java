@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 
 import java.util.*;
 
@@ -10,9 +10,9 @@ public class BaseMeterConfig extends AbstractMeterConfig<BaseMeterInstanceConfig
     public BaseMeterConfig(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         BaseMeterSliceConfig allSliceConfig,
         Set<BaseMeterSliceConfig> sliceConfigs,
         MetricContext context) {
@@ -20,8 +20,8 @@ public class BaseMeterConfig extends AbstractMeterConfig<BaseMeterInstanceConfig
         super(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,

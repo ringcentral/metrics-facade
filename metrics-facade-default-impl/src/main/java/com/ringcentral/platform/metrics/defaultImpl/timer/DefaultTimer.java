@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.*;
 import com.ringcentral.platform.metrics.defaultImpl.rate.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -313,18 +313,18 @@ public class DefaultTimer extends AbstractTimer<TimerImpl> {
         @Override
         public AbstractMeterInstance<TimerImpl> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<TimerImpl>> measurableValueProviders,
             TimerImpl timer) {
 
             return new DefaultTimerInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(timer, measurableValueProviders),
                 measurableValueProviders,
@@ -334,9 +334,9 @@ public class DefaultTimer extends AbstractTimer<TimerImpl> {
         @Override
         public AbstractExpirableMeterInstance<TimerImpl> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<TimerImpl>> measurableValueProviders,
             TimerImpl timer,
@@ -344,9 +344,9 @@ public class DefaultTimer extends AbstractTimer<TimerImpl> {
 
             return new DefaultExpirableTimerInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(timer, measurableValueProviders),
                 measurableValueProviders,
@@ -375,7 +375,7 @@ public class DefaultTimer extends AbstractTimer<TimerImpl> {
     }
 
     @Override
-    public Stopwatch stopwatch(MetricDimensionValues dimensionValues) {
-        return new DefaultStopwatch(this, dimensionValues);
+    public Stopwatch stopwatch(LabelValues labelValues) {
+        return new DefaultStopwatch(this, labelValues);
     }
 }

@@ -2,8 +2,8 @@ package com.ringcentral.platform.metrics.configs.builders;
 
 import com.ringcentral.platform.metrics.ModifiableMetricContext;
 import com.ringcentral.platform.metrics.configs.MetricConfig;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.impl.MetricImplConfigBuilder;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
 
     private Boolean enabled;
     private String description;
-    private MetricDimensionValues prefixDimensionValues;
+    private LabelValues labelValues;
     private final ModifiableMetricContext context = new ModifiableMetricContext();
 
     @Override
@@ -31,8 +31,8 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
                 description = metricBase.description;
             }
 
-            if (metricBase.prefixDimensionValues != null && prefixDimensionValues == null) {
-                prefixDimensionValues = metricBase.prefixDimensionValues;
+            if (metricBase.labelValues != null && labelValues == null) {
+                labelValues = metricBase.labelValues;
             }
 
             if (!metricBase.context.isEmpty()) {
@@ -54,8 +54,8 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
                 description = metricMod.description;
             }
 
-            if (metricMod.prefixDimensionValues != null) {
-                prefixDimensionValues = metricMod.prefixDimensionValues;
+            if (metricMod.labelValues != null) {
+                labelValues = metricMod.labelValues;
             }
 
             if (!metricMod.context.isEmpty()) {
@@ -98,13 +98,13 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
         return description;
     }
 
-    public CB prefix(MetricDimensionValues dimensionValues) {
-        this.prefixDimensionValues = dimensionValues;
+    public CB prefix(LabelValues labelValues) {
+        this.labelValues = labelValues;
         return builder();
     }
 
-    protected MetricDimensionValues prefixDimensionValues() {
-        return prefixDimensionValues;
+    protected LabelValues prefixLabelValues() {
+        return labelValues;
     }
 
     public CB impl(MetricImplConfigBuilder configBuilder) {
@@ -125,11 +125,11 @@ public abstract class AbstractMetricConfigBuilder<C extends MetricConfig, CB ext
         return context;
     }
 
-    protected void checkDimensionsUnique(MetricDimensionValues dimensionValues, List<MetricDimension> dimensions) {
-        if (dimensionValues != null && dimensions != null) {
-            dimensionValues.list().forEach(dv -> {
-                if (dimensions.contains(dv.dimension())) {
-                    throw new IllegalArgumentException("Dimensions are not unique");
+    protected void checkLabelsUnique(LabelValues labelValues, List<Label> labels) {
+        if (labelValues != null && labels != null) {
+            labelValues.list().forEach(lv -> {
+                if (labels.contains(lv.label())) {
+                    throw new IllegalArgumentException("Labels are not unique");
                 }
             });
         }

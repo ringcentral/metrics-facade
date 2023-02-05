@@ -68,18 +68,18 @@ public class ClassesMetricsProducer extends AbstractMetricsProducer {
     @Override
     public void produceMetrics(MetricRegistry registry) {
         registry.longVar(
-                nameWithSuffix("loaded"),
-                () -> (long) classLoadingMxBean.getLoadedClassCount(),
-                longVarConfigBuilderSupplier("The number of classes that are currently loaded in the Java virtual machine"));
+            nameWithSuffix("loaded"),
+            () -> (long) classLoadingMxBean.getLoadedClassCount(),
+            longVarConfigBuilderSupplier("The number of classes that are currently loaded in the Java virtual machine"));
 
         registry.longVar(
-                nameWithSuffix("loaded", "total"),
-                classLoadingMxBean::getTotalLoadedClassCount,
-                longVarConfigBuilderSupplier("The total number of classes that have been loaded since the Java virtual machine has started execution"));
+            nameWithSuffix("loaded", "total"),
+            classLoadingMxBean::getTotalLoadedClassCount,
+            longVarConfigBuilderSupplier("The total number of classes that have been loaded since the Java virtual machine has started execution"));
 
         registry.longVar(
-                nameWithSuffix("unloaded", "total"),
-                classLoadingMxBean::getUnloadedClassCount,
-                longVarConfigBuilderSupplier("The total number of classes unloaded since the Java virtual machine has started execution"));
+            nameWithSuffix("unloaded", "total"),
+            classLoadingMxBean::getUnloadedClassCount,
+            longVarConfigBuilderSupplier("The total number of classes unloaded since the Java virtual machine has started execution"));
     }
 }

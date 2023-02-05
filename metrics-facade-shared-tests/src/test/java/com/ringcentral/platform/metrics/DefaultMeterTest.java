@@ -1,14 +1,23 @@
 package com.ringcentral.platform.metrics;
 
-import com.ringcentral.platform.metrics.AbstractMeter.*;
-import com.ringcentral.platform.metrics.configs.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
-import com.ringcentral.platform.metrics.measurables.*;
-import com.ringcentral.platform.metrics.meter.*;
+import com.ringcentral.platform.metrics.AbstractMeter.AbstractExpirableMeterInstance;
+import com.ringcentral.platform.metrics.AbstractMeter.AbstractMeterInstance;
+import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
+import com.ringcentral.platform.metrics.configs.BaseMeterConfig;
+import com.ringcentral.platform.metrics.configs.BaseMeterInstanceConfig;
+import com.ringcentral.platform.metrics.configs.BaseMeterSliceConfig;
+import com.ringcentral.platform.metrics.labels.LabelValue;
+import com.ringcentral.platform.metrics.measurables.AbstractMeasurableValues;
+import com.ringcentral.platform.metrics.measurables.Measurable;
+import com.ringcentral.platform.metrics.meter.TestMeterConfigBuilder;
+import com.ringcentral.platform.metrics.meter.TestMeterInstanceConfigBuilder;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
@@ -49,18 +58,18 @@ public class DefaultMeterTest extends AbstractMeterTest<
 
         public TestMeterInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<TestMeterImpl>> measurableValueProviders,
             TestMeterImpl meterImpl) {
 
             super(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new AbstractMeasurableValues(measurableValueProviders.keySet()) {
 
@@ -87,9 +96,9 @@ public class DefaultMeterTest extends AbstractMeterTest<
 
         public TestExpirableMeterInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<TestMeterImpl>> measurableValueProviders,
             TestMeterImpl meterImpl,
@@ -97,9 +106,9 @@ public class DefaultMeterTest extends AbstractMeterTest<
 
             super(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new AbstractMeasurableValues(measurableValueProviders.keySet()) {
 
@@ -146,18 +155,18 @@ public class DefaultMeterTest extends AbstractMeterTest<
                     @Override
                     public AbstractMeterInstance<TestMeterImpl> makeInstance(
                         MetricName name,
-                        List<MetricDimensionValue> dimensionValues,
+                        List<LabelValue> labelValues,
                         boolean totalInstance,
-                        boolean dimensionalTotalInstance,
+                        boolean labeledMetricTotalInstance,
                         boolean levelInstance,
                         Map<Measurable, MeasurableValueProvider<TestMeterImpl>> measurableValueProviders,
                         TestMeterImpl meterImpl) {
 
                         return new TestMeterInstance(
                             name,
-                            dimensionValues,
+                            labelValues,
                             totalInstance,
-                            dimensionalTotalInstance,
+                            labeledMetricTotalInstance,
                             levelInstance,
                             measurableValueProviders,
                             meterImpl);
@@ -166,9 +175,9 @@ public class DefaultMeterTest extends AbstractMeterTest<
                     @Override
                     public AbstractExpirableMeterInstance<TestMeterImpl> makeExpirableInstance(
                         MetricName name,
-                        List<MetricDimensionValue> dimensionValues,
+                        List<LabelValue> labelValues,
                         boolean totalInstance,
-                        boolean dimensionalTotalInstance,
+                        boolean labeledMetricTotalInstance,
                         boolean levelInstance,
                         Map<Measurable, MeasurableValueProvider<TestMeterImpl>> measurableValueProviders,
                         TestMeterImpl meterImpl,
@@ -176,9 +185,9 @@ public class DefaultMeterTest extends AbstractMeterTest<
 
                         return new TestExpirableMeterInstance(
                             name,
-                            dimensionValues,
+                            labelValues,
                             totalInstance,
-                            dimensionalTotalInstance,
+                            labeledMetricTotalInstance,
                             levelInstance,
                             measurableValueProviders,
                             meterImpl,

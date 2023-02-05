@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.defaultImpl.rate;
 
 import com.ringcentral.platform.metrics.AbstractMeter.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.RateInstance;
@@ -12,9 +12,9 @@ public class DefaultExpirableRateInstance extends AbstractExpirableMeterInstance
 
     protected DefaultExpirableRateInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<RateImpl>> measurableValueProviders,
@@ -23,9 +23,9 @@ public class DefaultExpirableRateInstance extends AbstractExpirableMeterInstance
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

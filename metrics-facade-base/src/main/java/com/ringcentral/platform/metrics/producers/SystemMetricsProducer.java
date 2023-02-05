@@ -1,9 +1,10 @@
 package com.ringcentral.platform.metrics.producers;
 
-import com.ringcentral.platform.metrics.*;
+import com.ringcentral.platform.metrics.MetricModBuilder;
+import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.names.MetricName;
-import com.ringcentral.platform.metrics.producers.dimensional.*;
-import com.ringcentral.platform.metrics.producers.nondimensional.*;
+import com.ringcentral.platform.metrics.producers.unlabeled.*;
+import com.ringcentral.platform.metrics.producers.labeled.*;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,8 +22,8 @@ public class SystemMetricsProducer implements MetricsProducer {
         this(null, false);
     }
 
-    public SystemMetricsProducer(boolean dimensional) {
-        this(null, dimensional);
+    public SystemMetricsProducer(boolean labeled) {
+        this(null, labeled);
     }
 
     public SystemMetricsProducer(
@@ -33,7 +34,7 @@ public class SystemMetricsProducer implements MetricsProducer {
         MetricName threadsMetricNamePrefix,
         MetricName bufferPoolsMetricNamePrefix,
         MetricName classesMetricNamePrefix,
-        boolean dimensional) {
+        boolean labeled) {
 
         this(
             runtimeMetricNamePrefix,
@@ -44,23 +45,20 @@ public class SystemMetricsProducer implements MetricsProducer {
             bufferPoolsMetricNamePrefix,
             classesMetricNamePrefix,
             null,
-                dimensional);
+            labeled);
     }
 
-    public SystemMetricsProducer(
-            MetricModBuilder metricModBuilder,
-            boolean dimensional
-    ) {
+    public SystemMetricsProducer(MetricModBuilder metricModBuilder, boolean labeled) {
         this(
-                RuntimeMetricsProducer.DEFAULT_NAME_PREFIX,
-                AbstractOperatingSystemMetricsProducer.DEFAULT_NAME_PREFIX,
-                AbstractGarbageCollectorsMetricsProducer.DEFAULT_NAME_PREFIX,
-                AbstractMemoryMetricsProducer.DEFAULT_NAME_PREFIX,
-                AbstractThreadsMetricsProducer.DEFAULT_NAME_PREFIX,
-                AbstractBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
-                ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
-                metricModBuilder,
-                dimensional);
+            RuntimeMetricsProducer.DEFAULT_NAME_PREFIX,
+            AbstractOperatingSystemMetricsProducer.DEFAULT_NAME_PREFIX,
+            AbstractGarbageCollectorsMetricsProducer.DEFAULT_NAME_PREFIX,
+            AbstractMemoryMetricsProducer.DEFAULT_NAME_PREFIX,
+            AbstractThreadsMetricsProducer.DEFAULT_NAME_PREFIX,
+            AbstractBufferPoolsMetricsProducer.DEFAULT_NAME_PREFIX,
+            ClassesMetricsProducer.DEFAULT_NAME_PREFIX,
+            metricModBuilder,
+            labeled);
     }
 
     public SystemMetricsProducer(
@@ -72,46 +70,51 @@ public class SystemMetricsProducer implements MetricsProducer {
         MetricName bufferPoolsMetricNamePrefix,
         MetricName classesMetricNamePrefix,
         MetricModBuilder metricModBuilder,
-        boolean dimensional) {
+        boolean labeled) {
 
         this(
             new RuntimeMetricsProducer(runtimeMetricNamePrefix, metricModBuilder),
-                getOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder, dimensional),
-                getGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder, dimensional),
-                getMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder, dimensional),
-                getThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, dimensional),
-                getBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, dimensional),
+            makeOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder, labeled),
+            makeGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder, labeled),
+            makeMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder, labeled),
+            makeThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder, labeled),
+            makeBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder, labeled),
             new ClassesMetricsProducer(classesMetricNamePrefix, metricModBuilder));
     }
 
-    private static OperatingSystemMetricsProducer getOperatingSystemMetricsProducer(final MetricName operatingSystemMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
-        return dimensional ?
-                new DimensionalOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder) :
-                new DefaultOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder);
+    private static OperatingSystemMetricsProducer makeOperatingSystemMetricsProducer(final MetricName operatingSystemMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean labeled) {
+        return
+            labeled ?
+            new LabeledOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder) :
+            new DefaultOperatingSystemMetricsProducer(operatingSystemMetricNamePrefix, metricModBuilder);
     }
 
-    private static GarbageCollectorsMetricsProducer getGarbageCollectorsMetricsProducer(final MetricName garbageCollectorsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
-        return dimensional ?
-                new DimensionalGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder) :
-                new DefaultGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder);
+    private static GarbageCollectorsMetricsProducer makeGarbageCollectorsMetricsProducer(final MetricName garbageCollectorsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean labeled) {
+        return
+            labeled ?
+            new LabeledGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder) :
+            new DefaultGarbageCollectorsMetricsProducer(garbageCollectorsMetricNamePrefix, metricModBuilder);
     }
 
-    private static MemoryMetricsProducer getMemoryMetricsProducer(final MetricName memoryMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
-        return dimensional?
-                new DimensionalMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder):
-                new DefaultMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder);
+    private static MemoryMetricsProducer makeMemoryMetricsProducer(final MetricName memoryMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean labeled) {
+        return
+            labeled ?
+            new LabeledMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder):
+            new DefaultMemoryMetricsProducer(memoryMetricNamePrefix, metricModBuilder);
     }
 
-    private static BufferPoolsMetricsProducer getBufferPoolsMetricsProducer(final MetricName bufferPoolsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
-        return dimensional ?
-                new DimensionalBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder) :
-                new DefaultBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder);
+    private static BufferPoolsMetricsProducer makeBufferPoolsMetricsProducer(final MetricName bufferPoolsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean labeled) {
+        return
+            labeled ?
+            new LabeledBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder) :
+            new DefaultBufferPoolsMetricsProducer(bufferPoolsMetricNamePrefix, metricModBuilder);
     }
 
-    private static ThreadsMetricsProducer getThreadsMetricsProducer(final MetricName threadsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean dimensional) {
-        return dimensional ?
-                new DimensionalThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder) :
-                new DefaultThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder);
+    private static ThreadsMetricsProducer makeThreadsMetricsProducer(final MetricName threadsMetricNamePrefix, final MetricModBuilder metricModBuilder, final boolean labeled) {
+        return
+            labeled ?
+            new LabeledThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder) :
+            new DefaultThreadsMetricsProducer(threadsMetricNamePrefix, metricModBuilder);
     }
 
     public SystemMetricsProducer(

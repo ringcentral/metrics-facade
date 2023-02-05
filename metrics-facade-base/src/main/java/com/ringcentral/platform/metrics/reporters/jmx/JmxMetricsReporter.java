@@ -66,7 +66,7 @@ public class JmxMetricsReporter implements MetricsReporter, MetricRegistryListen
                 TRUE,
                 instance.name(),
                 instance.measurables(),
-                instance.dimensionValues());
+                instance.labelValues());
 
             if (mBeanSpecModProviders != null) {
                 for (MBeanSpecProvider mBeanSpecProvider : mBeanSpecModProviders.infosFor(instance)) {
@@ -81,7 +81,7 @@ public class JmxMetricsReporter implements MetricsReporter, MetricRegistryListen
             return objectNameProvider.objectNameFor(
                 domainName,
                 mBeanSpec.name(),
-                mBeanSpec.dimensionValues());
+                mBeanSpec.labelValues());
         }
 
         @Override

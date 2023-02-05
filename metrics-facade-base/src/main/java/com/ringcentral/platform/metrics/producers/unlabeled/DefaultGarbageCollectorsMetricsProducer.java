@@ -1,4 +1,4 @@
-package com.ringcentral.platform.metrics.producers.nondimensional;
+package com.ringcentral.platform.metrics.producers.unlabeled;
 
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
@@ -77,14 +77,14 @@ public class DefaultGarbageCollectorsMetricsProducer extends AbstractGarbageColl
                 "."));
 
             registry.longVar(
-                    name(namePrefix, "count"),
-                    gcMxBean::getCollectionCount,
-                    longVarConfigBuilderSupplier(COLLECTION_COUNT_DESCRIPTION));
+                name(namePrefix, "count"),
+                gcMxBean::getCollectionCount,
+                longVarConfigBuilderSupplier(COLLECTION_COUNT_DESCRIPTION));
 
             registry.longVar(
-                    name(namePrefix, "time"),
-                    gcMxBean::getCollectionTime,
-                    longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION));
+                name(namePrefix, "time"),
+                gcMxBean::getCollectionTime,
+                longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION));
         }
     }
 }

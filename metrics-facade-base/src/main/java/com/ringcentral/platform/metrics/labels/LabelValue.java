@@ -1,22 +1,22 @@
-package com.ringcentral.platform.metrics.dimensions;
+package com.ringcentral.platform.metrics.labels;
 
 import static com.ringcentral.platform.metrics.utils.ObjectUtils.*;
 import static java.util.Objects.*;
 
-public class MetricDimensionValue {
+public class LabelValue {
 
-    private final MetricDimension dimension;
+    private final Label label;
     private final String value;
     private final int hashCode;
 
-    public MetricDimensionValue(MetricDimension dimension, String value) {
-        this.dimension = requireNonNull(dimension);
+    public LabelValue(Label label, String value) {
+        this.label = requireNonNull(label);
         this.value = requireNonNull(value);
-        this.hashCode = hashCodeFor(dimension, value);
+        this.hashCode = hashCodeFor(label, value);
     }
 
-    public MetricDimension dimension() {
-        return dimension;
+    public Label label() {
+        return label;
     }
 
     public String value() {
@@ -33,13 +33,13 @@ public class MetricDimensionValue {
             return false;
         }
 
-        MetricDimensionValue that = (MetricDimensionValue)other;
+        LabelValue that = (LabelValue)other;
 
         if (hashCode != that.hashCode) {
             return false;
         }
 
-        return dimension.equals(that.dimension) && value.equals(that.value);
+        return label.equals(that.label) && value.equals(that.value);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class MetricDimensionValue {
 
     @Override
     public String toString() {
-        return "MetricDimensionValue{" +
-            "dimension=" + dimension +
+        return "LabelValue{" +
+            "label=" + label +
             ", value='" + value + '\'' +
             '}';
     }

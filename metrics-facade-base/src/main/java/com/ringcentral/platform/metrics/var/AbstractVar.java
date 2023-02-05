@@ -1,16 +1,24 @@
 package com.ringcentral.platform.metrics.var;
 
-import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.AbstractMetric;
+import com.ringcentral.platform.metrics.MetricInstance;
+import com.ringcentral.platform.metrics.MetricListener;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValue;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.VarConfig;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
+import static com.ringcentral.platform.metrics.labels.LabelValues.NO_LABEL_VALUES;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
@@ -19,9 +27,9 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
     public interface InstanceMaker<V> {
         VarInstance<V> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean nonDecreasing,
             Measurable valueMeasurable,
             Supplier<V> valueSupplier);
@@ -33,8 +41,8 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
     private volatile boolean removed;
     private final List<MetricListener> listeners = new ArrayList<>();
 
-    private final MetricDimensionValues prefixDimensionValues;
-    private final List<MetricDimension> dimensions;
+    private final LabelValues prefixLabelValues;
+    private final List<Label> labels;
     private final VarInstance<V> totalInstance;
     private final ConcurrentHashMap<InstanceKey, VarInstance<V>> instances;
 
@@ -60,25 +68,25 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
         this.nonDecreasing = config.isNonDecreasing();
 
         if (config.isEnabled()) {
-            this.prefixDimensionValues =
-                config.hasPrefixDimensionValues() ?
-                config.prefixDimensionValues() :
-                NO_DIMENSION_VALUES;
+            this.prefixLabelValues =
+                config.hasPrefixLabelValues() ?
+                config.prefixLabelValues() :
+                NO_LABEL_VALUES;
 
-            if (config.hasDimensions()) {
-                this.dimensions = config.dimensions();
+            if (config.hasLabels()) {
+                this.labels = config.labels();
                 this.instances = new ConcurrentHashMap<>();
             } else {
-                this.dimensions = emptyList();
+                this.labels = emptyList();
                 this.instances = null;
             }
 
             if (valueSupplier != null) {
                 this.totalInstance = instanceMaker.makeInstance(
                     name,
-                    this.prefixDimensionValues.list(),
+                    this.prefixLabelValues.list(),
                     true,
-                    !this.dimensions.isEmpty(),
+                    !this.labels.isEmpty(),
                     config.isNonDecreasing(),
                     valueMeasurable,
                     valueSupplier);
@@ -89,8 +97,8 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
             this.valueMeasurable = valueMeasurable;
             this.instanceMaker = instanceMaker;
         } else {
-            this.prefixDimensionValues = null;
-            this.dimensions = null;
+            this.prefixLabelValues = null;
+            this.labels = null;
             this.totalInstance = null;
             this.instances = null;
             this.valueMeasurable = null;
@@ -167,33 +175,33 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
     }
 
     @Override
-    public void register(Supplier<V> valueSupplier, MetricDimensionValues dimensionValues) {
+    public void register(Supplier<V> valueSupplier, LabelValues labelValues) {
         if (!isEnabled() || isRemoved()) {
             return;
         }
 
-        checkDimensionValues(dimensionValues.list());
+        checkLabelValues(labelValues.list());
 
         executor.execute(() -> {
-            InstanceKey instanceKey = new InstanceKey(dimensionValues.list());
+            InstanceKey instanceKey = new InstanceKey(labelValues.list());
 
             if (isRemoved() || instances.containsKey(instanceKey)) {
                 return;
             }
 
-            List<MetricDimensionValue> instanceDimensionValues;
+            List<LabelValue> instanceLabelValues;
 
-            if (!prefixDimensionValues.isEmpty()) {
-                instanceDimensionValues = new ArrayList<>(prefixDimensionValues.size() + dimensionValues.size());
-                instanceDimensionValues.addAll(prefixDimensionValues.list());
-                instanceDimensionValues.addAll(dimensionValues.list());
+            if (!prefixLabelValues.isEmpty()) {
+                instanceLabelValues = new ArrayList<>(prefixLabelValues.size() + labelValues.size());
+                instanceLabelValues.addAll(prefixLabelValues.list());
+                instanceLabelValues.addAll(labelValues.list());
             } else {
-                instanceDimensionValues = dimensionValues.list();
+                instanceLabelValues = labelValues.list();
             }
 
             VarInstance<V> instance = instanceMaker.makeInstance(
                 name(),
-                instanceDimensionValues,
+                instanceLabelValues,
                 false,
                 false,
                 nonDecreasing,
@@ -206,40 +214,38 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
         });
     }
 
-    private void checkDimensionValues(List<MetricDimensionValue> dimensionValues) {
+    private void checkLabelValues(List<LabelValue> labelValues) {
         checkArgument(
-            dimensionValues != null && !dimensionValues.isEmpty(),
-            "dimensionValues is null or empty");
+            labelValues != null && !labelValues.isEmpty(),
+            "labelValues is null or empty");
 
-        if (!dimensions.isEmpty()) {
-            if (dimensionValues.size() != dimensions.size()) {
-                unexpected(dimensionValues);
+        if (!labels.isEmpty()) {
+            if (labelValues.size() != labels.size()) {
+                unexpected(labelValues);
             }
 
-            for (int i = 0; i < dimensions.size(); ++i) {
-                if (!dimensions.get(i).equals(dimensionValues.get(i).dimension())) {
-                    unexpected(dimensionValues);
+            for (int i = 0; i < labels.size(); ++i) {
+                if (!labels.get(i).equals(labelValues.get(i).label())) {
+                    unexpected(labelValues);
                 }
             }
         } else {
-            unexpected(dimensionValues);
+            unexpected(labelValues);
         }
     }
 
-    private void unexpected(List<MetricDimensionValue> dimensionValues) {
-        throw new IllegalArgumentException(
-            "dimensionValues = " + dimensionValues +
-            " do not match dimensions = " + dimensions);
+    private void unexpected(List<LabelValue> labelValues) {
+        throw new IllegalArgumentException("labelValues = " + labelValues + " do not match labels = " + labels);
     }
 
     @Override
-    public void deregister(MetricDimensionValues dimensionValues) {
+    public void deregister(LabelValues labelValues) {
         if (!isEnabled() || isRemoved()) {
             return;
         }
 
-        checkDimensionValues(dimensionValues.list());
-        InstanceKey instanceKey = new InstanceKey(dimensionValues.list());
+        checkLabelValues(labelValues.list());
+        InstanceKey instanceKey = new InstanceKey(labelValues.list());
 
         executor.execute(() -> {
             if (isRemoved()) {
@@ -257,12 +263,12 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
 
     private static class InstanceKey {
 
-        final List<MetricDimensionValue> dimensionValues;
+        final List<LabelValue> labelValues;
         final int hashCode;
 
-        InstanceKey(List<MetricDimensionValue> dimensionValues) {
-            this.dimensionValues = dimensionValues;
-            this.hashCode = dimensionValues.hashCode();
+        InstanceKey(List<LabelValue> labelValues) {
+            this.labelValues = labelValues;
+            this.hashCode = labelValues.hashCode();
         }
 
         @Override
@@ -281,12 +287,12 @@ public abstract class AbstractVar<V> extends AbstractMetric implements Var<V> {
                 return false;
             }
 
-            if (dimensionValues == that.dimensionValues) {
+            if (labelValues == that.labelValues) {
                 return true;
             }
 
-            for (int i = 0; i < dimensionValues.size(); ++i) {
-                if (!dimensionValues.get(i).equals(that.dimensionValues.get(i))) {
+            for (int i = 0; i < labelValues.size(); ++i) {
+                if (!labelValues.get(i).equals(that.labelValues.get(i))) {
                     return false;
                 }
             }

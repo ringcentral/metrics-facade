@@ -10,8 +10,8 @@ Table of Contents
 * [Getting Started](#getting-started)
 * [Features](#features)
   * [Flexible Configuration](#flexible-configuration)
-  * [Dimensional metrics](#dimensional-metrics)
-  * [Prefix Dimension Values](#prefix-dimension-values)
+  * [Labeled metrics](#labeled-metrics)
+  * [Prefix Label Values](#prefix-label-values)
   * [Exclusions](#exclusions)
   * [Slices and Levels](#slices-and-levels)
 * [Metrics](#metrics)
@@ -51,14 +51,14 @@ For example, the implementation of a metric is not required to perform an expens
 calculating percentiles, if percentiles are not included in the set of values defined for this metric.           
 See [Getting Started](#getting-started) for details and usage examples.        
 
-### Advanced support for dimensional metrics
+### Advanced support for labeled (dimensional) metrics
 
-In particular, Metrics Facade supports eviction and expiration for dimensional metrics,        
-that is, for each dimensional metric, it allows you to specify:        
-- the maximum number of combinations of dimension values:        
+In particular, Metrics Facade supports eviction and expiration for labeled metrics,        
+that is, for each labeled metric, it allows you to specify:        
+- the maximum number of combinations of label values:        
   when this threshold is exceeded, the combination that has not been updated for the longest time,        
   will be automatically removed (will not waste system resources)          
-- the expiration time for a combination of dimension values:  
+- the expiration time for a combination of label values:  
   if a combination has not been updated during this time, it will be automatically removed    
 
 See [Getting Started](#getting-started) for details and usage examples.      
@@ -152,9 +152,9 @@ interface MetricInstance {
 
 ```
 
-This design has been driven by the need to support dimensional metrics.  
+This design has been driven by the need to support labeled metrics.  
 
-***Dimensional metric*** *is a metric with which a set of attributes (***dimensions***) is associated,      
+***Labeled (dimensional) metric*** *is a metric with which a set of attributes (***labels***) is associated,      
 and which generates a separate "child" metric (represented by a ```MetricInstance```)    
 for each involved (for which there was at least one update) combination of values of these attributes.*      
 
@@ -170,13 +170,13 @@ Let us also assume that we would like to have a ***separate*** request execution
 for each instance of an external service (that is, for each combination of service, server, and port         
 *for which at least one request has been made*).      
 
-In other words, we would like to define a ***dimensional [Timer](#timer)*** with the    
-***dimensions*** service, server, port (taking into account the order of the dimensions).  
+In other words, we would like to define a ***labeled [Timer](#timer)*** with the    
+***labels*** service, server, port (taking into account the order of the labels).  
 
 Let us now return to the concept of a metric instance (```MetricInstance```), and consider it in more detail.
 
 Instances are identified by a name (```MetricName```) which always starts with the metric's name (```MetricName```)          
-**and** a list of dimension values (```MetricDimensionValue```).          
+**and** a list of label values (```LabelValue```).          
 There is also the set of ```Measurable```s associated with an instance.      
 The instance allows you to get the value of any ```Measurable``` from this set (see ```instance.valueOf(m)``` below):  
 
@@ -191,8 +191,8 @@ counter.addListener(new MetricListener() {
 
     @Override
     public void metricInstanceAdded(MetricInstance instance) {
-        List<String> dimensionValuesString = instance.dimensionValues().stream()
-            .map(dv -> dv.dimension().name() + "=" + dv.value())
+        List<String> labelValuesString = instance.labelValues().stream()
+            .map(lv -> lv.label().name() + "=" + lv.value())
             .collect(toList());
 
         String valuesString = "{" + instance.measurables().stream()
@@ -207,9 +207,9 @@ counter.addListener(new MetricListener() {
         System.out.println(
             "Metric instance added:\n"
             + "  name = '" + instance.name() + "',\n"
-            + "  dimension values = " + instance.dimensionValues() + ",\n"
+            + "  label values = " + instance.labelValues() + ",\n"
             + "  total instance = " + instance.isTotalInstance() + ",\n"
-            + "  dimensional total instance = " + instance.isDimensionalTotalInstance() + ",\n"
+            + "  labeled metric total instance = " + instance.isLabeledMetricTotalInstance() + ",\n"
             + "  level instance = " + instance.isLevelInstance() + ",\n"
             + "  measurable values = " + valuesString);
     }
@@ -225,9 +225,9 @@ Output:
 ```
 Metric instance added:
   name = 'counter',
-  dimension values = [],
+  label values = [],
   total instance = true,
-  dimensional total instance = false,
+  labeled metric total instance = false,
   level instance = false,
   measurable values = {Count=2}
 ```
@@ -244,36 +244,36 @@ By default, only ***total instance*** is created along with the metric
 (it can be disabled through metric configuration).        
 The total instance takes all updates into account.        
 The lifetime of the total instance is the same as the lifetime of the metric.    
-This is the only instance created for non-dimensional metrics.  
+This is the only instance created for non-labeled metrics.  
 
-If the metric is dimensional, an instance is created for each combination of ```MetricDimensionValue```s.        
+If the metric is labeled, an instance is created for each combination of ```LabelValue```s.        
 Such an instance takes into account only those updates that are made for the corresponding combination:    
 
 ```java  
 Histogram histogram = registry.histogram(
     withName("histogram"),
     () -> withHistogram()
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         .allSlice().noLevels());
 
 // updates the total instance and the instance service_1/server_1_1/111
-histogram.update(10, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111"))); 
+histogram.update(10, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111"))); 
 
 // updates the total instance and the instance service_1/server_1_12/121
-histogram.update(20, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+histogram.update(20, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
 
 // updates the total instance and the instance service_2/server_2_1/211
-histogram.update(30, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+histogram.update(30, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
 // updates the total instance and the instance service_2/server_2_1/212
-histogram.update(40, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("212")));
+histogram.update(40, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("212")));
 
 // instances are added asynchronously
 Thread.sleep(25);
 
 histogram.forEach(instance -> {
-    List<String> dimensionValuesString = instance.dimensionValues().stream()
-        .map(dv -> dv.dimension().name() + "=" + dv.value())
+    List<String> labelValuesString = instance.labelValues().stream()
+        .map(lv -> lv.label().name() + "=" + lv.value())
         .collect(toList());
 
     // "snapshot-based" approach for getting values
@@ -295,9 +295,9 @@ histogram.forEach(instance -> {
     System.out.println(
         "Metric instance:\n"
         + "  name = '" + instance.name() + "',\n"
-        + "  dimension values = " + dimensionValuesString + ",\n"
+        + "  label values = " + labelValuesString + ",\n"
         + "  total instance = " + instance.isTotalInstance() + ",\n"
-        + "  dimensional total instance = " + instance.isDimensionalTotalInstance() + ",\n"
+        + "  labeled metric total instance = " + instance.isLabeledMetricTotalInstance() + ",\n"
         + "  level instance = " + instance.isLevelInstance() + ",\n"
         + "  measurable values = " + valuesString);
 });
@@ -307,48 +307,48 @@ Output:
 ```
 Metric instance:
   name = 'histogram',
-  dimension values = [],
+  label values = [],
   total instance = true,
-  dimensional total instance = true,
+  labeled metric total instance = true,
   level instance = false,
   measurable values = {Count=4, Max=40, Percentile_0.9=40.0, Percentile_0.99=40.0, Percentile_0.5=30.0, Mean=25.0, Min=10}
   
 Metric instance:
   name = 'histogram',
-  dimension values = [service=service_1, server=server_1_1, port=111],
+  label values = [service=service_1, server=server_1_1, port=111],
   total instance = false,
-  dimensional total instance = false,
+  labeled metric total instance = false,
   level instance = false,
   measurable values = {Count=1, Max=10, Percentile_0.9=10.0, Percentile_0.99=10.0, Percentile_0.5=10.0, Mean=10.0, Min=10}
   
 Metric instance:
   name = 'histogram',
-  dimension values = [service=service_1, server=server_1_2, port=121],
+  label values = [service=service_1, server=server_1_2, port=121],
   total instance = false,
-  dimensional total instance = false,
+  labeled metric total instance = false,
   level instance = false,
   measurable values = {Count=1, Max=20, Percentile_0.9=20.0, Percentile_0.99=20.0, Percentile_0.5=20.0, Mean=20.0, Min=20}  
   
 Metric instance:
   name = 'histogram',
-  dimension values = [service=service_2, server=server_2_1, port=211],
+  label values = [service=service_2, server=server_2_1, port=211],
   total instance = false,
-  dimensional total instance = false,
+  labeled metric total instance = false,
   level instance = false,
   measurable values = {Count=1, Max=30, Percentile_0.9=30.0, Percentile_0.99=30.0, Percentile_0.5=30.0, Mean=30.0, Min=30}  
   
 Metric instance:
   name = 'histogram',
-  dimension values = [service=service_2, server=server_2_1, port=212],
+  label values = [service=service_2, server=server_2_1, port=212],
   total instance = false,
-  dimensional total instance = false,
+  labeled metric total instance = false,
   level instance = false,
   measurable values = {Count=1, Max=40, Percentile_0.9=40.0, Percentile_0.99=40.0, Percentile_0.5=40.0, Mean=40.0, Min=4}
 ```
 
 The life cycle of such an instance may end earlier the life cycle of the metric      
-in the case of an eviction or expiration (see [Dimensional metrics](#dimensional-metrics)),          
-as well as in the case of deregistering a list of dimension values for a variable (see [Var and Caching Var](#var-and-cachingvar)).    
+in the case of an eviction or expiration (see [Labeled metrics](#labeled-metrics)),          
+as well as in the case of deregistering a list of label values for a variable (see [Var and Caching Var](#var-and-cachingvar)).    
 
 To manage metrics, a special entity is used - metric registry.  
  
@@ -394,15 +394,15 @@ Metrics reporter(s) (for example, ```PrometheusMetricsExporter```):
 ```
 
 Let's add metrics.    
-At the moment, we have only one metric - a dimensional [Timer](#timer) for requests to    
-external services with the dimensions service, server, and port.  
+At the moment, we have only one metric - a labeled [Timer](#timer) for requests to    
+external services with the labels service, server, and port.  
 
-A dimension is represented by the ```MetricDimension``` class.  
-Let's define the dimensions:    
+A label is represented by the ```Label``` class.  
+Let's define the labels:    
 ```java
-MetricDimension SERVICE = new MetricDimension("service");
-MetricDimension SERVER = new MetricDimension("server");
-MetricDimension PORT = new MetricDimension("port");
+Label SERVICE = new Label("service");
+Label SERVER = new Label("server");
+Label PORT = new Label("port");
 ```
 
 and add the metric using```MetricRegistry```:      
@@ -413,7 +413,7 @@ MetricRegistry registry = new DefaultMetricRegistry();
 
 Timer httpClientRequestTimer = registry.timer(
     withName("http", "client", "request", "duration"),
-    () -> withTimer().dimensions(SERVICE, SERVER, PORT));
+    () -> withTimer().labels(SERVICE, SERVER, PORT));
 ```
 
 The next step is to update the metric.      
@@ -426,14 +426,14 @@ long requestDuration = ...
 
 httpClientRequestTimer.update(
     requestDuration, 
-    forDimensionValues(SERVICE.value("authorizationService"), SERVER.value("127.0.0.1"), PORT.value("7001"))))
+    forLabelValues(SERVICE.value("authorizationService"), SERVER.value("127.0.0.1"), PORT.value("7001"))))
 ```
 
 You can also use the following recording scheme:    
 
 ```java
 // start a stopwatch before executing the request    
-Stopwatch stopwatch = fullConfigTimer.stopwatch(forDimensionValues(
+Stopwatch stopwatch = fullConfigTimer.stopwatch(forLabelValues(
     SERVICE.value("authorizationService"), 
     SERVER.value("127.0.0.1"), 
     PORT.value("7001"))));
@@ -552,14 +552,14 @@ Let's assume that the following metric updates have been made:
 ```java
 httpClientRequestTimer.update(
     100L, MILLISECONDS,
-    forDimensionValues(SERVICE.value("authorizationService"), SERVER.value("127.0.0.1"), PORT.value("7001")));
+    forLabelValues(SERVICE.value("authorizationService"), SERVER.value("127.0.0.1"), PORT.value("7001")));
 
 httpClientRequestTimer.update(
     200L, MILLISECONDS,
-    forDimensionValues(SERVICE.value("authorizationService"), SERVER.value("127.0.0.2"), PORT.value("7002")));
+    forLabelValues(SERVICE.value("authorizationService"), SERVER.value("127.0.0.2"), PORT.value("7002")));
 
 // start a stopwatch before executing the request
-Stopwatch stopwatch = httpClientRequestTimer.stopwatch(forDimensionValues(
+Stopwatch stopwatch = httpClientRequestTimer.stopwatch(forLabelValues(
     SERVICE.value("throttlingService"),
     SERVER.value("127.0.0.3"),
     PORT.value("7003")));
@@ -614,20 +614,20 @@ and are periodically requested from a special external service named "discoveryS
 Let's also assume that we would not want the duration of requests to this "auxiliary" service      
 to affect the statistics for other services ("business" services).        
 
-This can be achieved through exclusion of dimension values matching the corresponding predicate:        
+This can be achieved through exclusion of label values matching the corresponding predicate:        
 ```java
 Timer httpClientRequestTimer = registry.timer(
     withName("http", "client", "request", "duration"),
     () -> withTimer()
-        .dimensions(SERVICE, SERVER, PORT)
-        .exclude(dimensionValuesMatchingAll(SERVICE.mask("discoveryService"))));
+        .labels(SERVICE, SERVER, PORT)
+        .exclude(labelValuesMatchingAll(SERVICE.mask("discoveryService"))));
 ```
 
 The following metric update will be ignored:    
 ```java
 httpClientRequestTimer.update(
     100L, MILLISECONDS,
-    forDimensionValues(SERVICE.value("discoveryService"), SERVER.value("127.0.0.4"), PORT.value("7004")));
+    forLabelValues(SERVICE.value("discoveryService"), SERVER.value("127.0.0.4"), PORT.value("7004")));
 ```
 
 Further, since services are discovered dynamically,          
@@ -638,10 +638,10 @@ they have already been exported to external monitoring systems, they are no long
 but at the same time they continue to consume resources (for example, memory).          
 
 To solve this problem, Metrics Facade allows you to set for each metric:  
-- the maximum number of combinations of dimension values:          
+- the maximum number of combinations of label values:          
   when this threshold is exceeded, the combination that has not been updated for the longest time,          
   will be automatically removed  
-- the expiration time for a combination of dimension values:    
+- the expiration time for a combination of label values:    
   if a combination has not been updated during this time, it will be automatically removed  
   
 For example:  
@@ -650,10 +650,10 @@ For example:
 Timer httpClientRequestTimer = registry.timer(
     withName("http", "client", "request", "duration"),
     () -> withTimer()
-        .dimensions(SERVICE, SERVER, PORT)
-        .exclude(dimensionValuesMatchingAll(SERVICE.mask("discoveryService")))
-        .maxDimensionalInstancesPerSlice(100) // eviction
-        .expireDimensionalInstanceAfter(30, SECONDS)); // expiration
+        .labels(SERVICE, SERVER, PORT)
+        .exclude(labelValuesMatchingAll(SERVICE.mask("discoveryService")))
+        .maxLabeledInstancesPerSlice(100) // eviction
+        .expireLabeledInstanceAfter(30, SECONDS)); // expiration
 ```
 
 Further, it would often be helpful to have:  
@@ -670,17 +670,17 @@ Metrics Facade offers the ability to ***automatically*** add this kind of
 ```MetricInstance```s through the functionality of slices and levels.         
 
 ***Slice*** *is a child metric that takes into account only those updates of the parent metric     
-which satisfy the given ```MetricDimensionValuesPredicate```.      
-A slice can have its own configuration: name suffix, dimensions      
-(MUST be sublist if the parent metric's dimensions), measurable values, etc.*        
+which satisfy the given ```LabelValuesPredicate```.      
+A slice can have its own configuration: name suffix, labels      
+(MUST be sublist if the parent metric's labels), measurable values, etc.*        
 
 By default, a metric has only one slice - ```AllSlice``` taking all updates into account.    
 
 ***Slice level*** *is a set of ```MetricInstance```s of the slice  
-for the first ```k``` dimensions, ```k = 1..<dimension_count> - 1```.*   
+for the first ```k``` labels, ```k = 1..<label_count> - 1```.*   
 
 For example, if for a slice:    
-- three dimensions are defined: ```SERVICE```, ```SERVER```, ```PORT```  
+- three labels are defined: ```SERVICE```, ```SERVER```, ```PORT```  
 - levels are enabled  
 
 then when updating this slice for the values             
@@ -697,15 +697,15 @@ Here is how you can implement the above requirements using the functionality of 
 Timer httpClientRequestTimer = registry.timer(
     withName("http", "client", "request", "duration"),
     () -> withTimer()
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         ...
         .allSlice()
             .enableLevels() // enabled by default for AllSlice; implements 1) and 2)
         .slice("by", "server") // implements 3) 
-            .predicate(dimensionValuesMatchingAll(
+            .predicate(labelValuesMatchingAll(
                 SERVICE.mask("auth*|*throttling*"),
                 PORT.predicate(p -> !p.equals("7004"))))
-            .dimensions(SERVER)
+            .labels(SERVER)
             .measurables(MAX, MEAN, PERCENTILE_99));
 ```
 
@@ -731,9 +731,9 @@ calculating percentiles, if percentiles are not included in the set of values de
 Example of setting up defaults (```DefaultsSample.java```):  
 ```java
 registry.preConfigure(allMetrics(), modifying()
-    .metric(withMetric().prefix(dimensionValues(SAMPLE.value("defaults"))))
+    .metric(withMetric().prefix(labelValues(SAMPLE.value("defaults"))))
     .meter(withMeter()
-        .expireDimensionalInstanceAfter(30, MINUTES)
+        .expireLabeledInstanceAfter(30, MINUTES)
         .allSlice().noLevels())
     .rate(withRate().measurables(COUNT, ONE_MINUTE_RATE))
     .histogram(withHistogram().measurables(COUNT, MAX, MEAN, PERCENTILE_95))
@@ -743,9 +743,9 @@ registry.preConfigure(allMetrics(), modifying()
 Example of setting up overrides (```OverridesSample.java```):  
 ```java
 registry.postConfigure(allMetrics(), modifying()
-    .metric(withMetric().prefix(dimensionValues(SAMPLE.value("overrides"))))
+    .metric(withMetric().prefix(labelValues(SAMPLE.value("overrides"))))
     .meter(withMeter()
-        .expireDimensionalInstanceAfter(30, MINUTES)
+        .expireLabeledInstanceAfter(30, MINUTES)
         .allSlice().noLevels())
     .rate(withRate().measurables(COUNT, ONE_MINUTE_RATE))
     .histogram(withHistogram().measurables(COUNT, MAX, MEAN, PERCENTILE_95))
@@ -776,41 +776,41 @@ assert registry.timer(withName("d", "e", "f", "g", "h")).isEnabled();
 See [Getting Started](#getting-started), ```DefaultsSample.java```,    
 and ```OverridesSample.java``` for more details and usage examples.    
 
-### Dimensional metrics
+### Labeled metrics
 
-In particular, Metrics Facade supports eviction and expiration for dimensional metrics,        
-that is, for each dimensional metric, it allows you to specify:
-- the maximum number of combinations of dimension values:        
+In particular, Metrics Facade supports eviction and expiration for labeled metrics,        
+that is, for each labeled metric, it allows you to specify:
+- the maximum number of combinations of label values:        
   when this threshold is exceeded, the combination that has not been updated for the longest time,        
   will be automatically removed (will not waste system resources)
-- the expiration time for a combination of dimension values:  
+- the expiration time for a combination of label values:  
   if a combination has not been updated during this time, it will be automatically removed
   
-```DimensionalMetricsEvictionAndExpirationSample.java```
+```LabeledMetricsEvictionAndExpirationSample.java```
 ```java
 registry.histogram(
     withName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"),
     () -> withHistogram()
-        .dimensions(SERVICE, SERVER, PORT)
-        .maxDimensionalInstancesPerSlice(5) // eviction
-        .expireDimensionalInstanceAfter(1, MINUTES)); // expiration
+        .labels(SERVICE, SERVER, PORT)
+        .maxLabeledInstancesPerSlice(5) // eviction
+        .expireLabeledInstanceAfter(1, MINUTES)); // expiration
 ```
 
-See [Getting Started](#getting-started) and ```DimensionalMetricsEvictionAndExpirationSample.java```   
+See [Getting Started](#getting-started) and ```LabeledMetricsEvictionAndExpirationSample.java```   
 for more details and usage examples.    
 
-### Prefix Dimension Values
+### Prefix Label Values
 
 ```java
 registry.postConfigure(
     metricsMatchingNameMask("ActiveHealthChecker.**"),
-    modifying().metric(withMetric().prefix(dimensionValues(SAMPLE.value("prefixDimensionValues")))));
+    modifying().metric(withMetric().prefix(labelValues(SAMPLE.value("prefixLabelValues")))));
     
 registry.histogram(
     withName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"),
-    () -> withHistogram().dimensions(SERVICE, SERVER, PORT));
+    () -> withHistogram().labels(SERVICE, SERVER, PORT));
 
-h.update(25, forDimensionValues(
+h.update(25, forLabelValues(
     SERVICE.value("service_1"), 
     SERVER.value("server_1_1"), 
     PORT.value("7001")));    
@@ -821,28 +821,28 @@ is the same as
 ```java
 registry.histogram(
     withName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"),
-    () -> withHistogram().dimensions(SAMPLE, SERVICE, SERVER, PORT));
+    () -> withHistogram().labels(SAMPLE, SERVICE, SERVER, PORT));
 
-h.update(25, forDimensionValues(
-    SAMPLE.value("prefixDimensionValues"),
+h.update(25, forLabelValues(
+    SAMPLE.value("prefixLabelValues"),
     SERVICE.value("service_1"), 
     SERVER.value("server_1_1"), 
     PORT.value("7001")));    
 ```
 
-See ```PrefixDimensionValuesSample.java``` for more details and usage examples.
+See ```PrefixLabelValuesSample.java``` for more details and usage examples.
 
 ### Exclusions
 
-You can drop the metric updates for dimension values matching a predicate:
+You can drop the metric updates for label values matching a predicate:
 
 ```ExclusionsSample.java```
 ```java
 registry.timer(
     withName("ActiveHealthChecker", "healthCheck"),
     () -> withTimer()
-        .dimensions(SERVICE, SERVER, PORT)
-        .exclude(dimensionValuesMatchingAny(
+        .labels(SERVICE, SERVER, PORT)
+        .exclude(labelValuesMatchingAny(
             SERVER.mask("server_1_*|*2_1*"),
             PORT.predicate(p -> p.equals("9001")))));
 ```
@@ -852,17 +852,17 @@ See [Getting Started](#getting-started) and ```ExclusionsSample.java``` for more
 ### Slices and Levels
 
 ***Slice*** *is a child metric that takes into account only those updates of the parent metric       
-which satisfy the given ```MetricDimensionValuesPredicate```.      
-A slice can have its own configuration: name suffix, dimensions      
-(MUST be sublist if the parent metric's dimensions), measurable values, etc.*
+which satisfy the given ```LabelValuesPredicate```.      
+A slice can have its own configuration: name suffix, labels      
+(MUST be sublist if the parent metric's labels), measurable values, etc.*
 
 By default, a metric has only one slice - ```AllSlice``` taking all updates into account.  
 
 ***Slice level*** *is a set of ```MetricInstance```s of the slice    
-for the first ```k``` dimensions, ```k = 1..<dimension_count> - 1```.*  
+for the first ```k``` labels, ```k = 1..<label_count> - 1```.*  
 
 For example, if for a slice:    
-- three dimensions are defined: ```SERVICE```, ```SERVER```, ```PORT```    
+- three labels are defined: ```SERVICE```, ```SERVER```, ```PORT```    
 - levels are enabled    
 
 then when updating this slice for the values                 
@@ -884,7 +884,7 @@ See [Getting Started](#getting-started) and ```SlicesAndLevelsSample.java``` for
 ```CounterSample.java```
 ```java
 // Default config:
-//   no dimensions
+//   no labels
 //   measurables: { COUNT }
 Counter defaultConfigCounter = registry.counter(withName("counter", "defaultConfig"));
 
@@ -907,24 +907,24 @@ Counter fullConfigCounter = registry.counter(
         // default: enabled
         .enable()
 
-        // default: no prefix dimension values
-        .prefix(dimensionValues(SAMPLE.value("counter")))
+        // default: no prefix label values
+        .prefix(labelValues(SAMPLE.value("counter")))
 
-        // default: no dimensions
-        .dimensions(SERVICE, SERVER, PORT)
+        // default: no labels
+        .labels(SERVICE, SERVER, PORT)
 
         // options: noExclusions()
         // default: no exclusions
-        .exclude(dimensionValuesMatchingAny(
+        .exclude(labelValuesMatchingAny(
             SERVICE.mask("serv*2|serv*4*"),
             SERVER.mask("server_5")))
 
         // default: unlimited
-        .maxDimensionalInstancesPerSlice(5)
+        .maxLabeledInstancesPerSlice(5)
 
-        // options: notExpireDimensionalInstances()
+        // options: notExpireLabeledInstances()
         // default: no expiration
-        .expireDimensionalInstanceAfter(25, SECONDS)
+        .expireLabeledInstanceAfter(25, SECONDS)
 
         // options: noMeasurables()
         // default: { COUNT }
@@ -939,16 +939,16 @@ Counter fullConfigCounter = registry.counter(
             // default: enabled
             .enable()
 
-            // default: the metric's dimensions [ SERVICE, SERVER, PORT ]
-            .dimensions(SERVICE, SERVER)
+            // default: the metric's labels [ SERVICE, SERVER, PORT ]
+            .labels(SERVICE, SERVER)
 
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(10)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(10)
 
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
 
             // options: noMeasurables() 
             // default: the metric's measurables { COUNT }
@@ -985,20 +985,20 @@ Counter fullConfigCounter = registry.counter(
             .enable()
 
             // default: no predicate
-            .predicate(dimensionValuesMatchingAll(
+            .predicate(labelValuesMatchingAll(
                 SERVICE.mask("serv*_1*"),
                 SERVER.predicate(s -> s.equals("server_1_1"))))
 
-            // default: no dimensions
-            .dimensions(SERVICE)
+            // default: no labels
+            .labels(SERVICE)
 
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(2)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(2)
 
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
 
             // options: noMeasurables()
             // default: the metric's measurables { COUNT }
@@ -1049,7 +1049,7 @@ Supported measurables:
 ```RateSample.java```
 ```java
 // Default config:
-//   no dimensions
+//   no labels
 //   measurables: {
 //     COUNT,
 //     MEAN_RATE,
@@ -1075,24 +1075,24 @@ Rate fullConfigRate = registry.rate(
         // default: enabled
         .enable()
 
-        // default: no prefix dimension values
-        .prefix(dimensionValues(SAMPLE.value("rate")))
+        // default: no prefix label values
+        .prefix(labelValues(SAMPLE.value("rate")))
 
-        // default: no dimensions
-        .dimensions(SERVICE, SERVER, PORT)
+        // default: no labels
+        .labels(SERVICE, SERVER, PORT)
 
         // options: noExclusions()
         // default: no exclusions
-        .exclude(dimensionValuesMatchingAny(
+        .exclude(labelValuesMatchingAny(
             SERVICE.mask("serv*2|serv*4*"),
             SERVER.mask("server_5")))
 
         // default: unlimited
-        .maxDimensionalInstancesPerSlice(5)
+        .maxLabeledInstancesPerSlice(5)
 
-        // options: notExpireDimensionalInstances()
+        // options: notExpireLabeledInstances()
         // default: no expiration
-        .expireDimensionalInstanceAfter(25, SECONDS)
+        .expireLabeledInstanceAfter(25, SECONDS)
 
         // options: noMeasurables()
         // default: {
@@ -1124,16 +1124,16 @@ Rate fullConfigRate = registry.rate(
             // default: enabled
             .enable()
 
-            // default: the metric's dimensions [ SERVICE, SERVER, PORT ]
-            .dimensions(SERVICE, SERVER)
+            // default: the metric's labels [ SERVICE, SERVER, PORT ]
+            .labels(SERVICE, SERVER)
 
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(10)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(10)
 
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
 
             // options: noMeasurables()
             // default: the metric's measurables { COUNT }
@@ -1173,20 +1173,20 @@ Rate fullConfigRate = registry.rate(
             .enable()
 
             // default: no predicate
-            .predicate(dimensionValuesMatchingAll(
+            .predicate(labelValuesMatchingAll(
                 SERVICE.mask("serv*_1*"),
                 SERVER.predicate(s -> s.equals("server_1_1"))))
 
-            // default: no dimensions
-            .dimensions(SERVICE)
+            // default: no labels
+            .labels(SERVICE)
 
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(2)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(2)
 
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
 
             // options: noMeasurables()
             // default: the metric's measurables { COUNT }
@@ -1230,7 +1230,7 @@ Rate fullConfigRate = registry.rate(
 ```HistogramSample.java```
 ```java
 // Default config:
-//   no dimensions
+//   no labels
 //   measurables: {
 //     COUNT,
 //     MIN,
@@ -1266,24 +1266,24 @@ Histogram fullConfigHistogram = registry.histogram(
         // default: enabled
         .enable()
 
-        // default: no prefix dimension values
-        .prefix(dimensionValues(SAMPLE.value("histogram")))
+        // default: no prefix label values
+        .prefix(labelValues(SAMPLE.value("histogram")))
 
-        // default: no dimensions
-        .dimensions(SERVICE, SERVER, PORT)
+        // default: no labels
+        .labels(SERVICE, SERVER, PORT)
 
         // options: noExclusions()
         // default: no exclusions
-        .exclude(dimensionValuesMatchingAny(
+        .exclude(labelValuesMatchingAny(
             SERVICE.mask("serv*2|serv*4*"),
             SERVER.mask("server_5")))
 
         // default: unlimited
-        .maxDimensionalInstancesPerSlice(5)
+        .maxLabeledInstancesPerSlice(5)
 
-        // options: notExpireDimensionalInstances()
+        // options: notExpireLabeledInstances()
         // default: no expiration
-        .expireDimensionalInstanceAfter(25, SECONDS)
+        .expireLabeledInstanceAfter(25, SECONDS)
 
         // options: noMeasurables()
         // default: {
@@ -1321,16 +1321,16 @@ Histogram fullConfigHistogram = registry.histogram(
             // default: enabled
             .enable()
 
-            // default: the metric's dimensions [ SERVICE, SERVER, PORT ]
-            .dimensions(SERVICE, SERVER)
+            // default: the metric's labels [ SERVICE, SERVER, PORT ]
+            .labels(SERVICE, SERVER)
 
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(10)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(10)
 
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
 
             // options: noMeasurables()
             // default: the metric's measurables { COUNT, MEAN }
@@ -1367,20 +1367,20 @@ Histogram fullConfigHistogram = registry.histogram(
             .enable()
 
             // default: no predicate
-            .predicate(dimensionValuesMatchingAll(
+            .predicate(labelValuesMatchingAll(
                 SERVICE.mask("serv*_1*"),
                 SERVER.predicate(s -> s.equals("server_1_1"))))
 
-            // default: no dimensions
-            .dimensions(SERVICE)
+            // default: no labels
+            .labels(SERVICE)
 
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(2)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(2)
 
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
 
             // options: noMeasurables()
             // default: the metric's measurables { COUNT, MEAN }
@@ -1453,24 +1453,24 @@ Timer fullConfigTimer = registry.timer(
         // default: enabled
         .enable()
 
-        // default: no prefix dimension values
-        .prefix(dimensionValues(SAMPLE.value("timer")))
+        // default: no prefix label values
+        .prefix(labelValues(SAMPLE.value("timer")))
     
-        // default: no dimensions
-        .dimensions(SERVICE, SERVER, PORT)
+        // default: no labels
+        .labels(SERVICE, SERVER, PORT)
     
         // options: noExclusions()
         // default: no exclusions
-        .exclude(dimensionValuesMatchingAny(
+        .exclude(labelValuesMatchingAny(
             SERVICE.mask("serv*2|serv*4*"),
             SERVER.mask("server_5")))
     
         // default: unlimited
-        .maxDimensionalInstancesPerSlice(5)
+        .maxLabeledInstancesPerSlice(5)
     
-        // options: notExpireDimensionalInstances()
+        // options: notExpireLabeledInstances()
         // default: no expiration
-        .expireDimensionalInstanceAfter(25, SECONDS)
+        .expireLabeledInstanceAfter(25, SECONDS)
     
         // options: noMeasurables()
         // default: {
@@ -1528,16 +1528,16 @@ Timer fullConfigTimer = registry.timer(
             // default: enabled
             .enable()
     
-            // default: the metric's dimensions [ SERVICE, SERVER, PORT ]
-            .dimensions(SERVICE, SERVER)
+            // default: the metric's labels [ SERVICE, SERVER, PORT ]
+            .labels(SERVICE, SERVER)
     
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(10)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(10)
     
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
     
             // options: noMeasurables()
             // default: the metric's measurables { COUNT, MEAN_RATE, MAX, MEAN }
@@ -1574,20 +1574,20 @@ Timer fullConfigTimer = registry.timer(
             .enable()
     
             // default: no predicate
-            .predicate(dimensionValuesMatchingAll(
+            .predicate(labelValuesMatchingAll(
                 SERVICE.mask("serv*_1*"),
                 SERVER.predicate(s -> s.equals("server_1_1"))))
     
-            // default: no dimensions
-            .dimensions(SERVICE)
+            // default: no labels
+            .labels(SERVICE)
     
-            // options: noMaxDimensionalInstances()
-            // default: the metric's maxDimensionalInstancesPerSlice = 5
-            .maxDimensionalInstances(2)
+            // options: noMaxLabeledInstances()
+            // default: the metric's maxLabeledInstancesPerSlice = 5
+            .maxLabeledInstances(2)
     
-            // options: notExpireDimensionalInstances()
-            // default: the metric's expireDimensionalInstanceAfter = 25 SECONDS
-            .expireDimensionalInstanceAfter(42, SECONDS)
+            // options: notExpireLabeledInstances()
+            // default: the metric's expireLabeledInstanceAfter = 25 SECONDS
+            .expireLabeledInstanceAfter(42, SECONDS)
     
             // options: noMeasurables()
             // default: the metric's measurables { COUNT, MEAN_RATE, MAX, MEAN }
@@ -1660,10 +1660,10 @@ LongVar fullConfigVar = registry.longVar(
         // default: enabled
         .enable()
 
-        // default: no prefix dimension values
-        .prefix(dimensionValues(SAMPLE.value("var")))
+        // default: no prefix label values
+        .prefix(labelValues(SAMPLE.value("var")))
 
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
 
         // the properties specific to the metrics implementation
         // default: no properties
@@ -1673,15 +1673,15 @@ AtomicLong valueSupplier_3 = new AtomicLong();
 
 fullConfigVar.register(
     () -> valueSupplier_3.incrementAndGet(),
-    forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+    forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
 
 AtomicLong valueSupplier_4 = new AtomicLong();
 
 fullConfigVar.register(
     () -> valueSupplier_4.incrementAndGet(),
-    forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+    forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
-fullConfigVar.deregister(dimensionValues(
+fullConfigVar.deregister(labelValues(
     SERVICE.value("service_1"),
     SERVER.value("server_1_1"),
     PORT.value("111")));
@@ -1710,10 +1710,10 @@ CachingDoubleVar fullConfigCachingVar = registry.cachingDoubleVar(
         // default: enabled
         .enable()
 
-        // default: no prefix dimension values
-        .prefix(dimensionValues(SAMPLE.value("var")))
+        // default: no prefix label values
+        .prefix(labelValues(SAMPLE.value("var")))
 
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
 
         // default: 30 SECONDS
         .ttl(10, SECONDS)
@@ -1781,12 +1781,12 @@ PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
 Histogram h = registry.histogram(
     withName("histogram"),
     () -> withHistogram()
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         .measurables(MAX, MEAN));
 
-h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+h.update(1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+h.update(2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+h.update(3, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
 // Metric instances are added asynchronously
 sleep(25); 
@@ -1819,7 +1819,7 @@ MetricRegistry registry = new DefaultMetricRegistry();
 
 PrometheusInstanceSampleSpecProvider miSampleSpecProvider = new PrometheusInstanceSampleSpecProvider(
     true, // exportTotalInstances. defaults to true
-    false, // exportDimensionalTotalInstances. defaults to false
+    false, // exportLabeledTotalInstances. defaults to false
     false); // exportLevelInstances. defaults to true
 
 PrometheusInstanceSampleSpecModsProvider miSampleSpecModsProvider = new PrometheusInstanceSampleSpecModsProvider();
@@ -1834,7 +1834,7 @@ miSampleSpecModsProvider.addMod(
     forMetricWithName("Histogram"),
     (metric, instance, currSpec) -> instanceSampleSpec()
         .name(instance.name().withNewPart(instance.valueOf(SERVICE)))
-        .dimensionValues(currSpec.dimensionValuesWithout(SERVICE)));
+        .labelValues(currSpec.labelValuesWithout(SERVICE)));
 
 miSampleSpecModsProvider.addMod(
     forMetricsWithNamePrefix("Histogram"),
@@ -1843,7 +1843,7 @@ miSampleSpecModsProvider.addMod(
 
 PrometheusInstanceSamplesProducer miSamplesProducer = new PrometheusInstanceSamplesProducer(
     null, // totalInstanceNameSuffix. defaults to null that means no suffix
-    "all"); // dimensionalTotalInstanceNameSuffix. defaults to "all"
+    "all"); // labeledMetricTotalInstanceNameSuffix. defaults to "all"
 
 PrometheusSampleSpecProvider sampleSpecProvider = new PrometheusSampleSpecProvider();
 PrometheusSampleSpecModsProvider sampleSpecModsProvider = new PrometheusSampleSpecModsProvider();
@@ -1875,24 +1875,24 @@ Histogram h = registry.histogram(
     withName("Histogram"),
     () -> withHistogram()
         .description("Histogram for " + PrometheusMetricsExporterSample.class.getSimpleName())
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         .measurables(MIN, MAX, MEAN));
 
-h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-h.update(3, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-h.update(4, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+h.update(1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+h.update(2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+h.update(3, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+h.update(4, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
 Timer t = registry.timer(
     withName("Timer"),
     () -> withTimer()
         .description("Timer for " + PrometheusMetricsExporterSample.class.getSimpleName())
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         .measurables(MIN, MAX, MEAN));
 
-t.update(SECONDS.toNanos(1), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-t.update(SECONDS.toNanos(2), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-t.update(SECONDS.toNanos(3), forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+t.update(SECONDS.toNanos(1), forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+t.update(SECONDS.toNanos(2), forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+t.update(SECONDS.toNanos(3), forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 ```
 
 Output:  
@@ -1999,12 +1999,12 @@ registry.addListener(lldReporter);
 Histogram h = registry.histogram(
     withName("histogram"),
     () -> withHistogram()
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         .measurables(COUNT, MAX, MEAN, Buckets.of(scale())));
 
-h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+h.update(1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+h.update(2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+h.update(3, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
 ...
 
@@ -2328,12 +2328,12 @@ DefaultInstanceSamplesProvider miSamplesProvider = new DefaultInstanceSamplesPro
 Histogram h = registry.histogram(
     withName("histogram"),
     () -> withHistogram()
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         .measurables(COUNT, MAX, MEAN));
 
-h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-h.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+h.update(1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+h.update(2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+h.update(3, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 ```
 
 ```exporter.exportMetrics()``` as JSON (without grouping by types):
@@ -2412,7 +2412,7 @@ mBeanSpecs.addInfo(
             instance.isTotalInstance() ?
             instance.name() :
             instance.name().withNewPart(instance.valueOf(SERVICE)))
-        .dimensionValues(instance.dimensionValuesWithout(SERVICE)));
+        .labelValues(instance.labelValuesWithout(SERVICE)));
 
 JmxMetricsReporter jmxReporter = new JmxMetricsReporter(
     mBeanSpecs,
@@ -2426,12 +2426,12 @@ registry.addListener(jmxReporter);
 Rate r = registry.rate(
     withName("rate"),
     () -> withRate()
-        .dimensions(SERVICE, SERVER, PORT)
+        .labels(SERVICE, SERVER, PORT)
         .measurables(COUNT, MEAN_RATE, ONE_MINUTE_RATE));
 
-r.mark(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-r.mark(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-r.mark(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+r.mark(1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+r.mark(2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+r.mark(3, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 ```
 
 JMX MBean attribute ```JmxMetricsReporterSample:name=rate.service_1,server=server_1_2,port=121.count = 2```
@@ -2470,30 +2470,30 @@ It is based on ```java.lang.management.RuntimeMXBean```.
 
 Adds a number of metrics related to operating system:
 OS name, OS architecture, CPU time used by the process, etc.<br>
-See [DefaultOperatingSystemMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nondimensional/DefaultOperatingSystemMetricsProducer.java) and [DimensionalOperatingSystemMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/dimensional/DimensionalOperatingSystemMetricsProducer.java) for details.<br>It is based on ```com.sun.management.OperatingSystemMXBean```.  
+See [DefaultOperatingSystemMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nonlabeled/DefaultOperatingSystemMetricsProducer.java) and [LabeledOperatingSystemMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/labeled/LabeledOperatingSystemMetricsProducer.java) for details.<br>It is based on ```com.sun.management.OperatingSystemMXBean```.  
 
 ### GarbageCollectorsMetricsProducer
 
 Adds a number of metrics related to garbage collection:        
 the total number of collections that have occurred, the approximate accumulated collection elapsed time, etc.<br>
-See [DefaultGarbageCollectorsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nondimensional/DefaultGarbageCollectorsMetricsProducer.java) and [DimensionalGarbageCollectorsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/dimensional/DimensionalGarbageCollectorsMetricsProducer.java) for details.<br> It is based on ```java.lang.management.GarbageCollectorMetricSet```.      
+See [DefaultGarbageCollectorsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nonlabeled/DefaultGarbageCollectorsMetricsProducer.java) and [LabeledGarbageCollectorsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/labeled/LabeledGarbageCollectorsMetricsProducer.java) for details.<br> It is based on ```java.lang.management.GarbageCollectorMetricSet```.      
 
 ### MemoryMetricsProducer
 
 Adds a number of metrics related to memory:  
 heap memory usage, non-heap memory usage, etc.<br>
-See [DefaultMemoryMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nondimensional/DefaultMemoryMetricsProducer.java) and [DimensionalMemoryMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/dimensional/DimensionalMemoryMetricsProducer.java) for details.<br> It is based on ```java.lang.management.MemoryMXBean```.    
+See [DefaultMemoryMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nonlabeled/DefaultMemoryMetricsProducer.java) and [LabeledMemoryMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/labeled/LabeledMemoryMetricsProducer.java) for details.<br> It is based on ```java.lang.management.MemoryMXBean```.    
 
 ### ThreadsMetricsProducer
 
 Adds a number of metrics related to threads:    
 the current number of live threads, the total number of threads created and also started since the JVM started, etc.<br>
-See [DefaultThreadsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nondimensional/DefaultThreadsMetricsProducer.java) and [DimensionalThreadsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/dimensional/DimensionalThreadsMetricsProducer.java) for details.<br> It is based on ```java.lang.management.ThreadMXBean```      
+See [DefaultThreadsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nonlabeled/DefaultThreadsMetricsProducer.java) and [LabeledThreadsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/labeled/LabeledThreadsMetricsProducer.java) for details.<br> It is based on ```java.lang.management.ThreadMXBean```      
 
 ### BufferPoolsMetricsProducer
 
 Adds a number of metrics related to buffer pools.<br>
-See [DefaultBufferPoolsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nondimensional/DefaultBufferPoolsMetricsProducer.java) and [DimensionalBufferPoolsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/dimensional/DimensionalBufferPoolsMetricsProducer.java) for details.<br> It is based on the MBeans ```java.nio:type=BufferPool,name=<pool_name>```.      
+See [DefaultBufferPoolsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/nonlabeled/DefaultBufferPoolsMetricsProducer.java) and [LabeledBufferPoolsMetricsProducer](metrics-facade-base/src/main/java/com/ringcentral/platform/metrics/producers/labeled/LabeledBufferPoolsMetricsProducer.java) for details.<br> It is based on the MBeans ```java.nio:type=BufferPool,name=<pool_name>```.      
 
 ### ClassesMetricsProducer
 

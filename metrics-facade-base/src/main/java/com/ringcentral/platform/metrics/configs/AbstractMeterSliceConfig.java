@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -17,10 +17,10 @@ public abstract class AbstractMeterSliceConfig<IC extends MeterInstanceConfig> i
     private final boolean enabled;
     private final MetricName name;
 
-    private final MetricDimensionValuesPredicate predicate;
-    private final List<MetricDimension> dimensions;
-    private final Integer maxDimensionalInstances;
-    private final Duration dimensionalInstanceExpirationTime;
+    private final LabelValuesPredicate predicate;
+    private final List<Label> labels;
+    private final Integer maxLabeledInstances;
+    private final Duration labeledInstanceExpirationTime;
 
     private final Set<? extends Measurable> measurables;
 
@@ -28,7 +28,7 @@ public abstract class AbstractMeterSliceConfig<IC extends MeterInstanceConfig> i
     private final IC totalInstanceConfig;
     private final boolean levelsEnabled;
     private final LevelInstanceNameProvider levelInstanceNameProvider;
-    private final Map<MetricDimension, IC> levelInstanceConfigs;
+    private final Map<Label, IC> levelInstanceConfigs;
     private final IC defaultLevelInstanceConfig;
     private final boolean onlyConfiguredLevelsEnabled;
 
@@ -37,16 +37,16 @@ public abstract class AbstractMeterSliceConfig<IC extends MeterInstanceConfig> i
     protected AbstractMeterSliceConfig(
         boolean enabled,
         MetricName name,
-        MetricDimensionValuesPredicate predicate,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        LabelValuesPredicate predicate,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<? extends Measurable> measurables,
         boolean totalEnabled,
         IC totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, IC> levelInstanceConfigs,
+        Map<Label, IC> levelInstanceConfigs,
         IC defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -55,9 +55,9 @@ public abstract class AbstractMeterSliceConfig<IC extends MeterInstanceConfig> i
         this.name = requireNonNull(name);
 
         this.predicate = predicate;
-        this.dimensions = dimensions != null ? dimensions : emptyList();
-        this.maxDimensionalInstances = maxDimensionalInstances;
-        this.dimensionalInstanceExpirationTime = dimensionalInstanceExpirationTime;
+        this.labels = labels != null ? labels : emptyList();
+        this.maxLabeledInstances = maxLabeledInstances;
+        this.labeledInstanceExpirationTime = labeledInstanceExpirationTime;
 
         this.measurables = measurables != null ? measurables : emptySet();
 
@@ -83,23 +83,23 @@ public abstract class AbstractMeterSliceConfig<IC extends MeterInstanceConfig> i
     }
 
     @Override
-    public MetricDimensionValuesPredicate predicate() {
+    public LabelValuesPredicate predicate() {
         return predicate;
     }
 
     @Override
-    public List<MetricDimension> dimensions() {
-        return dimensions;
+    public List<Label> labels() {
+        return labels;
     }
 
     @Override
-    public Integer maxDimensionalInstances() {
-        return maxDimensionalInstances;
+    public Integer maxLabeledInstances() {
+        return maxLabeledInstances;
     }
 
     @Override
-    public Duration dimensionalInstanceExpirationTime() {
-        return dimensionalInstanceExpirationTime;
+    public Duration labeledInstanceExpirationTime() {
+        return labeledInstanceExpirationTime;
     }
 
     @Override
@@ -128,7 +128,7 @@ public abstract class AbstractMeterSliceConfig<IC extends MeterInstanceConfig> i
     }
 
     @Override
-    public Map<MetricDimension, IC> levelInstanceConfigs() {
+    public Map<Label, IC> levelInstanceConfigs() {
         return levelInstanceConfigs;
     }
 

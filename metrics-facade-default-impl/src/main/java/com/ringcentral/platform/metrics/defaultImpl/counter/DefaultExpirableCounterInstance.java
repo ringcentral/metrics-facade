@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.defaultImpl.counter;
 
 import com.ringcentral.platform.metrics.AbstractMeter.*;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -13,9 +13,9 @@ public class DefaultExpirableCounterInstance extends AbstractExpirableMeterInsta
 
     protected DefaultExpirableCounterInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<LongAdder>> measurableValueProviders,
@@ -24,9 +24,9 @@ public class DefaultExpirableCounterInstance extends AbstractExpirableMeterInsta
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

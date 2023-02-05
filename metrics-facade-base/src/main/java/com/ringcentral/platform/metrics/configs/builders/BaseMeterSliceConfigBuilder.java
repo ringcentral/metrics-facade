@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.*;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder.SliceConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.NothingMeasurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -28,16 +28,16 @@ public class BaseMeterSliceConfigBuilder extends SliceConfigBuilder<
     public BaseMeterSliceConfig buildImpl(
         boolean enabled,
         MetricName name,
-        MetricDimensionValuesPredicate predicate,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        LabelValuesPredicate predicate,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<NothingMeasurable> measurables,
         boolean totalEnabled,
         BaseMeterInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, BaseMeterInstanceConfig> levelInstanceConfigs,
+        Map<Label, BaseMeterInstanceConfig> levelInstanceConfigs,
         BaseMeterInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -46,9 +46,9 @@ public class BaseMeterSliceConfigBuilder extends SliceConfigBuilder<
             enabled,
             name,
             predicate,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

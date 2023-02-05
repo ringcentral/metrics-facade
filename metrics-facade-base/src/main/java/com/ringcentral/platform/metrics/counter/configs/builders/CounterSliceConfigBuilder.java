@@ -5,7 +5,7 @@ import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNa
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder.SliceConfigBuilder;
 import com.ringcentral.platform.metrics.counter.CounterMeasurable;
 import com.ringcentral.platform.metrics.counter.configs.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 
 import java.time.Duration;
@@ -27,16 +27,16 @@ public class CounterSliceConfigBuilder extends SliceConfigBuilder<
     @Override
     public CounterSliceConfig buildImpl(
         boolean enabled, MetricName name,
-        MetricDimensionValuesPredicate predicate,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        LabelValuesPredicate predicate,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<CounterMeasurable> measurables,
         boolean totalEnabled,
         CounterInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, CounterInstanceConfig> levelInstanceConfigs,
+        Map<Label, CounterInstanceConfig> levelInstanceConfigs,
         CounterInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -45,9 +45,9 @@ public class CounterSliceConfigBuilder extends SliceConfigBuilder<
             enabled,
             name,
             predicate,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

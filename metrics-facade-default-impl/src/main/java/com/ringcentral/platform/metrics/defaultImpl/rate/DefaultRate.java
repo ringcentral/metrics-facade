@@ -6,7 +6,7 @@ import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.defaultImpl.rate.configs.*;
 import com.ringcentral.platform.metrics.defaultImpl.rate.ema.ExpMovingAverageRateImpl;
 import com.ringcentral.platform.metrics.defaultImpl.rate.ema.configs.ExpMovingAverageRateImplConfig;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.AbstractRate;
@@ -234,9 +234,9 @@ public class DefaultRate extends AbstractRate<RateImpl> {
         @Override
         public AbstractMeterInstance<RateImpl> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<RateImpl>> measurableValueProviders,
             RateImpl rate) {
@@ -245,9 +245,9 @@ public class DefaultRate extends AbstractRate<RateImpl> {
 
             return new DefaultRateInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,
@@ -257,9 +257,9 @@ public class DefaultRate extends AbstractRate<RateImpl> {
         @Override
         public AbstractExpirableMeterInstance<RateImpl> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<RateImpl>> measurableValueProviders,
             RateImpl rate,
@@ -269,9 +269,9 @@ public class DefaultRate extends AbstractRate<RateImpl> {
 
             return new DefaultExpirableRateInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,

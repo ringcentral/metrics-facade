@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.reporters.zabbix;
 import java.util.List;
 import javax.management.*;
 import org.junit.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import static javax.management.MBeanServerFactory.*;
 import static junit.framework.TestCase.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -101,9 +101,9 @@ public class ZGroupMBeansExporterTest {
         assertThat(stringAttrValue("group_2", GROUP_JSON_ATTR_NAME), is("{\"data\":[]}"));
     }
 
-    boolean attrExists(String groupName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
+    boolean attrExists(String groupName, String mBeanAttrName, LabelValue... labelValues) {
         try {
-            return mBeanServer.getAttribute(objectName(groupName, dimensionValues), mBeanAttrName) != null;
+            return mBeanServer.getAttribute(objectName(groupName, labelValues), mBeanAttrName) != null;
         } catch (InstanceNotFoundException | AttributeNotFoundException e) {
             return false;
         } catch (Exception e) {
@@ -111,25 +111,25 @@ public class ZGroupMBeansExporterTest {
         }
     }
 
-    String stringAttrValue(String groupName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
-        return (String)attrValue(groupName, mBeanAttrName, dimensionValues);
+    String stringAttrValue(String groupName, String mBeanAttrName, LabelValue... labelValues) {
+        return (String)attrValue(groupName, mBeanAttrName, labelValues);
     }
 
-    Object attrValue(String groupName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
+    Object attrValue(String groupName, String mBeanAttrName, LabelValue... labelValues) {
         try {
-            return mBeanServer.getAttribute(objectName(groupName, dimensionValues), mBeanAttrName);
+            return mBeanServer.getAttribute(objectName(groupName, labelValues), mBeanAttrName);
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
     }
 
-    ObjectName objectName(String groupName, MetricDimensionValue... dimensionValues) {
+    ObjectName objectName(String groupName, LabelValue... labelValues) {
         try {
-            if (dimensionValues.length == 0) {
+            if (labelValues.length == 0) {
                 return new ObjectName("zabbix_lld", "group", groupName);
             } else {
                 StringBuilder builder = new StringBuilder("zabbix_lld").append(":group=").append(groupName);
-                List.of(dimensionValues).forEach(dv -> builder.append(',').append(escape(dv.dimension().name())).append('=').append(escape(dv.value())));
+                List.of(labelValues).forEach(lv -> builder.append(',').append(escape(lv.label().name())).append('=').append(escape(lv.value())));
                 return new ObjectName(builder.toString());
             }
         } catch (MalformedObjectNameException exception) {

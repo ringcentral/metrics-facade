@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples;
 
 import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.*;
 
 import java.util.List;
@@ -30,17 +30,17 @@ public class DefaultSampleSpecProvider implements SampleSpecProvider<DefaultSamp
         Measurable measurable,
         DefaultSampleSpec currSpec) {
 
-        List<MetricDimensionValue> dimensionValues = instanceSampleSpec.dimensionValues();
+        List<LabelValue> labelValues = instanceSampleSpec.labelValues();
 
-        if (dimensionValues == null) {
-            dimensionValues = instance.dimensionValues();
+        if (labelValues == null) {
+            labelValues = instance.labelValues();
         }
 
         return new DefaultSampleSpec(
             TRUE,
             instanceSampleSpec.hasName() ? instanceSampleSpec.name() : instance.name(),
             instanceSampleSpec.isWithMeasurableName() ? measurableNameProvider.nameFor(instance, measurable) : null,
-            dimensionValues,
+            labelValues,
             measurableValues.valueOf(measurable),
             typeFor(instance, measurable));
     }

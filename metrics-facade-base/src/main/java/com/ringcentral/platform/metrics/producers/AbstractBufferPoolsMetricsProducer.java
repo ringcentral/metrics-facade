@@ -15,10 +15,11 @@ public abstract class AbstractBufferPoolsMetricsProducer extends AbstractMetrics
     protected static final String[] POOLS = { "direct", "mapped" };
     protected static final String[] ATTRS = { "Count", "MemoryUsed", "TotalCapacity" };
     protected static final String[] ATTR_NAME_PARTS = { "count", "used", "capacity" };
+
     protected static final String[] ATTR_DESCRIPTION = {
-            "An estimate of the number of buffers in the pool",
-            "An estimate of the memory that the Java virtual machine is using for this buffer pool",
-            "An estimate of the total capacity of the buffers in this pool"
+        "An estimate of the number of buffers in the pool",
+        "An estimate of the memory that the Java virtual machine is using for this buffer pool",
+        "An estimate of the total capacity of the buffers in this pool"
     };
 
     protected final MBeanServer mBeanServer;

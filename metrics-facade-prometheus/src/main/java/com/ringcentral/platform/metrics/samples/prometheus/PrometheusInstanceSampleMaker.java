@@ -21,11 +21,11 @@ public class PrometheusInstanceSampleMaker implements InstanceSampleMaker<
     PrometheusInstanceSampleSpec> {
 
     public static final String DEFAULT_TOTAL_INSTANCE_NAME_SUFFIX = null;
-    public static final String DEFAULT_DIMENSIONAL_TOTAL_INSTANCE_NAME_SUFFIX = "all";
+    public static final String DEFAULT_LABELED_METRIC_TOTAL_INSTANCE_NAME_SUFFIX = "all";
     public static final boolean DEFAULT_EXPORT_NON_DECREASING_LONG_VAR_AS_COUNTER = true;
 
     private final String totalInstanceNameSuffix;
-    private final String dimensionalTotalInstanceNameSuffix;
+    private final String labeledMetricTotalInstanceNameSuffix;
     private final boolean exportNonDecreasingLongVarAsCounter;
 
     private static final Logger logger = getLogger(PrometheusInstanceSampleMaker.class);
@@ -33,27 +33,27 @@ public class PrometheusInstanceSampleMaker implements InstanceSampleMaker<
     public PrometheusInstanceSampleMaker() {
         this(
             DEFAULT_TOTAL_INSTANCE_NAME_SUFFIX,
-            DEFAULT_DIMENSIONAL_TOTAL_INSTANCE_NAME_SUFFIX,
+            DEFAULT_LABELED_METRIC_TOTAL_INSTANCE_NAME_SUFFIX,
             DEFAULT_EXPORT_NON_DECREASING_LONG_VAR_AS_COUNTER);
     }
 
     public PrometheusInstanceSampleMaker(
         String totalInstanceNameSuffix,
-        String dimensionalTotalInstanceNameSuffix) {
+        String labeledMetricTotalInstanceNameSuffix) {
 
         this(
             totalInstanceNameSuffix,
-            dimensionalTotalInstanceNameSuffix,
+            labeledMetricTotalInstanceNameSuffix,
             DEFAULT_EXPORT_NON_DECREASING_LONG_VAR_AS_COUNTER);
     }
 
     public PrometheusInstanceSampleMaker(
         String totalInstanceNameSuffix,
-        String dimensionalTotalInstanceNameSuffix,
+        String labeledMetricTotalInstanceNameSuffix,
         boolean exportNonDecreasingLongVarAsCounter) {
 
         this.totalInstanceNameSuffix = totalInstanceNameSuffix;
-        this.dimensionalTotalInstanceNameSuffix = dimensionalTotalInstanceNameSuffix;
+        this.labeledMetricTotalInstanceNameSuffix = labeledMetricTotalInstanceNameSuffix;
         this.exportNonDecreasingLongVarAsCounter = exportNonDecreasingLongVarAsCounter;
     }
 
@@ -67,8 +67,8 @@ public class PrometheusInstanceSampleMaker implements InstanceSampleMaker<
         MetricName name = spec.name();
 
         if (instance.isTotalInstance()) {
-            if (instance.isDimensionalTotalInstance() && dimensionalTotalInstanceNameSuffix != null) {
-                name = name.withNewPart(dimensionalTotalInstanceNameSuffix);
+            if (instance.isLabeledMetricTotalInstance() && labeledMetricTotalInstanceNameSuffix != null) {
+                name = name.withNewPart(labeledMetricTotalInstanceNameSuffix);
             } else if (totalInstanceNameSuffix != null) {
                 name = name.withNewPart(totalInstanceNameSuffix);
             }

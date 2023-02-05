@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -13,16 +13,16 @@ public class BaseMeterSliceConfig extends AbstractMeterSliceConfig<BaseMeterInst
     public BaseMeterSliceConfig(
         boolean enabled,
         MetricName name,
-        MetricDimensionValuesPredicate predicate,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        LabelValuesPredicate predicate,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<? extends Measurable> measurables,
         boolean totalEnabled,
         BaseMeterInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, BaseMeterInstanceConfig> levelInstanceConfigs,
+        Map<Label, BaseMeterInstanceConfig> levelInstanceConfigs,
         BaseMeterInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -31,9 +31,9 @@ public class BaseMeterSliceConfig extends AbstractMeterSliceConfig<BaseMeterInst
             enabled,
             name,
             predicate,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

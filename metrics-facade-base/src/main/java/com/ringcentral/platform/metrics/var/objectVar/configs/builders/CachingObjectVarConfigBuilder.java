@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.var.objectVar.configs.builders;
 
 import com.ringcentral.platform.metrics.MetricContext;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.var.configs.builders.AbstractCachingVarConfigBuilder;
 import com.ringcentral.platform.metrics.var.objectVar.configs.*;
 
@@ -26,8 +26,8 @@ public class CachingObjectVarConfigBuilder extends AbstractCachingVarConfigBuild
     protected CachingObjectVarConfig buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
         boolean nonDecreasing,
         MetricContext context,
         long ttl,
@@ -36,8 +36,8 @@ public class CachingObjectVarConfigBuilder extends AbstractCachingVarConfigBuild
         return new DefaultCachingObjectVarConfig(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             nonDecreasing,
             context,
             ttl,

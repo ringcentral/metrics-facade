@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.defaultImpl.var.longVar;
 
 import com.ringcentral.platform.metrics.defaultImpl.var.DefaultCachingValueSupplier;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
 import com.ringcentral.platform.metrics.var.longVar.*;
@@ -29,9 +29,9 @@ public class DefaultCachingLongVar extends AbstractLongVar implements CachingLon
     }
 
     @Override
-    public void register(Supplier<Long> valueSupplier, MetricDimensionValues dimensionValues) {
+    public void register(Supplier<Long> valueSupplier, LabelValues labelValues) {
         super.register(
             new DefaultCachingValueSupplier<>((CachingVarConfig)config(), valueSupplier),
-            dimensionValues);
+            labelValues);
     }
 }

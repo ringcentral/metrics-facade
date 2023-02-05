@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.histogram.configs.builders;
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder.AllSliceConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.histogram.HistogramMeasurable;
 import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -28,15 +28,15 @@ public class HistogramAllSliceConfigBuilder extends AllSliceConfigBuilder<
     public HistogramSliceConfig buildImpl(
         boolean enabled,
         MetricName name,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<HistogramMeasurable> measurables,
         boolean totalEnabled,
         HistogramInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, HistogramInstanceConfig> levelInstanceConfigs,
+        Map<Label, HistogramInstanceConfig> levelInstanceConfigs,
         HistogramInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -45,9 +45,9 @@ public class HistogramAllSliceConfigBuilder extends AllSliceConfigBuilder<
             enabled,
             name,
             null,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

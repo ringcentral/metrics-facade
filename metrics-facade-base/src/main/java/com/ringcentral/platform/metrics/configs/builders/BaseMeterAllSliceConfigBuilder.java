@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.*;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder.AllSliceConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.measurables.NothingMeasurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -28,15 +28,15 @@ public class BaseMeterAllSliceConfigBuilder extends AllSliceConfigBuilder<
     public BaseMeterSliceConfig buildImpl(
         boolean enabled,
         MetricName name,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<NothingMeasurable> measurables,
         boolean totalEnabled,
         BaseMeterInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, BaseMeterInstanceConfig> levelInstanceConfigs,
+        Map<Label, BaseMeterInstanceConfig> levelInstanceConfigs,
         BaseMeterInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -45,9 +45,9 @@ public class BaseMeterAllSliceConfigBuilder extends AllSliceConfigBuilder<
             enabled,
             name,
             null,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

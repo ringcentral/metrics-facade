@@ -7,7 +7,8 @@ import com.ringcentral.platform.metrics.var.longVar.LongVar;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.*;
+import static com.ringcentral.platform.metrics.labels.LabelValues.forLabelValues;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.var.doubleVar.configs.builders.CachingDoubleVarConfigBuilder.withCachingDoubleVar;
 import static com.ringcentral.platform.metrics.var.longVar.configs.builders.LongVarConfigBuilder.withLongVar;
@@ -39,10 +40,10 @@ public class VarSample extends AbstractSample {
                 // default: enabled
                 .enable()
 
-                // default: no prefix dimension values
-                .prefix(dimensionValues(SAMPLE.value("var")))
+                // default: no prefix label values
+                .prefix(labelValues(SAMPLE.value("var")))
 
-                .dimensions(SERVICE, SERVER, PORT)
+                .labels(SERVICE, SERVER, PORT)
 
                 // the properties specific to the metrics implementation
                 // default: no properties
@@ -52,15 +53,15 @@ public class VarSample extends AbstractSample {
 
         fullConfigVar.register(
             () -> valueSupplier_3.incrementAndGet(),
-            forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+            forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
 
         AtomicLong valueSupplier_4 = new AtomicLong();
 
         fullConfigVar.register(
             () -> valueSupplier_4.incrementAndGet(),
-            forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+            forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
-        fullConfigVar.deregister(dimensionValues(
+        fullConfigVar.deregister(labelValues(
             SERVICE.value("service_1"),
             SERVER.value("server_1_1"),
             PORT.value("111")));
@@ -89,10 +90,10 @@ public class VarSample extends AbstractSample {
                 // default: enabled
                 .enable()
 
-                // default: no prefix dimension values
-                .prefix(dimensionValues(SAMPLE.value("var")))
+                // default: no prefix label values
+                .prefix(labelValues(SAMPLE.value("var")))
 
-                .dimensions(SERVICE, SERVER, PORT)
+                .labels(SERVICE, SERVER, PORT)
 
                 // default: 30 SECONDS
                 .ttl(10, SECONDS)

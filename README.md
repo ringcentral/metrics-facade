@@ -51,7 +51,7 @@ For example, the implementation of a metric is not required to perform an expens
 calculating percentiles, if percentiles are not included in the set of values defined for this metric.           
 See [Getting Started](#getting-started) for details and usage examples.        
 
-### Advanced support for labeled (dimensional) metrics
+### Advanced support for labeled metrics
 
 In particular, Metrics Facade supports eviction and expiration for labeled metrics,        
 that is, for each labeled metric, it allows you to specify:        
@@ -154,7 +154,7 @@ interface MetricInstance {
 
 This design has been driven by the need to support labeled metrics.  
 
-***Labeled (dimensional) metric*** *is a metric with which a set of attributes (***labels***) is associated,      
+***Labeled metric*** *is a metric with which a set of attributes (***labels***) is associated,      
 and which generates a separate "child" metric (represented by a ```MetricInstance```)    
 for each involved (for which there was at least one update) combination of values of these attributes.*      
 

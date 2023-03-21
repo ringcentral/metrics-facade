@@ -1,9 +1,9 @@
 package com.ringcentral.platform.metrics;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelUtils;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.measurables.MeasurableValues;
 import com.ringcentral.platform.metrics.names.MetricNamed;
@@ -12,31 +12,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.ringcentral.platform.metrics.utils.CollectionUtils.isNonEmpty;
+
 public interface MetricInstance extends MetricNamed {
-    default boolean hasDimensionValues() {
-        return MetricDimensionUtils.hasDimensionValues(dimensionValues());
+    default boolean hasLabelValues() {
+        return isNonEmpty(labelValues());
     }
 
-    List<MetricDimensionValue> dimensionValues();
+    List<LabelValue> labelValues();
 
-    default boolean hasDimension(MetricDimension dimension) {
-        return MetricDimensionUtils.hasDimension(dimensionValues(), dimension);
+    default boolean hasLabel(Label label) {
+        return LabelUtils.hasLabel(labelValues(), label);
     }
 
-    default String valueOf(MetricDimension dimension) {
-        return MetricDimensionUtils.valueOf(dimensionValues(), dimension);
+    default String valueOf(Label label) {
+        return LabelUtils.valueOf(labelValues(), label);
     }
 
-    default Map<MetricDimension, MetricDimensionValue> dimensionToValue() {
-        return MetricDimensionUtils.dimensionToValue(dimensionValues());
+    default Map<Label, LabelValue> labelToValue() {
+        return LabelUtils.labelToValue(labelValues());
     }
 
-    default List<MetricDimensionValue> dimensionValuesWithout(MetricDimension dimension, MetricDimension... dimensions) {
-        return MetricDimensionUtils.dimensionValuesWithout(dimensionValues(), dimension, dimensions);
+    default List<LabelValue> labelValuesWithout(Label label, Label... labels) {
+        return LabelUtils.labelValuesWithout(labelValues(), label, labels);
     }
 
     boolean isTotalInstance();
-    boolean isDimensionalTotalInstance();
+    boolean isLabeledMetricTotalInstance();
     boolean isLevelInstance();
 
     Set<Measurable> measurables();

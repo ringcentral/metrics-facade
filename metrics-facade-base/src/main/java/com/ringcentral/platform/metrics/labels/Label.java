@@ -1,14 +1,14 @@
-package com.ringcentral.platform.metrics.dimensions;
+package com.ringcentral.platform.metrics.labels;
 
 import java.util.function.Predicate;
 import static java.util.Objects.*;
 
-public class MetricDimension {
+public class Label {
 
     private final String name;
     private final int hashCode;
 
-    public MetricDimension(String name) {
+    public Label(String name) {
         this.name = requireNonNull(name);
         this.hashCode = name.hashCode();
     }
@@ -17,16 +17,16 @@ public class MetricDimension {
         return name;
     }
 
-    public MetricDimensionValue value(String v) {
-        return new MetricDimensionValue(this, v);
+    public LabelValue value(String v) {
+        return new LabelValue(this, v);
     }
 
-    public MetricDimensionValueMask mask(String m) {
-        return MetricDimensionValueMask.of(this, m);
+    public LabelValueMask mask(String m) {
+        return LabelValueMask.of(this, m);
     }
 
-    public MetricDimensionValuePredicate predicate(Predicate<String> p) {
-        return new DefaultMetricDimensionValuePredicate(this, p);
+    public LabelValuePredicate predicate(Predicate<String> p) {
+        return new DefaultLabelValuePredicate(this, p);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class MetricDimension {
             return false;
         }
 
-        MetricDimension that = (MetricDimension)other;
+        Label that = (Label)other;
 
         if (hashCode != that.hashCode) {
             return false;
@@ -55,7 +55,7 @@ public class MetricDimension {
 
     @Override
     public String toString() {
-        return "MetricDimension{" +
+        return "Label{" +
             "name='" + name + '\'' +
             '}';
     }

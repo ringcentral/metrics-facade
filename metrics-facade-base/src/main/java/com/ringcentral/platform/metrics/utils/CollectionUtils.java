@@ -7,6 +7,14 @@ import static java.lang.System.arraycopy;
 
 public class CollectionUtils {
 
+    public static boolean isNullOrEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isNonEmpty(Collection<?> collection) {
+        return !isNullOrEmpty(collection);
+    }
+
     public static <K, V> LinkedHashMap<K, V> linkedHashMapOf(List<K> keys, List<V> values) {
         checkArgument(
             keys.size() == values.size(),

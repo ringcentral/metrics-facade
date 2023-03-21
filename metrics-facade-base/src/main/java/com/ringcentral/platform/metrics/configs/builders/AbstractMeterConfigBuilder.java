@@ -6,9 +6,9 @@ import com.ringcentral.platform.metrics.configs.MeterConfig;
 import com.ringcentral.platform.metrics.configs.MeterInstanceConfig;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValuesPredicate;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValues;
+import com.ringcentral.platform.metrics.labels.LabelValuesPredicate;
 import com.ringcentral.platform.metrics.impl.MetricImplConfigBuilder;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -54,9 +54,9 @@ public abstract class AbstractMeterConfigBuilder<
         Boolean enabled;
         MetricName name;
 
-        List<MetricDimension> dimensions;
-        Integer maxDimensionalInstances;
-        Duration dimensionalInstanceExpirationTime;
+        List<Label> labels;
+        Integer maxLabeledInstances;
+        Duration labeledInstanceExpirationTime;
 
         final Class<M> measurableType;
         Set<M> measurables;
@@ -66,7 +66,7 @@ public abstract class AbstractMeterConfigBuilder<
 
         Boolean levelsEnabled;
         LevelInstanceNameProvider levelInstanceNameProvider;
-        Map<MetricDimension, InstanceConfigBuilder<M, IC, ?>> levelInstanceConfigBuilders;
+        Map<Label, InstanceConfigBuilder<M, IC, ?>> levelInstanceConfigBuilders;
         InstanceConfigBuilder<M, IC, ?> defaultLevelInstanceConfigBuilder;
         Boolean onlyConfiguredLevelsEnabled;
 
@@ -87,16 +87,16 @@ public abstract class AbstractMeterConfigBuilder<
                 name = base.name;
             }
 
-            if (base.dimensions != null && dimensions == null) {
-                dimensions = base.dimensions;
+            if (base.labels != null && labels == null) {
+                labels = base.labels;
             }
 
-            if (base.maxDimensionalInstances != null && maxDimensionalInstances == null) {
-                maxDimensionalInstances = base.maxDimensionalInstances;
+            if (base.maxLabeledInstances != null && maxLabeledInstances == null) {
+                maxLabeledInstances = base.maxLabeledInstances;
             }
 
-            if (base.dimensionalInstanceExpirationTime != null && dimensionalInstanceExpirationTime == null) {
-                dimensionalInstanceExpirationTime = base.dimensionalInstanceExpirationTime;
+            if (base.labeledInstanceExpirationTime != null && labeledInstanceExpirationTime == null) {
+                labeledInstanceExpirationTime = base.labeledInstanceExpirationTime;
             }
 
             if (base.measurableType == measurableType
@@ -164,16 +164,16 @@ public abstract class AbstractMeterConfigBuilder<
                 name = mod.name;
             }
 
-            if (mod.dimensions != null) {
-                dimensions = mod.dimensions;
+            if (mod.labels != null) {
+                labels = mod.labels;
             }
 
-            if (mod.maxDimensionalInstances != null) {
-                maxDimensionalInstances = mod.maxDimensionalInstances;
+            if (mod.maxLabeledInstances != null) {
+                maxLabeledInstances = mod.maxLabeledInstances;
             }
 
-            if (mod.dimensionalInstanceExpirationTime != null) {
-                dimensionalInstanceExpirationTime = mod.dimensionalInstanceExpirationTime;
+            if (mod.labeledInstanceExpirationTime != null) {
+                labeledInstanceExpirationTime = mod.labeledInstanceExpirationTime;
             }
 
             if (mod.measurableType == measurableType && mod.measurables != null) {
@@ -242,40 +242,40 @@ public abstract class AbstractMeterConfigBuilder<
             return (Impl)this;
         }
 
-        public Impl dimensions(MetricDimension... dimensions) {
-            return dimensions(List.of(dimensions));
+        public Impl labels(Label... labels) {
+            return labels(List.of(labels));
         }
 
-        public Impl dimensions(List<MetricDimension> dimensions) {
-            checkState(this.dimensions == null, "Slice dimensions change is not allowed");
-            builder.checkSliceDimensions(dimensions);
-            this.dimensions = dimensions;
+        public Impl labels(List<Label> labels) {
+            checkState(this.labels == null, "Slice labels change is not allowed");
+            builder.checkSliceLabels(labels);
+            this.labels = labels;
             return (Impl)this;
         }
 
-        public Impl noMaxDimensionalInstances() {
-            return maxDimensionalInstances(Integer.MAX_VALUE);
+        public Impl noMaxLabeledInstances() {
+            return maxLabeledInstances(Integer.MAX_VALUE);
         }
 
-        public Impl maxDimensionalInstances(Integer maxDimensionalInstances) {
+        public Impl maxLabeledInstances(Integer maxLabeledInstances) {
             checkArgument(
-                maxDimensionalInstances == null || maxDimensionalInstances > 0,
-                "maxDimensionalInstances <= 0");
+                maxLabeledInstances == null || maxLabeledInstances > 0,
+                "maxLabeledInstances <= 0");
 
-            this.maxDimensionalInstances = maxDimensionalInstances;
+            this.maxLabeledInstances = maxLabeledInstances;
             return (Impl)this;
         }
 
-        public Impl notExpireDimensionalInstances() {
-            return expireDimensionalInstanceAfter(Duration.ZERO);
+        public Impl notExpireLabeledInstances() {
+            return expireLabeledInstanceAfter(Duration.ZERO);
         }
 
-        public Impl expireDimensionalInstanceAfter(long time, ChronoUnit unit) {
-            return expireDimensionalInstanceAfter(Duration.of(time, unit));
+        public Impl expireLabeledInstanceAfter(long time, ChronoUnit unit) {
+            return expireLabeledInstanceAfter(Duration.of(time, unit));
         }
 
-        public Impl expireDimensionalInstanceAfter(Duration time) {
-            this.dimensionalInstanceExpirationTime = time;
+        public Impl expireLabeledInstanceAfter(Duration time) {
+            this.labeledInstanceExpirationTime = time;
             return (Impl)this;
         }
 
@@ -333,7 +333,7 @@ public abstract class AbstractMeterConfigBuilder<
 
         public Impl levels(
             LevelInstanceNameProvider levelInstanceNameProvider,
-            Map<MetricDimension, InstanceConfigBuilder<M, IC, ?>> levelInstanceConfigBuilders,
+            Map<Label, InstanceConfigBuilder<M, IC, ?>> levelInstanceConfigBuilders,
             InstanceConfigBuilder<M, IC, ?> defaultLevelInstanceConfigBuilder,
             boolean onlyConfiguredLevelsEnabled) {
 
@@ -385,15 +385,15 @@ public abstract class AbstractMeterConfigBuilder<
         public abstract SC buildImpl(
             boolean enabled,
             MetricName name,
-            List<MetricDimension> dimensions,
-            Integer maxDimensionalInstances,
-            Duration dimensionalInstanceExpirationTime,
+            List<Label> labels,
+            Integer maxLabeledInstances,
+            Duration labeledInstanceExpirationTime,
             Set<M> measurables,
             boolean totalEnabled,
             IC totalInstanceConfig,
             boolean levelsEnabled,
             LevelInstanceNameProvider levelInstanceNameProvider,
-            Map<MetricDimension, IC> levelInstanceConfigs,
+            Map<Label, IC> levelInstanceConfigs,
             IC defaultLevelInstanceConfig,
             boolean onlyConfiguredLevelsEnabled,
             MetricContext context);
@@ -409,7 +409,7 @@ public abstract class AbstractMeterConfigBuilder<
         CB extends AbstractMeterConfigBuilder<M, IC, SC, C, ASCB, SCB, CB>>
             extends AbstractSliceConfigBuilder<M, IC, SC, C, ASCB, SCB, CB, SCB> {
 
-        MetricDimensionValuesPredicate predicate;
+        LabelValuesPredicate predicate;
 
         protected SliceConfigBuilder(CB builder, MetricName name, Class<M> measurableType) {
             super(builder, requireNonNull(name), measurableType);
@@ -439,7 +439,7 @@ public abstract class AbstractMeterConfigBuilder<
             return predicate(null);
         }
 
-        public SCB predicate(MetricDimensionValuesPredicate predicate) {
+        public SCB predicate(LabelValuesPredicate predicate) {
             this.predicate = predicate;
             return (SCB)this;
         }
@@ -447,16 +447,16 @@ public abstract class AbstractMeterConfigBuilder<
         protected abstract SC buildImpl(
             boolean enabled,
             MetricName name,
-            MetricDimensionValuesPredicate predicate,
-            List<MetricDimension> dimensions,
-            Integer maxDimensionalInstances,
-            Duration dimensionalInstanceExpirationTime,
+            LabelValuesPredicate predicate,
+            List<Label> labels,
+            Integer maxLabeledInstances,
+            Duration labeledInstanceExpirationTime,
             Set<M> measurables,
             boolean totalEnabled,
             IC totalInstanceConfig,
             boolean levelsEnabled,
             LevelInstanceNameProvider levelInstanceNameProvider,
-            Map<MetricDimension, IC> levelInstanceConfigs,
+            Map<Label, IC> levelInstanceConfigs,
             IC defaultLevelInstanceConfig,
             boolean onlyConfiguredLevelsEnabled,
             MetricContext context);
@@ -555,10 +555,10 @@ public abstract class AbstractMeterConfigBuilder<
             MetricContext context);
     }
 
-    private List<MetricDimension> dimensions;
-    private Integer maxDimensionalInstancesPerSlice;
-    private Duration dimensionalInstanceExpirationTime;
-    private MetricDimensionValuesPredicate exclusionPredicate;
+    private List<Label> labels;
+    private Integer maxLabeledInstancesPerSlice;
+    private Duration labeledInstanceExpirationTime;
+    private LabelValuesPredicate exclusionPredicate;
     private final Class<M> measurableType;
     private Set<M> measurables;
     private ASCB allSliceConfigBuilder;
@@ -573,25 +573,25 @@ public abstract class AbstractMeterConfigBuilder<
         if (base instanceof AbstractMeterConfigBuilder) {
             AbstractMeterConfigBuilder<?, ?, ?, ?, ?, ?, ?> meterBase = (AbstractMeterConfigBuilder<?, ?, ?, ?, ?, ?, ?>)base;
 
-            if (!areDimensionsCompatible(meterBase)) {
+            if (!areLabelsCompatible(meterBase)) {
                 return;
             }
 
-            if (prefixDimensionValues() == null
-                && meterBase.prefixDimensionValues() != null
-                && dimensions != null) {
+            if (prefixLabelValues() == null
+                && meterBase.prefixLabelValues() != null
+                && labels != null) {
 
-                checkDimensionsUnique(meterBase.prefixDimensionValues(), dimensions);
+                checkLabelsUnique(meterBase.prefixLabelValues(), labels);
             }
 
             super.rebase(meterBase);
 
-            if (meterBase.maxDimensionalInstancesPerSlice != null && maxDimensionalInstancesPerSlice == null) {
-                maxDimensionalInstancesPerSlice = meterBase.maxDimensionalInstancesPerSlice;
+            if (meterBase.maxLabeledInstancesPerSlice != null && maxLabeledInstancesPerSlice == null) {
+                maxLabeledInstancesPerSlice = meterBase.maxLabeledInstancesPerSlice;
             }
 
-            if (meterBase.dimensionalInstanceExpirationTime != null && dimensionalInstanceExpirationTime == null) {
-                dimensionalInstanceExpirationTime = meterBase.dimensionalInstanceExpirationTime;
+            if (meterBase.labeledInstanceExpirationTime != null && labeledInstanceExpirationTime == null) {
+                labeledInstanceExpirationTime = meterBase.labeledInstanceExpirationTime;
             }
 
             if (meterBase.exclusionPredicate != null && exclusionPredicate == null) {
@@ -630,9 +630,9 @@ public abstract class AbstractMeterConfigBuilder<
         }
     }
 
-    private boolean areDimensionsCompatible(AbstractMeterConfigBuilder<?, ?, ?, ?, ?, ?, ?> that) {
-        return that.dimensions == null
-            || (dimensions != null && containsAllInOrder(dimensions, that.dimensions));
+    private boolean areLabelsCompatible(AbstractMeterConfigBuilder<?, ?, ?, ?, ?, ?, ?> that) {
+        return that.labels == null
+            || (labels != null && containsAllInOrder(labels, that.labels));
     }
 
     @Override
@@ -640,22 +640,22 @@ public abstract class AbstractMeterConfigBuilder<
         if (mod instanceof AbstractMeterConfigBuilder) {
             AbstractMeterConfigBuilder<?, ?, ?, ?, ?, ?, ?> meterMod = (AbstractMeterConfigBuilder<?, ?, ?, ?, ?, ?, ?>)mod;
 
-            if (!areDimensionsCompatible(meterMod)) {
+            if (!areLabelsCompatible(meterMod)) {
                 return;
             }
 
-            if (meterMod.prefixDimensionValues() != null && dimensions != null) {
-                checkDimensionsUnique(meterMod.prefixDimensionValues(), dimensions);
+            if (meterMod.prefixLabelValues() != null && labels != null) {
+                checkLabelsUnique(meterMod.prefixLabelValues(), labels);
             }
 
             super.modify(meterMod);
 
-            if (meterMod.maxDimensionalInstancesPerSlice != null) {
-                maxDimensionalInstancesPerSlice = meterMod.maxDimensionalInstancesPerSlice;
+            if (meterMod.maxLabeledInstancesPerSlice != null) {
+                maxLabeledInstancesPerSlice = meterMod.maxLabeledInstancesPerSlice;
             }
 
-            if (meterMod.dimensionalInstanceExpirationTime != null) {
-                dimensionalInstanceExpirationTime = meterMod.dimensionalInstanceExpirationTime;
+            if (meterMod.labeledInstanceExpirationTime != null) {
+                labeledInstanceExpirationTime = meterMod.labeledInstanceExpirationTime;
             }
 
             if (meterMod.exclusionPredicate != null) {
@@ -692,46 +692,46 @@ public abstract class AbstractMeterConfigBuilder<
     }
 
     @Override
-    public CB prefix(MetricDimensionValues dimensionValues) {
-        checkDimensionsUnique(dimensionValues, dimensions);
-        return super.prefix(dimensionValues);
+    public CB prefix(LabelValues labelValues) {
+        checkLabelsUnique(labelValues, labels);
+        return super.prefix(labelValues);
     }
 
-    public CB dimensions(MetricDimension... dimensions) {
-        return dimensions(List.of(dimensions));
+    public CB labels(Label... labels) {
+        return labels(List.of(labels));
     }
 
-    public CB dimensions(List<MetricDimension> dimensions) {
-        checkState(this.dimensions == null, "Dimensions change is not allowed");
-        checkArgument(dimensions != null && !dimensions.isEmpty(), "dimensions is null or empty");
-        checkDimensionsUnique(prefixDimensionValues(), dimensions);
-        this.dimensions = dimensions;
+    public CB labels(List<Label> labels) {
+        checkState(this.labels == null, "Labels change is not allowed");
+        checkArgument(labels != null && !labels.isEmpty(), "labels is null or empty");
+        checkLabelsUnique(prefixLabelValues(), labels);
+        this.labels = labels;
         return builder();
     }
 
-    List<MetricDimension> dimensions() {
-        return dimensions;
+    List<Label> labels() {
+        return labels;
     }
 
-    public CB maxDimensionalInstancesPerSlice(Integer maxDimensionalInstancesPerSlice) {
+    public CB maxLabeledInstancesPerSlice(Integer maxLabeledInstancesPerSlice) {
         checkArgument(
-            maxDimensionalInstancesPerSlice == null || maxDimensionalInstancesPerSlice > 0,
-            "maxDimensionalInstances <= 0");
+            maxLabeledInstancesPerSlice == null || maxLabeledInstancesPerSlice > 0,
+            "maxLabeledInstancesPerSlice <= 0");
 
-        this.maxDimensionalInstancesPerSlice = maxDimensionalInstancesPerSlice;
+        this.maxLabeledInstancesPerSlice = maxLabeledInstancesPerSlice;
         return builder();
     }
 
-    public CB notExpireDimensionalInstances() {
-        return expireDimensionalInstanceAfter(Duration.ZERO);
+    public CB notExpireLabeledInstances() {
+        return expireLabeledInstanceAfter(Duration.ZERO);
     }
 
-    public CB expireDimensionalInstanceAfter(long time, ChronoUnit unit) {
-        return expireDimensionalInstanceAfter(Duration.of(time, unit));
+    public CB expireLabeledInstanceAfter(long time, ChronoUnit unit) {
+        return expireLabeledInstanceAfter(Duration.of(time, unit));
     }
 
-    public CB expireDimensionalInstanceAfter(Duration time) {
-        this.dimensionalInstanceExpirationTime = time;
+    public CB expireLabeledInstanceAfter(Duration time) {
+        this.labeledInstanceExpirationTime = time;
         return builder();
     }
 
@@ -739,7 +739,7 @@ public abstract class AbstractMeterConfigBuilder<
         return exclude(null);
     }
 
-    public CB exclude(MetricDimensionValuesPredicate exclusionPredicate) {
+    public CB exclude(LabelValuesPredicate exclusionPredicate) {
         this.exclusionPredicate = exclusionPredicate;
         return builder();
     }
@@ -787,7 +787,7 @@ public abstract class AbstractMeterConfigBuilder<
     }
 
     public SCB slice(MetricName name) {
-        checkDimensionsConfigured();
+        checkLabelsConfigured();
         checkSliceNameNotEmpty(name);
         checkSliceNamesUnique(name);
         SCB scb = makeSliceConfigBuilder(builder(), name);
@@ -795,26 +795,26 @@ public abstract class AbstractMeterConfigBuilder<
         return scb;
     }
 
-    protected void checkDimensionsConfigured() {
-        checkState(dimensions != null, "Dimensions are not configured");
+    protected void checkLabelsConfigured() {
+        checkState(labels != null, "Labels are not configured");
     }
 
     void checkSliceNameNotEmpty(MetricName name) {
         checkArgument(!name.isEmpty(), "Slice name is null or empty");
     }
 
-    void checkSliceDimensions(List<MetricDimension> sliceDimensions) {
+    void checkSliceLabels(List<Label> sliceLabels) {
         checkArgument(
-            sliceDimensions != null && !sliceDimensions.isEmpty(),
-            "sliceDimensions is null or empty");
+            sliceLabels != null && !sliceLabels.isEmpty(),
+            "sliceLabels is null or empty");
 
         checkArgument(
-            dimensions != null,
-            "sliceDimensions = " + sliceDimensions + " is not subsequence of dimensions = null");
+            labels != null,
+            "sliceLabels = " + sliceLabels + " is not subsequence of labels = null");
 
         checkArgument(
-            containsAllInOrder(dimensions, sliceDimensions),
-            "sliceDimensions = " + sliceDimensions + " is not subsequence of dimensions = " + dimensions);
+            containsAllInOrder(labels, sliceLabels),
+            "sliceLabels = " + sliceLabels + " is not subsequence of labels = " + labels);
     }
 
     @Override
@@ -825,9 +825,9 @@ public abstract class AbstractMeterConfigBuilder<
             scb.enabled != null ? scb.enabled : DEFAULT_ENABLED,
             scb.name,
             scb.predicate,
-            scb.dimensions,
-            scb.maxDimensionalInstances != null ? scb.maxDimensionalInstances : maxDimensionalInstancesPerSlice,
-            scb.dimensionalInstanceExpirationTime != null ? scb.dimensionalInstanceExpirationTime : dimensionalInstanceExpirationTime,
+            scb.labels,
+            scb.maxLabeledInstances != null ? scb.maxLabeledInstances : maxLabeledInstancesPerSlice,
+            scb.labeledInstanceExpirationTime != null ? scb.labeledInstanceExpirationTime : labeledInstanceExpirationTime,
             scb.measurables != null ? scb.measurables : measurables,
             scb.totalEnabled != null ? scb.totalEnabled : true,
             scb.totalInstanceConfigBuilder != null ? scb.totalInstanceConfigBuilder.build() : null,
@@ -843,8 +843,8 @@ public abstract class AbstractMeterConfigBuilder<
         return buildImpl(
             hasEnabled() ? getEnabled() : DEFAULT_ENABLED,
             description(),
-            prefixDimensionValues(),
-            dimensions,
+            prefixLabelValues(),
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,
@@ -859,9 +859,9 @@ public abstract class AbstractMeterConfigBuilder<
         return allSliceConfigBuilder.buildImpl(
             allSliceConfigBuilder.enabled != null ? allSliceConfigBuilder.enabled : DEFAULT_ENABLED,
             allSliceConfigBuilder.name != null ? allSliceConfigBuilder.name : emptyMetricName(),
-            allSliceConfigBuilder.dimensions != null ? allSliceConfigBuilder.dimensions : dimensions,
-            allSliceConfigBuilder.maxDimensionalInstances != null ? allSliceConfigBuilder.maxDimensionalInstances : maxDimensionalInstancesPerSlice,
-            allSliceConfigBuilder.dimensionalInstanceExpirationTime != null ? allSliceConfigBuilder.dimensionalInstanceExpirationTime : dimensionalInstanceExpirationTime,
+            allSliceConfigBuilder.labels != null ? allSliceConfigBuilder.labels : labels,
+            allSliceConfigBuilder.maxLabeledInstances != null ? allSliceConfigBuilder.maxLabeledInstances : maxLabeledInstancesPerSlice,
+            allSliceConfigBuilder.labeledInstanceExpirationTime != null ? allSliceConfigBuilder.labeledInstanceExpirationTime : labeledInstanceExpirationTime,
             allSliceConfigBuilder.measurables != null ? allSliceConfigBuilder.measurables : measurables,
             allSliceConfigBuilder.totalEnabled != null ? allSliceConfigBuilder.totalEnabled : true,
             allSliceConfigBuilder.totalInstanceConfigBuilder != null ? allSliceConfigBuilder.totalInstanceConfigBuilder.build() : null,
@@ -878,9 +878,9 @@ public abstract class AbstractMeterConfigBuilder<
     protected abstract C buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         SC allSliceConfig,
         Set<SC> sliceConfigs,
         MetricContext context);

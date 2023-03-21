@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
@@ -27,8 +27,8 @@ import static org.mockito.Mockito.*;
 
 public class PrometheusSamplesProducerTest {
 
-    static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
-    static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
+    static final Label LABEL_1 = new Label("label_1");
+    static final Label LABEL_2 = new Label("label_2");
 
     PrometheusInstanceSampleSpec SIMPLE_COUNTER_INSTANCE_SAMPLE_SPEC = new PrometheusInstanceSampleSpec(
         false,
@@ -72,7 +72,7 @@ public class PrometheusSamplesProducerTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusSampleSpec sampleSpec = new PrometheusSampleSpec(true, LONG_VALUE, 1.0);
 
@@ -88,7 +88,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -105,7 +105,7 @@ public class PrometheusSamplesProducerTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
             instanceSampleSpec.name(),
@@ -121,7 +121,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -138,7 +138,7 @@ public class PrometheusSamplesProducerTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
             instanceSampleSpec.name(),
@@ -155,7 +155,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -171,7 +171,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -187,7 +187,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -203,7 +203,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -219,7 +219,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -235,7 +235,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -254,7 +254,7 @@ public class PrometheusSamplesProducerTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
             instanceSampleSpec.name(),
@@ -271,7 +271,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_count",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -287,7 +287,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_sum",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -303,7 +303,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -319,7 +319,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -335,7 +335,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -351,7 +351,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -367,7 +367,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.5"),
             1.0);
 
@@ -383,7 +383,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.75"),
             1.0);
 
@@ -399,7 +399,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_bucket",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "le"),
             List.of("value_1", "value_2", "1.0E9"),
             1.0);
 
@@ -415,7 +415,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_bucket",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "le"),
             List.of("value_1", "value_2", "+Inf"),
             1.0);
 
@@ -431,7 +431,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_bucket",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "le"),
             List.of("value_1", "value_2", "-Inf"),
             1.0);
 
@@ -440,7 +440,7 @@ public class PrometheusSamplesProducerTest {
     }
 
     @Test
-    public void histogram_NoDimensions() {
+    public void histogram_NoLabels() {
         MetricInstance instance = mock(HistogramInstance.class);
         when(instance.isWithPercentiles()).thenReturn(true);
         when(instance.isWithBuckets()).thenReturn(true);
@@ -622,7 +622,7 @@ public class PrometheusSamplesProducerTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
             instanceSampleSpec.name(),
@@ -639,7 +639,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_count",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -655,7 +655,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_sum",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -671,7 +671,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -687,7 +687,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -703,7 +703,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -719,7 +719,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -735,7 +735,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -751,7 +751,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -767,7 +767,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -783,7 +783,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -799,7 +799,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -815,7 +815,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.5"),
             1.0);
 
@@ -831,7 +831,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.75"),
             1.0);
 
@@ -847,7 +847,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -863,7 +863,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_bucket",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "le"),
             List.of("value_1", "value_2", "1"),
             1.0);
 
@@ -888,7 +888,7 @@ public class PrometheusSamplesProducerTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
             instanceSampleSpec.name(),
@@ -906,7 +906,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_count",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -916,7 +916,7 @@ public class PrometheusSamplesProducerTest {
             SUMMARY,
             null,
             "_count",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -930,7 +930,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_sum",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -940,7 +940,7 @@ public class PrometheusSamplesProducerTest {
             SUMMARY,
             null,
             "_sum",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -953,7 +953,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -969,7 +969,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -985,7 +985,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -1001,7 +1001,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -1017,7 +1017,7 @@ public class PrometheusSamplesProducerTest {
             SUMMARY,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.5"),
             1.0);
 
@@ -1033,7 +1033,7 @@ public class PrometheusSamplesProducerTest {
             SUMMARY,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.75"),
             1.0);
 
@@ -1049,7 +1049,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_bucket",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "le"),
             List.of("value_1", "value_2", "1.0E9"),
             1.0);
 
@@ -1074,7 +1074,7 @@ public class PrometheusSamplesProducerTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusInstanceSample instanceSample = new PrometheusInstanceSample(
             instanceSampleSpec.name(),
@@ -1092,7 +1092,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_count",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -1102,7 +1102,7 @@ public class PrometheusSamplesProducerTest {
             SUMMARY,
             null,
             "_count",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -1116,7 +1116,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             "_sum",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -1126,7 +1126,7 @@ public class PrometheusSamplesProducerTest {
             SUMMARY,
             null,
             "_sum",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0));
 
@@ -1139,7 +1139,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -1155,7 +1155,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -1171,7 +1171,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -1187,7 +1187,7 @@ public class PrometheusSamplesProducerTest {
             GAUGE,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name()),
+            List.of(LABEL_1.name(), LABEL_2.name()),
             List.of("value_1", "value_2"),
             1.0);
 
@@ -1203,7 +1203,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.5"),
             1.0);
 
@@ -1219,7 +1219,7 @@ public class PrometheusSamplesProducerTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "quantile"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "quantile"),
             List.of("value_1", "value_2", "0.75"),
             1.0);
 
@@ -1235,7 +1235,7 @@ public class PrometheusSamplesProducerTest {
             HISTOGRAM,
             null,
             "_bucket",
-            List.of(DIMENSION_1.name(), DIMENSION_2.name(), "le"),
+            List.of(LABEL_1.name(), LABEL_2.name(), "le"),
             List.of("value_1", "value_2", "1.0E9"),
             1.0);
 

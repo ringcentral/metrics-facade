@@ -1,9 +1,9 @@
 package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionUtils;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelUtils;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.samples.InstanceSampleSpec;
 
@@ -20,7 +20,7 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
     private final MetricInstance instance;
     private MetricName name;
     private String description;
-    private List<MetricDimensionValue> dimensionValues;
+    private List<LabelValue> labelValues;
 
     public static PrometheusInstanceSampleSpec prometheusInstanceSampleSpec() {
         return instanceSampleSpec();
@@ -39,13 +39,13 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
         MetricInstance instance,
         MetricName name,
         String description,
-        List<MetricDimensionValue> dimensionValues) {
+        List<LabelValue> labelValues) {
 
         this.enabled = enabled;
         this.instance = instance;
         this.name = name;
         this.description = description;
-        this.dimensionValues = dimensionValues;
+        this.labelValues = labelValues;
     }
 
     public boolean hasEnabled() {
@@ -103,41 +103,41 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
         return description;
     }
 
-    public boolean hasDimensionValues() {
-        return dimensionValues != null && !dimensionValues.isEmpty();
+    public boolean hasLabelValues() {
+        return labelValues != null && !labelValues.isEmpty();
     }
 
-    public PrometheusInstanceSampleSpec noDimensionValues() {
-        return dimensionValues(emptyList());
+    public PrometheusInstanceSampleSpec noLabelValues() {
+        return labelValues(emptyList());
     }
 
-    public PrometheusInstanceSampleSpec dimensionValues(List<MetricDimensionValue> dimensionValues) {
-        this.dimensionValues = dimensionValues;
+    public PrometheusInstanceSampleSpec labelValues(List<LabelValue> labelValues) {
+        this.labelValues = labelValues;
         return this;
     }
 
-    public List<MetricDimensionValue> dimensionValues() {
-        return dimensionValues;
+    public List<LabelValue> labelValues() {
+        return labelValues;
     }
 
-    public boolean hasDimension(MetricDimension dimension) {
-        return MetricDimensionUtils.hasDimension(dimensionValues, dimension);
+    public boolean hasLabel(Label label) {
+        return LabelUtils.hasLabel(labelValues, label);
     }
 
-    public String valueOf(MetricDimension dimension) {
-        return MetricDimensionUtils.valueOf(dimensionValues, dimension);
+    public String valueOf(Label label) {
+        return LabelUtils.valueOf(labelValues, label);
     }
 
-    public MetricDimensionValue dimensionValueOf(MetricDimension dimension) {
-        return MetricDimensionUtils.dimensionValueOf(dimensionValues, dimension);
+    public LabelValue labelValueOf(Label label) {
+        return LabelUtils.labelValueOf(labelValues, label);
     }
 
-    public Map<MetricDimension, MetricDimensionValue> dimensionToValue() {
-        return MetricDimensionUtils.dimensionToValue(dimensionValues);
+    public Map<Label, LabelValue> labelToValue() {
+        return LabelUtils.labelToValue(labelValues);
     }
 
-    public List<MetricDimensionValue> dimensionValuesWithout(MetricDimension dimension, MetricDimension... dimensions) {
-        return MetricDimensionUtils.dimensionValuesWithout(dimensionValues, dimension, dimensions);
+    public List<LabelValue> labelValuesWithout(Label label, Label... labels) {
+        return LabelUtils.labelValuesWithout(labelValues, label, labels);
     }
 
     @Override
@@ -160,8 +160,8 @@ public class PrometheusInstanceSampleSpec implements InstanceSampleSpec {
             description = prometheusMod.description;
         }
 
-        if (prometheusMod.dimensionValues != null) {
-            dimensionValues = prometheusMod.dimensionValues;
+        if (prometheusMod.labelValues != null) {
+            labelValues = prometheusMod.labelValues;
         }
 
         return this;

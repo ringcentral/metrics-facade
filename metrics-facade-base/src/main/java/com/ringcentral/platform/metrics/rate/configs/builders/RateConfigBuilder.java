@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.rate.configs.builders;
 
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.RateMeasurable;
 import com.ringcentral.platform.metrics.rate.configs.*;
@@ -53,9 +53,9 @@ public class RateConfigBuilder extends AbstractMeterConfigBuilder<
     protected RateConfig buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         RateSliceConfig allSliceConfig,
         Set<RateSliceConfig> sliceConfigs,
         MetricContext context) {
@@ -63,8 +63,8 @@ public class RateConfigBuilder extends AbstractMeterConfigBuilder<
         return new DefaultRateConfig(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,

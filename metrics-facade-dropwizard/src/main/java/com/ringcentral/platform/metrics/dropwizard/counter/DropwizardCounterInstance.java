@@ -5,7 +5,7 @@ import com.ringcentral.platform.metrics.AbstractMeter.AbstractMeterInstance;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValuesProvider;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -16,9 +16,9 @@ public class DropwizardCounterInstance extends AbstractMeterInstance<Counter> im
 
     protected DropwizardCounterInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<Counter>> measurableValueProviders,
@@ -26,9 +26,9 @@ public class DropwizardCounterInstance extends AbstractMeterInstance<Counter> im
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

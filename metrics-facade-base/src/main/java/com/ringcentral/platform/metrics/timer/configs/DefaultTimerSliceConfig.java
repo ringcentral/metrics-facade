@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.timer.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.AbstractMeterSliceConfig;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.timer.TimerMeasurable;
 
@@ -14,16 +14,16 @@ public class DefaultTimerSliceConfig extends AbstractMeterSliceConfig<TimerInsta
     public DefaultTimerSliceConfig(
         boolean enabled,
         MetricName name,
-        MetricDimensionValuesPredicate predicate,
-        List<MetricDimension> dimensions,
-        Integer maxDimensionalInstances,
-        Duration dimensionalInstanceExpirationTime,
+        LabelValuesPredicate predicate,
+        List<Label> labels,
+        Integer maxLabeledInstances,
+        Duration labeledInstanceExpirationTime,
         Set<TimerMeasurable> measurables,
         boolean totalEnabled,
         TimerInstanceConfig totalInstanceConfig,
         boolean levelsEnabled,
         LevelInstanceNameProvider levelInstanceNameProvider,
-        Map<MetricDimension, TimerInstanceConfig> levelInstanceConfigs,
+        Map<Label, TimerInstanceConfig> levelInstanceConfigs,
         TimerInstanceConfig defaultLevelInstanceConfig,
         boolean onlyConfiguredLevelsEnabled,
         MetricContext context) {
@@ -32,9 +32,9 @@ public class DefaultTimerSliceConfig extends AbstractMeterSliceConfig<TimerInsta
             enabled,
             name,
             predicate,
-            dimensions,
-            maxDimensionalInstances,
-            dimensionalInstanceExpirationTime,
+            labels,
+            maxLabeledInstances,
+            labeledInstanceExpirationTime,
             measurables,
             totalEnabled,
             totalInstanceConfig,

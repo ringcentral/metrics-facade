@@ -4,7 +4,7 @@ import java.util.*;
 import com.codahale.metrics.Counter;
 import com.ringcentral.platform.metrics.AbstractMeter.*;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -12,9 +12,9 @@ public class DropwizardExpirableCounterInstance extends AbstractExpirableMeterIn
 
     protected DropwizardExpirableCounterInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<Counter>> measurableValueProviders,
@@ -23,9 +23,9 @@ public class DropwizardExpirableCounterInstance extends AbstractExpirableMeterIn
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

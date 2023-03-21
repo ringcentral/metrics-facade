@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.reporters.jmx;
 
 import java.util.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import static java.lang.Boolean.*;
@@ -12,7 +12,7 @@ public final class MBeanSpec {
     private Boolean enabled;
     private MetricName name;
     private Set<Measurable> measurables;
-    private List<MetricDimensionValue> dimensionValues;
+    private List<LabelValue> labelValues;
 
     public static MBeanSpec mBeanSpec() {
         return new MBeanSpec();
@@ -24,12 +24,12 @@ public final class MBeanSpec {
         Boolean enabled,
         MetricName name,
         Set<Measurable> measurables,
-        List<MetricDimensionValue> dimensionValues) {
+        List<LabelValue> labelValues) {
 
         this.enabled = enabled;
         this.name = name;
         this.measurables = measurables;
-        this.dimensionValues = dimensionValues;
+        this.labelValues = labelValues;
     }
 
     public boolean hasEnabled() {
@@ -87,21 +87,21 @@ public final class MBeanSpec {
         return measurables;
     }
 
-    public boolean hasDimensionValues() {
-        return dimensionValues != null && !dimensionValues.isEmpty();
+    public boolean hasLabelValues() {
+        return labelValues != null && !labelValues.isEmpty();
     }
 
-    public MBeanSpec noDimensionValues() {
-        return dimensionValues(emptyList());
+    public MBeanSpec noLabelValues() {
+        return labelValues(emptyList());
     }
 
-    public MBeanSpec dimensionValues(List<MetricDimensionValue> dimensionValues) {
-        this.dimensionValues = dimensionValues;
+    public MBeanSpec labelValues(List<LabelValue> labelValues) {
+        this.labelValues = labelValues;
         return this;
     }
 
-    public List<MetricDimensionValue> dimensionValues() {
-        return dimensionValues;
+    public List<LabelValue> labelValues() {
+        return labelValues;
     }
 
     public MBeanSpec modify(MBeanSpec mod) {
@@ -117,8 +117,8 @@ public final class MBeanSpec {
             measurables = mod.measurables();
         }
 
-        if (mod.dimensionValues != null) {
-            dimensionValues = mod.dimensionValues;
+        if (mod.labelValues != null) {
+            labelValues = mod.labelValues;
         }
 
         return this;

@@ -52,14 +52,14 @@ public class MfLongGauge<A> extends AbstractMeter implements MfMeter, Gauge {
 
         this.mfLongVar = mfRegistry.longVar(
             this.base.name(),
-            this.base.hasDimensions() ? noTotal() : this.valueSupplier,
+            this.base.hasLabels() ? noTotal() : this.valueSupplier,
             () ->
-                this.base.hasDimensions() ?
-                withLongVar().dimensions(this.base.dimensions()).nonDecreasing(nonDecreasing) :
+                this.base.hasLabels() ?
+                withLongVar().labels(this.base.labels()).nonDecreasing(nonDecreasing) :
                 withLongVar().nonDecreasing(nonDecreasing));
 
-        if (this.base.hasDimensions()) {
-            this.mfLongVar.register(this.valueSupplier, this.base.dimensionValues());
+        if (this.base.hasLabels()) {
+            this.mfLongVar.register(this.valueSupplier, this.base.labelValues());
         }
     }
 
@@ -81,8 +81,8 @@ public class MfLongGauge<A> extends AbstractMeter implements MfMeter, Gauge {
 
     @Override
     public void meterRemoved() {
-        if (base.hasDimensions()) {
-            mfLongVar.deregister(base.dimensionValues());
+        if (base.hasLabels()) {
+            mfLongVar.deregister(base.labelValues());
         } else {
             base.mfRegistry().remove(base.name());
         }

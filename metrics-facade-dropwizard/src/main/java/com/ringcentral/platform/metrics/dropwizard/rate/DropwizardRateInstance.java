@@ -4,7 +4,7 @@ import com.codahale.metrics.Meter;
 import com.ringcentral.platform.metrics.AbstractMeter.AbstractMeterInstance;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValuesProvider;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.RateInstance;
@@ -16,9 +16,9 @@ public class DropwizardRateInstance extends AbstractMeterInstance<Meter> impleme
 
     protected DropwizardRateInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<Meter>> measurableValueProviders,
@@ -26,9 +26,9 @@ public class DropwizardRateInstance extends AbstractMeterInstance<Meter> impleme
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

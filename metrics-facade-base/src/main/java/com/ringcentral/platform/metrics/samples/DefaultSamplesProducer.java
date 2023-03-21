@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.samples;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 
 import static java.lang.String.join;
 
@@ -38,9 +38,9 @@ public class DefaultSamplesProducer extends AbstractSamplesProducer<
 
         StringBuilder nameBuilder = new StringBuilder(join(namePartsDelimiter, spec.name()));
 
-        if (spec.hasDimensionValues()) {
-            for (MetricDimensionValue dv : spec.dimensionValues()) {
-                nameBuilder.append(namePartsDelimiter).append(dv.value());
+        if (spec.hasLabelValues()) {
+            for (LabelValue lv : spec.labelValues()) {
+                nameBuilder.append(namePartsDelimiter).append(lv.value());
             }
         }
 

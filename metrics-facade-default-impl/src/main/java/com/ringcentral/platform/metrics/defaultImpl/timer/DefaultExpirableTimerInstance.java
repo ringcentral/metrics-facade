@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.defaultImpl.timer;
 
 import com.ringcentral.platform.metrics.AbstractMeter.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
@@ -12,9 +12,9 @@ public class DefaultExpirableTimerInstance extends AbstractExpirableMeterInstanc
 
     protected DefaultExpirableTimerInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<TimerImpl>> measurableValueProviders,
@@ -23,9 +23,9 @@ public class DefaultExpirableTimerInstance extends AbstractExpirableMeterInstanc
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

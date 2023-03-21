@@ -1,16 +1,16 @@
 package com.ringcentral.platform.metrics.var.configs;
 
 import com.ringcentral.platform.metrics.configs.MetricConfig;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 
 import java.util.List;
 
 public interface VarConfig extends MetricConfig {
-    default boolean hasDimensions() {
-        return dimensions() != null && !dimensions().isEmpty();
+    default boolean hasLabels() {
+        return labels() != null && !labels().isEmpty();
     }
 
-    List<MetricDimension> dimensions();
+    List<Label> labels();
 
     boolean isNonDecreasing();
 }

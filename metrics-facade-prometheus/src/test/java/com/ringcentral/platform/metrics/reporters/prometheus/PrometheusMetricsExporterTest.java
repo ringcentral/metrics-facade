@@ -27,9 +27,9 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("unchecked")
 public class PrometheusMetricsExporterTest {
 
-    static final String DIMENSION_1 = "dimension_1";
-    static final String DIMENSION_2 = "dimension_2";
-    static final String DIMENSION_3 = "dimension_3";
+    static final String LABEL_1 = "label_1";
+    static final String LABEL_2 = "label_2";
+    static final String LABEL_3 = "label_3";
 
     @Test
     public void export_noInstanceSamples() {
@@ -82,8 +82,8 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1, DIMENSION_2),
-            List.of("dimension_1_value", "dimension_2_value"),
+            List.of(LABEL_1, LABEL_2),
+            List.of("label_1_value", "label_2_value"),
             2.0));
 
         instanceSamples.add(instanceSample);
@@ -119,8 +119,8 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
+            List.of(LABEL_1, LABEL_2, LABEL_3),
+            List.of("label_1_value", "label_2_value", "label_3_value"),
             4.0));
 
         instanceSamples.add(instanceSample);
@@ -206,8 +206,8 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             "_count",
-            List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
+            List.of(LABEL_1, LABEL_2, LABEL_3),
+            List.of("label_1_value", "label_2_value", "label_3_value"),
             10.0));
 
         instanceSample.add(new PrometheusSample(
@@ -216,8 +216,8 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.GAUGE,
             null,
             null,
-            List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
+            List.of(LABEL_1, LABEL_2, LABEL_3),
+            List.of("label_1_value", "label_2_value", "label_3_value"),
             10.5));
 
         instanceSample.add(new PrometheusSample(
@@ -226,8 +226,8 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.GAUGE,
             null,
             null,
-            List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
+            List.of(LABEL_1, LABEL_2, LABEL_3),
+            List.of("label_1_value", "label_2_value", "label_3_value"),
             11.0));
 
         instanceSample.add(new PrometheusSample(
@@ -236,8 +236,8 @@ public class PrometheusMetricsExporterTest {
             Collector.Type.GAUGE,
             null,
             null,
-            List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
+            List.of(LABEL_1, LABEL_2, LABEL_3),
+            List.of("label_1_value", "label_2_value", "label_3_value"),
             12.0));
 
         instanceSample.add(new PrometheusSample(
@@ -246,8 +246,8 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3, "quantile"),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value", "0.50"),
+            List.of(LABEL_1, LABEL_2, LABEL_3, "quantile"),
+            List.of("label_1_value", "label_2_value", "label_3_value", "0.50"),
             13.0));
 
         instanceSample.add(new PrometheusSample(
@@ -256,8 +256,8 @@ public class PrometheusMetricsExporterTest {
             null,
             null,
             null,
-            List.of(DIMENSION_1, DIMENSION_2, DIMENSION_3, "quantile"),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value", "0.75"),
+            List.of(LABEL_1, LABEL_2, LABEL_3, "quantile"),
+            List.of("label_1_value", "label_2_value", "label_3_value", "0.75"),
             14.0));
 
         instanceSamples.add(instanceSample);
@@ -283,13 +283,13 @@ public class PrometheusMetricsExporterTest {
             "a 1.0\n" +
             "# HELP a_b Description for a.b\n" +
             "# TYPE a_b gauge\n" +
-            "a_b{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",} 2.0\n" +
+            "a_b{label_1=\"label_1_value\",label_2=\"label_2_value\",} 2.0\n" +
             "# HELP a_b_total Description for a.b.total\n" +
             "# TYPE a_b_total counter\n" +
             "a_b_total 3.0\n" +
             "# HELP a_b_c_total Description for a.b.c.total\n" +
             "# TYPE a_b_c_total counter\n" +
-            "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 4.0\n" +
+            "a_b_c_total{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",} 4.0\n" +
             "# HELP a_b_c_d Description for a.b.c.d\n" +
             "# TYPE a_b_c_d summary\n" +
             "a_b_c_d{quantile=\"0.50\",} 8.0\n" +
@@ -306,18 +306,18 @@ public class PrometheusMetricsExporterTest {
             "a_b_c_d_mean 7.0\n" +
             "# HELP a_b_c_d_e Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e histogram\n" +
-            "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.50\",} 13.0\n" +
-            "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.75\",} 14.0\n" +
-            "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 10.0\n" +
+            "a_b_c_d_e{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",quantile=\"0.50\",} 13.0\n" +
+            "a_b_c_d_e{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",quantile=\"0.75\",} 14.0\n" +
+            "a_b_c_d_e_count{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",} 10.0\n" +
             "# HELP a_b_c_d_e_min Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e_min gauge\n" +
-            "a_b_c_d_e_min{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 10.5\n" +
+            "a_b_c_d_e_min{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",} 10.5\n" +
             "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e_max gauge\n" +
-            "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 11.0\n" +
+            "a_b_c_d_e_max{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",} 11.0\n" +
             "# HELP a_b_c_d_e_mean Description for a.b.c.d.e\n" +
             "# TYPE a_b_c_d_e_mean gauge\n" +
-            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",} 12.0\n"));
+            "a_b_c_d_e_mean{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",} 12.0\n"));
 
         exporter = new PrometheusMetricsExporter(OPENMETRICS_TEXT_1_0_0, instanceSamplesProvider);
 
@@ -327,13 +327,13 @@ public class PrometheusMetricsExporterTest {
             "a 1.0\n" +
             "# TYPE a_b gauge\n" +
             "# HELP a_b Description for a.b\n" +
-            "a_b{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\"} 2.0\n" +
+            "a_b{label_1=\"label_1_value\",label_2=\"label_2_value\"} 2.0\n" +
             "# TYPE a_b counter\n" +
             "# HELP a_b Description for a.b.total\n" +
             "a_b_total 3.0\n" +
             "# TYPE a_b_c counter\n" +
             "# HELP a_b_c Description for a.b.c.total\n" +
-            "a_b_c_total{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 4.0\n" +
+            "a_b_c_total{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\"} 4.0\n" +
             "# TYPE a_b_c_d summary\n" +
             "# HELP a_b_c_d Description for a.b.c.d\n" +
             "a_b_c_d{quantile=\"0.50\"} 8.0\n" +
@@ -350,18 +350,18 @@ public class PrometheusMetricsExporterTest {
             "a_b_c_d_mean 7.0\n" +
             "# TYPE a_b_c_d_e histogram\n" +
             "# HELP a_b_c_d_e Description for a.b.c.d.e\n" +
-            "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.50\"} 13.0\n" +
-            "a_b_c_d_e{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\",quantile=\"0.75\"} 14.0\n" +
-            "a_b_c_d_e_count{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 10.0\n" +
+            "a_b_c_d_e{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",quantile=\"0.50\"} 13.0\n" +
+            "a_b_c_d_e{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\",quantile=\"0.75\"} 14.0\n" +
+            "a_b_c_d_e_count{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\"} 10.0\n" +
             "# TYPE a_b_c_d_e_min gauge\n" +
             "# HELP a_b_c_d_e_min Description for a.b.c.d.e\n" +
-            "a_b_c_d_e_min{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 10.5\n" +
+            "a_b_c_d_e_min{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\"} 10.5\n" +
             "# TYPE a_b_c_d_e_max gauge\n" +
             "# HELP a_b_c_d_e_max Description for a.b.c.d.e\n" +
-            "a_b_c_d_e_max{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 11.0\n" +
+            "a_b_c_d_e_max{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\"} 11.0\n" +
             "# TYPE a_b_c_d_e_mean gauge\n" +
             "# HELP a_b_c_d_e_mean Description for a.b.c.d.e\n" +
-            "a_b_c_d_e_mean{dimension_1=\"dimension_1_value\",dimension_2=\"dimension_2_value\",dimension_3=\"dimension_3_value\"} 12.0\n" +
+            "a_b_c_d_e_mean{label_1=\"label_1_value\",label_2=\"label_2_value\",label_3=\"label_3_value\"} 12.0\n" +
             "# EOF\n"));
     }
 }

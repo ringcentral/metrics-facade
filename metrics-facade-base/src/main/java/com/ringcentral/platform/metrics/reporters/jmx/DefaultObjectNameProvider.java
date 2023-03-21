@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.reporters.jmx;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.names.MetricName;
 import org.slf4j.Logger;
 
@@ -19,26 +19,26 @@ public class DefaultObjectNameProvider implements ObjectNameProvider {
     public ObjectName objectNameFor(
         String domainName,
         MetricName name,
-        List<MetricDimensionValue> dimensionValues) {
+        List<LabelValue> labelValues) {
 
         try {
             ObjectName objectName;
             String namePropertyValue = escape(join(".", name));
 
-            if (dimensionValues == null || dimensionValues.isEmpty()) {
+            if (labelValues == null || labelValues.isEmpty()) {
                 objectName = new ObjectName(domainName, "name", namePropertyValue);
             } else {
                 Set<String> names = new HashSet<>();
                 StringBuilder builder = new StringBuilder(domainName).append(":name=").append(namePropertyValue);
 
-                for (MetricDimensionValue dv : dimensionValues) {
-                    String dname = dv.dimension().name();
+                for (LabelValue lv : labelValues) {
+                    String labelName = lv.label().name();
 
-                    if (!names.contains(dname)) {
-                        builder.append(',').append(escapeDimensionName(dname)).append('=').append(escape(dv.value()));
-                        names.add(dname);
+                    if (!names.contains(labelName)) {
+                        builder.append(',').append(escapeLabelName(labelName)).append('=').append(escape(lv.value()));
+                        names.add(labelName);
                     } else {
-                        logger.warn("Ignoring duplicate dimension name: {}", dname);
+                        logger.warn("Ignoring duplicate label name: {}", labelName);
                     }
                 }
 
@@ -62,11 +62,11 @@ public class DefaultObjectNameProvider implements ObjectNameProvider {
         return v.replaceAll("[\\s*?,=:\\\\]", "_");
     }
 
-    private String escapeDimensionName(String dname) {
-        if (dname.equals("name")) {
+    private String escapeLabelName(String labelName) {
+        if (labelName.equals("name")) {
             return "_name";
         }
 
-        return escape(dname);
+        return escape(labelName);
     }
 }

@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.micrometer;
 
 import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.stub.StubMetricRegistry;
@@ -28,9 +28,9 @@ import static org.junit.Assert.*;
 
 public class MfMeterRegistryTest {
 
-    static final MetricDimension SERVICE = new MetricDimension("1_service");
-    static final MetricDimension SERVER = new MetricDimension("2_server");
-    static final MetricDimension STATISTIC = new MetricDimension("statistic");
+    static final Label SERVICE = new Label("1_service");
+    static final Label SERVER = new Label("2_server");
+    static final Label STATISTIC = new Label("statistic");
 
     TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
     TestScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
@@ -46,10 +46,10 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void gauge_nonDimensional() {
+    public void gauge_nonLabeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
         AtomicLong valueSupplier = new AtomicLong();
-        Gauge gauge = Gauge.builder("gauge.nonDimensional", valueSupplier::incrementAndGet).register(registry);
+        Gauge gauge = Gauge.builder("gauge.nonLabeled", valueSupplier::incrementAndGet).register(registry);
         assertThat(gauge.value(), is(1.0));
         assertThat(gauge.value(), is(2.0));
 
@@ -57,9 +57,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         DoubleVar mfDoubleVar = mfRegistryNotification.metric();
-        assertThat(mfDoubleVar.name(), is(name("gauge", "nonDimensional")));
+        assertThat(mfDoubleVar.name(), is(name("gauge", "nonLabeled")));
 
-        TestMetricListener mfDoubleVarListener = mfRegistryListener.listenerForMetric(withName("gauge", "nonDimensional"));
+        TestMetricListener mfDoubleVarListener = mfRegistryListener.listenerForMetric(withName("gauge", "nonLabeled"));
         assertThat(mfDoubleVarListener.notificationCount(), is(1));
         assertThat(mfDoubleVarListener.notification(0).type(), is(INSTANCE_ADDED));
         DoubleVarInstance instance = (DoubleVarInstance)mfDoubleVarListener.notification(0).instance();
@@ -78,12 +78,12 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void gauge_dimensional() {
+    public void gauge_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
         AtomicLong valueSupplier_1 = new AtomicLong();
 
         // add
-        Gauge gauge_1 = Gauge.builder("gauge.dimensional", valueSupplier_1::incrementAndGet)
+        Gauge gauge_1 = Gauge.builder("gauge.labeled", valueSupplier_1::incrementAndGet)
             .tags(SERVICE.name(), "service_1", SERVER.name(), "server_1_1")
             .register(registry);
 
@@ -94,20 +94,20 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         DoubleVar mfDoubleVar = mfRegistryNotification.metric();
-        assertThat(mfDoubleVar.name(), is(name("gauge", "dimensional")));
+        assertThat(mfDoubleVar.name(), is(name("gauge", "labeled")));
 
-        TestMetricListener mfDoubleVarListener = mfRegistryListener.listenerForMetric(withName("gauge", "dimensional"));
+        TestMetricListener mfDoubleVarListener = mfRegistryListener.listenerForMetric(withName("gauge", "labeled"));
 
         assertThat(mfDoubleVarListener.notificationCount(), is(1));
         assertThat(mfDoubleVarListener.notification(0).type(), is(INSTANCE_ADDED));
         DoubleVarInstance instance_1 = (DoubleVarInstance)mfDoubleVarListener.notification(0).instance();
-        assertThat(instance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(instance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(instance_1.isTotalInstance());
         assertFalse(instance_1.isNonDecreasing());
 
         AtomicLong valueSupplier_2 = new AtomicLong();
 
-        Gauge gauge_2 = Gauge.builder("gauge.dimensional", valueSupplier_2::incrementAndGet)
+        Gauge gauge_2 = Gauge.builder("gauge.labeled", valueSupplier_2::incrementAndGet)
             .tags(SERVICE.name(), "service_2", SERVER.name(), "server_2_1")
             .register(registry);
 
@@ -119,7 +119,7 @@ public class MfMeterRegistryTest {
         assertThat(mfDoubleVarListener.notificationCount(), is(2));
         assertThat(mfDoubleVarListener.notification(1).type(), is(INSTANCE_ADDED));
         DoubleVarInstance instance_2 = (DoubleVarInstance)mfDoubleVarListener.notification(1).instance();
-        assertThat(instance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(instance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(instance_2.isTotalInstance());
         assertFalse(instance_2.isNonDecreasing());
 
@@ -140,9 +140,9 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void counter_nonDimensional() {
+    public void counter_nonLabeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
-        Counter counter = Counter.builder("counter.nonDimensional").register(registry);
+        Counter counter = Counter.builder("counter.nonLabeled").register(registry);
         assertThat(counter.count(), is(0.0));
         counter.increment();
         assertThat(counter.count(), is(1.0));
@@ -153,9 +153,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         Rate mfRate = mfRegistryNotification.metric();
-        assertThat(mfRate.name(), is(name("counter", "nonDimensional")));
+        assertThat(mfRate.name(), is(name("counter", "nonLabeled")));
 
-        TestMetricListener mfRateListener = mfRegistryListener.listenerForMetric(withName("counter", "nonDimensional"));
+        TestMetricListener mfRateListener = mfRegistryListener.listenerForMetric(withName("counter", "nonLabeled"));
 
         assertThat(mfRateListener.notificationCount(), is(1));
         assertThat(mfRateListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -174,11 +174,11 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void counter_dimensional() {
+    public void counter_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         // add
-        Counter counter_1 = Counter.builder("counter.dimensional")
+        Counter counter_1 = Counter.builder("counter.labeled")
             .tags(SERVICE.name(), "service_1", SERVER.name(), "server_1_1")
             .register(registry);
 
@@ -192,9 +192,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         Rate mfRate = mfRegistryNotification.metric();
-        assertThat(mfRate.name(), is(name("counter", "dimensional")));
+        assertThat(mfRate.name(), is(name("counter", "labeled")));
 
-        TestMetricListener mfRateListener = mfRegistryListener.listenerForMetric(withName("counter", "dimensional"));
+        TestMetricListener mfRateListener = mfRegistryListener.listenerForMetric(withName("counter", "labeled"));
 
         assertThat(mfRateListener.notificationCount(), is(2));
 
@@ -204,10 +204,10 @@ public class MfMeterRegistryTest {
 
         assertThat(mfRateListener.notification(1).type(), is(INSTANCE_ADDED));
         MetricInstance instance_1 = mfRateListener.notification(1).instance();
-        assertThat(instance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(instance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(instance_1.isTotalInstance());
 
-        Counter counter_2 = Counter.builder("counter.dimensional")
+        Counter counter_2 = Counter.builder("counter.labeled")
             .tags(SERVICE.name(), "service_2", SERVER.name(), "server_2_1")
             .register(registry);
 
@@ -222,7 +222,7 @@ public class MfMeterRegistryTest {
         assertThat(mfRateListener.notificationCount(), is(3));
         assertThat(mfRateListener.notification(2).type(), is(INSTANCE_ADDED));
         MetricInstance instance_2 = mfRateListener.notification(2).instance();
-        assertThat(instance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(instance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(instance_2.isTotalInstance());
 
         // remove
@@ -242,12 +242,12 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void functionCounter_nonDimensional() {
+    public void functionCounter_nonLabeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
         AtomicLong valueSupplier = new AtomicLong();
 
         FunctionCounter funCounter = FunctionCounter
-            .builder("funCounter.nonDimensional", this, a -> (double)valueSupplier.incrementAndGet())
+            .builder("funCounter.nonLabeled", this, a -> (double)valueSupplier.incrementAndGet())
             .register(registry);
 
         assertThat(funCounter.count(), is(1.0));
@@ -257,9 +257,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         LongVar mfLongVar = mfRegistryNotification.metric();
-        assertThat(mfLongVar.name(), is(name("funCounter", "nonDimensional")));
+        assertThat(mfLongVar.name(), is(name("funCounter", "nonLabeled")));
 
-        TestMetricListener mfLongVarListener = mfRegistryListener.listenerForMetric(withName("funCounter", "nonDimensional"));
+        TestMetricListener mfLongVarListener = mfRegistryListener.listenerForMetric(withName("funCounter", "nonLabeled"));
 
         assertThat(mfLongVarListener.notificationCount(), is(1));
         assertThat(mfLongVarListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -279,13 +279,13 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void funCounter_dimensional() {
+    public void funCounter_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
         AtomicLong valueSupplier_1 = new AtomicLong();
 
         // add
         FunctionCounter funCounter_1 = FunctionCounter
-            .builder("funCounter.dimensional", this, a -> (double)valueSupplier_1.incrementAndGet())
+            .builder("funCounter.labeled", this, a -> (double)valueSupplier_1.incrementAndGet())
             .tags(SERVICE.name(), "service_1", SERVER.name(), "server_1_1")
             .register(registry);
 
@@ -296,21 +296,21 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         LongVar mfLongVar = mfRegistryNotification.metric();
-        assertThat(mfLongVar.name(), is(name("funCounter", "dimensional")));
+        assertThat(mfLongVar.name(), is(name("funCounter", "labeled")));
 
-        TestMetricListener mfLongVarListener = mfRegistryListener.listenerForMetric(withName("funCounter", "dimensional"));
+        TestMetricListener mfLongVarListener = mfRegistryListener.listenerForMetric(withName("funCounter", "labeled"));
 
         assertThat(mfLongVarListener.notificationCount(), is(1));
         assertThat(mfLongVarListener.notification(0).type(), is(INSTANCE_ADDED));
         LongVarInstance instance_1 = (LongVarInstance)mfLongVarListener.notification(0).instance();
-        assertThat(instance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(instance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(instance_1.isTotalInstance());
         assertTrue(instance_1.isNonDecreasing());
 
         AtomicLong valueSupplier_2 = new AtomicLong();
 
         FunctionCounter funCounter_2 = FunctionCounter
-            .builder("funCounter.dimensional", this, a -> (double)valueSupplier_2.incrementAndGet())
+            .builder("funCounter.labeled", this, a -> (double)valueSupplier_2.incrementAndGet())
             .tags(SERVICE.name(), "service_2", SERVER.name(), "server_2_1")
             .register(registry);
 
@@ -322,7 +322,7 @@ public class MfMeterRegistryTest {
         assertThat(mfLongVarListener.notificationCount(), is(2));
         assertThat(mfLongVarListener.notification(1).type(), is(INSTANCE_ADDED));
         LongVarInstance instance_2 = (LongVarInstance)mfLongVarListener.notification(1).instance();
-        assertThat(instance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(instance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(instance_2.isTotalInstance());
         assertTrue(instance_2.isNonDecreasing());
 
@@ -343,11 +343,11 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void distributionSummary_nonDimensional() {
+    public void distributionSummary_nonLabeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         DistributionSummary distributionSummary = DistributionSummary
-            .builder("distributionSummary.nonDimensional")
+            .builder("distributionSummary.nonLabeled")
             .register(registry);
 
         assertThat(distributionSummary.count(), is(0L));
@@ -360,9 +360,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         Histogram mfHistogram = mfRegistryNotification.metric();
-        assertThat(mfHistogram.name(), is(name("distributionSummary", "nonDimensional")));
+        assertThat(mfHistogram.name(), is(name("distributionSummary", "nonLabeled")));
 
-        TestMetricListener mfHistogramListener = mfRegistryListener.listenerForMetric(withName("distributionSummary", "nonDimensional"));
+        TestMetricListener mfHistogramListener = mfRegistryListener.listenerForMetric(withName("distributionSummary", "nonLabeled"));
 
         assertThat(mfHistogramListener.notificationCount(), is(1));
         assertThat(mfHistogramListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -381,12 +381,12 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void distributionSummary_dimensional() {
+    public void distributionSummary_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         // add
         DistributionSummary distributionSummary_1 = DistributionSummary
-            .builder("distributionSummary.dimensional")
+            .builder("distributionSummary.labeled")
             .tags(SERVICE.name(), "service_1", SERVER.name(), "server_1_1")
             .register(registry);
 
@@ -400,9 +400,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         Histogram mfHistogram = mfRegistryNotification.metric();
-        assertThat(mfHistogram.name(), is(name("distributionSummary", "dimensional")));
+        assertThat(mfHistogram.name(), is(name("distributionSummary", "labeled")));
 
-        TestMetricListener mfHistogramListener = mfRegistryListener.listenerForMetric(withName("distributionSummary", "dimensional"));
+        TestMetricListener mfHistogramListener = mfRegistryListener.listenerForMetric(withName("distributionSummary", "labeled"));
 
         assertThat(mfHistogramListener.notificationCount(), is(2));
 
@@ -412,11 +412,11 @@ public class MfMeterRegistryTest {
 
         assertThat(mfHistogramListener.notification(1).type(), is(INSTANCE_ADDED));
         MetricInstance instance_1 = mfHistogramListener.notification(1).instance();
-        assertThat(instance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(instance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(instance_1.isTotalInstance());
 
         DistributionSummary distributionSummary_2 = DistributionSummary
-            .builder("distributionSummary.dimensional")
+            .builder("distributionSummary.labeled")
             .tags(SERVICE.name(), "service_2", SERVER.name(), "server_2_1")
             .register(registry);
 
@@ -434,7 +434,7 @@ public class MfMeterRegistryTest {
         assertThat(mfHistogramListener.notificationCount(), is(3));
         assertThat(mfHistogramListener.notification(2).type(), is(INSTANCE_ADDED));
         MetricInstance instance_2 = mfHistogramListener.notification(2).instance();
-        assertThat(instance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(instance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(instance_2.isTotalInstance());
 
         // remove
@@ -454,11 +454,11 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void timer_nonDimensional() {
+    public void timer_nonLabeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         Timer timer = Timer
-            .builder("timer.nonDimensional")
+            .builder("timer.nonLabeled")
             .register(registry);
 
         assertThat(timer.count(), is(0L));
@@ -471,9 +471,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         com.ringcentral.platform.metrics.timer.Timer mfTimer = mfRegistryNotification.metric();
-        assertThat(mfTimer.name(), is(name("timer", "nonDimensional")));
+        assertThat(mfTimer.name(), is(name("timer", "nonLabeled")));
 
-        TestMetricListener mfTimerListener = mfRegistryListener.listenerForMetric(withName("timer", "nonDimensional"));
+        TestMetricListener mfTimerListener = mfRegistryListener.listenerForMetric(withName("timer", "nonLabeled"));
 
         assertThat(mfTimerListener.notificationCount(), is(1));
         assertThat(mfTimerListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -492,12 +492,12 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void timer_dimensional() {
+    public void timer_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         // add
         Timer timer_1 = Timer
-            .builder("timer.dimensional")
+            .builder("timer.labeled")
             .tags(SERVICE.name(), "service_1", SERVER.name(), "server_1_1")
             .register(registry);
 
@@ -511,9 +511,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         com.ringcentral.platform.metrics.timer.Timer mfTimer = mfRegistryNotification.metric();
-        assertThat(mfTimer.name(), is(name("timer", "dimensional")));
+        assertThat(mfTimer.name(), is(name("timer", "labeled")));
 
-        TestMetricListener mfTimerListener = mfRegistryListener.listenerForMetric(withName("timer", "dimensional"));
+        TestMetricListener mfTimerListener = mfRegistryListener.listenerForMetric(withName("timer", "labeled"));
 
         assertThat(mfTimerListener.notificationCount(), is(2));
 
@@ -523,11 +523,11 @@ public class MfMeterRegistryTest {
 
         assertThat(mfTimerListener.notification(1).type(), is(INSTANCE_ADDED));
         MetricInstance instance_1 = mfTimerListener.notification(1).instance();
-        assertThat(instance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(instance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(instance_1.isTotalInstance());
 
         Timer timer_2 = Timer
-            .builder("timer.dimensional")
+            .builder("timer.labeled")
             .tags(SERVICE.name(), "service_2", SERVER.name(), "server_2_1")
             .register(registry);
 
@@ -545,7 +545,7 @@ public class MfMeterRegistryTest {
         assertThat(mfTimerListener.notificationCount(), is(3));
         assertThat(mfTimerListener.notification(2).type(), is(INSTANCE_ADDED));
         MetricInstance instance_2 = mfTimerListener.notification(2).instance();
-        assertThat(instance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(instance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(instance_2.isTotalInstance());
 
         // remove
@@ -565,14 +565,14 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void functionTimer_nonDimensional() {
+    public void functionTimer_nonLabeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
         AtomicLong countSupplier = new AtomicLong();
         AtomicLong totalTimeSupplier = new AtomicLong();
 
         FunctionTimer funTimer = FunctionTimer
             .builder(
-                "funTimer.nonDimensional",
+                "funTimer.nonLabeled",
                 this,
                 a -> countSupplier.incrementAndGet(),
                 a -> (double)totalTimeSupplier.incrementAndGet(),
@@ -588,9 +588,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         LongVar countVar = mfRegistryNotification.metric();
-        assertThat(countVar.name(), is(name("funTimer", "nonDimensional", "count")));
+        assertThat(countVar.name(), is(name("funTimer", "nonLabeled", "count")));
 
-        TestMetricListener countVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "nonDimensional", "count"));
+        TestMetricListener countVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "nonLabeled", "count"));
 
         assertThat(countVarListener.notificationCount(), is(1));
         assertThat(countVarListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -601,9 +601,9 @@ public class MfMeterRegistryTest {
         mfRegistryNotification = mfRegistryListener.notification(1);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         DoubleVar totalTimeVar = mfRegistryNotification.metric();
-        assertThat(totalTimeVar.name(), is(name("funTimer", "nonDimensional", "totalTime")));
+        assertThat(totalTimeVar.name(), is(name("funTimer", "nonLabeled", "totalTime")));
 
-        TestMetricListener totalTimeVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "nonDimensional", "totalTime"));
+        TestMetricListener totalTimeVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "nonLabeled", "totalTime"));
 
         assertThat(totalTimeVarListener.notificationCount(), is(1));
         assertThat(totalTimeVarListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -629,7 +629,7 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void funTimer_dimensional() {
+    public void funTimer_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
         AtomicLong countSupplier_1 = new AtomicLong();
         AtomicLong totalTimeSupplier_1 = new AtomicLong();
@@ -637,7 +637,7 @@ public class MfMeterRegistryTest {
         // add
         FunctionTimer funTimer_1 = FunctionTimer
             .builder(
-                "funTimer.dimensional",
+                "funTimer.labeled",
                 this,
                 a -> countSupplier_1.incrementAndGet(),
                 a -> (double)totalTimeSupplier_1.incrementAndGet(),
@@ -654,23 +654,23 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         LongVar countVar = mfRegistryNotification.metric();
-        assertThat(countVar.name(), is(name("funTimer", "dimensional", "count")));
+        assertThat(countVar.name(), is(name("funTimer", "labeled", "count")));
 
-        TestMetricListener countVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "dimensional", "count"));
+        TestMetricListener countVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "labeled", "count"));
 
         assertThat(countVarListener.notificationCount(), is(1));
         assertThat(countVarListener.notification(0).type(), is(INSTANCE_ADDED));
         LongVarInstance countVarInstance_1 = (LongVarInstance)countVarListener.notification(0).instance();
-        assertThat(countVarInstance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(countVarInstance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(countVarInstance_1.isTotalInstance());
         assertTrue(countVarInstance_1.isNonDecreasing());
 
-        TestMetricListener totalTimeVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "dimensional", "totalTime"));
+        TestMetricListener totalTimeVarListener = mfRegistryListener.listenerForMetric(withName("funTimer", "labeled", "totalTime"));
 
         assertThat(totalTimeVarListener.notificationCount(), is(1));
         assertThat(totalTimeVarListener.notification(0).type(), is(INSTANCE_ADDED));
         DoubleVarInstance totalTimeVarInstance_1 = (DoubleVarInstance)totalTimeVarListener.notification(0).instance();
-        assertThat(totalTimeVarInstance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(totalTimeVarInstance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(totalTimeVarInstance_1.isTotalInstance());
         assertTrue(totalTimeVarInstance_1.isNonDecreasing());
 
@@ -679,7 +679,7 @@ public class MfMeterRegistryTest {
 
         FunctionTimer funTimer_2 = FunctionTimer
             .builder(
-                "funTimer.dimensional",
+                "funTimer.labeled",
                 this,
                 a -> countSupplier_2.incrementAndGet(),
                 a -> (double)totalTimeSupplier_2.incrementAndGet(),
@@ -697,14 +697,14 @@ public class MfMeterRegistryTest {
         assertThat(countVarListener.notificationCount(), is(2));
         assertThat(countVarListener.notification(1).type(), is(INSTANCE_ADDED));
         LongVarInstance countVarInstance_2 = (LongVarInstance)countVarListener.notification(1).instance();
-        assertThat(countVarInstance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(countVarInstance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(countVarInstance_2.isTotalInstance());
         assertTrue(countVarInstance_2.isNonDecreasing());
 
         assertThat(totalTimeVarListener.notificationCount(), is(2));
         assertThat(totalTimeVarListener.notification(1).type(), is(INSTANCE_ADDED));
         DoubleVarInstance totalTimeVarInstance_2 = (DoubleVarInstance)totalTimeVarListener.notification(1).instance();
-        assertThat(totalTimeVarInstance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(totalTimeVarInstance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(totalTimeVarInstance_2.isTotalInstance());
         assertTrue(totalTimeVarInstance_2.isNonDecreasing());
 
@@ -733,11 +733,11 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void longTaskTimer_nonDimensional() {
+    public void longTaskTimer_nonLabeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         LongTaskTimer longTaskTimer = LongTaskTimer
-            .builder("longTaskTimer.nonDimensional")
+            .builder("longTaskTimer.nonLabeled")
             .register(registry);
 
         assertThat(longTaskTimer.activeTasks(), is(0));
@@ -748,9 +748,9 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         LongVar activeTasksVar = mfRegistryNotification.metric();
-        assertThat(activeTasksVar.name(), is(name("longTaskTimer", "nonDimensional", "activeTasks")));
+        assertThat(activeTasksVar.name(), is(name("longTaskTimer", "nonLabeled", "activeTasks")));
 
-        TestMetricListener activeTasksVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "nonDimensional", "activeTasks"));
+        TestMetricListener activeTasksVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "nonLabeled", "activeTasks"));
 
         assertThat(activeTasksVarListener.notificationCount(), is(1));
         assertThat(activeTasksVarListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -761,9 +761,9 @@ public class MfMeterRegistryTest {
         mfRegistryNotification = mfRegistryListener.notification(1);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         DoubleVar durationVar = mfRegistryNotification.metric();
-        assertThat(durationVar.name(), is(name("longTaskTimer", "nonDimensional", "duration")));
+        assertThat(durationVar.name(), is(name("longTaskTimer", "nonLabeled", "duration")));
 
-        TestMetricListener durationVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "nonDimensional", "duration"));
+        TestMetricListener durationVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "nonLabeled", "duration"));
 
         assertThat(durationVarListener.notificationCount(), is(1));
         assertThat(durationVarListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -774,9 +774,9 @@ public class MfMeterRegistryTest {
         mfRegistryNotification = mfRegistryListener.notification(2);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         DoubleVar maxVar = mfRegistryNotification.metric();
-        assertThat(maxVar.name(), is(name("longTaskTimer", "nonDimensional", "max")));
+        assertThat(maxVar.name(), is(name("longTaskTimer", "nonLabeled", "max")));
 
-        TestMetricListener maxVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "nonDimensional", "max"));
+        TestMetricListener maxVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "nonLabeled", "max"));
 
         assertThat(maxVarListener.notificationCount(), is(1));
         assertThat(maxVarListener.notification(0).type(), is(INSTANCE_ADDED));
@@ -808,12 +808,12 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void longTaskTimer_dimensional() {
+    public void longTaskTimer_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         // add
         LongTaskTimer longTaskTimer_1 = LongTaskTimer
-            .builder("longTaskTimer.dimensional")
+            .builder("longTaskTimer.labeled")
             .tags(SERVICE.name(), "service_1", SERVER.name(), "server_1_1")
             .register(registry);
 
@@ -825,37 +825,37 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         LongVar countVar = mfRegistryNotification.metric();
-        assertThat(countVar.name(), is(name("longTaskTimer", "dimensional", "activeTasks")));
+        assertThat(countVar.name(), is(name("longTaskTimer", "labeled", "activeTasks")));
 
-        TestMetricListener activeTasksVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "dimensional", "activeTasks"));
+        TestMetricListener activeTasksVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "labeled", "activeTasks"));
 
         assertThat(activeTasksVarListener.notificationCount(), is(1));
         assertThat(activeTasksVarListener.notification(0).type(), is(INSTANCE_ADDED));
         LongVarInstance activeTasksVarInstance_1 = (LongVarInstance)activeTasksVarListener.notification(0).instance();
-        assertThat(activeTasksVarInstance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(activeTasksVarInstance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(activeTasksVarInstance_1.isTotalInstance());
         assertFalse(activeTasksVarInstance_1.isNonDecreasing());
 
-        TestMetricListener durationVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "dimensional", "duration"));
+        TestMetricListener durationVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "labeled", "duration"));
 
         assertThat(durationVarListener.notificationCount(), is(1));
         assertThat(durationVarListener.notification(0).type(), is(INSTANCE_ADDED));
         DoubleVarInstance durationVarInstance_1 = (DoubleVarInstance)durationVarListener.notification(0).instance();
-        assertThat(durationVarInstance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(durationVarInstance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(durationVarInstance_1.isTotalInstance());
         assertFalse(durationVarInstance_1.isNonDecreasing());
 
-        TestMetricListener maxVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "dimensional", "max"));
+        TestMetricListener maxVarListener = mfRegistryListener.listenerForMetric(withName("longTaskTimer", "labeled", "max"));
 
         assertThat(maxVarListener.notificationCount(), is(1));
         assertThat(maxVarListener.notification(0).type(), is(INSTANCE_ADDED));
         DoubleVarInstance maxVarInstance_1 = (DoubleVarInstance)maxVarListener.notification(0).instance();
-        assertThat(maxVarInstance_1.dimensionValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
+        assertThat(maxVarInstance_1.labelValues(), is(List.of(SERVICE.value("service_1"), SERVER.value("server_1_1"))));
         assertFalse(maxVarInstance_1.isTotalInstance());
         assertFalse(maxVarInstance_1.isNonDecreasing());
 
         LongTaskTimer longTaskTimer_2 = LongTaskTimer
-            .builder("longTaskTimer.dimensional")
+            .builder("longTaskTimer.labeled")
             .tags(SERVICE.name(), "service_2", SERVER.name(), "server_2_1")
             .register(registry);
 
@@ -868,21 +868,21 @@ public class MfMeterRegistryTest {
         assertThat(activeTasksVarListener.notificationCount(), is(2));
         assertThat(activeTasksVarListener.notification(1).type(), is(INSTANCE_ADDED));
         LongVarInstance activeTasksVarInstance_2 = (LongVarInstance)activeTasksVarListener.notification(1).instance();
-        assertThat(activeTasksVarInstance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(activeTasksVarInstance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(activeTasksVarInstance_2.isTotalInstance());
         assertFalse(activeTasksVarInstance_2.isNonDecreasing());
 
         assertThat(durationVarListener.notificationCount(), is(2));
         assertThat(durationVarListener.notification(1).type(), is(INSTANCE_ADDED));
         DoubleVarInstance durationVarInstance_2 = (DoubleVarInstance)durationVarListener.notification(1).instance();
-        assertThat(durationVarInstance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(durationVarInstance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(durationVarInstance_2.isTotalInstance());
         assertFalse(durationVarInstance_2.isNonDecreasing());
 
         assertThat(maxVarListener.notificationCount(), is(2));
         assertThat(maxVarListener.notification(1).type(), is(INSTANCE_ADDED));
         DoubleVarInstance maxVarInstance_2 = (DoubleVarInstance)durationVarListener.notification(1).instance();
-        assertThat(maxVarInstance_2.dimensionValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
+        assertThat(maxVarInstance_2.labelValues(), is(List.of(SERVICE.value("service_2"), SERVER.value("server_2_1"))));
         assertFalse(maxVarInstance_2.isTotalInstance());
         assertFalse(maxVarInstance_2.isNonDecreasing());
 
@@ -919,7 +919,7 @@ public class MfMeterRegistryTest {
     }
 
     @Test
-    public void meter_dimensional() {
+    public void meter_labeled() {
         assertThat(mfRegistryListener.notificationCount(), is(0));
 
         AtomicLong durationSupplier_1 = new AtomicLong();
@@ -928,7 +928,7 @@ public class MfMeterRegistryTest {
         // add
         Meter meter_1 = Meter
             .builder(
-                "meter.dimensional",
+                "meter.labeled",
                 Meter.Type.OTHER,
                 List.of(
                     new Measurement(() -> (double)durationSupplier_1.incrementAndGet(), Statistic.DURATION),
@@ -940,16 +940,16 @@ public class MfMeterRegistryTest {
         TestMetricRegistryListener.Notification mfRegistryNotification = mfRegistryListener.notification(0);
         assertThat(mfRegistryNotification.type(), is(METRIC_ADDED));
         DoubleVar mfVar = mfRegistryNotification.metric();
-        assertThat(mfVar.name(), is(name("meter", "dimensional")));
+        assertThat(mfVar.name(), is(name("meter", "labeled")));
 
-        TestMetricListener mfVarListener = mfRegistryListener.listenerForMetric(withName("meter", "dimensional"));
+        TestMetricListener mfVarListener = mfRegistryListener.listenerForMetric(withName("meter", "labeled"));
         assertThat(mfVarListener.notificationCount(), is(2));
 
         assertThat(mfVarListener.notification(0).type(), is(INSTANCE_ADDED));
         DoubleVarInstance mfVarInstance_1 = (DoubleVarInstance)mfVarListener.notification(0).instance();
 
         assertThat(
-            mfVarInstance_1.dimensionValues(),
+            mfVarInstance_1.labelValues(),
             is(List.of(
                 SERVICE.value("service_1"),
                 SERVER.value("server_1_1"),
@@ -962,7 +962,7 @@ public class MfMeterRegistryTest {
         DoubleVarInstance mfVarInstance_2 = (DoubleVarInstance)mfVarListener.notification(1).instance();
 
         assertThat(
-            mfVarInstance_2.dimensionValues(),
+            mfVarInstance_2.labelValues(),
             is(List.of(
                 SERVICE.value("service_1"),
                 SERVER.value("server_1_1"),
@@ -976,7 +976,7 @@ public class MfMeterRegistryTest {
 
         Meter meter_2 = Meter
             .builder(
-                "meter.dimensional",
+                "meter.labeled",
                 Meter.Type.OTHER,
                 List.of(
                     new Measurement(() -> (double) durationSupplier_2.incrementAndGet(), Statistic.DURATION),
@@ -992,7 +992,7 @@ public class MfMeterRegistryTest {
         DoubleVarInstance mfVarInstance_3 = (DoubleVarInstance)mfVarListener.notification(2).instance();
 
         assertThat(
-            mfVarInstance_3.dimensionValues(),
+            mfVarInstance_3.labelValues(),
             is(List.of(
                 SERVICE.value("service_2"),
                 SERVER.value("server_2_1"),
@@ -1005,7 +1005,7 @@ public class MfMeterRegistryTest {
         DoubleVarInstance mfVarInstance_4 = (DoubleVarInstance)mfVarListener.notification(3).instance();
 
         assertThat(
-            mfVarInstance_4.dimensionValues(),
+            mfVarInstance_4.labelValues(),
             is(List.of(
                 SERVICE.value("service_2"),
                 SERVER.value("server_2_1"),

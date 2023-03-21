@@ -40,15 +40,15 @@ public class MfTimer extends AbstractTimer implements MfMeter {
         this.max = new TimeWindowMax(clock, distributionStatisticConfig);
 
         this.mfTimer =
-            this.base.hasDimensions() ?
-            mfRegistry.timer(this.base.name(), () -> withTimer().dimensions(this.base.dimensions())) :
+            this.base.hasLabels() ?
+            mfRegistry.timer(this.base.name(), () -> withTimer().labels(this.base.labels())) :
             mfRegistry.timer(this.base.name());
     }
 
     @Override
     protected void recordNonNegative(long amount, TimeUnit unit) {
         if (amount >= 0) {
-            mfTimer.update(amount, unit, base.dimensionValues());
+            mfTimer.update(amount, unit, base.labelValues());
             count.add(amount);
             long amountNanos = NANOSECONDS.convert(amount, unit);
             max.record(amountNanos, NANOSECONDS);
@@ -73,8 +73,8 @@ public class MfTimer extends AbstractTimer implements MfMeter {
 
     @Override
     public void meterRemoved() {
-        if (base.hasDimensions()) {
-            mfTimer.removeInstancesFor(base.dimensionValues());
+        if (base.hasLabels()) {
+            mfTimer.removeInstancesFor(base.labelValues());
         } else {
             base.mfRegistry().remove(base.name());
         }

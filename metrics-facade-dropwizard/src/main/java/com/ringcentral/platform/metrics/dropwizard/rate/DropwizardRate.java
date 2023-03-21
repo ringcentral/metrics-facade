@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.dropwizard.rate;
 import com.codahale.metrics.*;
 import com.ringcentral.platform.metrics.NotMeasuredException;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.AbstractRate;
@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.ringcentral.platform.metrics.utils.MetricContextUtils.getForClass;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class DropwizardRate extends AbstractRate<Meter> {
@@ -161,9 +160,9 @@ public class DropwizardRate extends AbstractRate<Meter> {
         @Override
         public AbstractMeterInstance<Meter> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Meter>> measurableValueProviders,
             Meter meter) {
@@ -172,9 +171,9 @@ public class DropwizardRate extends AbstractRate<Meter> {
 
             return new DropwizardRateInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,
@@ -184,9 +183,9 @@ public class DropwizardRate extends AbstractRate<Meter> {
         @Override
         public AbstractExpirableMeterInstance<Meter> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Meter>> measurableValueProviders,
             Meter meter,
@@ -196,9 +195,9 @@ public class DropwizardRate extends AbstractRate<Meter> {
 
             return new DropwizardExpirableRateInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,

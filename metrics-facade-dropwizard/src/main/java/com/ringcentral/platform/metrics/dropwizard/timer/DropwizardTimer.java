@@ -5,7 +5,7 @@ import com.codahale.metrics.*;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -266,18 +266,18 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
         @Override
         public AbstractMeterInstance<Timer> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Timer>> measurableValueProviders,
             Timer timer) {
 
             return new DropwizardTimerInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(timer, measurableValueProviders),
                 measurableValueProviders,
@@ -287,9 +287,9 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
         @Override
         public AbstractExpirableMeterInstance<Timer> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Timer>> measurableValueProviders,
             Timer timer,
@@ -297,9 +297,9 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
 
             return new DropwizardExpirableTimerInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(timer, measurableValueProviders),
                 measurableValueProviders,
@@ -328,7 +328,7 @@ public class DropwizardTimer extends AbstractTimer<Timer> {
     }
 
     @Override
-    public Stopwatch stopwatch(MetricDimensionValues dimensionValues) {
-        return new DropwizardStopwatch(this, dimensionValues);
+    public Stopwatch stopwatch(LabelValues labelValues) {
+        return new DropwizardStopwatch(this, labelValues);
     }
 }

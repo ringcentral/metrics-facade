@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.var.objectVar;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.AbstractVar;
@@ -21,18 +21,18 @@ public class AbstractObjectVar extends AbstractVar<Object> implements ObjectVar 
         @Override
         public ObjectVarInstance makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean nonDecreasing,
             Measurable valueMeasurable,
             Supplier<Object> valueSupplier) {
 
             return new DefaultObjectVarInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 nonDecreasing,
                 valueMeasurable,
                 valueSupplier);

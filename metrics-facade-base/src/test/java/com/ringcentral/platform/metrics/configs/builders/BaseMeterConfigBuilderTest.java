@@ -1,22 +1,29 @@
 package com.ringcentral.platform.metrics.configs.builders;
 
-import com.ringcentral.platform.metrics.configs.*;
+import com.ringcentral.platform.metrics.configs.BaseMeterConfig;
+import com.ringcentral.platform.metrics.configs.BaseMeterInstanceConfig;
+import com.ringcentral.platform.metrics.configs.BaseMeterSliceConfig;
 import com.ringcentral.platform.metrics.configs.MeterSliceConfig.LevelInstanceNameProvider;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder.InstanceConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValuesPredicate;
 import com.ringcentral.platform.metrics.measurables.NothingMeasurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import org.junit.Test;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static com.ringcentral.platform.metrics.configs.builders.BaseMeterConfigBuilder.*;
+import static com.ringcentral.platform.metrics.configs.builders.BaseMeterConfigBuilder.meter;
+import static com.ringcentral.platform.metrics.configs.builders.BaseMeterConfigBuilder.withMeter;
 import static com.ringcentral.platform.metrics.configs.builders.BaseMeterInstanceConfigBuilder.meterInstance;
-import static com.ringcentral.platform.metrics.dimensions.AllMetricDimensionValuesPredicate.dimensionValuesMatchingAll;
-import static com.ringcentral.platform.metrics.dimensions.AnyMetricDimensionValuesPredicate.dimensionValuesMatchingAny;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
-import static com.ringcentral.platform.metrics.names.MetricName.*;
+import static com.ringcentral.platform.metrics.labels.AllLabelValuesPredicate.labelValuesMatchingAll;
+import static com.ringcentral.platform.metrics.labels.AnyLabelValuesPredicate.labelValuesMatchingAny;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
+import static com.ringcentral.platform.metrics.names.MetricName.name;
+import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,22 +32,22 @@ import static org.mockito.Mockito.mock;
 
 public class BaseMeterConfigBuilderTest {
 
-    static final MetricDimensionValuesPredicate SLICE_PREDICATE_1 = mock(MetricDimensionValuesPredicate.class);
-    static final MetricDimensionValuesPredicate SLICE_PREDICATE_2 = mock(MetricDimensionValuesPredicate.class);
+    static final LabelValuesPredicate SLICE_PREDICATE_1 = mock(LabelValuesPredicate.class);
+    static final LabelValuesPredicate SLICE_PREDICATE_2 = mock(LabelValuesPredicate.class);
 
-    static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
-    static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
-    static final MetricDimension DIMENSION_3 = new MetricDimension("dimension_3");
-    static final MetricDimension DIMENSION_4 = new MetricDimension("dimension_4");
-    static final MetricDimension DIMENSION_5 = new MetricDimension("dimension_5");
-    static final MetricDimension DIMENSION_6 = new MetricDimension("dimension_6");
-    static final MetricDimension DIMENSION_7 = new MetricDimension("dimension_7");
-    static final MetricDimension DIMENSION_8 = new MetricDimension("dimension_8");
-    static final MetricDimension DIMENSION_9 = new MetricDimension("dimension_9");
-    static final MetricDimension DIMENSION_10 = new MetricDimension("dimension_10");
+    static final Label LABEL_1 = new Label("label_1");
+    static final Label LABEL_2 = new Label("label_2");
+    static final Label LABEL_3 = new Label("label_3");
+    static final Label LABEL_4 = new Label("label_4");
+    static final Label LABEL_5 = new Label("label_5");
+    static final Label LABEL_6 = new Label("label_6");
+    static final Label LABEL_7 = new Label("label_7");
+    static final Label LABEL_8 = new Label("label_8");
+    static final Label LABEL_9 = new Label("label_9");
+    static final Label LABEL_10 = new Label("label_10");
 
-    static final MetricDimensionValuesPredicate EXCLUSION_PREDICATE_1 = dimensionValuesMatchingAll(DIMENSION_1.mask("*1*"));
-    static final MetricDimensionValuesPredicate EXCLUSION_PREDICATE_2 = dimensionValuesMatchingAny(DIMENSION_2.mask("*1*"));
+    static final LabelValuesPredicate EXCLUSION_PREDICATE_1 = labelValuesMatchingAll(LABEL_1.mask("*1*"));
+    static final LabelValuesPredicate EXCLUSION_PREDICATE_2 = labelValuesMatchingAny(LABEL_2.mask("*1*"));
 
     static final NothingMeasurable MEASURABLE_1 = mock(NothingMeasurable.class);
     static final NothingMeasurable MEASURABLE_2 = mock(NothingMeasurable.class);
@@ -73,23 +80,23 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(config.isEnabled());
         assertFalse(config.hasDescription());
         assertNull(config.description());
-        assertTrue(config.prefixDimensionValues().isEmpty());
+        assertTrue(config.prefixLabelValues().isEmpty());
         assertTrue(config.context().isEmpty());
         assertFalse(config.hasExclusionPredicate());
         assertNull(config.exclusionPredicate());
-        assertTrue(config.dimensions().isEmpty());
+        assertTrue(config.labels().isEmpty());
 
         BaseMeterSliceConfig allSliceConfig = config.allSliceConfig();
         assertTrue(allSliceConfig.isEnabled());
         assertTrue(allSliceConfig.name().isEmpty());
         assertFalse(allSliceConfig.hasPredicate());
         assertNull(allSliceConfig.predicate());
-        assertFalse(allSliceConfig.hasDimensions());
-        assertTrue(allSliceConfig.dimensions().isEmpty());
-        assertFalse(allSliceConfig.hasMaxDimensionalInstances());
-        assertNull(allSliceConfig.maxDimensionalInstances());
-        assertFalse(allSliceConfig.isDimensionalInstanceExpirationEnabled());
-        assertNull(allSliceConfig.dimensionalInstanceExpirationTime());
+        assertFalse(allSliceConfig.hasLabels());
+        assertTrue(allSliceConfig.labels().isEmpty());
+        assertFalse(allSliceConfig.hasMaxLabeledInstances());
+        assertNull(allSliceConfig.maxLabeledInstances());
+        assertFalse(allSliceConfig.isLabeledInstanceExpirationEnabled());
+        assertNull(allSliceConfig.labeledInstanceExpirationTime());
         assertFalse(allSliceConfig.hasMeasurables());
         assertTrue(allSliceConfig.measurables().isEmpty());
         assertTrue(allSliceConfig.isTotalEnabled());
@@ -97,7 +104,7 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(allSliceConfig.areLevelsEnabled());
         assertFalse(allSliceConfig.hasLevelInstanceNameProvider());
         assertNull(allSliceConfig.levelInstanceNameProvider());
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_1));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_1));
         assertFalse(allSliceConfig.hasLevelInstanceConfigs());
         assertTrue(allSliceConfig.levelInstanceConfigs().isEmpty());
         assertFalse(allSliceConfig.hasDefaultLevelInstanceConfig());
@@ -112,19 +119,19 @@ public class BaseMeterConfigBuilderTest {
         BaseMeterConfig config = new BaseMeterConfigBuilder()
             .disable()
             .description("description")
-            .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
+            .prefix(labelValues(LABEL_1.value("v_1"), LABEL_2.value("v_2")))
             .put("k_1", "v_1").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_1)
-            .dimensions(DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7, DIMENSION_8)
-            .maxDimensionalInstancesPerSlice(10)
-            .expireDimensionalInstanceAfter(11, SECONDS)
+            .labels(LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8)
+            .maxLabeledInstancesPerSlice(10)
+            .expireLabeledInstanceAfter(11, SECONDS)
             .measurables(MEASURABLE_1)
             // AllSlice
             .allSlice(withName("all"))
                 .disable()
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(12)
-                .expireDimensionalInstanceAfter(13, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(12)
+                .expireLabeledInstanceAfter(13, SECONDS)
                 .measurables(MEASURABLE_2)
                 .disableTotal()
                 .total(meterInstance()
@@ -135,18 +142,18 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_1,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true)
             // Slice 1
             .slice("slice_1", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_1)
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6)
-                .maxDimensionalInstances(14)
-                .expireDimensionalInstanceAfter(15, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6)
+                .maxLabeledInstances(14)
+                .expireLabeledInstanceAfter(15, SECONDS)
                 .measurables(MEASURABLE_4)
                 .disableTotal()
                 .total(meterInstance()
@@ -157,17 +164,17 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_2,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
                     LEVEL_INSTANCE_CONFIG_BUILDER_6,
                     true)
             // Slice 2
             .slice("slice_2", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_2)
-                .dimensions(DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(16)
-                .expireDimensionalInstanceAfter(17, SECONDS)
+                .labels(LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(16)
+                .expireLabeledInstanceAfter(17, SECONDS)
                 .measurables(MEASURABLE_6)
                 .disableTotal()
                 .total(meterInstance()
@@ -178,8 +185,8 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_3,
                     Map.of(
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true)
             .builder().build();
@@ -187,12 +194,12 @@ public class BaseMeterConfigBuilderTest {
         assertFalse(config.isEnabled());
         assertTrue(config.hasDescription());
         assertThat(config.description(), is("description"));
-        assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
+        assertThat(config.prefixLabelValues(), is(labelValues(LABEL_1.value("v_1"), LABEL_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
         assertTrue(config.hasExclusionPredicate());
         assertThat(config.exclusionPredicate(), is(EXCLUSION_PREDICATE_1));
-        assertThat(config.dimensions(), is(List.of(DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7, DIMENSION_8)));
+        assertThat(config.labels(), is(List.of(LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8)));
 
         // AllSlice
         BaseMeterSliceConfig allSliceConfig = config.allSliceConfig();
@@ -200,12 +207,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(allSliceConfig.name(), is(name("all")));
         assertFalse(allSliceConfig.hasPredicate());
         assertNull(allSliceConfig.predicate());
-        assertTrue(allSliceConfig.hasDimensions());
-        assertThat(allSliceConfig.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(allSliceConfig.hasMaxDimensionalInstances());
-        assertThat(allSliceConfig.maxDimensionalInstances(), is(12));
-        assertTrue(allSliceConfig.isDimensionalInstanceExpirationEnabled());
-        assertThat(allSliceConfig.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(13)));
+        assertTrue(allSliceConfig.hasLabels());
+        assertThat(allSliceConfig.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(allSliceConfig.hasMaxLabeledInstances());
+        assertThat(allSliceConfig.maxLabeledInstances(), is(12));
+        assertTrue(allSliceConfig.isLabeledInstanceExpirationEnabled());
+        assertThat(allSliceConfig.labeledInstanceExpirationTime(), is(Duration.ofSeconds(13)));
         assertTrue(allSliceConfig.hasMeasurables());
         assertThat(allSliceConfig.measurables(), is(Set.of(MEASURABLE_2)));
 
@@ -217,17 +224,17 @@ public class BaseMeterConfigBuilderTest {
         assertFalse(allSliceConfig.areLevelsEnabled());
         assertTrue(allSliceConfig.hasLevelInstanceNameProvider());
         assertThat(allSliceConfig.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(allSliceConfig.hasLevelInstanceConfigs());
         assertThat(allSliceConfig.levelInstanceConfigs().size(), is(3));
         assertTrue(allSliceConfig.hasDefaultLevelInstanceConfig());
@@ -248,12 +255,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_1_config.name(), is(name("slice_1", "suffix")));
         assertTrue(slice_1_config.hasPredicate());
         assertThat(slice_1_config.predicate(), is(SLICE_PREDICATE_1));
-        assertTrue(slice_1_config.hasDimensions());
-        assertThat(slice_1_config.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6)));
-        assertTrue(slice_1_config.hasMaxDimensionalInstances());
-        assertThat(slice_1_config.maxDimensionalInstances(), is(14));
-        assertTrue(slice_1_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_1_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(15)));
+        assertTrue(slice_1_config.hasLabels());
+        assertThat(slice_1_config.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6)));
+        assertTrue(slice_1_config.hasMaxLabeledInstances());
+        assertThat(slice_1_config.maxLabeledInstances(), is(14));
+        assertTrue(slice_1_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_1_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(15)));
         assertTrue(slice_1_config.hasMeasurables());
         assertThat(slice_1_config.measurables(), is(Set.of(MEASURABLE_4)));
 
@@ -265,16 +272,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_1_config.areLevelsEnabled());
         assertTrue(slice_1_config.hasLevelInstanceNameProvider());
         assertThat(slice_1_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_1_config.hasLevelInstanceConfigs());
         assertThat(slice_1_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_1_config.hasDefaultLevelInstanceConfig());
@@ -291,12 +298,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_2_config.name(), is(name("slice_2", "suffix")));
         assertTrue(slice_2_config.hasPredicate());
         assertThat(slice_2_config.predicate(), is(SLICE_PREDICATE_2));
-        assertTrue(slice_2_config.hasDimensions());
-        assertThat(slice_2_config.dimensions(), is(List.of(DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(slice_2_config.hasMaxDimensionalInstances());
-        assertThat(slice_2_config.maxDimensionalInstances(), is(16));
-        assertTrue(slice_2_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_2_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(17)));
+        assertTrue(slice_2_config.hasLabels());
+        assertThat(slice_2_config.labels(), is(List.of(LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(slice_2_config.hasMaxLabeledInstances());
+        assertThat(slice_2_config.maxLabeledInstances(), is(16));
+        assertTrue(slice_2_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_2_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(17)));
         assertTrue(slice_2_config.hasMeasurables());
         assertThat(slice_2_config.measurables(), is(Set.of(MEASURABLE_6)));
 
@@ -308,16 +315,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_2_config.areLevelsEnabled());
         assertTrue(slice_2_config.hasLevelInstanceNameProvider());
         assertThat(slice_2_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_2_config.hasLevelInstanceConfigs());
         assertThat(slice_2_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_2_config.hasDefaultLevelInstanceConfig());
@@ -328,26 +335,26 @@ public class BaseMeterConfigBuilderTest {
     @Test
     public void rebase() {
         BaseMeterConfigBuilder builder = meter()
-            .dimensions(
-                DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6,
-                DIMENSION_7, DIMENSION_8, DIMENSION_9, DIMENSION_10);
+            .labels(
+                LABEL_3, LABEL_4, LABEL_5, LABEL_6,
+                LABEL_7, LABEL_8, LABEL_9, LABEL_10);
 
         builder.rebase(withMeter()
             .disable()
             .description("description_1")
-            .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
+            .prefix(labelValues(LABEL_1.value("v_1"), LABEL_2.value("v_2")))
             .put("k_1", "v_1").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_1)
-            .dimensions(DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7, DIMENSION_8)
-            .maxDimensionalInstancesPerSlice(10)
-            .expireDimensionalInstanceAfter(11, SECONDS)
+            .labels(LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8)
+            .maxLabeledInstancesPerSlice(10)
+            .expireLabeledInstanceAfter(11, SECONDS)
             .measurables(MEASURABLE_1)
             // AllSlice
             .allSlice(withName("all"))
                 .disable()
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(12)
-                .expireDimensionalInstanceAfter(13, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(12)
+                .expireLabeledInstanceAfter(13, SECONDS)
                 .measurables(MEASURABLE_2)
                 .disableTotal()
                 .total(meterInstance()
@@ -358,18 +365,18 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_1,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true)
             // Slice 1
             .slice("slice_1", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_1)
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6)
-                .maxDimensionalInstances(14)
-                .expireDimensionalInstanceAfter(15, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6)
+                .maxLabeledInstances(14)
+                .expireLabeledInstanceAfter(15, SECONDS)
                 .measurables(MEASURABLE_4)
                 .disableTotal()
                 .total(meterInstance()
@@ -380,17 +387,17 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_2,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
                     LEVEL_INSTANCE_CONFIG_BUILDER_6,
                     true)
             // Slice 2
             .slice("slice_2", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_2)
-                .dimensions(DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(16)
-                .expireDimensionalInstanceAfter(17, SECONDS)
+                .labels(LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(16)
+                .expireLabeledInstanceAfter(17, SECONDS)
                 .measurables(MEASURABLE_6)
                 .disableTotal()
                 .total(meterInstance()
@@ -401,8 +408,8 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_3,
                     Map.of(
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true).builder());
 
@@ -410,15 +417,15 @@ public class BaseMeterConfigBuilderTest {
 
         assertFalse(config.isEnabled());
         assertThat(config.description(), is("description_1"));
-        assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
+        assertThat(config.prefixLabelValues(), is(labelValues(LABEL_1.value("v_1"), LABEL_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
         assertTrue(config.hasExclusionPredicate());
         assertThat(config.exclusionPredicate(), is(EXCLUSION_PREDICATE_1));
 
-        assertThat(config.dimensions(), is(List.of(
-            DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6,
-            DIMENSION_7, DIMENSION_8, DIMENSION_9, DIMENSION_10)));
+        assertThat(config.labels(), is(List.of(
+            LABEL_3, LABEL_4, LABEL_5, LABEL_6,
+            LABEL_7, LABEL_8, LABEL_9, LABEL_10)));
 
         // AllSlice
         BaseMeterSliceConfig allSliceConfig = config.allSliceConfig();
@@ -426,12 +433,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(allSliceConfig.name(), is(name("all")));
         assertFalse(allSliceConfig.hasPredicate());
         assertNull(allSliceConfig.predicate());
-        assertTrue(allSliceConfig.hasDimensions());
-        assertThat(allSliceConfig.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(allSliceConfig.hasMaxDimensionalInstances());
-        assertThat(allSliceConfig.maxDimensionalInstances(), is(12));
-        assertTrue(allSliceConfig.isDimensionalInstanceExpirationEnabled());
-        assertThat(allSliceConfig.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(13)));
+        assertTrue(allSliceConfig.hasLabels());
+        assertThat(allSliceConfig.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(allSliceConfig.hasMaxLabeledInstances());
+        assertThat(allSliceConfig.maxLabeledInstances(), is(12));
+        assertTrue(allSliceConfig.isLabeledInstanceExpirationEnabled());
+        assertThat(allSliceConfig.labeledInstanceExpirationTime(), is(Duration.ofSeconds(13)));
         assertTrue(allSliceConfig.hasMeasurables());
         assertThat(allSliceConfig.measurables(), is(Set.of(MEASURABLE_2)));
 
@@ -443,17 +450,17 @@ public class BaseMeterConfigBuilderTest {
         assertFalse(allSliceConfig.areLevelsEnabled());
         assertTrue(allSliceConfig.hasLevelInstanceNameProvider());
         assertThat(allSliceConfig.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(allSliceConfig.hasLevelInstanceConfigs());
         assertThat(allSliceConfig.levelInstanceConfigs().size(), is(3));
         assertTrue(allSliceConfig.hasDefaultLevelInstanceConfig());
@@ -474,12 +481,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_1_config.name(), is(name("slice_1", "suffix")));
         assertTrue(slice_1_config.hasPredicate());
         assertThat(slice_1_config.predicate(), is(SLICE_PREDICATE_1));
-        assertTrue(slice_1_config.hasDimensions());
-        assertThat(slice_1_config.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6)));
-        assertTrue(slice_1_config.hasMaxDimensionalInstances());
-        assertThat(slice_1_config.maxDimensionalInstances(), is(14));
-        assertTrue(slice_1_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_1_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(15)));
+        assertTrue(slice_1_config.hasLabels());
+        assertThat(slice_1_config.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6)));
+        assertTrue(slice_1_config.hasMaxLabeledInstances());
+        assertThat(slice_1_config.maxLabeledInstances(), is(14));
+        assertTrue(slice_1_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_1_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(15)));
         assertTrue(slice_1_config.hasMeasurables());
         assertThat(slice_1_config.measurables(), is(Set.of(MEASURABLE_4)));
 
@@ -491,16 +498,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_1_config.areLevelsEnabled());
         assertTrue(slice_1_config.hasLevelInstanceNameProvider());
         assertThat(slice_1_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_1_config.hasLevelInstanceConfigs());
         assertThat(slice_1_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_1_config.hasDefaultLevelInstanceConfig());
@@ -517,12 +524,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_2_config.name(), is(name("slice_2", "suffix")));
         assertTrue(slice_2_config.hasPredicate());
         assertThat(slice_2_config.predicate(), is(SLICE_PREDICATE_2));
-        assertTrue(slice_2_config.hasDimensions());
-        assertThat(slice_2_config.dimensions(), is(List.of(DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(slice_2_config.hasMaxDimensionalInstances());
-        assertThat(slice_2_config.maxDimensionalInstances(), is(16));
-        assertTrue(slice_2_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_2_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(17)));
+        assertTrue(slice_2_config.hasLabels());
+        assertThat(slice_2_config.labels(), is(List.of(LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(slice_2_config.hasMaxLabeledInstances());
+        assertThat(slice_2_config.maxLabeledInstances(), is(16));
+        assertTrue(slice_2_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_2_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(17)));
         assertTrue(slice_2_config.hasMeasurables());
         assertThat(slice_2_config.measurables(), is(Set.of(MEASURABLE_6)));
 
@@ -534,16 +541,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_2_config.areLevelsEnabled());
         assertTrue(slice_2_config.hasLevelInstanceNameProvider());
         assertThat(slice_2_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_2_config.hasLevelInstanceConfigs());
         assertThat(slice_2_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_2_config.hasDefaultLevelInstanceConfig());
@@ -553,19 +560,19 @@ public class BaseMeterConfigBuilderTest {
         builder.rebase(withMeter()
             .disable()
             .description("description_2")
-            .prefix(dimensionValues(DIMENSION_1.value("v_1_2"), DIMENSION_2.value("v_2")))
+            .prefix(labelValues(LABEL_1.value("v_1_2"), LABEL_2.value("v_2")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_2)
-            .dimensions(DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7, DIMENSION_8)
-            .maxDimensionalInstancesPerSlice(110)
-            .expireDimensionalInstanceAfter(111, SECONDS)
+            .labels(LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8)
+            .maxLabeledInstancesPerSlice(110)
+            .expireLabeledInstanceAfter(111, SECONDS)
             .measurables(MEASURABLE_1, MEASURABLE_8)
             // AllSlice
             .allSlice(withName("all_2"))
                 .disable()
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(112)
-                .expireDimensionalInstanceAfter(113, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(112)
+                .expireLabeledInstanceAfter(113, SECONDS)
                 .measurables(MEASURABLE_2, MEASURABLE_8)
                 .disableTotal()
                 .total(meterInstance()
@@ -576,18 +583,18 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_1,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true)
             // Slice 1
             .slice("slice_1", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_1)
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6)
-                .maxDimensionalInstances(114)
-                .expireDimensionalInstanceAfter(115, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6)
+                .maxLabeledInstances(114)
+                .expireLabeledInstanceAfter(115, SECONDS)
                 .measurables(MEASURABLE_4, MEASURABLE_8)
                 .disableTotal()
                 .total(meterInstance()
@@ -598,17 +605,17 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_2,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
                     LEVEL_INSTANCE_CONFIG_BUILDER_6,
                     true)
             // Slice 3
             .slice("slice_3", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_2)
-                .dimensions(DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(116)
-                .expireDimensionalInstanceAfter(117, SECONDS)
+                .labels(LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(116)
+                .expireLabeledInstanceAfter(117, SECONDS)
                 .measurables(MEASURABLE_6, MEASURABLE_8)
                 .disableTotal()
                 .total(meterInstance()
@@ -619,8 +626,8 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_3,
                     Map.of(
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true).builder());
 
@@ -628,15 +635,15 @@ public class BaseMeterConfigBuilderTest {
 
         assertFalse(config.isEnabled());
         assertThat(config.description(), is("description_1"));
-        assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
+        assertThat(config.prefixLabelValues(), is(labelValues(LABEL_1.value("v_1"), LABEL_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
         assertTrue(config.hasExclusionPredicate());
         assertThat(config.exclusionPredicate(), is(EXCLUSION_PREDICATE_1));
 
-        assertThat(config.dimensions(), is(List.of(
-            DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6,
-            DIMENSION_7, DIMENSION_8, DIMENSION_9, DIMENSION_10)));
+        assertThat(config.labels(), is(List.of(
+            LABEL_3, LABEL_4, LABEL_5, LABEL_6,
+            LABEL_7, LABEL_8, LABEL_9, LABEL_10)));
 
         // AllSlice
         allSliceConfig = config.allSliceConfig();
@@ -644,12 +651,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(allSliceConfig.name(), is(name("all")));
         assertFalse(allSliceConfig.hasPredicate());
         assertNull(allSliceConfig.predicate());
-        assertTrue(allSliceConfig.hasDimensions());
-        assertThat(allSliceConfig.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(allSliceConfig.hasMaxDimensionalInstances());
-        assertThat(allSliceConfig.maxDimensionalInstances(), is(12));
-        assertTrue(allSliceConfig.isDimensionalInstanceExpirationEnabled());
-        assertThat(allSliceConfig.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(13)));
+        assertTrue(allSliceConfig.hasLabels());
+        assertThat(allSliceConfig.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(allSliceConfig.hasMaxLabeledInstances());
+        assertThat(allSliceConfig.maxLabeledInstances(), is(12));
+        assertTrue(allSliceConfig.isLabeledInstanceExpirationEnabled());
+        assertThat(allSliceConfig.labeledInstanceExpirationTime(), is(Duration.ofSeconds(13)));
         assertTrue(allSliceConfig.hasMeasurables());
         assertThat(allSliceConfig.measurables(), is(Set.of(MEASURABLE_2)));
 
@@ -661,17 +668,17 @@ public class BaseMeterConfigBuilderTest {
         assertFalse(allSliceConfig.areLevelsEnabled());
         assertTrue(allSliceConfig.hasLevelInstanceNameProvider());
         assertThat(allSliceConfig.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(allSliceConfig.hasLevelInstanceConfigs());
         assertThat(allSliceConfig.levelInstanceConfigs().size(), is(3));
         assertTrue(allSliceConfig.hasDefaultLevelInstanceConfig());
@@ -692,12 +699,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_1_config.name(), is(name("slice_1", "suffix")));
         assertTrue(slice_1_config.hasPredicate());
         assertThat(slice_1_config.predicate(), is(SLICE_PREDICATE_1));
-        assertTrue(slice_1_config.hasDimensions());
-        assertThat(slice_1_config.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6)));
-        assertTrue(slice_1_config.hasMaxDimensionalInstances());
-        assertThat(slice_1_config.maxDimensionalInstances(), is(14));
-        assertTrue(slice_1_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_1_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(15)));
+        assertTrue(slice_1_config.hasLabels());
+        assertThat(slice_1_config.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6)));
+        assertTrue(slice_1_config.hasMaxLabeledInstances());
+        assertThat(slice_1_config.maxLabeledInstances(), is(14));
+        assertTrue(slice_1_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_1_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(15)));
         assertTrue(slice_1_config.hasMeasurables());
         assertThat(slice_1_config.measurables(), is(Set.of(MEASURABLE_4)));
 
@@ -709,16 +716,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_1_config.areLevelsEnabled());
         assertTrue(slice_1_config.hasLevelInstanceNameProvider());
         assertThat(slice_1_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_1_config.hasLevelInstanceConfigs());
         assertThat(slice_1_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_1_config.hasDefaultLevelInstanceConfig());
@@ -735,12 +742,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_2_config.name(), is(name("slice_2", "suffix")));
         assertTrue(slice_2_config.hasPredicate());
         assertThat(slice_2_config.predicate(), is(SLICE_PREDICATE_2));
-        assertTrue(slice_2_config.hasDimensions());
-        assertThat(slice_2_config.dimensions(), is(List.of(DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(slice_2_config.hasMaxDimensionalInstances());
-        assertThat(slice_2_config.maxDimensionalInstances(), is(16));
-        assertTrue(slice_2_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_2_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(17)));
+        assertTrue(slice_2_config.hasLabels());
+        assertThat(slice_2_config.labels(), is(List.of(LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(slice_2_config.hasMaxLabeledInstances());
+        assertThat(slice_2_config.maxLabeledInstances(), is(16));
+        assertTrue(slice_2_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_2_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(17)));
         assertTrue(slice_2_config.hasMeasurables());
         assertThat(slice_2_config.measurables(), is(Set.of(MEASURABLE_6)));
 
@@ -752,16 +759,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_2_config.areLevelsEnabled());
         assertTrue(slice_2_config.hasLevelInstanceNameProvider());
         assertThat(slice_2_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_2_config.hasLevelInstanceConfigs());
         assertThat(slice_2_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_2_config.hasDefaultLevelInstanceConfig());
@@ -778,12 +785,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_3_config.name(), is(name("slice_3", "suffix")));
         assertTrue(slice_3_config.hasPredicate());
         assertThat(slice_3_config.predicate(), is(SLICE_PREDICATE_2));
-        assertTrue(slice_3_config.hasDimensions());
-        assertThat(slice_3_config.dimensions(), is(List.of(DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(slice_3_config.hasMaxDimensionalInstances());
-        assertThat(slice_3_config.maxDimensionalInstances(), is(116));
-        assertTrue(slice_3_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_3_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(117)));
+        assertTrue(slice_3_config.hasLabels());
+        assertThat(slice_3_config.labels(), is(List.of(LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(slice_3_config.hasMaxLabeledInstances());
+        assertThat(slice_3_config.maxLabeledInstances(), is(116));
+        assertTrue(slice_3_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_3_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(117)));
         assertTrue(slice_3_config.hasMeasurables());
         assertThat(slice_3_config.measurables(), is(Set.of(MEASURABLE_6, MEASURABLE_8)));
 
@@ -795,16 +802,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_3_config.areLevelsEnabled());
         assertTrue(slice_3_config.hasLevelInstanceNameProvider());
         assertThat(slice_3_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_3));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertTrue(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_3_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(slice_3_config.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertTrue(slice_3_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_3_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(slice_3_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(slice_3_config.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_3_config.hasLevelInstanceConfigs());
         assertThat(slice_3_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_3_config.hasDefaultLevelInstanceConfig());
@@ -813,34 +820,34 @@ public class BaseMeterConfigBuilderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void rebase_dimensionsNotUnique() {
-        BaseMeterConfigBuilder builder = meter().dimensions(DIMENSION_1, DIMENSION_2);
-        builder.rebase(withMeter().prefix(dimensionValues(DIMENSION_2.value("v_2"))));
+    public void rebase_labelsNotUnique() {
+        BaseMeterConfigBuilder builder = meter().labels(LABEL_1, LABEL_2);
+        builder.rebase(withMeter().prefix(labelValues(LABEL_2.value("v_2"))));
     }
 
     @Test
     public void mod() {
         BaseMeterConfigBuilder builder = meter()
-            .dimensions(
-                DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6,
-                DIMENSION_7, DIMENSION_8, DIMENSION_9, DIMENSION_10);
+            .labels(
+                LABEL_3, LABEL_4, LABEL_5, LABEL_6,
+                LABEL_7, LABEL_8, LABEL_9, LABEL_10);
 
         builder.modify(withMeter()
             .disable()
             .description("description_1")
-            .prefix(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2")))
+            .prefix(labelValues(LABEL_1.value("v_1"), LABEL_2.value("v_2")))
             .put("k_1", "v_1").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_1)
-            .dimensions(DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7, DIMENSION_8)
-            .maxDimensionalInstancesPerSlice(10)
-            .expireDimensionalInstanceAfter(11, SECONDS)
+            .labels(LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8)
+            .maxLabeledInstancesPerSlice(10)
+            .expireLabeledInstanceAfter(11, SECONDS)
             .measurables(MEASURABLE_1)
             // AllSlice
             .allSlice(withName("all"))
                 .disable()
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(12)
-                .expireDimensionalInstanceAfter(13, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(12)
+                .expireLabeledInstanceAfter(13, SECONDS)
                 .measurables(MEASURABLE_2)
                 .disableTotal()
                 .total(meterInstance()
@@ -851,18 +858,18 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_1,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true)
             // Slice 1
             .slice("slice_1", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_1)
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6)
-                .maxDimensionalInstances(14)
-                .expireDimensionalInstanceAfter(15, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6)
+                .maxLabeledInstances(14)
+                .expireLabeledInstanceAfter(15, SECONDS)
                 .measurables(MEASURABLE_4)
                 .disableTotal()
                 .total(meterInstance()
@@ -873,17 +880,17 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_2,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
                     LEVEL_INSTANCE_CONFIG_BUILDER_6,
                     true)
             // Slice 2
             .slice("slice_2", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_2)
-                .dimensions(DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(16)
-                .expireDimensionalInstanceAfter(17, SECONDS)
+                .labels(LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(16)
+                .expireLabeledInstanceAfter(17, SECONDS)
                 .measurables(MEASURABLE_6)
                 .disableTotal()
                 .total(meterInstance()
@@ -894,8 +901,8 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_3,
                     Map.of(
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true).builder());
 
@@ -903,15 +910,15 @@ public class BaseMeterConfigBuilderTest {
 
         assertFalse(config.isEnabled());
         assertThat(config.description(), is("description_1"));
-        assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1"), DIMENSION_2.value("v_2"))));
+        assertThat(config.prefixLabelValues(), is(labelValues(LABEL_1.value("v_1"), LABEL_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1"));
         assertThat(config.context().get("k_2"), is("v_2"));
         assertTrue(config.hasExclusionPredicate());
         assertThat(config.exclusionPredicate(), is(EXCLUSION_PREDICATE_1));
 
-        assertThat(config.dimensions(), is(List.of(
-            DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6,
-            DIMENSION_7, DIMENSION_8, DIMENSION_9, DIMENSION_10)));
+        assertThat(config.labels(), is(List.of(
+            LABEL_3, LABEL_4, LABEL_5, LABEL_6,
+            LABEL_7, LABEL_8, LABEL_9, LABEL_10)));
 
         // AllSlice
         BaseMeterSliceConfig allSliceConfig = config.allSliceConfig();
@@ -919,12 +926,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(allSliceConfig.name(), is(name("all")));
         assertFalse(allSliceConfig.hasPredicate());
         assertNull(allSliceConfig.predicate());
-        assertTrue(allSliceConfig.hasDimensions());
-        assertThat(allSliceConfig.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(allSliceConfig.hasMaxDimensionalInstances());
-        assertThat(allSliceConfig.maxDimensionalInstances(), is(12));
-        assertTrue(allSliceConfig.isDimensionalInstanceExpirationEnabled());
-        assertThat(allSliceConfig.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(13)));
+        assertTrue(allSliceConfig.hasLabels());
+        assertThat(allSliceConfig.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(allSliceConfig.hasMaxLabeledInstances());
+        assertThat(allSliceConfig.maxLabeledInstances(), is(12));
+        assertTrue(allSliceConfig.isLabeledInstanceExpirationEnabled());
+        assertThat(allSliceConfig.labeledInstanceExpirationTime(), is(Duration.ofSeconds(13)));
         assertTrue(allSliceConfig.hasMeasurables());
         assertThat(allSliceConfig.measurables(), is(Set.of(MEASURABLE_2)));
 
@@ -936,17 +943,17 @@ public class BaseMeterConfigBuilderTest {
         assertFalse(allSliceConfig.areLevelsEnabled());
         assertTrue(allSliceConfig.hasLevelInstanceNameProvider());
         assertThat(allSliceConfig.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(allSliceConfig.hasLevelInstanceConfigs());
         assertThat(allSliceConfig.levelInstanceConfigs().size(), is(3));
         assertTrue(allSliceConfig.hasDefaultLevelInstanceConfig());
@@ -967,12 +974,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_1_config.name(), is(name("slice_1", "suffix")));
         assertTrue(slice_1_config.hasPredicate());
         assertThat(slice_1_config.predicate(), is(SLICE_PREDICATE_1));
-        assertTrue(slice_1_config.hasDimensions());
-        assertThat(slice_1_config.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6)));
-        assertTrue(slice_1_config.hasMaxDimensionalInstances());
-        assertThat(slice_1_config.maxDimensionalInstances(), is(14));
-        assertTrue(slice_1_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_1_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(15)));
+        assertTrue(slice_1_config.hasLabels());
+        assertThat(slice_1_config.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6)));
+        assertTrue(slice_1_config.hasMaxLabeledInstances());
+        assertThat(slice_1_config.maxLabeledInstances(), is(14));
+        assertTrue(slice_1_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_1_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(15)));
         assertTrue(slice_1_config.hasMeasurables());
         assertThat(slice_1_config.measurables(), is(Set.of(MEASURABLE_4)));
 
@@ -984,16 +991,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_1_config.areLevelsEnabled());
         assertTrue(slice_1_config.hasLevelInstanceNameProvider());
         assertThat(slice_1_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_1_config.hasLevelInstanceConfigs());
         assertThat(slice_1_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_1_config.hasDefaultLevelInstanceConfig());
@@ -1010,12 +1017,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_2_config.name(), is(name("slice_2", "suffix")));
         assertTrue(slice_2_config.hasPredicate());
         assertThat(slice_2_config.predicate(), is(SLICE_PREDICATE_2));
-        assertTrue(slice_2_config.hasDimensions());
-        assertThat(slice_2_config.dimensions(), is(List.of(DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(slice_2_config.hasMaxDimensionalInstances());
-        assertThat(slice_2_config.maxDimensionalInstances(), is(16));
-        assertTrue(slice_2_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_2_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(17)));
+        assertTrue(slice_2_config.hasLabels());
+        assertThat(slice_2_config.labels(), is(List.of(LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(slice_2_config.hasMaxLabeledInstances());
+        assertThat(slice_2_config.maxLabeledInstances(), is(16));
+        assertTrue(slice_2_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_2_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(17)));
         assertTrue(slice_2_config.hasMeasurables());
         assertThat(slice_2_config.measurables(), is(Set.of(MEASURABLE_6)));
 
@@ -1027,16 +1034,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_2_config.areLevelsEnabled());
         assertTrue(slice_2_config.hasLevelInstanceNameProvider());
         assertThat(slice_2_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_2_config.hasLevelInstanceConfigs());
         assertThat(slice_2_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_2_config.hasDefaultLevelInstanceConfig());
@@ -1046,19 +1053,19 @@ public class BaseMeterConfigBuilderTest {
         builder.modify(withMeter()
             .disable()
             .description("description_2")
-            .prefix(dimensionValues(DIMENSION_1.value("v_1_2"), DIMENSION_2.value("v_2")))
+            .prefix(labelValues(LABEL_1.value("v_1_2"), LABEL_2.value("v_2")))
             .put("k_1", "v_1_2").put("k_2", "v_2")
             .exclude(EXCLUSION_PREDICATE_2)
-            .dimensions(DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7, DIMENSION_8)
-            .maxDimensionalInstancesPerSlice(110)
-            .expireDimensionalInstanceAfter(111, SECONDS)
+            .labels(LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8)
+            .maxLabeledInstancesPerSlice(110)
+            .expireLabeledInstanceAfter(111, SECONDS)
             .measurables(MEASURABLE_1, MEASURABLE_8)
             // AllSlice
             .allSlice(withName("all_2"))
                 .disable()
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(112)
-                .expireDimensionalInstanceAfter(113, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(112)
+                .expireLabeledInstanceAfter(113, SECONDS)
                 .measurables(MEASURABLE_2, MEASURABLE_8)
                 .disableTotal()
                 .total(meterInstance()
@@ -1069,18 +1076,18 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_1,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true)
             // Slice 1
             .slice("slice_1", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_1)
-                .dimensions(DIMENSION_4, DIMENSION_5, DIMENSION_6)
-                .maxDimensionalInstances(114)
-                .expireDimensionalInstanceAfter(115, SECONDS)
+                .labels(LABEL_4, LABEL_5, LABEL_6)
+                .maxLabeledInstances(114)
+                .expireLabeledInstanceAfter(115, SECONDS)
                 .measurables(MEASURABLE_4, MEASURABLE_8)
                 .disableTotal()
                 .total(meterInstance()
@@ -1091,17 +1098,17 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_2,
                     Map.of(
-                        DIMENSION_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
+                        LABEL_4, LEVEL_INSTANCE_CONFIG_BUILDER_4,
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5),
                     LEVEL_INSTANCE_CONFIG_BUILDER_6,
                     true)
             // Slice 3
             .slice("slice_3", "suffix")
                 .disable()
                 .predicate(SLICE_PREDICATE_2)
-                .dimensions(DIMENSION_5, DIMENSION_6, DIMENSION_7)
-                .maxDimensionalInstances(116)
-                .expireDimensionalInstanceAfter(117, SECONDS)
+                .labels(LABEL_5, LABEL_6, LABEL_7)
+                .maxLabeledInstances(116)
+                .expireLabeledInstanceAfter(117, SECONDS)
                 .measurables(MEASURABLE_6, MEASURABLE_8)
                 .disableTotal()
                 .total(meterInstance()
@@ -1112,8 +1119,8 @@ public class BaseMeterConfigBuilderTest {
                 .levels(
                     LEVEL_INSTANCE_NAME_PROVIDER_3,
                     Map.of(
-                        DIMENSION_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
-                        DIMENSION_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
+                        LABEL_5, LEVEL_INSTANCE_CONFIG_BUILDER_5,
+                        LABEL_6, LEVEL_INSTANCE_CONFIG_BUILDER_6),
                     LEVEL_INSTANCE_CONFIG_BUILDER_7,
                     true).builder());
 
@@ -1121,15 +1128,15 @@ public class BaseMeterConfigBuilderTest {
 
         assertFalse(config.isEnabled());
         assertThat(config.description(), is("description_2"));
-        assertThat(config.prefixDimensionValues(), is(dimensionValues(DIMENSION_1.value("v_1_2"), DIMENSION_2.value("v_2"))));
+        assertThat(config.prefixLabelValues(), is(labelValues(LABEL_1.value("v_1_2"), LABEL_2.value("v_2"))));
         assertThat(config.context().get("k_1"), is("v_1_2"));
         assertThat(config.context().get("k_2"), is("v_2"));
         assertTrue(config.hasExclusionPredicate());
         assertThat(config.exclusionPredicate(), is(EXCLUSION_PREDICATE_2));
 
-        assertThat(config.dimensions(), is(List.of(
-            DIMENSION_3, DIMENSION_4, DIMENSION_5, DIMENSION_6,
-            DIMENSION_7, DIMENSION_8, DIMENSION_9, DIMENSION_10)));
+        assertThat(config.labels(), is(List.of(
+            LABEL_3, LABEL_4, LABEL_5, LABEL_6,
+            LABEL_7, LABEL_8, LABEL_9, LABEL_10)));
 
         // AllSlice
         allSliceConfig = config.allSliceConfig();
@@ -1137,12 +1144,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(allSliceConfig.name(), is(name("all_2")));
         assertFalse(allSliceConfig.hasPredicate());
         assertNull(allSliceConfig.predicate());
-        assertTrue(allSliceConfig.hasDimensions());
-        assertThat(allSliceConfig.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(allSliceConfig.hasMaxDimensionalInstances());
-        assertThat(allSliceConfig.maxDimensionalInstances(), is(112));
-        assertTrue(allSliceConfig.isDimensionalInstanceExpirationEnabled());
-        assertThat(allSliceConfig.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(113)));
+        assertTrue(allSliceConfig.hasLabels());
+        assertThat(allSliceConfig.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(allSliceConfig.hasMaxLabeledInstances());
+        assertThat(allSliceConfig.maxLabeledInstances(), is(112));
+        assertTrue(allSliceConfig.isLabeledInstanceExpirationEnabled());
+        assertThat(allSliceConfig.labeledInstanceExpirationTime(), is(Duration.ofSeconds(113)));
         assertTrue(allSliceConfig.hasMeasurables());
         assertThat(allSliceConfig.measurables(), is(Set.of(MEASURABLE_2, MEASURABLE_8)));
 
@@ -1154,17 +1161,17 @@ public class BaseMeterConfigBuilderTest {
         assertFalse(allSliceConfig.areLevelsEnabled());
         assertTrue(allSliceConfig.hasLevelInstanceNameProvider());
         assertThat(allSliceConfig.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(allSliceConfig.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(allSliceConfig.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(allSliceConfig.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(allSliceConfig.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(allSliceConfig.hasLevelInstanceConfigs());
         assertThat(allSliceConfig.levelInstanceConfigs().size(), is(3));
         assertTrue(allSliceConfig.hasDefaultLevelInstanceConfig());
@@ -1185,12 +1192,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_1_config.name(), is(name("slice_1", "suffix")));
         assertTrue(slice_1_config.hasPredicate());
         assertThat(slice_1_config.predicate(), is(SLICE_PREDICATE_1));
-        assertTrue(slice_1_config.hasDimensions());
-        assertThat(slice_1_config.dimensions(), is(List.of(DIMENSION_4, DIMENSION_5, DIMENSION_6)));
-        assertTrue(slice_1_config.hasMaxDimensionalInstances());
-        assertThat(slice_1_config.maxDimensionalInstances(), is(114));
-        assertTrue(slice_1_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_1_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(115)));
+        assertTrue(slice_1_config.hasLabels());
+        assertThat(slice_1_config.labels(), is(List.of(LABEL_4, LABEL_5, LABEL_6)));
+        assertTrue(slice_1_config.hasMaxLabeledInstances());
+        assertThat(slice_1_config.maxLabeledInstances(), is(114));
+        assertTrue(slice_1_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_1_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(115)));
         assertTrue(slice_1_config.hasMeasurables());
         assertThat(slice_1_config.measurables(), is(Set.of(MEASURABLE_4, MEASURABLE_8)));
 
@@ -1202,16 +1209,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_1_config.areLevelsEnabled());
         assertTrue(slice_1_config.hasLevelInstanceNameProvider());
         assertThat(slice_1_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
-        assertTrue(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_1_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_1_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_4).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_4.build().name()));
+        assertTrue(slice_1_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_1_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_1_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_1_config.hasLevelInstanceConfigs());
         assertThat(slice_1_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_1_config.hasDefaultLevelInstanceConfig());
@@ -1228,12 +1235,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_2_config.name(), is(name("slice_2", "suffix")));
         assertTrue(slice_2_config.hasPredicate());
         assertThat(slice_2_config.predicate(), is(SLICE_PREDICATE_2));
-        assertTrue(slice_2_config.hasDimensions());
-        assertThat(slice_2_config.dimensions(), is(List.of(DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(slice_2_config.hasMaxDimensionalInstances());
-        assertThat(slice_2_config.maxDimensionalInstances(), is(16));
-        assertTrue(slice_2_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_2_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(17)));
+        assertTrue(slice_2_config.hasLabels());
+        assertThat(slice_2_config.labels(), is(List.of(LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(slice_2_config.hasMaxLabeledInstances());
+        assertThat(slice_2_config.maxLabeledInstances(), is(16));
+        assertTrue(slice_2_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_2_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(17)));
         assertTrue(slice_2_config.hasMeasurables());
         assertThat(slice_2_config.measurables(), is(Set.of(MEASURABLE_6)));
 
@@ -1245,16 +1252,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_2_config.areLevelsEnabled());
         assertTrue(slice_2_config.hasLevelInstanceNameProvider());
         assertThat(slice_2_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(slice_2_config.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_2_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(slice_2_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(slice_2_config.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_2_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_2_config.hasLevelInstanceConfigs());
         assertThat(slice_2_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_2_config.hasDefaultLevelInstanceConfig());
@@ -1271,12 +1278,12 @@ public class BaseMeterConfigBuilderTest {
         assertThat(slice_3_config.name(), is(name("slice_3", "suffix")));
         assertTrue(slice_3_config.hasPredicate());
         assertThat(slice_3_config.predicate(), is(SLICE_PREDICATE_2));
-        assertTrue(slice_3_config.hasDimensions());
-        assertThat(slice_3_config.dimensions(), is(List.of(DIMENSION_5, DIMENSION_6, DIMENSION_7)));
-        assertTrue(slice_3_config.hasMaxDimensionalInstances());
-        assertThat(slice_3_config.maxDimensionalInstances(), is(116));
-        assertTrue(slice_3_config.isDimensionalInstanceExpirationEnabled());
-        assertThat(slice_3_config.dimensionalInstanceExpirationTime(), is(Duration.ofSeconds(117)));
+        assertTrue(slice_3_config.hasLabels());
+        assertThat(slice_3_config.labels(), is(List.of(LABEL_5, LABEL_6, LABEL_7)));
+        assertTrue(slice_3_config.hasMaxLabeledInstances());
+        assertThat(slice_3_config.maxLabeledInstances(), is(116));
+        assertTrue(slice_3_config.isLabeledInstanceExpirationEnabled());
+        assertThat(slice_3_config.labeledInstanceExpirationTime(), is(Duration.ofSeconds(117)));
         assertTrue(slice_3_config.hasMeasurables());
         assertThat(slice_3_config.measurables(), is(Set.of(MEASURABLE_6, MEASURABLE_8)));
 
@@ -1288,16 +1295,16 @@ public class BaseMeterConfigBuilderTest {
         assertTrue(slice_3_config.areLevelsEnabled());
         assertTrue(slice_3_config.hasLevelInstanceNameProvider());
         assertThat(slice_3_config.levelInstanceNameProvider(), is(LEVEL_INSTANCE_NAME_PROVIDER_3));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_1));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_2));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_3));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_4));
-        assertTrue(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_5));
-        assertThat(slice_3_config.levelInstanceConfigs().get(DIMENSION_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
-        assertTrue(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_6));
-        assertThat(slice_3_config.levelInstanceConfigs().get(DIMENSION_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_7));
-        assertFalse(slice_3_config.hasLevelInstanceConfigFor(DIMENSION_8));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_1));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_2));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_3));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_4));
+        assertTrue(slice_3_config.hasLevelInstanceConfigFor(LABEL_5));
+        assertThat(slice_3_config.levelInstanceConfigs().get(LABEL_5).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_5.build().name()));
+        assertTrue(slice_3_config.hasLevelInstanceConfigFor(LABEL_6));
+        assertThat(slice_3_config.levelInstanceConfigs().get(LABEL_6).name(), is(LEVEL_INSTANCE_CONFIG_BUILDER_6.build().name()));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_7));
+        assertFalse(slice_3_config.hasLevelInstanceConfigFor(LABEL_8));
         assertTrue(slice_3_config.hasLevelInstanceConfigs());
         assertThat(slice_3_config.levelInstanceConfigs().size(), is(2));
         assertTrue(slice_3_config.hasDefaultLevelInstanceConfig());
@@ -1306,22 +1313,22 @@ public class BaseMeterConfigBuilderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void mod_dimensionsNotUnique() {
-        BaseMeterConfigBuilder builder = meter().dimensions(DIMENSION_1, DIMENSION_2);
-        builder.modify(withMeter().prefix(dimensionValues(DIMENSION_2.value("v_2"))));
+    public void mod_labelsNotUnique() {
+        BaseMeterConfigBuilder builder = meter().labels(LABEL_1, LABEL_2);
+        builder.modify(withMeter().prefix(labelValues(LABEL_2.value("v_2"))));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void dimensions_dimensionsNotUnique() {
+    public void labels_labelsNotUnique() {
         meter()
-            .prefix(dimensionValues(DIMENSION_1.value("v_1")))
-            .dimensions(DIMENSION_1, DIMENSION_2);
+            .prefix(labelValues(LABEL_1.value("v_1")))
+            .labels(LABEL_1, LABEL_2);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void prefixDimensionValues_dimensionsNotUnique() {
+    public void prefixLabelValues_labelsNotUnique() {
         meter()
-            .dimensions(DIMENSION_1, DIMENSION_2)
-            .prefix(dimensionValues(DIMENSION_2.value("v_1")));
+            .labels(LABEL_1, LABEL_2)
+            .prefix(labelValues(LABEL_2.value("v_1")));
     }
 }

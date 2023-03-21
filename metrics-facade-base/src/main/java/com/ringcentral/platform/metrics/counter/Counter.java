@@ -1,10 +1,10 @@
 package com.ringcentral.platform.metrics.counter;
 
 import com.ringcentral.platform.metrics.Meter;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
+import static com.ringcentral.platform.metrics.labels.LabelValues.NO_LABEL_VALUES;
 import static com.ringcentral.platform.metrics.measurables.MeasurableType.LONG;
 
 public interface Counter extends Meter {
@@ -31,30 +31,30 @@ public interface Counter extends Meter {
     Count COUNT = new Count();
 
     default void inc() {
-        inc(NO_DIMENSION_VALUES);
+        inc(NO_LABEL_VALUES);
     }
 
-    default void inc(MetricDimensionValues dimensionValues) {
-        inc(1L, dimensionValues);
+    default void inc(LabelValues labelValues) {
+        inc(1L, labelValues);
     }
 
     default void inc(long count) {
-        inc(count, NO_DIMENSION_VALUES);
+        inc(count, NO_LABEL_VALUES);
     }
 
-    void inc(long count, MetricDimensionValues dimensionValues);
+    void inc(long count, LabelValues labelValues);
 
     default void dec() {
-        dec(NO_DIMENSION_VALUES);
+        dec(NO_LABEL_VALUES);
     }
 
-    default void dec(MetricDimensionValues dimensionValues) {
-        dec(1L, dimensionValues);
+    default void dec(LabelValues labelValues) {
+        dec(1L, labelValues);
     }
 
     default void dec(long count) {
-        dec(count, NO_DIMENSION_VALUES);
+        dec(count, NO_LABEL_VALUES);
     }
 
-    void dec(long count, MetricDimensionValues dimensionValues);
+    void dec(long count, LabelValues labelValues);
 }

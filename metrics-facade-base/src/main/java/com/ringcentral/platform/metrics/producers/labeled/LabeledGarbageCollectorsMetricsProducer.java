@@ -1,8 +1,8 @@
-package com.ringcentral.platform.metrics.producers.dimensional;
+package com.ringcentral.platform.metrics.producers.labeled;
 
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.producers.AbstractGarbageCollectorsMetricsProducer;
 import com.ringcentral.platform.metrics.var.Var;
@@ -10,7 +10,7 @@ import com.ringcentral.platform.metrics.var.Var;
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.Collection;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
 import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
 
 /**
@@ -18,12 +18,12 @@ import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
  * <ul>
  *     <li>
  *         <i>collection.time</i> - the approximate accumulated collection elapsed time in milliseconds.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         name = {"G1 Young Generation", "G1 Old Generation"}<br>
  *     </li>
  *     <li>
  *         <i>collection.count</i> - the total number of collections that have occurred.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         name = {"G1 Young Generation", "G1 Old Generation"}<br>
  *     </li>
  * </ul>
@@ -33,7 +33,7 @@ import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
  * Example of usage:
  * <pre>
  * MetricRegistry registry = new DefaultMetricRegistry();
- * new DimensionalGarbageCollectorsMetricsProducer().produceMetrics(registry);
+ * new LabeledGarbageCollectorsMetricsProducer().produceMetrics(registry);
  * PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
  * System.out.println(exporter.exportMetrics());
  * </pre>
@@ -49,26 +49,26 @@ import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
  * GarbageCollectors_collection_count{name="G1 Old Generation",} 0.0
  * </pre>
  */
-public class DimensionalGarbageCollectorsMetricsProducer extends AbstractGarbageCollectorsMetricsProducer {
+public class LabeledGarbageCollectorsMetricsProducer extends AbstractGarbageCollectorsMetricsProducer {
 
-    private static final MetricDimension NAME_DIMENSION = new MetricDimension("name");
+    private static final Label NAME_LABEL = new Label("name");
 
-    public DimensionalGarbageCollectorsMetricsProducer() {
+    public LabeledGarbageCollectorsMetricsProducer() {
         this(DEFAULT_NAME_PREFIX);
     }
 
-    public DimensionalGarbageCollectorsMetricsProducer(MetricName namePrefix) {
+    public LabeledGarbageCollectorsMetricsProducer(MetricName namePrefix) {
         this(namePrefix, null);
     }
 
-    public DimensionalGarbageCollectorsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
+    public LabeledGarbageCollectorsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
         this(namePrefix, metricModBuilder, getGarbageCollectorMXBeans());
     }
 
-    public DimensionalGarbageCollectorsMetricsProducer(
-            MetricName namePrefix,
-            MetricModBuilder metricModBuilder,
-            Collection<GarbageCollectorMXBean> gcMxBeans) {
+    public LabeledGarbageCollectorsMetricsProducer(
+        MetricName namePrefix,
+        MetricModBuilder metricModBuilder,
+        Collection<GarbageCollectorMXBean> gcMxBeans) {
 
         super(namePrefix, metricModBuilder, gcMxBeans);
     }
@@ -76,24 +76,22 @@ public class DimensionalGarbageCollectorsMetricsProducer extends AbstractGarbage
     @Override
     public void produceMetrics(MetricRegistry registry) {
         final var collectionCount = registry.longVar(
-                nameWithSuffix("collection", "count"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(COLLECTION_COUNT_DESCRIPTION, NAME_DIMENSION)
-        );
+            nameWithSuffix("collection", "count"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(COLLECTION_COUNT_DESCRIPTION, NAME_LABEL));
 
         final var collectionTime = registry.longVar(
-                nameWithSuffix("collection", "time"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION, NAME_DIMENSION)
-        );
+            nameWithSuffix("collection", "time"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(COLLECTION_TIME_DESCRIPTION, NAME_LABEL));
 
         for (GarbageCollectorMXBean gcMxBean : gcMxBeans) {
             final var name = gcMxBean.getName();
-            final var nameDimensionValue = NAME_DIMENSION.value(name);
-            final var dimensionValues = dimensionValues(nameDimensionValue);
+            final var nameLabelValue = NAME_LABEL.value(name);
+            final var labelValues = labelValues(nameLabelValue);
 
-            collectionCount.register(gcMxBean::getCollectionCount, dimensionValues);
-            collectionTime.register(gcMxBean::getCollectionTime, dimensionValues);
+            collectionCount.register(gcMxBean::getCollectionCount, labelValues);
+            collectionTime.register(gcMxBean::getCollectionTime, labelValues);
         }
     }
 }

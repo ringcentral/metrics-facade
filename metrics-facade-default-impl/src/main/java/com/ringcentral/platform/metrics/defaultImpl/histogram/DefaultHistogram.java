@@ -12,7 +12,7 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.*;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.neverReset.NeverResetScaleHistogramImpl;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.resetByChunks.ResetByChunksScaleHistogramImpl;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.resetOnSnapshot.ResetOnSnapshotScaleHistogramImpl;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.histogram.AbstractHistogram;
 import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.measurables.*;
@@ -347,18 +347,18 @@ public class DefaultHistogram extends AbstractHistogram<HistogramImpl> {
         @Override
         public AbstractMeterInstance<HistogramImpl> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<HistogramImpl>> measurableValueProviders,
             HistogramImpl histogram) {
 
             return new DefaultHistogramInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(histogram, measurableValueProviders),
                 measurableValueProviders,
@@ -368,9 +368,9 @@ public class DefaultHistogram extends AbstractHistogram<HistogramImpl> {
         @Override
         public AbstractExpirableMeterInstance<HistogramImpl> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<HistogramImpl>> measurableValueProviders,
             HistogramImpl histogram,
@@ -378,9 +378,9 @@ public class DefaultHistogram extends AbstractHistogram<HistogramImpl> {
 
             return new DefaultExpirableHistogramInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> new MeasurableValuesImpl(histogram, measurableValueProviders),
                 measurableValueProviders,

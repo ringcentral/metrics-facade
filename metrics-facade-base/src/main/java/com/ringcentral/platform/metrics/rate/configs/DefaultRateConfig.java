@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.rate.configs;
 
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.AbstractMeterConfig;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 
 import java.util.*;
 
@@ -11,9 +11,9 @@ public class DefaultRateConfig extends AbstractMeterConfig<RateInstanceConfig, R
     public DefaultRateConfig(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         RateSliceConfig allSliceConfig,
         Set<RateSliceConfig> sliceConfigs,
         MetricContext context) {
@@ -21,8 +21,8 @@ public class DefaultRateConfig extends AbstractMeterConfig<RateInstanceConfig, R
         super(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,

@@ -2,8 +2,8 @@ package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.measurables.MeasurableValues;
 import com.ringcentral.platform.metrics.rate.RateInstance;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
@@ -27,8 +27,8 @@ import static org.mockito.Mockito.*;
 
 public class PrometheusSampleSpecProviderTest {
 
-    static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
-    static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
+    static final Label LABEL_1 = new Label("label_1");
+    static final Label LABEL_2 = new Label("label_2");
 
     PrometheusSampleSpecProvider provider = new PrometheusSampleSpecProvider();
     MeasurableValues measurableValues = mock(MeasurableValues.class);
@@ -47,7 +47,7 @@ public class PrometheusSampleSpecProviderTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, LONG_VALUE, 1.0);
 
@@ -70,7 +70,7 @@ public class PrometheusSampleSpecProviderTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
@@ -93,7 +93,7 @@ public class PrometheusSampleSpecProviderTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
@@ -151,7 +151,7 @@ public class PrometheusSampleSpecProviderTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 
@@ -259,7 +259,7 @@ public class PrometheusSampleSpecProviderTest {
             instance,
             name("a", "b"),
             "Description for " + name("a", "b"),
-            List.of(DIMENSION_1.value("value_1"), DIMENSION_2.value("value_2")));
+            List.of(LABEL_1.value("value_1"), LABEL_2.value("value_2")));
 
         PrometheusSampleSpec expectedSampleSpec = new PrometheusSampleSpec(true, COUNT, 1.0);
 

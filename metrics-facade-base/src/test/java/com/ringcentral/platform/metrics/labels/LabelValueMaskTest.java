@@ -1,17 +1,17 @@
-package com.ringcentral.platform.metrics.dimensions;
+package com.ringcentral.platform.metrics.labels;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class MetricDimensionValueMaskTest {
+public class LabelValueMaskTest {
 
-    static final MetricDimension DIMENSION = new MetricDimension("name");
+    static final Label LABEL = new Label("name");
 
     @Test
     public void multipleOptions() {
-        MetricDimensionValueMask pattern = MetricDimensionValueMask.of(
-            DIMENSION,
+        LabelValueMask pattern = LabelValueMask.of(
+            LABEL,
             "aaa|*bbb|ccc*|*ddd*|eee*fff|*ggg*hhh|iii*jjj*|*kkk*ooo*");
 
         assertTrue(pattern.matches("aaa"));
@@ -75,7 +75,7 @@ public class MetricDimensionValueMaskTest {
 
     @Test
     public void matchingAny() {
-        MetricDimensionValueMask pattern = MetricDimensionValueMask.of(DIMENSION, "*");
+        LabelValueMask pattern = LabelValueMask.of(LABEL, "*");
         assertTrue(pattern.matches(""));
         assertTrue(pattern.matches("a"));
         assertTrue(pattern.matches("ab"));

@@ -1,41 +1,41 @@
-package com.ringcentral.platform.metrics.dimensions;
+package com.ringcentral.platform.metrics.labels;
 
 import java.util.Arrays;
 
 import static com.ringcentral.platform.metrics.utils.Preconditions.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
-public class MetricDimensionValueMask implements MetricDimensionValuePredicate {
+public class LabelValueMask implements LabelValuePredicate {
 
     public static final String DEFAULT_OPTIONS_DELIMITER = "|";
     public static final String DEFAULT_OPTION_VARIABLE_PART = "*";
 
-    private final MetricDimension dimension;
+    private final Label label;
     private final Option[] options;
 
-    public static MetricDimensionValueMask of(MetricDimension dimension, String s) {
-        return of(dimension, s, DEFAULT_OPTIONS_DELIMITER, DEFAULT_OPTION_VARIABLE_PART);
+    public static LabelValueMask of(Label label, String s) {
+        return of(label, s, DEFAULT_OPTIONS_DELIMITER, DEFAULT_OPTION_VARIABLE_PART);
     }
 
-    public static MetricDimensionValueMask of(
-        MetricDimension dimension,
+    public static LabelValueMask of(
+        Label label,
         String s,
         String optionsDelimiter,
         String optionVarPart) {
 
-        return new MetricDimensionValueMask(
-            dimension,
+        return new LabelValueMask(
+            label,
             Arrays.stream(split(s, optionsDelimiter)).map(os -> Option.of(os, optionVarPart)).toArray(Option[]::new));
     }
 
-    private MetricDimensionValueMask(MetricDimension dimension, Option[] options) {
-        this.dimension = dimension;
+    private LabelValueMask(Label label, Option[] options) {
+        this.label = label;
         this.options = options;
     }
 
     @Override
-    public MetricDimension dimension() {
-        return dimension;
+    public Label label() {
+        return label;
     }
 
     @Override

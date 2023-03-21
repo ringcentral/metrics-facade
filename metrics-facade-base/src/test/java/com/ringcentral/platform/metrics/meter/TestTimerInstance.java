@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.meter;
 
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
@@ -12,18 +12,18 @@ public class TestTimerInstance extends TestMeterInstance<TestTimerImpl> implemen
 
     public TestTimerInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         Map<Measurable, MeasurableValueProvider<TestTimerImpl>> measurableValueProviders,
         TestTimerImpl timerImpl) {
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValueProviders,
             timerImpl);

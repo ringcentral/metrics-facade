@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.dropwizard.var.longVar;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.dropwizard.var.DropwizardCachingValueSupplier;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
@@ -29,9 +29,9 @@ public class DropwizardCachingLongVar extends AbstractLongVar implements Caching
     }
 
     @Override
-    public void register(Supplier<Long> valueSupplier, MetricDimensionValues dimensionValues) {
+    public void register(Supplier<Long> valueSupplier, LabelValues labelValues) {
         super.register(
             new DropwizardCachingValueSupplier<>((CachingVarConfig)config(), valueSupplier),
-            dimensionValues);
+            labelValues);
     }
 }

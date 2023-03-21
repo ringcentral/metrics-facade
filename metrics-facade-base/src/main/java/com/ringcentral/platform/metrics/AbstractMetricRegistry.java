@@ -5,12 +5,12 @@ import com.ringcentral.platform.metrics.configs.builders.MetricConfigBuilderProv
 import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.counter.configs.CounterConfig;
 import com.ringcentral.platform.metrics.counter.configs.builders.CounterConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.histogram.configs.HistogramConfig;
 import com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder;
 import com.ringcentral.platform.metrics.infoProviders.ConcurrentMaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfoProvider;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.predicates.MetricNamedPredicate;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -344,7 +344,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             }
         }
 
-        replacePrefixDimensionValues(key, builder);
+        replacePrefixLabelValues(key, builder);
         return builder;
     }
 
@@ -437,7 +437,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             }
         }
 
-        replacePrefixDimensionValues(key, builder);
+        replacePrefixLabelValues(key, builder);
         return builder;
     }
 
@@ -843,7 +843,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             }
         }
 
-        replacePrefixDimensionValues(key, builder);
+        replacePrefixLabelValues(key, builder);
 
         return metricMaker.makeCounter(
             key.name(),
@@ -921,7 +921,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             }
         }
 
-        replacePrefixDimensionValues(key, builder);
+        replacePrefixLabelValues(key, builder);
 
         return metricMaker.makeRate(
             key.name(),
@@ -999,7 +999,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             }
         }
 
-        replacePrefixDimensionValues(key, builder);
+        replacePrefixLabelValues(key, builder);
 
         return metricMaker.makeHistogram(
             key.name(),
@@ -1077,7 +1077,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
             }
         }
 
-        replacePrefixDimensionValues(key, builder);
+        replacePrefixLabelValues(key, builder);
 
         return metricMaker.makeTimer(
             key.name(),
@@ -1277,10 +1277,10 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
         }
     }
 
-    private void replacePrefixDimensionValues(MetricKey key, MetricConfigBuilder<?> builder) {
-        if (key instanceof PrefixDimensionValuesMetricKey) {
-            MetricDimensionValues dimensionValues = ((PrefixDimensionValuesMetricKey)key).dimensionValues();
-            builder.modify(withMetric().prefix(dimensionValues));
+    private void replacePrefixLabelValues(MetricKey key, MetricConfigBuilder<?> builder) {
+        if (key instanceof PrefixLabelValuesMetricKey) {
+            LabelValues labelValues = ((PrefixLabelValuesMetricKey)key).labelValues();
+            builder.modify(withMetric().prefix(labelValues));
         }
     }
 }

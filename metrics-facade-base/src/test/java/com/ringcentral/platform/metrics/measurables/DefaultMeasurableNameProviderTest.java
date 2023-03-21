@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.measurables;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.CounterInstance;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.RateInstance;
@@ -27,9 +27,9 @@ public class DefaultMeasurableNameProviderTest {
     DefaultMeasurableNameProvider p = new DefaultMeasurableNameProvider();
 
     static class UnsupportedMetricInstance implements MetricInstance {
-        @Override public List<MetricDimensionValue> dimensionValues() { return null; }
+        @Override public List<LabelValue> labelValues() { return null; }
         @Override public boolean isTotalInstance() { return false; }
-        @Override public boolean isDimensionalTotalInstance() { return false; }
+        @Override public boolean isLabeledMetricTotalInstance() { return false; }
         @Override public boolean isLevelInstance() { return false; }
         @Override public Set<Measurable> measurables() { return null; }
         @Override public MeasurableValues measurableValues() { return null; }

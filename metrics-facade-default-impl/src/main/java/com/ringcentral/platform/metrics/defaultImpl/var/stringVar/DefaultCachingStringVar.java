@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.defaultImpl.var.stringVar;
 
 import com.ringcentral.platform.metrics.defaultImpl.var.DefaultCachingValueSupplier;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
 import com.ringcentral.platform.metrics.var.stringVar.*;
@@ -27,9 +27,9 @@ public class DefaultCachingStringVar extends AbstractStringVar implements Cachin
     }
 
     @Override
-    public void register(Supplier<String> valueSupplier, MetricDimensionValues dimensionValues) {
+    public void register(Supplier<String> valueSupplier, LabelValues labelValues) {
         super.register(
             new DefaultCachingValueSupplier<>((CachingVarConfig)config(), valueSupplier),
-            dimensionValues);
+            labelValues);
     }
 }

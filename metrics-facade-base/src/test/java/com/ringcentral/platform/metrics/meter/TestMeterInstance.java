@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.meter;
 
 import com.ringcentral.platform.metrics.AbstractMeter.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -14,18 +14,18 @@ public abstract class TestMeterInstance<MI> extends AbstractMeterInstance<MI> {
 
     public TestMeterInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         Map<Measurable, MeasurableValueProvider<MI>> measurableValueProviders,
         MI meterImpl) {
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             () -> new AbstractMeasurableValues(measurableValueProviders.keySet()) {
 

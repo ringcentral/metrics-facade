@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.timer;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -62,8 +62,8 @@ public abstract class AbstractTimer<MI> extends AbstractMeter<
     }
 
     @Override
-    public void update(long duration, MetricDimensionValues dimensionValues) {
+    public void update(long duration, LabelValues labelValues) {
         checkArgument(duration >= 0L, "duration < 0");
-        super.update(duration, dimensionValues);
+        super.update(duration, labelValues);
     }
 }

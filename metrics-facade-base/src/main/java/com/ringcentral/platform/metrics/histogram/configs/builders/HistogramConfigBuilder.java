@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.histogram.configs.builders;
 
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.histogram.HistogramMeasurable;
 import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.names.MetricName;
@@ -53,9 +53,9 @@ public class HistogramConfigBuilder extends AbstractMeterConfigBuilder<
     protected HistogramConfig buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         HistogramSliceConfig allSliceConfig,
         Set<HistogramSliceConfig> sliceConfigs,
         MetricContext context) {
@@ -63,8 +63,8 @@ public class HistogramConfigBuilder extends AbstractMeterConfigBuilder<
         return new DefaultHistogramConfig(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,

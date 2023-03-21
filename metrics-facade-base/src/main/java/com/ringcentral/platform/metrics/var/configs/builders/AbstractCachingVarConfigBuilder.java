@@ -2,7 +2,8 @@ package com.ringcentral.platform.metrics.var.configs.builders;
 
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.builders.MetricConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
 
 import java.util.List;
@@ -61,16 +62,16 @@ public abstract class AbstractCachingVarConfigBuilder<C extends CachingVarConfig
     protected C buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
         boolean nonDecreasing,
         MetricContext context) {
 
         return buildImpl(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             nonDecreasing,
             context,
             DEFAULT_TTL_SEC,
@@ -82,8 +83,8 @@ public abstract class AbstractCachingVarConfigBuilder<C extends CachingVarConfig
         return buildImpl(
             hasEnabled() ? getEnabled() : DEFAULT_ENABLED,
             description(),
-            prefixDimensionValues(),
-            dimensions(),
+            prefixLabelValues(),
+            labels(),
             hasNonDecreasing() ? getNonDecreasing() : DEFAULT_NON_DECREASING,
             context().unmodifiable(),
             hasTtl() ? ttl : DEFAULT_TTL_SEC,
@@ -93,8 +94,8 @@ public abstract class AbstractCachingVarConfigBuilder<C extends CachingVarConfig
     protected abstract C buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
         boolean nonDecreasing,
         MetricContext context,
         long ttl,

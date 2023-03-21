@@ -17,9 +17,9 @@ import io.prometheus.client.Summary;
 
 import java.util.Locale;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
+import static com.ringcentral.platform.metrics.labels.LabelValues.forLabelValues;
 import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.*;
@@ -42,7 +42,7 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
 
         PrometheusInstanceSampleSpecProvider miSampleSpecProvider = new PrometheusInstanceSampleSpecProvider(
             true, // exportTotalInstances. defaults to true
-            false, // exportDimensionalTotalInstances. defaults to false
+            false, // exportLabeledMetricTotalInstances. defaults to false
             false); // exportLevelInstances. defaults to true
 
         PrometheusInstanceSampleSpecModsProvider miSampleSpecModsProvider = new PrometheusInstanceSampleSpecModsProvider();
@@ -57,7 +57,7 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             forMetricWithName("Histogram"),
             (metric, instance, currSpec) -> instanceSampleSpec()
                 .name(instance.name().withNewPart(instance.valueOf(SERVICE)))
-                .dimensionValues(currSpec.dimensionValuesWithout(SERVICE)));
+                .labelValues(currSpec.labelValuesWithout(SERVICE)));
 
         miSampleSpecModsProvider.addMod(
             forMetricsWithNamePrefix("Histogram"),
@@ -66,7 +66,7 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
 
         PrometheusInstanceSampleMaker miSampleMaker = new PrometheusInstanceSampleMaker(
             null, // totalInstanceNameSuffix. defaults to null that means no suffix
-            "all"); // dimensionalTotalInstanceNameSuffix. defaults to "all"
+            "all"); // labeledMetricTotalInstanceNameSuffix. defaults to "all"
 
         PrometheusSampleSpecProvider sampleSpecProvider = new PrometheusSampleSpecProvider();
         PrometheusSampleSpecModsProvider sampleSpecModsProvider = new PrometheusSampleSpecModsProvider();
@@ -119,24 +119,24 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             withName("Histogram"),
             () -> withHistogram()
                 .description("Histogram for " + PrometheusMetricsExporterSample.class.getSimpleName())
-                .dimensions(SERVICE, SERVER, PORT)
+                .labels(SERVICE, SERVER, PORT)
                 .measurables(MIN, MAX, MEAN));
 
-        h.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        h.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        h.update(3, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-        h.update(4, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+        h.update(1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        h.update(2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        h.update(3, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+        h.update(4, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
         Timer t = registry.timer(
             withName("Timer"),
             () -> withTimer()
                 .description("Timer for " + PrometheusMetricsExporterSample.class.getSimpleName())
-                .dimensions(SERVICE, SERVER, PORT)
+                .labels(SERVICE, SERVER, PORT)
                 .measurables(MIN, MAX, MEAN));
 
-        t.update(SECONDS.toNanos(1), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        t.update(SECONDS.toNanos(2), forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-        t.update(SECONDS.toNanos(3), forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+        t.update(SECONDS.toNanos(1), forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        t.update(SECONDS.toNanos(2), forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+        t.update(SECONDS.toNanos(3), forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
         new PrometheusHttpServer(PROMETHEUS_PORT, exporter);
         registry.addListener(new JmxMetricsReporter());

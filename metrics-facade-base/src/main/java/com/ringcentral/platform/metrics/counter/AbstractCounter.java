@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.counter;
 
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.configs.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 
@@ -38,12 +38,12 @@ public abstract class AbstractCounter<MI> extends AbstractMeter<
     }
 
     @Override
-    public void inc(long count, MetricDimensionValues dimensionValues) {
-        update(count, dimensionValues);
+    public void inc(long count, LabelValues labelValues) {
+        update(count, labelValues);
     }
 
     @Override
-    public void dec(long count, MetricDimensionValues dimensionValues) {
-        update(-count, dimensionValues);
+    public void dec(long count, LabelValues labelValues) {
+        update(-count, labelValues);
     }
 }

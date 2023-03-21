@@ -23,7 +23,7 @@ public class BaseMetricConfigBuilder
         return new BaseMetricConfig(
             hasEnabled() ? getEnabled() : DEFAULT_ENABLED,
             description(),
-            prefixDimensionValues(),
+            prefixLabelValues(),
             context().unmodifiable());
     }
 

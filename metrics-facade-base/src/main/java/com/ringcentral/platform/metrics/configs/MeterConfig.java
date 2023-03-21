@@ -1,21 +1,21 @@
 package com.ringcentral.platform.metrics.configs;
 
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 
 import java.util.*;
 
 public interface MeterConfig<IC extends MeterInstanceConfig, SC extends MeterSliceConfig<IC>> extends MetricConfig {
-    default boolean hasDimensions() {
-        return dimensions() != null && !dimensions().isEmpty();
+    default boolean hasLabels() {
+        return labels() != null && !labels().isEmpty();
     }
 
-    List<MetricDimension> dimensions();
+    List<Label> labels();
 
     default boolean hasExclusionPredicate() {
         return exclusionPredicate() != null;
     }
 
-    MetricDimensionValuesPredicate exclusionPredicate();
+    LabelValuesPredicate exclusionPredicate();
     SC allSliceConfig();
 
     default boolean hasSliceConfigs() {

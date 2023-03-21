@@ -4,7 +4,7 @@ import com.codahale.metrics.Timer;
 import com.ringcentral.platform.metrics.AbstractMeter.AbstractExpirableMeterInstance;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValuesProvider;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.timer.TimerInstance;
@@ -16,9 +16,9 @@ public class DropwizardExpirableTimerInstance extends AbstractExpirableMeterInst
 
     protected DropwizardExpirableTimerInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean levelInstance,
         MeasurableValuesProvider measurableValuesProvider,
         Map<Measurable, MeasurableValueProvider<Timer>> measurableValueProviders,
@@ -27,9 +27,9 @@ public class DropwizardExpirableTimerInstance extends AbstractExpirableMeterInst
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             levelInstance,
             measurableValuesProvider,
             measurableValueProviders,

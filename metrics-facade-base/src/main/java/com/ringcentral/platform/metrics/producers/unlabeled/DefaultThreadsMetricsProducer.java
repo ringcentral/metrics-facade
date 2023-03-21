@@ -1,4 +1,4 @@
-package com.ringcentral.platform.metrics.producers.nondimensional;
+package com.ringcentral.platform.metrics.producers.unlabeled;
 
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
  *     <li><i>deadlock.count</i> - the current number of threads that are in deadlock waiting to acquire object monitors or ownable synchronizers.<br></li>
  *     <li>
  *         <i>state.count</i> - the current number of threads in the corresponding state.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         state = {"waiting", "runnable", "timed_waiting", "terminated", "new", "blocked"}<br>
  *     </li>
  * </ul>
@@ -80,17 +80,18 @@ public class DefaultThreadsMetricsProducer extends AbstractThreadsMetricsProduce
     }
 
     public DefaultThreadsMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
-        this(namePrefix,
-                metricModBuilder,
-                getThreadMXBean(),
-                new DeadlockInfoProvider(getThreadMXBean()));
+        this(
+            namePrefix,
+            metricModBuilder,
+            getThreadMXBean(),
+            new DeadlockInfoProvider(getThreadMXBean()));
     }
 
     public DefaultThreadsMetricsProducer(
-            MetricName namePrefix,
-            MetricModBuilder metricModBuilder,
-            ThreadMXBean threadMxBean,
-            DeadlockInfoProvider deadlockInfoProvider) {
+        MetricName namePrefix,
+        MetricModBuilder metricModBuilder,
+        ThreadMXBean threadMxBean,
+        DeadlockInfoProvider deadlockInfoProvider) {
 
         super(namePrefix, metricModBuilder, threadMxBean, deadlockInfoProvider);
     }
@@ -98,13 +99,13 @@ public class DefaultThreadsMetricsProducer extends AbstractThreadsMetricsProduce
     @Override
     public void produceMetrics(MetricRegistry registry) {
         requireNonNull(registry);
-        produceNonDimensional(registry);
+        produceUnlabeled(registry);
 
         for (Thread.State state : Thread.State.values()) {
             registry.longVar(
-                    nameWithSuffix(state.toString().toLowerCase(Locale.ENGLISH), "count"),
-                    () -> (long) threadCountFor(state),
-                    longVarConfigBuilderSupplier(STATE_COUNT_DESCRIPTION));
+                nameWithSuffix(state.toString().toLowerCase(Locale.ENGLISH), "count"),
+                () -> (long)threadCountFor(state),
+                longVarConfigBuilderSupplier(STATE_COUNT_DESCRIPTION));
         }
     }
 }

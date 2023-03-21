@@ -4,7 +4,7 @@ import com.codahale.metrics.Counter;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.AbstractCounter;
 import com.ringcentral.platform.metrics.counter.configs.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
@@ -86,9 +86,9 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
         @Override
         public AbstractMeterInstance<Counter> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Counter>> measurableValueProviders,
             Counter counter) {
@@ -97,9 +97,9 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
 
             return new DropwizardCounterInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,
@@ -109,9 +109,9 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
         @Override
         public AbstractExpirableMeterInstance<Counter> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<Counter>> measurableValueProviders,
             Counter counter,
@@ -121,9 +121,9 @@ public class DropwizardCounter extends AbstractCounter<Counter> {
 
             return new DropwizardExpirableCounterInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,

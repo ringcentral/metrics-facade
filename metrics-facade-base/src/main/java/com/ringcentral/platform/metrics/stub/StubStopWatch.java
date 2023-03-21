@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.stub;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.timer.Stopwatch;
 
 public class StubStopWatch implements Stopwatch {
@@ -11,7 +11,7 @@ public class StubStopWatch implements Stopwatch {
     }
 
     @Override
-    public long stop(MetricDimensionValues dimensionValues) {
+    public long stop(LabelValues labelValues) {
         return 0L;
     }
 }

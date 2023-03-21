@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.defaultImpl.counter;
 import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.counter.AbstractCounter;
 import com.ringcentral.platform.metrics.counter.configs.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
@@ -86,9 +86,9 @@ public class DefaultCounter extends AbstractCounter<LongAdder> {
         @Override
         public AbstractMeterInstance<LongAdder> makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<LongAdder>> measurableValueProviders,
             LongAdder counter) {
@@ -97,9 +97,9 @@ public class DefaultCounter extends AbstractCounter<LongAdder> {
 
             return new DefaultCounterInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,
@@ -109,9 +109,9 @@ public class DefaultCounter extends AbstractCounter<LongAdder> {
         @Override
         public AbstractExpirableMeterInstance<LongAdder> makeExpirableInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean levelInstance,
             Map<Measurable, MeasurableValueProvider<LongAdder>> measurableValueProviders,
             LongAdder counter,
@@ -121,9 +121,9 @@ public class DefaultCounter extends AbstractCounter<LongAdder> {
 
             return new DefaultExpirableCounterInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 levelInstance,
                 () -> measurableValues,
                 measurableValueProviders,

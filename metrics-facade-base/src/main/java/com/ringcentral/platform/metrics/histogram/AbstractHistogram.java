@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.histogram;
 
 import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.histogram.configs.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
@@ -50,7 +50,7 @@ public abstract class AbstractHistogram<MI> extends AbstractMeter<
     }
 
     @Override
-    public void update(long value, MetricDimensionValues dimensionValues) {
-        super.update(value, dimensionValues);
+    public void update(long value, LabelValues labelValues) {
+        super.update(value, labelValues);
     }
 }

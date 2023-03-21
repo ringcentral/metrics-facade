@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.reporters.jmx;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
+import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.names.MetricName;
 import org.junit.Test;
 
@@ -14,8 +14,8 @@ public class DefaultObjectNameProviderTest {
 
     static final String DOMAIN_NAME = "metrics";
 
-    static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
-    static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
+    static final Label LABEL_1 = new Label("label_1");
+    static final Label LABEL_2 = new Label("label_2");
 
     DefaultObjectNameProvider objectNameProvider = new DefaultObjectNameProvider();
 
@@ -24,8 +24,8 @@ public class DefaultObjectNameProviderTest {
         ObjectName objectName = objectNameProvider.objectNameFor(
             DOMAIN_NAME,
             MetricName.of("aa \t\\  *?,=:\\aa.b"),
-            List.of(DIMENSION_1.value("d_1_value"), DIMENSION_2.value("aa \t\\  *?,=:\\aa")));
+            List.of(LABEL_1.value("l_1_value"), LABEL_2.value("aa \t\\  *?,=:\\aa")));
 
-        assertThat(objectName.toString(), is("metrics:name=aa___________aa.b,dimension_1=d_1_value,dimension_2=aa___________aa"));
+        assertThat(objectName.toString(), is("metrics:name=aa___________aa.b,label_1=l_1_value,label_2=aa___________aa"));
     }
 }

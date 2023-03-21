@@ -24,10 +24,10 @@ public abstract class AbstractMemoryMetricsProducer extends AbstractMetricsProdu
     protected final List<MemoryPoolMXBean> memoryPoolMxBeans;
 
     public AbstractMemoryMetricsProducer(
-            MetricName namePrefix,
-            MetricModBuilder metricModBuilder,
-            MemoryMXBean memoryMxBean,
-            List<MemoryPoolMXBean> memoryPoolMxBeans) {
+        MetricName namePrefix,
+        MetricModBuilder metricModBuilder,
+        MemoryMXBean memoryMxBean,
+        List<MemoryPoolMXBean> memoryPoolMxBeans) {
 
         super(namePrefix, metricModBuilder);
 

@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.MetricInstance;
 import com.ringcentral.platform.metrics.counter.Counter.Count;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.histogram.HistogramInstance;
 import com.ringcentral.platform.metrics.measurables.Measurable;
@@ -118,9 +118,9 @@ public class PrometheusSamplesProducer implements SamplesProducer<
         List<String> labelNames;
         List<String> labelValues;
 
-        if (instanceSampleSpec.hasDimensionValues()) {
-            labelNames = instanceSampleSpec.dimensionValues().stream().map(dv -> dv.dimension().name()).collect(toList());
-            labelValues = instanceSampleSpec.dimensionValues().stream().map(MetricDimensionValue::value).collect(toList());
+        if (instanceSampleSpec.hasLabelValues()) {
+            labelNames = instanceSampleSpec.labelValues().stream().map(lv -> lv.label().name()).collect(toList());
+            labelValues = instanceSampleSpec.labelValues().stream().map(LabelValue::value).collect(toList());
 
             if (m instanceof Percentile) {
                 labelNames.add("quantile");

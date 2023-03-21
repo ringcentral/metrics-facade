@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.dropwizard.var.doubleVar;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.dropwizard.var.DropwizardCachingValueSupplier;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
@@ -27,9 +27,9 @@ public class DropwizardCachingDoubleVar extends AbstractDoubleVar implements Cac
     }
 
     @Override
-    public void register(Supplier<Double> valueSupplier, MetricDimensionValues dimensionValues) {
+    public void register(Supplier<Double> valueSupplier, LabelValues labelValues) {
         super.register(
             new DropwizardCachingValueSupplier<>((CachingVarConfig)config(), valueSupplier),
-            dimensionValues);
+            labelValues);
     }
 }

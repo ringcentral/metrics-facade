@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder;
 import com.ringcentral.platform.metrics.counter.CounterMeasurable;
 import com.ringcentral.platform.metrics.counter.configs.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 
 import java.util.*;
@@ -53,9 +53,9 @@ public class CounterConfigBuilder extends AbstractMeterConfigBuilder<
     protected CounterConfig buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         CounterSliceConfig allSliceConfig,
         Set<CounterSliceConfig> sliceConfigs,
         MetricContext context) {
@@ -63,8 +63,8 @@ public class CounterConfigBuilder extends AbstractMeterConfigBuilder<
         return new DefaultCounterConfig(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,

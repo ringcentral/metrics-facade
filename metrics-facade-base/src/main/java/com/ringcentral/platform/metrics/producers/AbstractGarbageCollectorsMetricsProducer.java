@@ -18,9 +18,9 @@ public abstract class AbstractGarbageCollectorsMetricsProducer extends AbstractM
     protected final List<GarbageCollectorMXBean> gcMxBeans;
 
     public AbstractGarbageCollectorsMetricsProducer(
-            MetricName namePrefix,
-            MetricModBuilder metricModBuilder,
-            Collection<GarbageCollectorMXBean> gcMxBeans) {
+        MetricName namePrefix,
+        MetricModBuilder metricModBuilder,
+        Collection<GarbageCollectorMXBean> gcMxBeans) {
 
         super(namePrefix, metricModBuilder);
         this.gcMxBeans = new ArrayList<>(gcMxBeans);

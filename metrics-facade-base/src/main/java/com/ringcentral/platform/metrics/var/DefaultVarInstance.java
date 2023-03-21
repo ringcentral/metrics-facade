@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.var;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 
@@ -11,18 +11,18 @@ public class DefaultVarInstance<V> extends AbstractVarInstance<V> {
 
     public DefaultVarInstance(
         MetricName name,
-        List<MetricDimensionValue> dimensionValues,
+        List<LabelValue> labelValues,
         boolean totalInstance,
-        boolean dimensionalTotalInstance,
+        boolean labeledMetricTotalInstance,
         boolean nonDecreasing,
         Measurable valueMeasurable,
         Supplier<V> valueSupplier) {
 
         super(
             name,
-            dimensionValues,
+            labelValues,
             totalInstance,
-            dimensionalTotalInstance,
+            labeledMetricTotalInstance,
             nonDecreasing,
             valueMeasurable,
             valueSupplier);

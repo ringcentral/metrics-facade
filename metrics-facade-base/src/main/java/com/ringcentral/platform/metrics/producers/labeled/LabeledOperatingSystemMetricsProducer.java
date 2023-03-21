@@ -1,15 +1,15 @@
-package com.ringcentral.platform.metrics.producers.dimensional;
+package com.ringcentral.platform.metrics.producers.labeled;
 
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.producers.AbstractOperatingSystemMetricsProducer;
 import com.ringcentral.platform.metrics.var.Var;
 import com.sun.management.OperatingSystemMXBean;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
 import static java.lang.management.ManagementFactory.getOperatingSystemMXBean;
 import static java.util.Objects.requireNonNull;
 
@@ -18,17 +18,17 @@ import static java.util.Objects.requireNonNull;
  * <ul>
  *     <li>
  *         <i>swapSpaceSize</i> - the amount of swap memory in bytes.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"free", "total"}<br>
  *     </li>
  *     <li>
  *         <i>physicalMemorySize</i> - the amount of physical memory in bytes.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"free", "total"}<br>
  *     </li>
  *     <li>
  *         <i>cpuLoad</i> - the 'recent cpu usage' for the process of corresponding type.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"system", "process"}<br>
  *     </li>
  *     <li><i>systemLoadAverage</i> - the system load average for the last minute.<br></li>
@@ -45,7 +45,7 @@ import static java.util.Objects.requireNonNull;
  * Example of usage:
  * <pre>
  * MetricRegistry registry = new DefaultMetricRegistry();
- * new DimensionalOperatingSystemMetricsProducer().produceMetrics(registry);
+ * new LabeledOperatingSystemMetricsProducer().produceMetrics(registry);
  * PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
  * System.out.println(exporter.exportMetrics());
  * </pre>
@@ -86,55 +86,57 @@ import static java.util.Objects.requireNonNull;
  * OperatingSystem_availableProcessors 12.0
  * </pre>
  */
-public class DimensionalOperatingSystemMetricsProducer extends AbstractOperatingSystemMetricsProducer {
+public class LabeledOperatingSystemMetricsProducer extends AbstractOperatingSystemMetricsProducer {
 
-    private static final MetricDimension TYPE_DIMENSION = new MetricDimension("type");
-    private static final MetricDimensionValues TOTAL_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("total"));
-    private static final MetricDimensionValues FREE_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("free"));
+    private static final Label TYPE_LABEL = new Label("type");
+    private static final LabelValues SYSTEM_TYPE_LABEL_VALUES = labelValues(TYPE_LABEL.value("system"));
+    private static final LabelValues PROCESS_TYPE_LABEL_VALUES = labelValues(TYPE_LABEL.value("process"));
+    private static final LabelValues TOTAL_TYPE_LABEL_VALUES = labelValues(TYPE_LABEL.value("total"));
+    private static final LabelValues FREE_TYPE_LABEL_VALUES = labelValues(TYPE_LABEL.value("free"));
 
-    public DimensionalOperatingSystemMetricsProducer() {
+    public LabeledOperatingSystemMetricsProducer() {
         this(DEFAULT_NAME_PREFIX);
     }
 
-    public DimensionalOperatingSystemMetricsProducer(MetricName namePrefix) {
+    public LabeledOperatingSystemMetricsProducer(MetricName namePrefix) {
         this(namePrefix, null);
     }
 
-    public DimensionalOperatingSystemMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
+    public LabeledOperatingSystemMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
         this(namePrefix, metricModBuilder, (OperatingSystemMXBean) getOperatingSystemMXBean());
     }
 
-    public DimensionalOperatingSystemMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder, OperatingSystemMXBean osMxBean) {
+    public LabeledOperatingSystemMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder, OperatingSystemMXBean osMxBean) {
         super(namePrefix, metricModBuilder, osMxBean);
     }
 
     @Override
     public void produceMetrics(MetricRegistry registry) {
         requireNonNull(registry);
-        produceNonDimensional(registry);
+        produceUnlabeled(registry);
 
         final var cpuLoad = registry.doubleVar(
-                nameWithSuffix("cpuLoad"),
-                Var.noTotal(),
-                doubleVarConfigBuilderSupplier(CPU_USAGE_DESCRIPTION, TYPE_DIMENSION)
-        );
-        cpuLoad.register(osMxBean::getProcessCpuLoad, dimensionValues(TYPE_DIMENSION.value("process")));
-        cpuLoad.register(osMxBean::getSystemCpuLoad, dimensionValues(TYPE_DIMENSION.value("system")));
+            nameWithSuffix("cpuLoad"),
+            Var.noTotal(),
+            doubleVarConfigBuilderSupplier(CPU_USAGE_DESCRIPTION, TYPE_LABEL));
+
+        cpuLoad.register(osMxBean::getProcessCpuLoad, PROCESS_TYPE_LABEL_VALUES);
+        cpuLoad.register(osMxBean::getSystemCpuLoad, SYSTEM_TYPE_LABEL_VALUES);
 
         final var physicalMemorySize = registry.longVar(
-                nameWithSuffix("physicalMemorySize"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(AMOUNT_OF_PHYSICAL_MEMORY_IN_BYTES_DESCRIPTION, TYPE_DIMENSION)
-        );
-        physicalMemorySize.register(osMxBean::getTotalPhysicalMemorySize, TOTAL_TYPE_DIMENSION_VALUES);
-        physicalMemorySize.register(osMxBean::getFreePhysicalMemorySize, FREE_TYPE_DIMENSION_VALUES);
+            nameWithSuffix("physicalMemorySize"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(AMOUNT_OF_PHYSICAL_MEMORY_IN_BYTES_DESCRIPTION, TYPE_LABEL));
+
+        physicalMemorySize.register(osMxBean::getTotalPhysicalMemorySize, TOTAL_TYPE_LABEL_VALUES);
+        physicalMemorySize.register(osMxBean::getFreePhysicalMemorySize, FREE_TYPE_LABEL_VALUES);
 
         final var swapSpaceSize = registry.longVar(
-                nameWithSuffix("swapSpaceSize"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(AMOUNT_OF_SWAP_MEMORY_IN_BYTES_DESCRIPTION, TYPE_DIMENSION)
-        );
-        swapSpaceSize.register(osMxBean::getTotalSwapSpaceSize, TOTAL_TYPE_DIMENSION_VALUES);
-        swapSpaceSize.register(osMxBean::getFreeSwapSpaceSize, FREE_TYPE_DIMENSION_VALUES);
+            nameWithSuffix("swapSpaceSize"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(AMOUNT_OF_SWAP_MEMORY_IN_BYTES_DESCRIPTION, TYPE_LABEL));
+
+        swapSpaceSize.register(osMxBean::getTotalSwapSpaceSize, TOTAL_TYPE_LABEL_VALUES);
+        swapSpaceSize.register(osMxBean::getFreeSwapSpaceSize, FREE_TYPE_LABEL_VALUES);
     }
 }

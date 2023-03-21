@@ -44,10 +44,10 @@ public class TestMetricListener implements MetricListener {
         instances.add(instance);
 
         logger.info(
-            "Instance added: name = {}, dimension values = [{}], total = {}, level = {}",
+            "Instance added: name = {}, label values = [{}], total = {}, level = {}",
             instance.name(),
-            instance.dimensionValues().stream()
-                .map(dv -> dv.dimension().name() + "=" + dv.value())
+            instance.labelValues().stream()
+                .map(lv -> lv.label().name() + "=" + lv.value())
                 .collect(joining(",")),
             instance.isTotalInstance(),
             instance.isLevelInstance());
@@ -59,10 +59,10 @@ public class TestMetricListener implements MetricListener {
         instances.remove(instance);
 
         logger.info(
-            "Instance removed: name = {}, dimension values = [{}], total = {}, level = {}",
+            "Instance removed: name = {}, label values = [{}], total = {}, level = {}",
             instance.name(),
-            instance.dimensionValues().stream()
-                .map(dv -> dv.dimension().name() + "=" + dv.value())
+            instance.labelValues().stream()
+                .map(lv -> lv.label().name() + "=" + lv.value())
                 .collect(joining(",")),
             instance.isTotalInstance(),
             instance.isLevelInstance());

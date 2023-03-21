@@ -17,8 +17,8 @@ import com.ringcentral.platform.metrics.timer.TimerInstance;
 import java.util.List;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.forDimensionValues;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
+import static com.ringcentral.platform.metrics.labels.LabelValues.forLabelValues;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.forMetricWithName;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.nameMask;
@@ -92,12 +92,12 @@ public class ZabbixReportersSample extends AbstractSample {
         Timer t = registry.timer(
             withName("timer"),
             () -> withTimer()
-                .dimensions(SERVICE, SERVER, PORT)
+                .labels(SERVICE, SERVER, PORT)
                 .measurables(COUNT, MAX, MEAN, Buckets.of(scale())));
 
-        t.update(1, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
-        t.update(2, forDimensionValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
-        t.update(3, forDimensionValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
+        t.update(1, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_1"), PORT.value("111")));
+        t.update(2, forLabelValues(SERVICE.value("service_1"), SERVER.value("server_1_2"), PORT.value("121")));
+        t.update(3, forLabelValues(SERVICE.value("service_2"), SERVER.value("server_2_1"), PORT.value("211")));
 
         System.out.println("Output:");
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(exporter.exportMetrics()));

@@ -13,7 +13,7 @@ public class DefaultInstanceSampleSpecProvider implements InstanceSampleSpecProv
         return new DefaultInstanceSampleSpec(
             Boolean.TRUE,
             instance.name(),
-            instance.dimensionValues(),
+            instance.labelValues(),
             Boolean.TRUE);
     }
 }

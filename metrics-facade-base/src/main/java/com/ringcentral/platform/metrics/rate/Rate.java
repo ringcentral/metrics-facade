@@ -1,10 +1,10 @@
 package com.ringcentral.platform.metrics.rate;
 
 import com.ringcentral.platform.metrics.Meter;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.measurables.MeasurableType;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.NO_DIMENSION_VALUES;
+import static com.ringcentral.platform.metrics.labels.LabelValues.NO_LABEL_VALUES;
 import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
 
 public interface Rate extends Meter {
@@ -119,16 +119,16 @@ public interface Rate extends Meter {
     RateUnit RATE_UNIT = new RateUnit();
 
     default void mark() {
-        mark(NO_DIMENSION_VALUES);
+        mark(NO_LABEL_VALUES);
     }
 
-    default void mark(MetricDimensionValues dimensionValues) {
-        mark(1L, dimensionValues);
+    default void mark(LabelValues labelValues) {
+        mark(1L, labelValues);
     }
 
     default void mark(long count) {
-        mark(count, NO_DIMENSION_VALUES);
+        mark(count, NO_LABEL_VALUES);
     }
 
-    void mark(long count, MetricDimensionValues dimensionValues);
+    void mark(long count, LabelValues labelValues);
 }

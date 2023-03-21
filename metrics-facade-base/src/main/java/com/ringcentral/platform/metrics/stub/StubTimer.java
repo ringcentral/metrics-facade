@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.stub;
 
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.timer.Timer;
@@ -43,18 +43,18 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
                 @Override
                 public AbstractMeterInstance<Object> makeInstance(
                     MetricName name,
-                    List<MetricDimensionValue> dimensionValues,
+                    List<LabelValue> labelValues,
                     boolean totalInstance,
-                    boolean dimensionalTotalInstance,
+                    boolean labeledMetricTotalInstance,
                     boolean levelInstance,
                     Map<Measurable, MeasurableValueProvider<Object>> measurableValueProviders,
                     Object meterImpl) {
 
                     return new StubMeterInstance(
                         name,
-                        dimensionValues,
+                        labelValues,
                         totalInstance,
-                        dimensionalTotalInstance,
+                        labeledMetricTotalInstance,
                         levelInstance,
                         measurableValueProviders,
                         meterImpl);
@@ -63,9 +63,9 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
                 @Override
                 public AbstractExpirableMeterInstance<Object> makeExpirableInstance(
                     MetricName name,
-                    List<MetricDimensionValue> dimensionValues,
+                    List<LabelValue> labelValues,
                     boolean totalInstance,
-                    boolean dimensionalTotalInstance,
+                    boolean labeledMetricTotalInstance,
                     boolean levelInstance,
                     Map<Measurable, MeasurableValueProvider<Object>> measurableValueProviders,
                     Object meterImpl,
@@ -73,9 +73,9 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
 
                     return new StubExpirableMeterInstance(
                         name,
-                        dimensionValues,
+                        labelValues,
                         totalInstance,
-                        dimensionalTotalInstance,
+                        labeledMetricTotalInstance,
                         levelInstance,
                         measurableValueProviders,
                         meterImpl,
@@ -88,7 +88,7 @@ public class StubTimer extends AbstractTimer<Object> implements Timer {
     }
 
     @Override
-    public Stopwatch stopwatch(MetricDimensionValues dimensionValues) {
+    public Stopwatch stopwatch(LabelValues labelValues) {
         return new StubStopWatch();
     }
 }

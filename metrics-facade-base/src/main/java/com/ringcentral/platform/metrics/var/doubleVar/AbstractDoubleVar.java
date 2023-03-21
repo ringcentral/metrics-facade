@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.var.doubleVar;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.AbstractVar;
@@ -21,18 +21,18 @@ public class AbstractDoubleVar extends AbstractVar<Double> implements DoubleVar 
         @Override
         public DoubleVarInstance makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean nonDecreasing,
             Measurable valueMeasurable,
             Supplier<Double> valueSupplier) {
 
             return new DefaultDoubleVarInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 nonDecreasing,
                 valueMeasurable,
                 valueSupplier);

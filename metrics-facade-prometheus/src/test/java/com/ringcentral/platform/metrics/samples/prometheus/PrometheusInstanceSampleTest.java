@@ -41,8 +41,8 @@ public class PrometheusInstanceSampleTest {
             Collector.Type.SUMMARY,
             null,
             "suffix_2",
-            List.of("dimension_1", "dimension_2"),
-            List.of("dimension_1_value", "dimension_2_value"),
+            List.of("label_1", "label_2"),
+            List.of("label_1_value", "label_2_value"),
             2.0));
 
         instanceSample.add(new PrometheusSample(
@@ -51,8 +51,8 @@ public class PrometheusInstanceSampleTest {
             Collector.Type.HISTOGRAM,
             null,
             null,
-            List.of("dimension_1"),
-            List.of("dimension_1_value"),
+            List.of("label_1"),
+            List.of("label_1_value"),
             3.0));
 
         instanceSample.add(new PrometheusSample(
@@ -61,8 +61,8 @@ public class PrometheusInstanceSampleTest {
             Collector.Type.SUMMARY,
             null,
             "suffix_2",
-            List.of("dimension_1", "dimension_2"),
-            List.of("dimension_1_value", "dimension_2_value"),
+            List.of("label_1", "label_2"),
+            List.of("label_1_value", "label_2_value"),
             4.0));
 
         instanceSample.add(new PrometheusSample(
@@ -71,8 +71,8 @@ public class PrometheusInstanceSampleTest {
             null,
             null,
             "suffix_3",
-            List.of("dimension_1", "dimension_2", "dimension_3"),
-            List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
+            List.of("label_1", "label_2", "label_3"),
+            List.of("label_1_value", "label_2_value", "label_3_value"),
             5.0));
 
         assertThat(instanceSample.samples().size(), is(2));
@@ -97,8 +97,8 @@ public class PrometheusInstanceSampleTest {
                 null,
                 null,
                 "suffix_3",
-                List.of("dimension_1", "dimension_2", "dimension_3"),
-                List.of("dimension_1_value", "dimension_2_value", "dimension_3_value"),
+                List.of("label_1", "label_2", "label_3"),
+                List.of("label_1_value", "label_2_value", "label_3_value"),
                 5.0));
 
         assertTrue(instanceSample.hasChildren());
@@ -116,8 +116,8 @@ public class PrometheusInstanceSampleTest {
                 null,
                 null,
                 "suffix_2",
-                List.of("dimension_1", "dimension_2"),
-                List.of("dimension_1_value", "dimension_2_value"),
+                List.of("label_1", "label_2"),
+                List.of("label_1_value", "label_2_value"),
                 2.0));
 
         check(
@@ -128,8 +128,8 @@ public class PrometheusInstanceSampleTest {
                 null,
                 null,
                 "suffix_2",
-                List.of("dimension_1", "dimension_2"),
-                List.of("dimension_1_value", "dimension_2_value"),
+                List.of("label_1", "label_2"),
+                List.of("label_1_value", "label_2_value"),
                 4.0));
 
         child = instanceSample.children().get(1);
@@ -144,8 +144,8 @@ public class PrometheusInstanceSampleTest {
                 null,
                 null,
                 null,
-                List.of("dimension_1"),
-                List.of("dimension_1_value"),
+                List.of("label_1"),
+                List.of("label_1_value"),
                 3.0));
     }
 

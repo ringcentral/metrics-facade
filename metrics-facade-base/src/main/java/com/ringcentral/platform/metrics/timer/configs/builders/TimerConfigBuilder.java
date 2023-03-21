@@ -2,7 +2,7 @@ package com.ringcentral.platform.metrics.timer.configs.builders;
 
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.configs.builders.AbstractMeterConfigBuilder;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.timer.TimerMeasurable;
 import com.ringcentral.platform.metrics.timer.configs.*;
@@ -53,9 +53,9 @@ public class TimerConfigBuilder extends AbstractMeterConfigBuilder<
     protected TimerConfig buildImpl(
         boolean enabled,
         String description,
-        MetricDimensionValues prefixDimensionValues,
-        List<MetricDimension> dimensions,
-        MetricDimensionValuesPredicate exclusionPredicate,
+        LabelValues prefixLabelValues,
+        List<Label> labels,
+        LabelValuesPredicate exclusionPredicate,
         TimerSliceConfig allSliceConfig,
         Set<TimerSliceConfig> sliceConfigs,
         MetricContext context) {
@@ -63,8 +63,8 @@ public class TimerConfigBuilder extends AbstractMeterConfigBuilder<
         return new DefaultTimerConfig(
             enabled,
             description,
-            prefixDimensionValues,
-            dimensions,
+            prefixLabelValues,
+            labels,
             exclusionPredicate,
             allSliceConfig,
             sliceConfigs,

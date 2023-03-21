@@ -1,6 +1,6 @@
 package com.ringcentral.platform.metrics.var.longVar;
 
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValue;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.var.AbstractVar;
@@ -21,18 +21,18 @@ public class AbstractLongVar extends AbstractVar<Long> implements LongVar {
         @Override
         public LongVarInstance makeInstance(
             MetricName name,
-            List<MetricDimensionValue> dimensionValues,
+            List<LabelValue> labelValues,
             boolean totalInstance,
-            boolean dimensionalTotalInstance,
+            boolean labeledMetricTotalInstance,
             boolean nonDecreasing,
             Measurable valueMeasurable,
             Supplier<Long> valueSupplier) {
 
             return new DefaultLongVarInstance(
                 name,
-                dimensionValues,
+                labelValues,
                 totalInstance,
-                dimensionalTotalInstance,
+                labeledMetricTotalInstance,
                 nonDecreasing,
                 valueMeasurable,
                 valueSupplier);

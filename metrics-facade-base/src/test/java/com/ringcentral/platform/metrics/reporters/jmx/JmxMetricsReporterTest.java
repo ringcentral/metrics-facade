@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.reporters.jmx;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
 import com.ringcentral.platform.metrics.MetricListener;
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.meter.*;
 import com.ringcentral.platform.metrics.rate.Rate;
@@ -38,8 +38,8 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings({ "unchecked", "SameParameterValue" })
 public class JmxMetricsReporterTest {
 
-    static final MetricDimension DIMENSION_1 = new MetricDimension("dimension_1");
-    static final MetricDimension DIMENSION_2 = new MetricDimension("dimension_2");
+    static final Label LABEL_1 = new Label("label_1");
+    static final Label LABEL_2 = new Label("label_2");
 
     MBeanServer mBeanServer = newMBeanServer();
     JmxMetricsReporter reporter = new JmxMetricsReporter(mBeanServer);
@@ -343,7 +343,7 @@ public class JmxMetricsReporterTest {
 
             TestCounterInstance instance_2 = new TestCounterInstance(
                 withName("counter", "c", "d"),
-                List.of(DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")),
+                List.of(LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")),
                 false,
                 false,
                 true,
@@ -363,8 +363,8 @@ public class JmxMetricsReporterTest {
             reporter.counterAdded(counter);
             assertThat(longAttrValue("counter.a.b", "count"), is(1L));
             assertThat(longAttrValue("counter.a.b", "count"), is(2L));
-            assertThat(longAttrValue("counter.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(3L));
-            assertThat(longAttrValue("counter.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(4L));
+            assertThat(longAttrValue("counter.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(3L));
+            assertThat(longAttrValue("counter.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(4L));
             listenerRef.value().metricInstanceRemoved(instance_1);
             listenerRef.value().metricInstanceRemoved(instance_2);
             reporter.counterRemoved(counter);
@@ -408,7 +408,7 @@ public class JmxMetricsReporterTest {
 
             TestRateInstance instance_2 = new TestRateInstance(
                 withName("rate", "c", "d"),
-                List.of(DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")),
+                List.of(LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")),
                 false,
                 false,
                 true,
@@ -441,22 +441,22 @@ public class JmxMetricsReporterTest {
             assertFalse(attrExists("rate.a.b", "rate.15_minutes"));
             assertFalse(attrExists("rate.a.b", "rate.unit"));
 
-            assertThat(longAttrValue("rate.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(3L));
-            assertThat(longAttrValue("rate.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(4L));
+            assertThat(longAttrValue("rate.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(3L));
+            assertThat(longAttrValue("rate.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(4L));
 
-            assertThat(doubleAttrValue("rate.c.d", "rate.mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(5.0));
-            assertThat(doubleAttrValue("rate.c.d", "rate.mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(6.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(5.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(6.0));
 
-            assertThat(doubleAttrValue("rate.c.d", "rate.1_minute", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(7.0));
-            assertThat(doubleAttrValue("rate.c.d", "rate.1_minute", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(8.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.1_minute", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(7.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.1_minute", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(8.0));
 
-            assertThat(doubleAttrValue("rate.c.d", "rate.5_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(9.0));
-            assertThat(doubleAttrValue("rate.c.d", "rate.5_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(10.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.5_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(9.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.5_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(10.0));
 
-            assertThat(doubleAttrValue("rate.c.d", "rate.15_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(11.0));
-            assertThat(doubleAttrValue("rate.c.d", "rate.15_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(12.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.15_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(11.0));
+            assertThat(doubleAttrValue("rate.c.d", "rate.15_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(12.0));
 
-            assertThat(stringAttrValue("rate.c.d", "rate.unit", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is("events/hours"));
+            assertThat(stringAttrValue("rate.c.d", "rate.unit", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is("events/hours"));
 
             listenerRef.value().metricInstanceRemoved(instance_1);
             listenerRef.value().metricInstanceRemoved(instance_2);
@@ -504,7 +504,7 @@ public class JmxMetricsReporterTest {
 
             TestHistogramInstance instance_2 = new TestHistogramInstance(
                 withName("histogram", "c", "d"),
-                List.of(DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")),
+                List.of(LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")),
                 false,
                 false,
                 true,
@@ -539,26 +539,26 @@ public class JmxMetricsReporterTest {
             assertFalse(attrExists("histogram.a.b", "percentile_50"));
             assertFalse(attrExists("histogram.a.b", "percentile_75"));
 
-            assertThat(longAttrValue("histogram.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(3L));
-            assertThat(longAttrValue("histogram.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(4L));
+            assertThat(longAttrValue("histogram.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(3L));
+            assertThat(longAttrValue("histogram.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(4L));
 
-            assertThat(doubleAttrValue("histogram.c.d", "min", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(5.0));
-            assertThat(doubleAttrValue("histogram.c.d", "min", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(6.0));
+            assertThat(doubleAttrValue("histogram.c.d", "min", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(5.0));
+            assertThat(doubleAttrValue("histogram.c.d", "min", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(6.0));
 
-            assertThat(doubleAttrValue("histogram.c.d", "max", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(7.0));
-            assertThat(doubleAttrValue("histogram.c.d", "max", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(8.0));
+            assertThat(doubleAttrValue("histogram.c.d", "max", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(7.0));
+            assertThat(doubleAttrValue("histogram.c.d", "max", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(8.0));
 
-            assertThat(doubleAttrValue("histogram.c.d", "mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(9.0));
-            assertThat(doubleAttrValue("histogram.c.d", "mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(10.0));
+            assertThat(doubleAttrValue("histogram.c.d", "mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(9.0));
+            assertThat(doubleAttrValue("histogram.c.d", "mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(10.0));
 
-            assertThat(doubleAttrValue("histogram.c.d", "stdDev", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(11.0));
-            assertThat(doubleAttrValue("histogram.c.d", "stdDev", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(12.0));
+            assertThat(doubleAttrValue("histogram.c.d", "stdDev", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(11.0));
+            assertThat(doubleAttrValue("histogram.c.d", "stdDev", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(12.0));
 
-            assertThat(doubleAttrValue("histogram.c.d", "50_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(13.0));
-            assertThat(doubleAttrValue("histogram.c.d", "50_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(14.0));
+            assertThat(doubleAttrValue("histogram.c.d", "50_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(13.0));
+            assertThat(doubleAttrValue("histogram.c.d", "50_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(14.0));
 
-            assertThat(doubleAttrValue("histogram.c.d", "75_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(15.0));
-            assertThat(doubleAttrValue("histogram.c.d", "75_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(16.0));
+            assertThat(doubleAttrValue("histogram.c.d", "75_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(15.0));
+            assertThat(doubleAttrValue("histogram.c.d", "75_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(16.0));
 
             listenerRef.value().metricInstanceRemoved(instance_1);
             listenerRef.value().metricInstanceRemoved(instance_2);
@@ -626,7 +626,7 @@ public class JmxMetricsReporterTest {
 
             TestTimerInstance instance_2 = new TestTimerInstance(
                 withName("timer", "c", "d"),
-                List.of(DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")),
+                List.of(LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")),
                 false,
                 false,
                 true,
@@ -675,44 +675,44 @@ public class JmxMetricsReporterTest {
             assertFalse(attrExists("timer.a.b", "duration.percentile_75"));
             assertFalse(attrExists("timer.a.b", "duration.unit"));
 
-            assertThat(longAttrValue("timer.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(3L));
-            assertThat(longAttrValue("timer.c.d", "count", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(4L));
+            assertThat(longAttrValue("timer.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(3L));
+            assertThat(longAttrValue("timer.c.d", "count", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(4L));
 
             // rate
-            assertThat(doubleAttrValue("timer.c.d", "rate.mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(5.0));
-            assertThat(doubleAttrValue("timer.c.d", "rate.mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(6.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(5.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(6.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "rate.1_minute", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(7.0));
-            assertThat(doubleAttrValue("timer.c.d", "rate.1_minute", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(8.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.1_minute", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(7.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.1_minute", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(8.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "rate.5_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(9.0));
-            assertThat(doubleAttrValue("timer.c.d", "rate.5_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(10.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.5_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(9.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.5_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(10.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "rate.15_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(11.0));
-            assertThat(doubleAttrValue("timer.c.d", "rate.15_minutes", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(12.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.15_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(11.0));
+            assertThat(doubleAttrValue("timer.c.d", "rate.15_minutes", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(12.0));
 
-            assertThat(stringAttrValue("timer.c.d", "rate.unit", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is("events/hours"));
+            assertThat(stringAttrValue("timer.c.d", "rate.unit", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is("events/hours"));
 
             // duration
-            assertThat(doubleAttrValue("timer.c.d", "duration.min", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(13.0));
-            assertThat(doubleAttrValue("timer.c.d", "duration.min", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(14.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.min", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(13.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.min", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(14.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "duration.max", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(15.0));
-            assertThat(doubleAttrValue("timer.c.d", "duration.max", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(16.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.max", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(15.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.max", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(16.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "duration.mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(17.0));
-            assertThat(doubleAttrValue("timer.c.d", "duration.mean", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(18.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(17.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.mean", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(18.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "duration.stdDev", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(19.0));
-            assertThat(doubleAttrValue("timer.c.d", "duration.stdDev", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(20.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.stdDev", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(19.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.stdDev", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(20.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "duration.50_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(21.0));
-            assertThat(doubleAttrValue("timer.c.d", "duration.50_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(22.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.50_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(21.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.50_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(22.0));
 
-            assertThat(doubleAttrValue("timer.c.d", "duration.75_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(23.0));
-            assertThat(doubleAttrValue("timer.c.d", "duration.75_percentile", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is(24.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.75_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(23.0));
+            assertThat(doubleAttrValue("timer.c.d", "duration.75_percentile", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is(24.0));
 
-            assertThat(stringAttrValue("timer.c.d", "duration.unit", DIMENSION_1.value("d_1_value"), DIMENSION_2.value("d_2_value")), is("days"));
+            assertThat(stringAttrValue("timer.c.d", "duration.unit", LABEL_1.value("l_1_value"), LABEL_2.value("l_2_value")), is("days"));
 
             listenerRef.value().metricInstanceRemoved(instance_1);
             listenerRef.value().metricInstanceRemoved(instance_2);
@@ -720,9 +720,9 @@ public class JmxMetricsReporterTest {
         }
     }
 
-    boolean attrExists(String mBeanName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
+    boolean attrExists(String mBeanName, String mBeanAttrName, LabelValue... labelValues) {
         try {
-            return mBeanServer.getAttribute(objectName(mBeanName, dimensionValues), mBeanAttrName) != null;
+            return mBeanServer.getAttribute(objectName(mBeanName, labelValues), mBeanAttrName) != null;
         } catch (AttributeNotFoundException e) {
             return false;
         } catch (Exception e) {
@@ -730,33 +730,33 @@ public class JmxMetricsReporterTest {
         }
     }
 
-    long longAttrValue(String mBeanName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
-        return (long)attrValue(mBeanName, mBeanAttrName, dimensionValues);
+    long longAttrValue(String mBeanName, String mBeanAttrName, LabelValue... labelValues) {
+        return (long)attrValue(mBeanName, mBeanAttrName, labelValues);
     }
 
-    double doubleAttrValue(String mBeanName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
-        return (double)attrValue(mBeanName, mBeanAttrName, dimensionValues);
+    double doubleAttrValue(String mBeanName, String mBeanAttrName, LabelValue... labelValues) {
+        return (double)attrValue(mBeanName, mBeanAttrName, labelValues);
     }
 
-    String stringAttrValue(String mBeanName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
-        return (String)attrValue(mBeanName, mBeanAttrName, dimensionValues);
+    String stringAttrValue(String mBeanName, String mBeanAttrName, LabelValue... labelValues) {
+        return (String)attrValue(mBeanName, mBeanAttrName, labelValues);
     }
 
-    Object attrValue(String mBeanName, String mBeanAttrName, MetricDimensionValue... dimensionValues) {
+    Object attrValue(String mBeanName, String mBeanAttrName, LabelValue... labelValues) {
         try {
-            return mBeanServer.getAttribute(objectName(mBeanName, dimensionValues), mBeanAttrName);
+            return mBeanServer.getAttribute(objectName(mBeanName, labelValues), mBeanAttrName);
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
     }
 
-    ObjectName objectName(String mBeanName, MetricDimensionValue... dimensionValues) {
+    ObjectName objectName(String mBeanName, LabelValue... labelValues) {
         try {
-            if (dimensionValues.length == 0) {
+            if (labelValues.length == 0) {
                 return new ObjectName("metrics", "name", mBeanName);
             } else {
                 StringBuilder builder = new StringBuilder("metrics").append(":name=").append(mBeanName);
-                List.of(dimensionValues).forEach(dv -> builder.append(',').append(escape(dv.dimension().name())).append('=').append(escape(dv.value())));
+                List.of(labelValues).forEach(lv -> builder.append(',').append(escape(lv.label().name())).append('=').append(escape(lv.value())));
                 return new ObjectName(builder.toString());
             }
         } catch (MalformedObjectNameException exception) {

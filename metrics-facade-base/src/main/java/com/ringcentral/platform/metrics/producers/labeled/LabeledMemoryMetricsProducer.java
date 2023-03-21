@@ -1,9 +1,9 @@
-package com.ringcentral.platform.metrics.producers.dimensional;
+package com.ringcentral.platform.metrics.producers.labeled;
 
 import com.ringcentral.platform.metrics.MetricModBuilder;
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.dimensions.MetricDimension;
-import com.ringcentral.platform.metrics.dimensions.MetricDimensionValues;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.producers.AbstractMemoryMetricsProducer;
 import com.ringcentral.platform.metrics.producers.Ratio;
@@ -14,7 +14,7 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.List;
 
-import static com.ringcentral.platform.metrics.dimensions.MetricDimensionValues.dimensionValues;
+import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
 import static java.lang.management.ManagementFactory.getMemoryMXBean;
 import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
 
@@ -23,57 +23,57 @@ import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
  * <ul>
  *     <li>
  *         <i>init</i> - the amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"heap", "total", "non-heap"}<br>
  *     </li>
  *     <li>
  *         <i>max</i> - the maximum amount of memory in bytes that can be used for memory management.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"heap", "total", "non-heap"}<br>
  *     </li>
  *     <li>
  *         <i>used</i> - the amount of used memory in bytes.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"heap", "total", "non-heap"}<br>
  *     </li>
  *     <li>
  *         <i>usage</i> - used divided by max.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"heap", "non-heap"}<br>
  *     </li>
  *     <li>
  *         <i>committed</i> - the amount of memory in bytes that is committed for the Java virtual machine to use.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"heap", "total", "non-heap"}<br>
  *     </li>
  *     <li>
  *         <i>usedAfterGc</i> - the amount of used memory in bytes after the Java virtual machine most recently expended effort in recycling unused objects in this memory pool.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         name = {"G1 Old Gen", "G1 Eden Space", "G1 Survivor Space"}<br>
  *     </li>
  *     <li>
  *         <i>pools.init</i> - the amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
  *     </li>
  *     <li>
  *         <i>pools.max</i> - the maximum amount of memory in bytes that can be used for memory management.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
  *     </li>
  *     <li>
  *         <i>pools.used</i> - the amount of used memory in bytes.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
  *     </li>
  *     <li>
  *         <i>pools.usage</i> - used divided by max.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
  *     </li>
  *     <li>
  *         <i>pools.committed</i> - the amount of memory in bytes that is committed for the Java virtual machine to use.<br>
- *         Dimensions:<br>
+ *         Labels:<br>
  *         type = {"G1 Old Gen", "Compressed Class Space", "G1 Eden Space", "G1 Survivor Space", "CodeHeap 'non-profiled nmethods'", "CodeHeap 'non-nmethods'", "CodeHeap 'profiled nmethods'", "Metaspace"}<br>
  *     </li>
  * </ul>
@@ -83,7 +83,7 @@ import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
  * Example of usage:
  * <pre>
  * MetricRegistry registry = new DefaultMetricRegistry();
- * new DimensionalMemoryMetricsProducer().produceMetrics(registry);
+ * new LabeledMemoryMetricsProducer().produceMetrics(registry);
  * PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(registry);
  * System.out.println(exporter.exportMetrics());
  * </pre>
@@ -170,31 +170,31 @@ import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
  * Memory_pools_used{name="Metaspace",} 9053760.0
  * </pre>
  */
-public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProducer {
+public class LabeledMemoryMetricsProducer extends AbstractMemoryMetricsProducer {
 
-    private static final MetricDimension NAME_DIMENSION = new MetricDimension("name");
-    private static final MetricDimension TYPE_DIMENSION = new MetricDimension("type");
-    private static final MetricDimensionValues HEAP_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("heap"));
-    private static final MetricDimensionValues NON_HEAP_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("non-heap"));
-    private static final MetricDimensionValues TOTAL_TYPE_DIMENSION_VALUES = dimensionValues(TYPE_DIMENSION.value("total"));
+    private static final Label NAME_LABEL = new Label("name");
+    private static final Label TYPE_LABEL = new Label("type");
+    private static final LabelValues HEAP_TYPE_LABEL_VALUES = labelValues(TYPE_LABEL.value("heap"));
+    private static final LabelValues NON_HEAP_TYPE_LABEL_VALUES = labelValues(TYPE_LABEL.value("non-heap"));
+    private static final LabelValues TOTAL_TYPE_LABEL_VALUES = labelValues(TYPE_LABEL.value("total"));
 
-    public DimensionalMemoryMetricsProducer() {
+    public LabeledMemoryMetricsProducer() {
         this(DEFAULT_NAME_PREFIX, null);
     }
 
-    public DimensionalMemoryMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
+    public LabeledMemoryMetricsProducer(MetricName namePrefix, MetricModBuilder metricModBuilder) {
         this(
-                namePrefix,
-                metricModBuilder,
-                getMemoryMXBean(),
-                getMemoryPoolMXBeans());
+            namePrefix,
+            metricModBuilder,
+            getMemoryMXBean(),
+            getMemoryPoolMXBeans());
     }
 
-    public DimensionalMemoryMetricsProducer(
-            MetricName namePrefix,
-            MetricModBuilder metricModBuilder,
-            MemoryMXBean memoryMxBean,
-            List<MemoryPoolMXBean> memoryPoolMxBeans) {
+    public LabeledMemoryMetricsProducer(
+        MetricName namePrefix,
+        MetricModBuilder metricModBuilder,
+        MemoryMXBean memoryMxBean,
+        List<MemoryPoolMXBean> memoryPoolMxBeans) {
 
         super(namePrefix, metricModBuilder, memoryMxBean, memoryPoolMxBeans);
     }
@@ -202,130 +202,118 @@ public class DimensionalMemoryMetricsProducer extends AbstractMemoryMetricsProdu
     @Override
     public void produceMetrics(MetricRegistry registry) {
         final var initialSize = registry.longVar(
-                nameWithSuffix("init"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(INIT_DESCRIPTION, TYPE_DIMENSION)
-        );
+            nameWithSuffix("init"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(INIT_DESCRIPTION, TYPE_LABEL));
+
         initialSize.register(
-                () -> memoryMxBean.getHeapMemoryUsage().getInit() + memoryMxBean.getNonHeapMemoryUsage().getInit(),
-                TOTAL_TYPE_DIMENSION_VALUES
-        );
-        initialSize.register(memoryMxBean.getHeapMemoryUsage()::getInit, HEAP_TYPE_DIMENSION_VALUES);
-        initialSize.register(memoryMxBean.getNonHeapMemoryUsage()::getInit, NON_HEAP_TYPE_DIMENSION_VALUES);
+            () -> memoryMxBean.getHeapMemoryUsage().getInit() + memoryMxBean.getNonHeapMemoryUsage().getInit(),
+            TOTAL_TYPE_LABEL_VALUES);
+
+        initialSize.register(memoryMxBean.getHeapMemoryUsage()::getInit, HEAP_TYPE_LABEL_VALUES);
+        initialSize.register(memoryMxBean.getNonHeapMemoryUsage()::getInit, NON_HEAP_TYPE_LABEL_VALUES);
 
         final var usedSize = registry.longVar(
-                nameWithSuffix("used"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(USED_DESCRIPTION, TYPE_DIMENSION)
-        );
+            nameWithSuffix("used"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(USED_DESCRIPTION, TYPE_LABEL));
+
         usedSize.register(
-                () -> memoryMxBean.getHeapMemoryUsage().getUsed() + memoryMxBean.getNonHeapMemoryUsage().getUsed(),
-                TOTAL_TYPE_DIMENSION_VALUES
-        );
-        usedSize.register(memoryMxBean.getHeapMemoryUsage()::getUsed, HEAP_TYPE_DIMENSION_VALUES);
-        usedSize.register(memoryMxBean.getNonHeapMemoryUsage()::getUsed, NON_HEAP_TYPE_DIMENSION_VALUES);
+            () -> memoryMxBean.getHeapMemoryUsage().getUsed() + memoryMxBean.getNonHeapMemoryUsage().getUsed(),
+            TOTAL_TYPE_LABEL_VALUES);
+
+        usedSize.register(memoryMxBean.getHeapMemoryUsage()::getUsed, HEAP_TYPE_LABEL_VALUES);
+        usedSize.register(memoryMxBean.getNonHeapMemoryUsage()::getUsed, NON_HEAP_TYPE_LABEL_VALUES);
 
         final var maxSize = registry.longVar(
-                nameWithSuffix("max"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(MAX_DESCRIPTION, TYPE_DIMENSION)
-        );
-        maxSize.register(() -> memoryMxBean.getHeapMemoryUsage().getMax() + memoryMxBean.getNonHeapMemoryUsage().getMax(), TOTAL_TYPE_DIMENSION_VALUES);
+            nameWithSuffix("max"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(MAX_DESCRIPTION, TYPE_LABEL));
 
-        maxSize.register(memoryMxBean.getHeapMemoryUsage()::getMax, HEAP_TYPE_DIMENSION_VALUES);
-        maxSize.register(memoryMxBean.getNonHeapMemoryUsage()::getMax, NON_HEAP_TYPE_DIMENSION_VALUES);
+        maxSize.register(() -> memoryMxBean.getHeapMemoryUsage().getMax() + memoryMxBean.getNonHeapMemoryUsage().getMax(), TOTAL_TYPE_LABEL_VALUES);
+
+        maxSize.register(memoryMxBean.getHeapMemoryUsage()::getMax, HEAP_TYPE_LABEL_VALUES);
+        maxSize.register(memoryMxBean.getNonHeapMemoryUsage()::getMax, NON_HEAP_TYPE_LABEL_VALUES);
 
         final var committedSize = registry.longVar(
-                nameWithSuffix("committed"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION, TYPE_DIMENSION)
-        );
-        committedSize.register(
-                () -> memoryMxBean.getHeapMemoryUsage().getCommitted() + memoryMxBean.getNonHeapMemoryUsage().getCommitted(),
-                TOTAL_TYPE_DIMENSION_VALUES
-        );
-        committedSize.register(memoryMxBean.getHeapMemoryUsage()::getCommitted, HEAP_TYPE_DIMENSION_VALUES);
-        committedSize.register(memoryMxBean.getNonHeapMemoryUsage()::getCommitted, NON_HEAP_TYPE_DIMENSION_VALUES);
+            nameWithSuffix("committed"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION, TYPE_LABEL));
 
+        committedSize.register(
+            () -> memoryMxBean.getHeapMemoryUsage().getCommitted() + memoryMxBean.getNonHeapMemoryUsage().getCommitted(),
+            TOTAL_TYPE_LABEL_VALUES);
+
+        committedSize.register(memoryMxBean.getHeapMemoryUsage()::getCommitted, HEAP_TYPE_LABEL_VALUES);
+        committedSize.register(memoryMxBean.getNonHeapMemoryUsage()::getCommitted, NON_HEAP_TYPE_LABEL_VALUES);
 
         final var usageRatio = registry.doubleVar(
-                nameWithSuffix("usage"),
-                Var.noTotal(),
-                doubleVarConfigBuilderSupplier(USAGE_DESCRIPTION, TYPE_DIMENSION)
-        );
-        usageRatio.register(
-                () -> {
-                    MemoryUsage usage = memoryMxBean.getHeapMemoryUsage();
-                    return Ratio.of(usage.getUsed(), usage.getMax()).value();
-                },
-                HEAP_TYPE_DIMENSION_VALUES
-        );
-        usageRatio.register(
-                () -> {
-                    MemoryUsage usage = memoryMxBean.getNonHeapMemoryUsage();
-                    return Ratio.of(usage.getUsed(), usage.getMax()).value();
-                },
-                NON_HEAP_TYPE_DIMENSION_VALUES
-        );
+            nameWithSuffix("usage"),
+            Var.noTotal(),
+            doubleVarConfigBuilderSupplier(USAGE_DESCRIPTION, TYPE_LABEL));
 
+        usageRatio.register(
+            () -> {
+                MemoryUsage usage = memoryMxBean.getHeapMemoryUsage();
+                return Ratio.of(usage.getUsed(), usage.getMax()).value();
+            },
+            HEAP_TYPE_LABEL_VALUES);
+
+        usageRatio.register(
+            () -> {
+                MemoryUsage usage = memoryMxBean.getNonHeapMemoryUsage();
+                return Ratio.of(usage.getUsed(), usage.getMax()).value();
+            },
+            NON_HEAP_TYPE_LABEL_VALUES);
 
         final var initialPoolSize = registry.longVar(
-                nameWithSuffix("pools", "init"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(INIT_DESCRIPTION, NAME_DIMENSION)
-        );
+            nameWithSuffix("pools", "init"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(INIT_DESCRIPTION, NAME_LABEL));
 
         final var maxPoolSize = registry.longVar(
-                nameWithSuffix("pools", "max"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(MAX_DESCRIPTION, NAME_DIMENSION)
-
-        );
+            nameWithSuffix("pools", "max"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(MAX_DESCRIPTION, NAME_LABEL));
 
         final var committedPoolSize = registry.longVar(
-                nameWithSuffix("pools", "committed"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION, NAME_DIMENSION)
-
-        );
+            nameWithSuffix("pools", "committed"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(COMMITTED_DESCRIPTION, NAME_LABEL));
 
         final var usedPoolSize = registry.longVar(
-                nameWithSuffix("pools", "used"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(USED_DESCRIPTION, NAME_DIMENSION)
-
-        );
+            nameWithSuffix("pools", "used"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(USED_DESCRIPTION, NAME_LABEL));
 
         final var usagePoolRatio = registry.doubleVar(
-                nameWithSuffix("pools", "usage"),
-                Var.noTotal(),
-                doubleVarConfigBuilderSupplier(USAGE_DESCRIPTION, NAME_DIMENSION)
-        );
+            nameWithSuffix("pools", "usage"),
+            Var.noTotal(),
+            doubleVarConfigBuilderSupplier(USAGE_DESCRIPTION, NAME_LABEL));
 
         final var usedAfterGcPoolRatio = registry.longVar(
-                nameWithSuffix("usedAfterGc"),
-                Var.noTotal(),
-                longVarConfigBuilderSupplier(USED_AFTER_GC_DESCRIPTION, NAME_DIMENSION)
-        );
+            nameWithSuffix("usedAfterGc"),
+            Var.noTotal(),
+            longVarConfigBuilderSupplier(USED_AFTER_GC_DESCRIPTION, NAME_LABEL));
 
         for (MemoryPoolMXBean pool : memoryPoolMxBeans) {
-            final var dimensionValues = dimensionValues(NAME_DIMENSION.value(pool.getName()));
-            initialPoolSize.register(pool.getUsage()::getInit, dimensionValues);
-            maxPoolSize.register(pool.getUsage()::getMax, dimensionValues);
-            committedPoolSize.register(pool.getUsage()::getCommitted, dimensionValues);
-            usedPoolSize.register(pool.getUsage()::getUsed, dimensionValues);
+            final var labelValues = labelValues(NAME_LABEL.value(pool.getName()));
+            initialPoolSize.register(pool.getUsage()::getInit, labelValues);
+            maxPoolSize.register(pool.getUsage()::getMax, labelValues);
+            committedPoolSize.register(pool.getUsage()::getCommitted, labelValues);
+            usedPoolSize.register(pool.getUsage()::getUsed, labelValues);
+
             usagePoolRatio.register(
-                    () -> {
-                        MemoryUsage usage = pool.getUsage();
-                        final var max = usage.getMax();
-                        final var denominator = max == -1 ? usage.getCommitted() : max;
-                        return Ratio.of(usage.getUsed(), denominator).value();
-                    },
-                    dimensionValues
-            );
+                () -> {
+                    MemoryUsage usage = pool.getUsage();
+                    final var max = usage.getMax();
+                    final var denominator = max == -1 ? usage.getCommitted() : max;
+                    return Ratio.of(usage.getUsed(), denominator).value();
+                },
+                labelValues);
 
             if (pool.getCollectionUsage() != null) {
-                usedAfterGcPoolRatio.register(pool.getCollectionUsage()::getUsed, dimensionValues);
+                usedAfterGcPoolRatio.register(pool.getCollectionUsage()::getUsed, labelValues);
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.ringcentral.platform.metrics.reporters.zabbix;
 
 import com.ringcentral.platform.metrics.*;
-import com.ringcentral.platform.metrics.dimensions.*;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.infoProviders.*;
 import com.ringcentral.platform.metrics.reporters.zabbix.ZabbixLldMetricsReporter.Rule;
@@ -20,9 +20,9 @@ import static org.mockito.Mockito.*;
 
 public class ZabbixLldMetricsReporterTest {
 
-    static final MetricDimension SERVICE = new MetricDimension("service");
-    static final MetricDimension SERVER = new MetricDimension("server");
-    static final MetricDimension PORT = new MetricDimension("port");
+    static final Label SERVICE = new Label("service");
+    static final Label SERVER = new Label("server");
+    static final Label PORT = new Label("port");
 
     PredicativeMetricNamedInfoProvider<Rule> rulesProvider;
     ZabbixLldMetricsReporterListener listener = mock(ZabbixLldMetricsReporterListener.class);
@@ -59,10 +59,10 @@ public class ZabbixLldMetricsReporterTest {
 
         MeterInstance meterInstance_1 = mock(MeterInstance.class);
         when(meterInstance_1.name()).thenReturn(metricName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"));
-        when(meterInstance_1.hasDimensionValues()).thenReturn(true);
-        List<MetricDimensionValue> dimensionValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"));
-        when(meterInstance_1.dimensionValues()).thenReturn(dimensionValues);
-        when(meterInstance_1.dimensionToValue()).thenReturn(dimensionValues.stream().collect(toMap(MetricDimensionValue::dimension, dv -> dv)));
+        when(meterInstance_1.hasLabelValues()).thenReturn(true);
+        List<LabelValue> labelValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"));
+        when(meterInstance_1.labelValues()).thenReturn(labelValues);
+        when(meterInstance_1.labelToValue()).thenReturn(labelValues.stream().collect(toMap(LabelValue::label, lv -> lv)));
         when(meterInstance_1.valueOf(SERVICE)).thenReturn("service_1");
         when(meterInstance_1.valueOf(SERVER)).thenReturn("server_1");
         when(meterInstance_1.isLevelInstance()).thenReturn(false);
@@ -76,10 +76,10 @@ public class ZabbixLldMetricsReporterTest {
 
         MeterInstance meterInstance_2 = mock(MeterInstance.class);
         when(meterInstance_2.name()).thenReturn(metricName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"));
-        when(meterInstance_2.hasDimensionValues()).thenReturn(true);
-        dimensionValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"), PORT.value("port_1"));
-        when(meterInstance_2.dimensionValues()).thenReturn(dimensionValues);
-        when(meterInstance_2.dimensionToValue()).thenReturn(dimensionValues.stream().collect(toMap(MetricDimensionValue::dimension, dv -> dv)));
+        when(meterInstance_2.hasLabelValues()).thenReturn(true);
+        labelValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"), PORT.value("port_1"));
+        when(meterInstance_2.labelValues()).thenReturn(labelValues);
+        when(meterInstance_2.labelToValue()).thenReturn(labelValues.stream().collect(toMap(LabelValue::label, lv -> lv)));
         when(meterInstance_2.valueOf(SERVICE)).thenReturn("service_1");
         when(meterInstance_2.valueOf(SERVER)).thenReturn("server_1");
         when(meterInstance_2.valueOf(PORT)).thenReturn("port_1");
@@ -101,10 +101,10 @@ public class ZabbixLldMetricsReporterTest {
 
         meterInstance_1 = mock(MeterInstance.class);
         when(meterInstance_1.name()).thenReturn(metricName("ActiveHealthChecker", "healthCheck", "NOT_MATCHING", "histogram"));
-        when(meterInstance_1.hasDimensionValues()).thenReturn(true);
-        dimensionValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"));
-        when(meterInstance_1.dimensionValues()).thenReturn(dimensionValues);
-        when(meterInstance_1.dimensionToValue()).thenReturn(dimensionValues.stream().collect(toMap(MetricDimensionValue::dimension, dv -> dv)));
+        when(meterInstance_1.hasLabelValues()).thenReturn(true);
+        labelValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"));
+        when(meterInstance_1.labelValues()).thenReturn(labelValues);
+        when(meterInstance_1.labelToValue()).thenReturn(labelValues.stream().collect(toMap(LabelValue::label, lv -> lv)));
         when(meterInstance_1.valueOf(SERVICE)).thenReturn("service_1");
         when(meterInstance_1.valueOf(SERVER)).thenReturn("server_1");
         when(meterInstance_1.isLevelInstance()).thenReturn(false);
@@ -114,10 +114,10 @@ public class ZabbixLldMetricsReporterTest {
 
         meterInstance_1 = mock(MeterInstance.class);
         when(meterInstance_1.name()).thenReturn(metricName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"));
-        when(meterInstance_1.hasDimensionValues()).thenReturn(true);
-        dimensionValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"));
-        when(meterInstance_1.dimensionValues()).thenReturn(dimensionValues);
-        when(meterInstance_1.dimensionToValue()).thenReturn(dimensionValues.stream().collect(toMap(MetricDimensionValue::dimension, dv -> dv)));
+        when(meterInstance_1.hasLabelValues()).thenReturn(true);
+        labelValues = List.of(SERVICE.value("service_1"), SERVER.value("server_1"));
+        when(meterInstance_1.labelValues()).thenReturn(labelValues);
+        when(meterInstance_1.labelToValue()).thenReturn(labelValues.stream().collect(toMap(LabelValue::label, lv -> lv)));
         when(meterInstance_1.valueOf(SERVICE)).thenReturn("service_1");
         when(meterInstance_1.valueOf(SERVER)).thenReturn("server_1");
         when(meterInstance_1.isLevelInstance()).thenReturn(true);
@@ -127,10 +127,10 @@ public class ZabbixLldMetricsReporterTest {
 
         meterInstance_1 = mock(MeterInstance.class);
         when(meterInstance_1.name()).thenReturn(metricName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"));
-        when(meterInstance_1.hasDimensionValues()).thenReturn(true);
-        dimensionValues = List.of(SERVICE.value("service_1"), PORT.value("port_1"));
-        when(meterInstance_1.dimensionValues()).thenReturn(dimensionValues);
-        when(meterInstance_1.dimensionToValue()).thenReturn(dimensionValues.stream().collect(toMap(MetricDimensionValue::dimension, dv -> dv)));
+        when(meterInstance_1.hasLabelValues()).thenReturn(true);
+        labelValues = List.of(SERVICE.value("service_1"), PORT.value("port_1"));
+        when(meterInstance_1.labelValues()).thenReturn(labelValues);
+        when(meterInstance_1.labelToValue()).thenReturn(labelValues.stream().collect(toMap(LabelValue::label, lv -> lv)));
         when(meterInstance_2.valueOf(SERVICE)).thenReturn("service_1");
         when(meterInstance_2.valueOf(PORT)).thenReturn("port_1");
         when(meterInstance_1.isLevelInstance()).thenReturn(true);

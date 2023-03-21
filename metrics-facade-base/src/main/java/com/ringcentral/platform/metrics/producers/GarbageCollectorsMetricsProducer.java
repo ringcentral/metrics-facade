@@ -1,4 +1,3 @@
 package com.ringcentral.platform.metrics.producers;
 
-public interface GarbageCollectorsMetricsProducer extends MetricsProducer {
-}
+public interface GarbageCollectorsMetricsProducer extends MetricsProducer {}

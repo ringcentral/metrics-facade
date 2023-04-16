@@ -11,14 +11,18 @@ public class Listing03Test {
     public void test() throws InterruptedException {
         // given
         var expected =
-                "# HELP request_total Generated from metric instances with name request.total\n" +
+                "Before expiration time\n" +
+                        "# HELP request_total Generated from metric instances with name request.total\n" +
                         "# TYPE request_total gauge\n" +
-                        "request_total{service=\"auth\",server=\"auth-server-5\",port=\"8080\",} 1.0\n" +
-                        "request_total{service=\"auth\",server=\"auth-server-4\",port=\"8080\",} 1.0\n" +
-                        "request_total{service=\"auth\",server=\"auth-server-3\",port=\"8080\",} 1.0\n";
+                        "request_total{service=\"service-1\",} 1.0\n" +
+                        "request_total{service=\"service-2\",} 1.0\n" +
+                        "request_total{service=\"service-3\",} 1.0\n" +
+                        "request_total{service=\"service-4\",} 1.0\n" +
+                        "request_total{service=\"service-5\",} 1.0\n" +
+                        "After expiration time\n";
 
         // when
-        var actual = Listing03.run();
+        var actual = Listing04.run();
 
         // then
         assertThat(actual).isEqualTo(expected);

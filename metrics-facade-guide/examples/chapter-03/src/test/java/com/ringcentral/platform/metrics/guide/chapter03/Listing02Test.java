@@ -3,15 +3,24 @@ package com.ringcentral.platform.metrics.guide.chapter03;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Listing02Test {
 
     @Test
-    public void test() {
-        // given, when, then
-        assertThatThrownBy(() -> Listing02.main(new String[]{}))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("labelValues = [LabelValue{label=Label{name='server'}, value='auth-server-1'}, LabelValue{label=Label{name='port'}, value='8080'}, LabelValue{label=Label{name='service'}, value='auth'}] do not match labels = [Label{name='service'}, Label{name='server'}, Label{name='port'}]");
+    public void test() throws InterruptedException {
+        // given
+        var expected =
+                "# HELP request_total Generated from metric instances with name request.total\n" +
+                        "# TYPE request_total gauge\n" +
+                        "request_total{service=\"service-3\",} 1.0\n" +
+                        "request_total{service=\"service-4\",} 1.0\n" +
+                        "request_total{service=\"service-5\",} 1.0\n";
+
+        // when
+        var actual = Listing02.run();
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 }

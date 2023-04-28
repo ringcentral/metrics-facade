@@ -120,8 +120,8 @@ As you can see creation of the metric and its update is pretty simple.
   * [First metric creation and export](./chapters/01-first-creation-and-export.md)
   * [Metric types and Measurables](./chapters/02-metric-types.md)
   * [Labeled metrics](./chapters/03-labeled-metrics.md)
-  * Configuration
-  * Exporters
+  * [Configuration](./chapters/04-configuration.md)
+  * [Reporting](./chapters/05-reporting.md)
 * Advanced
   * Metric Instance
   * Slices and Levels

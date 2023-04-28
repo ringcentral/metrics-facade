@@ -8,3 +8,7 @@ rootProject.name = "metrics-facade-guide"
 include(":chapter-01")
 include(":chapter-02")
 include(":chapter-03")
+include(":chapter-04")
+include(":chapter-05:prometheus")
+include(":chapter-05:prometheus-deps")
+include(":chapter-05:zabbix")

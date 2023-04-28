@@ -17,6 +17,8 @@
         <module>chapter-01</module>
         <module>chapter-02</module>
         <module>chapter-03</module>
+        <module>chapter-04</module>
+        <module>chapter-05</module>
     </modules>
 
     <packaging>pom</packaging>

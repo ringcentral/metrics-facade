@@ -1,4 +1,14 @@
-## Metric types and Measurables
+# Metric types and Measurables
+
+Table of Contents
+============
+- [Introduction](#introduction)
+- [Metric examples](#metric-examples)
+  - [Counter](#counter)
+  - [Histogram](#histogram)
+- [Measurable set configuration](#measurable-set-configuration)
+
+## Introduction
 
 `Metric` is a typed named entity measuring a certain set of `Measurable`s.
 
@@ -51,13 +61,15 @@ Measurable implements `com.ringcentral.platform.metrics.measurables.Measurable` 
 
 Each Measurable identifies its value as one of `com.ringcentral.platform.metrics.measurables.MeasurableType` type: OBJECT, LONG, DOUBLE or STRING.
 
+## Metric examples
+
 ### Counter
 
 Let's take a look at Counter.
 
 `com.ringcentral.platform.metrics.counter.Counter`  measures exactly one value - the current value of counter. Its `MeasurableType` is LONG.
 
-[First metric creation and export](./first-creation-and-export.md) you can find an example of `Counter`'s usage.
+[First metric creation and export](./01-first-creation-and-export.md) you can find an example of `Counter`'s usage.
 
 ### Histogram
 
@@ -134,18 +146,14 @@ request_duration_seconds_min 5.0
 request_duration_seconds_max 15.0
 ```
 
-### Measurable set configuration
+## Measurable set configuration
 
 It has been said above that Histogram supports Histogram.Bucket and Histogram.STANDARD_DEVIATION Measurables, but output doesn't contain it.
 
 `Metric` has default set of Measurables. For example, `com.ringcentral.platform.metrics.histogram.AbstractHistogram.DEFAULT_HISTOGRAM_MEASURABLES` for `Histogram`. Notice that it doesn't contain any of `Histogram.Bucket` or `Histogram.STANDARD_DEVIATION` Measurables.
 
-You could override set of metrics:
-- globally - for all registered Metrics and new ones,
-- using filters - override will be applied only to those metrics, which will pass the filter,
-- during registration - override will be applied only to the registering metric.
-
-Now we will look only into the last option.
+You could override set of Measurable during registration - override will be applied only to the registering metric.
+To know other ways to configure metrics check [Configuration](04-configuration.md).
 
 [com.ringcentral.platform.metrics.guide.chapter02.Listing02](../examples/chapter-02/src/main/java/com/ringcentral/platform/metrics/guide/chapter02/Listing02.java)
 ```java

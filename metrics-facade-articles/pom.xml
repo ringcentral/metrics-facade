@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ringcentral.platform.metrics</groupId>
+        <artifactId>metrics-facade</artifactId>
+        <version>3.0.0-RELEASE</version>
+    </parent>
+
+    <artifactId>metrics-facade-articles</artifactId>
+
+    <properties>
+        <prometheus.version>0.16.0</prometheus.version>
+        <micrometer-registry-metrics-facade.version>3.0.0-RELEASE</micrometer-registry-metrics-facade.version>
+        <micrometer.version>1.7.3</micrometer.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ringcentral.platform.metrics</groupId>
+            <artifactId>metrics-facade-dropwizard</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ringcentral.platform.metrics</groupId>
+            <artifactId>metrics-facade-default-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ringcentral.platform.metrics</groupId>
+            <artifactId>metrics-facade-prometheus</artifactId>
+            <version>${project.version}</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>io.prometheus</groupId>
+                    <artifactId>simpleclient_common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ringcentral.platform.metrics</groupId>
+            <artifactId>micrometer-registry-metrics-facade</artifactId>
+            <version>${micrometer-registry-metrics-facade.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-jmx</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_common</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_dropwizard</artifactId>
+            <version>${prometheus.version}</version>
+        </dependency>
+    </dependencies>
+</project>

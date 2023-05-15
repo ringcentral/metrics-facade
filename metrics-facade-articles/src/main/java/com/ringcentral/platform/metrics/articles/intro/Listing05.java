@@ -33,20 +33,27 @@ public class Listing05 {
             1, SECONDS,
             forLabelValues(service.value("auth"), server.value("127.0.0.1")));
 
-        // Contacts service is called 3 times
-        for (int i = 0; i < 3; ++i) {
+        // 5) Contacts service is called 3 times on the server 127.0.0.1
+        for (int i = 1; i <= 3; ++i) {
             httpClientRequestTimer.update(
                 i, SECONDS,
-                forLabelValues(service.value("contacts"), server.value("127.0.0." + i)));
+                forLabelValues(service.value("contacts"), server.value("127.0.0.1")));
+        }
+
+        // 6) Contacts service is called 6 times on the server 127.0.0.2
+        for (int i = 1; i <= 6; ++i) {
+            httpClientRequestTimer.update(
+                i, SECONDS,
+                forLabelValues(service.value("contacts"), server.value("127.0.0.2")));
         }
 
         // Labeled metric instances are added asynchronously
         sleep(100);
 
-        // 5) Create exporter
+        // 7) Create exporter
         var exporter = new PrometheusMetricsExporter(registry);
 
-        // 6) Export metrics
+        // 8) Export metrics
         System.out.println(exporter.exportMetrics());
     }
 }

@@ -23,28 +23,24 @@ public class Listing14 {
 
         // 2) Define labels
         var service = new Label("service");
-        var server = new Label("server");
 
         // 3) Register metric
         Histogram histogram = registry.histogram(withName("failover", "count", "histogram"), () -> withHistogram()
             .description("Failover count histogram")
-            .labels(service, server)
+            .labels(service)
             .measurables(
-                COUNT, TOTAL_SUM, MEAN,
+                COUNT, TOTAL_SUM,
                 Buckets.of(linearScale().from(0).steps(1, 2).withInf()),
-                PERCENTILE_50, PERCENTILE_95)
+                PERCENTILE_50)
             // We've changed the Histogram implementation to Scale, which we'll describe in detail in the upcoming article
             .impl(scale().with(linearScale().from(0).steps(1, 2).withInf())));
 
         // 4) Update metric
-        histogram.update(0, forLabelValues(service.value("service-1"), server.value("server-1-1")));
-        histogram.update(1, forLabelValues(service.value("service-1"), server.value("server-1-1")));
+        histogram.update(0, forLabelValues(service.value("auth")));
+        histogram.update(1, forLabelValues(service.value("auth")));
 
-        histogram.update(1, forLabelValues(service.value("service-1"), server.value("server-1-2")));
-        histogram.update(2, forLabelValues(service.value("service-1"), server.value("server-1-2")));
-
-        histogram.update(0, forLabelValues(service.value("service-2"), server.value("server-2-1")));
-        histogram.update(2, forLabelValues(service.value("service-2"), server.value("server-2-1")));
+        histogram.update(1, forLabelValues(service.value("contacts")));
+        histogram.update(2, forLabelValues(service.value("contacts")));
 
         // Metric instances are added asynchronously
         sleep(100);

@@ -28,8 +28,8 @@ public class Listing08 {
             .expireLabeledInstanceAfter(1, SECONDS)
             .allSlice().noLevels());
 
-        // 4) Process requests for 6 different services
-        for (int i = 1; i <= 6; ++i) {
+        // 4) Process requests for 3 different services
+        for (int i = 1; i <= 3; ++i) {
             counter.inc(forLabelValues(service.value("service-" + i)));
         }
 

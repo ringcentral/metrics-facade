@@ -33,18 +33,18 @@ public class Listing08 {
             counter.inc(forLabelValues(service.value("service-" + i)));
         }
 
-        // 5) Labeled metric instances are added asynchronously
+        // Labeled metric instances are added asynchronously
         sleep(100);
 
-        // 6) Create exporter
+        // 5) Create exporter
         var exporter = new PrometheusMetricsExporter(registry);
 
-        // 7) Export metrics before expiration time has passed.
+        // 6) Export metrics before expiration time has passed.
         var output = new StringBuilder();
         output.append("Before expiration time:\n").append(exporter.exportMetrics());
 
-        // 8) Export metrics after expiration time has passed.
-        // We have to add 10 seconds because it is a period of checking MetricInstances for expiration.
+        // 7) Export metrics after expiration time has passed.
+        // We have to add 10 seconds because (expireLabeledInstanceAfter + 10) seconds is a period of checking MetricInstances for expiration.
         sleep(TimeUnit.SECONDS.toMillis(1) + TimeUnit.SECONDS.toMillis(10));
         output.append("After expiration time:\n").append(exporter.exportMetrics());
 

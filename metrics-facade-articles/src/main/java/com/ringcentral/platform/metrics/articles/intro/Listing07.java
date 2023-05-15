@@ -31,13 +31,13 @@ public class Listing07 {
             sleep(2);
         }
 
-        // 5) Labeled metric instances are added asynchronously
+        // Labeled metric instances are added asynchronously
         sleep(100);
 
-        // 6) Create exporter
+        // 5) Create exporter
         var exporter = new PrometheusMetricsExporter(registry);
 
-        // 7) Export metrics
+        // 6) Export metrics
         System.out.println(exporter.exportMetrics());
     }
 }

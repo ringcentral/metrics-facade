@@ -161,7 +161,7 @@ for each involved (for which there was at least one update) combination of value
 Let us explain this definition with the following example 1,      
 that we will use and develop throughout this section.  
 
-Assume you are developing a HTTP service that, in order to do its job, calls several other HTTP services.        
+Assume you are developing an HTTP service that, in order to do its job, calls several other HTTP services.  
 Each of the external services is represented by several instances running on specific servers and ports.        
 The service being developed can call any of these instances.      
 (for example, by using round-robin balancing).    
@@ -371,7 +371,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -380,7 +380,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-default-impl</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -389,7 +389,7 @@ Metrics reporter(s) (for example, ```PrometheusMetricsExporter```):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -714,7 +714,7 @@ You can find the complete sample ```GettingStartedSample.java``` in the followin
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-samples</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -1744,7 +1744,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -1935,7 +1935,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2289,7 +2289,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2385,7 +2385,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2553,7 +2553,7 @@ Required dependency:
 <dependency>
   <groupId>com.ringcentral.platform.metrics</groupId>
   <artifactId>metrics-facade-dropwizard</artifactId>
-  <version>3.1.0-SNAPSHOT</version>
+  <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2628,7 +2628,7 @@ Required dependency:
 <dependency>
   <groupId>com.ringcentral.platform.metrics</groupId>
   <artifactId>metrics-facade-dropwizard-to-prometheus</artifactId>
-  <version>3.1.0-SNAPSHOT</version>
+  <version>3.1.0-RELEASE</version>
 </dependency>
 ```
 

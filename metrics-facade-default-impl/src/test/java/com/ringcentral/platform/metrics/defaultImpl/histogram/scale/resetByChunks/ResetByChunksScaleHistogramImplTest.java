@@ -1,16 +1,21 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.resetByChunks;
 
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
-import com.ringcentral.platform.metrics.scale.*;
-import com.ringcentral.platform.metrics.test.time.*;
+import com.ringcentral.platform.metrics.scale.LinearScaleBuilder;
+import com.ringcentral.platform.metrics.scale.Scale;
+import com.ringcentral.platform.metrics.test.time.TestScheduledExecutorService;
+import com.ringcentral.platform.metrics.test.time.TestTimeMsProvider;
+import com.ringcentral.platform.metrics.test.time.TestTimeNanosProvider;
 import org.junit.Test;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.*;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE_DOUBLE;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleImpl;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
@@ -1301,28 +1306,10 @@ public class ResetByChunksScaleHistogramImplTest {
 
         h.metricInstanceAdded();
 
-        h.update(ms(1));
-        h.update(ms(3));
-        h.update(ms(3));
-        h.update(ms(25));
-        h.update(ms(27));
-        h.update(ms(27));
-        h.update(ms(27));
-        h.update(ms(32));
-        h.update(ms(75));
-        h.update(ms(77));
-        h.update(ms(125));
-        h.update(ms(235));
-        h.update(ms(48));
-        h.update(ms(778));
-        h.update(ms(778));
-        h.update(ms(778));
-        h.update(ms(275));
-        h.update(ms(500));
-        h.update(ms(500));
-        h.update(ms(8000));
+        List<Integer> updateValues = List.of(1, 3, 3, 25, 27, 27, 27, 32, 75, 77, 125, 235, 48, 778, 778, 778, 275, 500, 500, 8000);
+        updateValues.forEach(v -> h.update(ms(v)));
 
-        long expectedTotalSum = ms(3 * 5 + 25 + 5 * 50 + 75 + 100 + 2 * 250 + 3 * 500 + 3 * 1000 + 10000);
+        long expectedTotalSum = ms(updateValues.stream().reduce(0, Integer::sum));
         double expectedMean = (1.0 * expectedTotalSum) / 20;
 
         for (int i = 0; i < 10; ++i) {
@@ -1591,6 +1578,30 @@ public class ResetByChunksScaleHistogramImplTest {
         assertThat(snapshot.bucketSize(Bucket.of(7500, MILLISECONDS)), is(NO_VALUE));
         assertThat(snapshot.bucketSize(Bucket.of(10000, MILLISECONDS)), is(NO_VALUE));
         assertThat(snapshot.bucketSize(INF_BUCKET), is(NO_VALUE));
+
+        h.metricInstanceRemoved();
+    }
+
+    /**
+     * Test for bug <a href="https://github.com/ringcentral/metrics-facade/issues/44">Scale histogram: prevent overflow when calculating TOTAL_SUM and other measurables #44</a>
+     */
+    @Test
+    public void issue_44_TotalSumShouldAddUpUpdateValuesInsteadOfBucketUpperBounds() {
+        ResetByChunksScaleHistogramImpl h = new ResetByChunksScaleHistogramImpl(
+            scaleImpl()
+                .with(linearScale().from(0).steps(1, 2).withInf())
+                .build(),
+            Set.of(TOTAL_SUM, MEAN),
+            executor,
+            timeMsProvider);
+
+        h.metricInstanceAdded();
+
+        h.update(4);
+        h.update(5);
+
+        HistogramSnapshot snapshot = h.snapshot();
+        assertThat(snapshot.totalSum(), is(9L));
 
         h.metricInstanceRemoved();
     }

@@ -1,12 +1,14 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal;
 
 import com.ringcentral.platform.metrics.defaultImpl.histogram.AbstractHistogramImpl.MeasurementSpec;
-import com.ringcentral.platform.metrics.defaultImpl.histogram.*;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogramSnapshot;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfig;
 
 import java.util.concurrent.atomic.LongAdder;
 
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.*;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE_DOUBLE;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTree.*;
 
 public abstract class Chunk {
@@ -90,12 +92,12 @@ public abstract class Chunk {
     public void update(long value, boolean snapshotInProgress, long snapshotNum) {
         ScaleTreeNode node = tree.nodeForValue(value);
         updateTree(node, snapshotInProgress, snapshotNum);
-        updateSum(node, snapshotInProgress);
+        updateSum(value, snapshotInProgress);
     }
 
     protected abstract void updateTree(ScaleTreeNode node, boolean snapshotInProgress, long snapshotNum);
 
-    protected void updateSum(ScaleTreeNode node, boolean snapshotInProgress) {
+    protected void updateSum(long value, boolean snapshotInProgress) {
         if (sumAdder != null) {
             if (snapshotInProgress && snapshotSum == NO_SNAPSHOT_SUM) {
                 long sum = sumAdder.sum();
@@ -105,7 +107,7 @@ public abstract class Chunk {
                 }
             }
 
-            sumAdder.add(node.point);
+            sumAdder.add(value);
         }
     }
 

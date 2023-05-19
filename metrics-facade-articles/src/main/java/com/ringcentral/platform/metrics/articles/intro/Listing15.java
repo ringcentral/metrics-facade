@@ -67,7 +67,7 @@ public class Listing15 {
         sampleSpecModsProvider.addMod(
             forMetricInstancesMatching(namePrefix("failover"), instance -> instance instanceof HistogramInstance),
             (instanceSampleSpec, instance, measurableValues, measurable, currSpec) ->
-                measurable instanceof Histogram.Percentile ? sampleSpec().disable() : sampleSpec());
+                 sampleSpec().enabled(!(measurable instanceof Histogram.Percentile)));
 
         // 4.3) Create exporter
         PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(prometheusInstanceSamplesProvider(registry)

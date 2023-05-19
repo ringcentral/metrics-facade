@@ -26,10 +26,10 @@ public class Listing06 {
         var server = new Label("server");
 
         Histogram httpClientFailoverCountHistogram = registry.histogram(
-            withName("histogram"),
+            withName("http", "client", "failover", "count", "histogram"),
             () -> withHistogram()
                 .labels(service, server)
-                // Slices and levels will be descrobed in the next session
+                // Slices and levels will be described in the next session
                 .allSlice().noLevels());
 
         // 3) Update the total instance and the instance (auth, 127.0.0.1)
@@ -60,8 +60,8 @@ public class Listing06 {
                 .map(m -> {
                     String name =
                         m instanceof Histogram.Percentile ?
-                            "Percentile_" + ((Histogram.Percentile)m).quantileAsString() :
-                            m.getClass().getSimpleName();
+                        "Percentile_" + ((Histogram.Percentile)m).quantileAsString() :
+                        m.getClass().getSimpleName();
 
                     // or instance.valueOf(m) but this approach is not snapshot-based, e.i., is not consistent, and should not be used unnecessarily
                     return name + "=" + values.valueOf(m);

@@ -28,7 +28,7 @@ public class Listing12 {
             // 3) Override any other definitions of set of Measurables for histograms
             registry.postConfigure(
                 allMetrics(),
-                modifying().histogram(withHistogram().measurables(COUNT, TOTAL_SUM, PERCENTILE_99)));
+                modifying().histogram(withHistogram().measurables(COUNT, TOTAL_SUM, PERCENTILE_50, PERCENTILE_90)));
         }
 
         // 4) Create Histogram with custom Measurables
@@ -40,7 +40,7 @@ public class Listing12 {
                 PERCENTILE_10, PERCENTILE_25, PERCENTILE_50, PERCENTILE_90, PERCENTILE_99, PERCENTILE_999));
 
         // 5) Update histogram
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             histogram.update(i);
         }
 

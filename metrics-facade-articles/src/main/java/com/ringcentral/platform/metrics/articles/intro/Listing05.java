@@ -23,10 +23,12 @@ public class Listing05 {
         var server = new Label("server");
 
         // 3) Register metric
-        Timer httpClientRequestTimer = registry.timer(withName("http", "client", "request", "duration"), () -> withTimer()
-            .labels(service, server)
-            // We leave only one measurable for the sake of brevity.
-            .measurables(COUNT));
+        Timer httpClientRequestTimer = registry.timer(
+            withName("http", "client", "request", "duration", "seconds"),
+            () -> withTimer()
+                .labels(service, server)
+                // We leave only one measurable for the sake of brevity
+                .measurables(COUNT));
 
         // 4) Auth service is called once
         httpClientRequestTimer.update(

@@ -31,8 +31,8 @@ public class Listing09 {
         Timer httpClientRequestTimer = registry.timer(withName("http", "client", "request"), () -> withTimer()
             .labels(service, server)
             .measurables(COUNT, TOTAL_SUM)
-            .allSlice().enableLevels() // implements 1). Enabled by default for AllSlice
-            .slice("by", "server") // implements 2)
+            .allSlice().enableLevels() // implements requirement 1. Enabled by default for AllSlice
+            .slice("by", "server") // implements requirement 2
                 .predicate(labelValuesMatchingAll(service.mask("auth*|*contacts*")))
                 .labels(server)
                 .measurables(MAX, MEAN, PERCENTILE_99)
@@ -40,11 +40,11 @@ public class Listing09 {
 
         // 4) Update metric
         httpClientRequestTimer.update(
-            100L, MILLISECONDS,
+            100, MILLISECONDS,
             forLabelValues(service.value("auth"), server.value("127.0.0.1")));
 
         httpClientRequestTimer.update(
-            200L, MILLISECONDS,
+            200, MILLISECONDS,
             forLabelValues(service.value("auth"), server.value("127.0.0.2")));
 
         // start a stopwatch before executing the request
@@ -52,7 +52,8 @@ public class Listing09 {
             service.value("user-contacts"),
             server.value("127.0.0.3")));
 
-        sleep(300L);
+        // The third request execution took 300 milliseconds
+        sleep(300);
 
         // stop the stopwatch after executing the request
         stopwatch.stop();

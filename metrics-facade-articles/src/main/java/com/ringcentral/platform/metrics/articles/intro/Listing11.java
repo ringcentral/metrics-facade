@@ -31,7 +31,7 @@ public class Listing11 {
                 PERCENTILE_10, PERCENTILE_25, PERCENTILE_50, PERCENTILE_90, PERCENTILE_99, PERCENTILE_999));
 
         // 4) Update histogram
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             histogram.update(i);
         }
 

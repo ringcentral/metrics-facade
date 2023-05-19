@@ -39,12 +39,12 @@ public class Listing08 {
         // 5) Create exporter
         var exporter = new PrometheusMetricsExporter(registry);
 
-        // 6) Export metrics before expiration time has passed.
+        // 6) Export metrics before expiration time has passed
         var output = new StringBuilder();
         output.append("Before expiration time:\n").append(exporter.exportMetrics());
 
         // 7) Export metrics after expiration time has passed.
-        // We have to add 10 seconds because (expireLabeledInstanceAfter + 10) seconds is a period of checking MetricInstances for expiration.
+        // We have to add 10 seconds because (expireLabeledInstanceAfter + 10) seconds is a period of checking MetricInstances for expiration
         sleep(TimeUnit.SECONDS.toMillis(1) + TimeUnit.SECONDS.toMillis(10));
         output.append("After expiration time:\n").append(exporter.exportMetrics());
 

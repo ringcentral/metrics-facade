@@ -21,7 +21,7 @@ public class Listing06 {
         // 1) Create registry
         var registry = new DefaultMetricRegistry();
 
-        // 2) Define labels. Typically, we define labels as constants, but in this example, we deviate from that convention for the sake of brevity.
+        // 2) Define labels. Typically, we define labels as constants, but in this example, we deviate from that convention for the sake of brevity
         var service = new Label("service");
         var server = new Label("server");
 

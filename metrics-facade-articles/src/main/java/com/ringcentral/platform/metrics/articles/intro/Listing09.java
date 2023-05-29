@@ -39,23 +39,34 @@ public class Listing09 {
                 .noTotal()); // disable total instance for this slice
 
         // 4) Update metric
+
+        // 4.1) (auth, 127.0.0.1). Let's assume that there were 2 requests: 100 and 300 milliseconds long
         httpClientRequestTimer.update(
             100, MILLISECONDS,
             forLabelValues(service.value("auth"), server.value("127.0.0.1")));
 
         httpClientRequestTimer.update(
+            300, MILLISECONDS,
+            forLabelValues(service.value("auth"), server.value("127.0.0.1")));
+
+        // 4.2) (auth, 127.0.0.2). Let's assume that there were 2 requests: 200 and 400 milliseconds long
+        httpClientRequestTimer.update(
             200, MILLISECONDS,
             forLabelValues(service.value("auth"), server.value("127.0.0.2")));
 
-        // start a stopwatch before executing the request
+        httpClientRequestTimer.update(
+            400, MILLISECONDS,
+            forLabelValues(service.value("auth"), server.value("127.0.0.2")));
+
+        // 4.3) (user-contacts, 127.0.0.3): start a stopwatch before executing the request
         Stopwatch stopwatch = httpClientRequestTimer.stopwatch(forLabelValues(
             service.value("user-contacts"),
             server.value("127.0.0.3")));
 
-        // The third request execution took 300 milliseconds
-        sleep(300);
+        // The (user-contacts, 127.0.0.3) request execution took 600 milliseconds
+        sleep(600);
 
-        // stop the stopwatch after executing the request
+        // Stop the stopwatch after executing the request to (user-contacts, 127.0.0.3)
         stopwatch.stop();
 
         // Labeled metric instances are added asynchronously

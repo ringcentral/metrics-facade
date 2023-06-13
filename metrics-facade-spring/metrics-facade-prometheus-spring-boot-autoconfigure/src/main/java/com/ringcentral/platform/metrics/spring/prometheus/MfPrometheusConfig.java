@@ -1,24 +1,20 @@
 package com.ringcentral.platform.metrics.spring.prometheus;
 
-import com.ringcentral.platform.metrics.samples.*;
-import com.ringcentral.platform.metrics.samples.prometheus.*;
-
-import java.util.Locale;
+import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSample;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSample;
 
 public class MfPrometheusConfig {
 
     private final InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider;
     private final boolean convertNameToLowercase;
-    private final Locale locale;
 
     public MfPrometheusConfig(
         InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider,
-        boolean convertNameToLowercase,
-        Locale locale) {
+        boolean convertNameToLowercase) {
 
         this.instanceSamplesProvider = instanceSamplesProvider;
         this.convertNameToLowercase = convertNameToLowercase;
-        this.locale = locale;
     }
 
     public boolean hasInstanceSamplesProvider() {
@@ -31,13 +27,5 @@ public class MfPrometheusConfig {
 
     public boolean convertNameToLowercase() {
         return convertNameToLowercase;
-    }
-
-    public boolean hasLocale() {
-        return locale != null;
-    }
-
-    public Locale locale() {
-        return locale;
     }
 }

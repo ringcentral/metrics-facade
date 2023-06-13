@@ -14,7 +14,7 @@ public class DefaultPrometheusMetricSanitizer implements PrometheusMetricSanitiz
 
     public static final boolean DEFAULT_SANITIZE_METRIC_NAME = true;
     public static final boolean DEFAULT_SANITIZE_LABEL_NAME = true;
-    public static final String DEFAULT_NON_LETTER_LABEL_NAME_FIRST_CHAR_PREFIX = "label_";
+    public static final String DEFAULT_NON_LETTER_LABEL_NAME_FIRST_CHAR_PREFIX = "l_";
 
     private static final Pattern LABEL_NAME_FORBIDDEN_CHAR_PATTERN = Pattern.compile("\\W");
 

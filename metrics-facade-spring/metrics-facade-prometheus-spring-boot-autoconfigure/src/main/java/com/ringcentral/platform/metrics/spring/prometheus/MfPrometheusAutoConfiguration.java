@@ -66,7 +66,6 @@ public class MfPrometheusAutoConfiguration {
 
         configBuilder = new MfPrometheusConfigBuilder()
             .convertNameToLowercase(properties.getConvertNameToLowercase())
-            .locale(properties.getLocale())
             .rebase(configBuilder);
 
         MfPrometheusConfig config = configBuilder.build();
@@ -78,7 +77,6 @@ public class MfPrometheusAutoConfiguration {
 
         PrometheusMetricsExporter exporter = prometheusMetricsExporterBuilder()
             .convertNameToLowercase(config.convertNameToLowercase())
-            .locale(config.locale())
             .addInstanceSamplesProvider(instanceSamplesProvider)
             .build();
 

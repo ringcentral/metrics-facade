@@ -15,8 +15,6 @@ import io.prometheus.client.Counter;
 import io.prometheus.client.SampleNameFilter;
 import io.prometheus.client.Summary;
 
-import java.util.Locale;
-
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.histogram.configs.builders.HistogramConfigBuilder.withHistogram;
 import static com.ringcentral.platform.metrics.labels.LabelValues.forLabelValues;
@@ -24,10 +22,12 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
 import static com.ringcentral.platform.metrics.names.MetricName.withName;
 import static com.ringcentral.platform.metrics.names.MetricNameMask.*;
 import static com.ringcentral.platform.metrics.predicates.DefaultMetricInstancePredicate.forMetricInstancesMatching;
+import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporterBuilder.prometheusMetricsExporter;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleSpec.instanceSampleSpec;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProviderBuilder.prometheusInstanceSamplesProvider;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleSpec.sampleSpec;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
+import static java.util.Locale.ENGLISH;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @SuppressWarnings("ALL")
@@ -89,15 +89,16 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
             .samplesProducer(samplesProducer)
             .build();
 
-        PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(
-            true,
-            Locale.ENGLISH,
-            miSamplesProvider,
-            new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(
+        PrometheusMetricsExporter exporter = prometheusMetricsExporter()
+            .convertNameToLowercase()
+            .locale(ENGLISH)
+            .addInstanceSamplesProvider(miSamplesProvider)
+            .addInstanceSamplesProvider(new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(
                 name("defaultRegistry"), // optional prefix
                 new SampleNameFilter.Builder().nameMustNotStartWith("counter").build(), // optional filter
                 sampleName -> !sampleName.endsWith("created"), // optional filter
-                CollectorRegistry.defaultRegistry));
+                CollectorRegistry.defaultRegistry))
+            .build();
 
         Counter defaultRegistry_Counter = Counter.build()
             .name("counter")

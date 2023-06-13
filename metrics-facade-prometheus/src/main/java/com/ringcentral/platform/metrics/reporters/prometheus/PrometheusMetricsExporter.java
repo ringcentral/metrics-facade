@@ -3,14 +3,11 @@ package com.ringcentral.platform.metrics.reporters.prometheus;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.reporters.MetricsExporter;
-import com.ringcentral.platform.metrics.samples.CompositeInstanceSamplesProvider;
 import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSample;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProvider;
 import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSample;
-import com.ringcentral.platform.metrics.samples.prometheus.collectorRegistry.SimpleCollectorRegistryPrometheusInstanceSamplesProvider;
 import com.ringcentral.platform.metrics.utils.StringBuilderWriter;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import org.slf4j.Logger;
 
@@ -20,10 +17,10 @@ import java.util.*;
 
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.Format.PROMETHEUS_TEXT_O_O_4;
 import static io.prometheus.client.Collector.MetricFamilySamples;
-import static io.prometheus.client.Collector.sanitizeMetricName;
 import static java.lang.String.join;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.enumeration;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -42,109 +39,38 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
 
     public static final Format DEFAULT_FORMAT = PROMETHEUS_TEXT_O_O_4;
     public static final String NAME_PARTS_DELIMITER = "_";
-    public static final boolean DEFAULT_LOWER_CASE_NAME = false;
+    public static final boolean DEFAULT_CONVERT_NAME_TO_LOWER_CASE = false;
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
     private final Format defaultFormat;
-    private final InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider;
     private final boolean convertNameToLowercase;
     private final Locale locale;
+    private final PrometheusMetricSanitizer sanitizer;
+    private final InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider;
 
     private static final Logger logger = getLogger(PrometheusMetricsExporter.class);
 
-    public PrometheusMetricsExporter(MetricRegistry registry) {
-        this(new PrometheusInstanceSamplesProvider(registry));
-    }
-
-    public PrometheusMetricsExporter(MetricRegistry registry, CollectorRegistry... collectorRegistries) {
-        this(
-            new PrometheusInstanceSamplesProvider(registry),
-            new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(collectorRegistries));
-    }
-
-    public PrometheusMetricsExporter(
-        MetricRegistry registry,
-        boolean convertNameToLowercase,
-        Locale locale) {
-
-        this(
-            convertNameToLowercase,
-            locale,
-            new PrometheusInstanceSamplesProvider(registry));
-    }
-
-    public PrometheusMetricsExporter(InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider) {
-        this(DEFAULT_FORMAT, instanceSamplesProvider);
-    }
-
-    public PrometheusMetricsExporter(
-        Format defaultFormat,
-        InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider) {
-
-        this(
-            defaultFormat,
-            DEFAULT_LOWER_CASE_NAME,
-            DEFAULT_LOCALE,
-            instanceSamplesProvider);
-    }
-
-    public PrometheusMetricsExporter(
-        Format defaultFormat,
-        boolean convertNameToLowercase,
-        Locale locale,
-        InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider) {
-
-        this.defaultFormat = defaultFormat;
-        this.convertNameToLowercase = convertNameToLowercase;
-        this.locale = locale != null ? locale : DEFAULT_LOCALE;
-        this.instanceSamplesProvider = instanceSamplesProvider;
-    }
-
-    @SafeVarargs
-    public PrometheusMetricsExporter(InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample>... instanceSamplesProviders) {
+    public PrometheusMetricsExporter(MetricRegistry metricRegistry) {
         this(
             DEFAULT_FORMAT,
-            DEFAULT_LOWER_CASE_NAME,
+            DEFAULT_CONVERT_NAME_TO_LOWER_CASE,
             DEFAULT_LOCALE,
-            instanceSamplesProviders);
+            new DefaultPrometheusMetricSanitizer(),
+            new PrometheusInstanceSamplesProvider(metricRegistry));
     }
 
-    @SafeVarargs
-    public PrometheusMetricsExporter(
-        boolean convertNameToLowercase,
-        Locale locale,
-        InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample>... instanceSamplesProviders) {
-
-        this(
-            DEFAULT_FORMAT,
-            convertNameToLowercase,
-            locale,
-            instanceSamplesProviders);
-    }
-
-    @SafeVarargs
-    public PrometheusMetricsExporter(
-        Format defaultFormat,
-        InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample>... instanceSamplesProviders) {
-
-        this(
-            defaultFormat,
-            DEFAULT_LOWER_CASE_NAME,
-            DEFAULT_LOCALE,
-            instanceSamplesProviders);
-    }
-
-    @SafeVarargs
     public PrometheusMetricsExporter(
         Format defaultFormat,
         boolean convertNameToLowercase,
         Locale locale,
-        InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample>... instanceSamplesProviders) {
+        PrometheusMetricSanitizer sanitizer,
+        InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider) {
 
-        this.defaultFormat = defaultFormat;
+        this.defaultFormat = requireNonNull(defaultFormat);
         this.convertNameToLowercase = convertNameToLowercase;
         this.locale = locale != null ? locale : DEFAULT_LOCALE;
-        this.instanceSamplesProvider = new CompositeInstanceSamplesProvider<>(List.of(instanceSamplesProviders));
+        this.sanitizer = requireNonNull(sanitizer);
+        this.instanceSamplesProvider = requireNonNull(instanceSamplesProvider);
     }
 
     @Override
@@ -232,7 +158,7 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
 
                     return new MetricFamilySamples.Sample(
                         sampleName,
-                        s.labelNames() != null ? s.labelNames() : emptyList(),
+                        s.labelNames() != null ? sanitizer.sanitizeLabelNames(s.labelNames()) : emptyList(),
                         s.labelValues() != null ? s.labelValues() : emptyList(),
                         s.value());
                 })
@@ -240,13 +166,13 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
     }
 
     private String buildName(MetricName name) {
-        final var sanitizedName = sanitizeMetricName(join(NAME_PARTS_DELIMITER, name));
+        final var sanitizedName = sanitizer.sanitizeMetricName(join(NAME_PARTS_DELIMITER, name));
         return convertNameToLowercase ? sanitizedName.toLowerCase(locale) : sanitizedName;
     }
 
     private String buildNameSuffix(PrometheusSample ps) {
         final var suffix = ps.nameSuffix();
-        final var sanitizedSuffix = sanitizeMetricName(suffix);
+        final var sanitizedSuffix = sanitizer.sanitizeMetricName(suffix);
         return convertNameToLowercase ? sanitizedSuffix.toLowerCase(locale) : sanitizedSuffix;
     }
 

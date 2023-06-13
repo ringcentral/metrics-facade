@@ -3,9 +3,8 @@ package com.ringcentral.platform.metrics.spring.prometheus;
 import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.infoProviders.ConcurrentMaskTreeMetricNamedInfoProvider;
 import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter;
-import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSampleSpecModsProvider;
-import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProvider;
-import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleSpecModsProvider;
+import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
+import com.ringcentral.platform.metrics.samples.prometheus.*;
 import com.ringcentral.platform.metrics.spring.MfMetricsExportAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -72,12 +71,12 @@ public class MfPrometheusAutoConfiguration {
 
         MfPrometheusConfig config = configBuilder.build();
 
-        final var instanceSamplesProvider =
+        InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider =
             config.hasInstanceSamplesProvider() ?
             config.instanceSamplesProvider() :
             new PrometheusInstanceSamplesProvider(registry);
 
-        final var exporter = prometheusMetricsExporterBuilder()
+        PrometheusMetricsExporter exporter = prometheusMetricsExporterBuilder()
             .convertNameToLowercase(config.convertNameToLowercase())
             .locale(config.locale())
             .addInstanceSamplesProvider(instanceSamplesProvider)

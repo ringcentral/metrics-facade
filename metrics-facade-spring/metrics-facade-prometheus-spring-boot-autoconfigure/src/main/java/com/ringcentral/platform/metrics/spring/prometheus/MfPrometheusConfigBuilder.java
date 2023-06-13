@@ -1,17 +1,15 @@
 package com.ringcentral.platform.metrics.spring.prometheus;
 
 import com.ringcentral.platform.metrics.samples.InstanceSamplesProvider;
-import com.ringcentral.platform.metrics.samples.prometheus.*;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSample;
+import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSample;
 
-import java.util.Locale;
-
-import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.*;
+import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.DEFAULT_CONVERT_NAME_TO_LOWER_CASE;
 
 public class MfPrometheusConfigBuilder {
 
     private InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample> instanceSamplesProvider;
     private Boolean convertNameToLowercase;
-    private Locale locale;
 
     public MfPrometheusConfigBuilder() {}
 
@@ -22,10 +20,6 @@ public class MfPrometheusConfigBuilder {
 
         if (base.convertNameToLowercase != null && convertNameToLowercase == null) {
             convertNameToLowercase = base.convertNameToLowercase;
-        }
-
-        if (base.locale != null && locale == null) {
-            locale = base.locale;
         }
 
         return this;
@@ -41,11 +35,6 @@ public class MfPrometheusConfigBuilder {
         return this;
     }
 
-    public MfPrometheusConfigBuilder locale(Locale locale) {
-        this.locale = locale;
-        return this;
-    }
-
     public MfPrometheusConfig build() {
         boolean convertNameToLowercase = DEFAULT_CONVERT_NAME_TO_LOWER_CASE;
 
@@ -53,9 +42,6 @@ public class MfPrometheusConfigBuilder {
             convertNameToLowercase = this.convertNameToLowercase;
         }
 
-        return new MfPrometheusConfig(
-            instanceSamplesProvider,
-            convertNameToLowercase,
-            locale != null ? locale : DEFAULT_LOCALE);
+        return new MfPrometheusConfig(instanceSamplesProvider, convertNameToLowercase);
     }
 }

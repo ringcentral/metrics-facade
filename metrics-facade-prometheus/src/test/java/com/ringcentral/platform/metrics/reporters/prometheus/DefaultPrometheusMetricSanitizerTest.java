@@ -28,6 +28,6 @@ public class DefaultPrometheusMetricSanitizerTest {
     @Test
     public void sanitizingLabelName() {
         assertThat(sanitizer.sanitizeLabelName("a.1.:._.й.|"), is("a_1________"));
-        assertThat(sanitizer.sanitizeLabelNames(List.of(".a.1.:._.й.|")), is(List.of("label__a_1________")));
+        assertThat(sanitizer.sanitizeLabelNames(List.of(".a.1.:._.й.|")), is(List.of("l__a_1________")));
     }
 }

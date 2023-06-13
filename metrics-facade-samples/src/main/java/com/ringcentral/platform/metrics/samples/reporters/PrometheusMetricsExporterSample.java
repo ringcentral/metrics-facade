@@ -27,7 +27,6 @@ import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInst
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProviderBuilder.prometheusInstanceSamplesProvider;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusSampleSpec.sampleSpec;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
-import static java.util.Locale.ENGLISH;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @SuppressWarnings("ALL")
@@ -91,7 +90,6 @@ public class PrometheusMetricsExporterSample extends AbstractSample {
 
         PrometheusMetricsExporter exporter = prometheusMetricsExporter()
             .convertNameToLowercase()
-            .locale(ENGLISH)
             .addInstanceSamplesProvider(miSamplesProvider)
             .addInstanceSamplesProvider(new SimpleCollectorRegistryPrometheusInstanceSamplesProvider(
                 name("defaultRegistry"), // optional prefix

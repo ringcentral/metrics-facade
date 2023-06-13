@@ -9,7 +9,6 @@ import com.ringcentral.platform.metrics.samples.prometheus.PrometheusSample;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProviderBuilder.prometheusInstanceSamplesProvider;
 import static java.util.Objects.requireNonNull;
@@ -18,7 +17,6 @@ public class PrometheusMetricsExporterBuilder {
 
     private PrometheusMetricsExporter.Format defaultFormat = PrometheusMetricsExporter.DEFAULT_FORMAT;
     private boolean convertNameToLowercase = PrometheusMetricsExporter.DEFAULT_CONVERT_NAME_TO_LOWER_CASE;
-    private Locale locale = PrometheusMetricsExporter.DEFAULT_LOCALE;
     private PrometheusMetricSanitizer sanitizer = new DefaultPrometheusMetricSanitizer();
     private final List<InstanceSamplesProvider<? extends PrometheusSample, ? extends PrometheusInstanceSample>> instanceSamplesProviders = new ArrayList<>();
 
@@ -49,11 +47,6 @@ public class PrometheusMetricsExporterBuilder {
         return this;
     }
 
-    public PrometheusMetricsExporterBuilder locale(Locale locale) {
-        this.locale = requireNonNull(locale);
-        return this;
-    }
-
     public PrometheusMetricsExporterBuilder sanitizer(PrometheusMetricSanitizer sanitizer) {
         this.sanitizer = requireNonNull(sanitizer);
         return this;
@@ -72,7 +65,6 @@ public class PrometheusMetricsExporterBuilder {
         return new PrometheusMetricsExporter(
             defaultFormat,
             convertNameToLowercase,
-            locale,
             sanitizer,
             instanceSamplesProviders.size() == 1 ? instanceSamplesProviders.get(0) : new CompositeInstanceSamplesProvider<>(instanceSamplesProviders));
     }

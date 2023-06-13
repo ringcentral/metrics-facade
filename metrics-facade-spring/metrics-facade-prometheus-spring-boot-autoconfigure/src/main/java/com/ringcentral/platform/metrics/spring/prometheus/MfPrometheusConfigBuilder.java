@@ -47,7 +47,7 @@ public class MfPrometheusConfigBuilder {
     }
 
     public MfPrometheusConfig build() {
-        boolean convertNameToLowercase = DEFAULT_LOWER_CASE_NAME;
+        boolean convertNameToLowercase = DEFAULT_CONVERT_NAME_TO_LOWER_CASE;
 
         if (this.convertNameToLowercase != null) {
             convertNameToLowercase = this.convertNameToLowercase;

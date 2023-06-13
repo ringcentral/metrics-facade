@@ -14,7 +14,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.DEFAULT_LOCALE;
+import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporterBuilder.prometheusMetricsExporterBuilder;
 import static com.ringcentral.platform.metrics.samples.prometheus.PrometheusInstanceSamplesProviderBuilder.prometheusInstanceSamplesProvider;
 
 @Configuration(proxyBeanMethods = false)
@@ -76,10 +76,11 @@ public class MfPrometheusAutoConfiguration {
             config.instanceSamplesProvider() :
             new PrometheusInstanceSamplesProvider(registry);
 
-        PrometheusMetricsExporter exporter = new PrometheusMetricsExporter(
-            config.convertNameToLowercase(),
-            config.hasLocale() ? config.locale() : DEFAULT_LOCALE,
-            instanceSamplesProvider);
+        PrometheusMetricsExporter exporter = prometheusMetricsExporterBuilder()
+            .convertNameToLowercase(config.convertNameToLowercase())
+            .locale(config.locale())
+            .addInstanceSamplesProvider(instanceSamplesProvider)
+            .build();
 
         customizer.customizePrometheusMetricsExporter(exporter);
         return exporter;

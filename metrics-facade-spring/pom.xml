@@ -29,7 +29,9 @@
 
     <properties>
         <metrics-facade-version>4.0.0-SNAPSHOT</metrics-facade-version>
-        <spring-boot.version>2.5.4</spring-boot.version>
+
+        <!-- The latest version that does not require Java 17. -->
+        <spring-boot.version>2.7.18</spring-boot.version>
     </properties>
 
     <dependencyManagement>

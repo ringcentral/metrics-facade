@@ -18,7 +18,6 @@
         <benchmark.jar.name>benchmark</benchmark.jar.name>
         <benchmark.jmh.version>1.32</benchmark.jmh.version>
         <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-        <guava.version>33.2.0-jre</guava.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
         <maven-shade-plugin.version>2.2</maven-shade-plugin.version>
@@ -67,7 +66,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 

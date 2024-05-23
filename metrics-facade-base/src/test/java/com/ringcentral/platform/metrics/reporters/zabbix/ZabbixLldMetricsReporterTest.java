@@ -55,7 +55,7 @@ public class ZabbixLldMetricsReporterTest {
         }).when(histogram).addListener(any());
 
         reporter.histogramAdded(histogram);
-        verifyZeroInteractions(listener);
+        verifyNoInteractions(listener);
 
         MeterInstance meterInstance_1 = mock(MeterInstance.class);
         when(meterInstance_1.name()).thenReturn(metricName("ActiveHealthChecker", "healthCheck", "attemptCount", "histogram"));

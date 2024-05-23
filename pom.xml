@@ -96,7 +96,7 @@
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
         <prometheus.version>0.16.0</prometheus.version>
-        <dropwizard-metrics.version>4.1.17</dropwizard-metrics.version>
+        <dropwizard-metrics.version>4.2.25</dropwizard-metrics.version>
 
         <reflections.version>0.10.2</reflections.version>
         <commons-lang3.version>3.11</commons-lang3.version>

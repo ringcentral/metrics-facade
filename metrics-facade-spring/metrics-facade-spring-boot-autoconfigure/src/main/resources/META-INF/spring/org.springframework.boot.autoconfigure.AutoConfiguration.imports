@@ -1,0 +1,5 @@
+com.ringcentral.platform.metrics.spring.MfMetricsExportAutoConfiguration
+com.ringcentral.platform.metrics.spring.jmx.MfJmxAutoConfiguration
+com.ringcentral.platform.metrics.spring.zabbix.lld.MfZabbixLldAutoConfiguration
+com.ringcentral.platform.metrics.spring.zabbix.MfZabbixAutoConfiguration
+com.ringcentral.platform.metrics.spring.telegraf.MfTelegrafAutoConfiguration

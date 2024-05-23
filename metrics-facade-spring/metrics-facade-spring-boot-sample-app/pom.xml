@@ -14,6 +14,19 @@
 
     <artifactId>metrics-facade-spring-boot-sample-app</artifactId>
 
+    <!-- We configure a different version of Spring here to demonstrate that you can override the version used in the library with one of your choice. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.2.5</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

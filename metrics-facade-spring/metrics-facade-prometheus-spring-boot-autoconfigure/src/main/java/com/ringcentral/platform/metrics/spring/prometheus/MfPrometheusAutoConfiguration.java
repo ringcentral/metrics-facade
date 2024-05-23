@@ -86,6 +86,7 @@ public class MfPrometheusAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnAvailableEndpoint(endpoint = MfPrometheusEndpoint.class)
+    @ConditionalOnProperty(prefix = MfPrometheusProperties.PREFIX, name = "enabled")
     public static class MfPrometheusEndpointConfiguration {
 
         @Bean

@@ -15,10 +15,12 @@
     <artifactId>metrics-facade-spring-boot-sample-app</artifactId>
 
     <properties>
-        <app-specific-spring-boot.version>3.2.5</app-specific-spring-boot.version>
+        <!-- We configure a different version of Spring here to demonstrate that you can override the version used in the library with one of your choice. -->
+        <!-- <app-specific-spring-boot.version>3.2.5</app-specific-spring-boot.version> -->
+
+        <app-specific-spring-boot.version>${spring-boot.version}</app-specific-spring-boot.version>
     </properties>
 
-    <!-- We configure a different version of Spring here to demonstrate that you can override the version used in the library with one of your choice. -->
     <dependencyManagement>
         <dependencies>
             <dependency>

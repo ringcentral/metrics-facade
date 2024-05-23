@@ -15,9 +15,8 @@
     <artifactId>metrics-facade-samples</artifactId>
 
     <properties>
-        <prometheus.version>0.16.0</prometheus.version>
         <micrometer-registry-metrics-facade.version>4.0.0-SNAPSHOT</micrometer-registry-metrics-facade.version>
-        <micrometer.version>1.7.3</micrometer.version>
+        <micrometer.version>1.12.5</micrometer.version>
     </properties>
 
     <dependencies>
@@ -37,13 +36,6 @@
             <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-prometheus</artifactId>
             <version>${project.version}</version>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>io.prometheus</groupId>
-                    <artifactId>simpleclient_common</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -82,19 +74,16 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_common</artifactId>
-            <version>${prometheus.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>${prometheus.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_dropwizard</artifactId>
-            <version>${prometheus.version}</version>
         </dependency>
     </dependencies>
 </project>

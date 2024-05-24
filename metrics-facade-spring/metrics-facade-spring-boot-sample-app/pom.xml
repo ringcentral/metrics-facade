@@ -17,8 +17,11 @@
     <properties>
         <!-- We configure a different version of Spring here to demonstrate that you can override the version used in the library with one of your choice. -->
         <!-- <app-specific-spring-boot.version>3.2.5</app-specific-spring-boot.version> -->
-
         <app-specific-spring-boot.version>${spring-boot.version}</app-specific-spring-boot.version>
+
+        <!-- https://github.com/spring-projects/spring-boot/issues/34708 -->
+        <app-specific-slf4j-api.version>1.7.36</app-specific-slf4j-api.version>
+        <app-specific-logback.version>1.2.13</app-specific-logback.version>
     </properties>
 
     <dependencyManagement>
@@ -61,9 +64,21 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${app-specific-slf4j-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${app-specific-logback.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
+            <version>${app-specific-logback.version}</version>
         </dependency>
 
         <dependency>

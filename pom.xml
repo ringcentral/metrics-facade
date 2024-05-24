@@ -103,11 +103,8 @@
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <jackson.version>2.17.1</jackson.version>
         <guava.version>33.2.0-jre</guava.version>
-
-        <!-- https://github.com/spring-projects/spring-boot/issues/34708 -->
-        <slf4j-api.version>1.7.36</slf4j-api.version>
-        <logback.version>1.2.13</logback.version>
-
+        <slf4j-api.version>2.0.13</slf4j-api.version>
+        <logback.version>1.5.6</logback.version>
         <junit.version>4.13.2</junit.version>
         <mockito-core.version>5.12.0</mockito-core.version>
     </properties>

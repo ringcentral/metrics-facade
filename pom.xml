@@ -103,8 +103,11 @@
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <jackson.version>2.17.1</jackson.version>
         <guava.version>33.2.0-jre</guava.version>
-        <slf4j-api.version>2.0.13</slf4j-api.version>
-        <logback.version>1.5.6</logback.version>
+
+        <!-- https://github.com/spring-projects/spring-boot/issues/34708 -->
+        <slf4j-api.version>1.7.36</slf4j-api.version>
+        <logback.version>1.2.13</logback.version>
+
         <junit.version>4.13.2</junit.version>
         <mockito-core.version>5.12.0</mockito-core.version>
     </properties>
@@ -187,20 +190,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j-api.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${logback.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-                <scope>test</scope>
             </dependency>
 
             <dependency>

@@ -41,7 +41,7 @@ import static com.ringcentral.platform.metrics.rate.configs.builders.RateConfigB
 import static com.ringcentral.platform.metrics.rate.configs.builders.RateInstanceConfigBuilder.rateInstance;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder.withTimer;
 import static com.ringcentral.platform.metrics.timer.configs.builders.TimerInstanceConfigBuilder.timerInstance;
-import static org.apache.commons.lang3.StringUtils.split;
+import static com.ringcentral.platform.metrics.utils.StringUtils.splitByDot;
 
 @SuppressWarnings("SameParameterValue")
 public class DropwizardMetricRegistry extends AbstractMetricRegistry {
@@ -281,7 +281,7 @@ public class DropwizardMetricRegistry extends AbstractMetricRegistry {
 
     public void addMetricSet(MetricName namePrefix, MetricSet dwMetricSet) {
         for (Map.Entry<String, Metric> dwMetricEntry : dwMetricSet.getMetrics().entrySet()) {
-            MetricName name = MetricName.of(namePrefix, split(dwMetricEntry.getKey(), '.'));
+            MetricName name = MetricName.of(namePrefix, splitByDot(dwMetricEntry.getKey()));
             Metric dwMetric = dwMetricEntry.getValue();
 
             if (dwMetric instanceof MetricSet) {

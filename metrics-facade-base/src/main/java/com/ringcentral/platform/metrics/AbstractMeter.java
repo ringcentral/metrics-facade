@@ -1,18 +1,12 @@
 package com.ringcentral.platform.metrics;
 
-import com.ringcentral.platform.metrics.configs.MeterConfig;
-import com.ringcentral.platform.metrics.configs.MeterInstanceConfig;
-import com.ringcentral.platform.metrics.configs.MeterSliceConfig;
-import com.ringcentral.platform.metrics.labels.Label;
-import com.ringcentral.platform.metrics.labels.LabelValue;
-import com.ringcentral.platform.metrics.labels.LabelValues;
-import com.ringcentral.platform.metrics.labels.LabelValuesPredicate;
+import com.ringcentral.platform.metrics.configs.*;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.measurables.MeasurableValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -24,10 +18,8 @@ import java.util.function.Consumer;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Collections.*;
-import static java.util.concurrent.TimeUnit.DAYS;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toMap;
+import static java.util.concurrent.TimeUnit.*;
+import static java.util.stream.Collectors.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractMeter<
@@ -654,15 +646,13 @@ public abstract class AbstractMeter<
         }
 
         static int hashCodeFor(List<LabelValue> labelValues, Label[] labelsMask) {
-            HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+            LabelValue[] items = new LabelValue[labelsMask.length];
 
             for (int i = 0; i < labelsMask.length; ++i) {
-                if (labelsMask[i] != null) {
-                    builder.append(labelValues.get(i));
-                }
+                items[i] = labelsMask[i] != null ? labelValues.get(i) : null;
             }
 
-            return builder.toHashCode();
+            return Arrays.hashCode(items);
         }
     }
 

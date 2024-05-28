@@ -1,10 +1,11 @@
 package com.ringcentral.platform.metrics;
 
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.ringcentral.platform.metrics.UnmodifiableMetricContext.emptyUnmodifiableMetricContext;
-import static org.apache.commons.lang3.ClassUtils.getAllInterfaces;
+import static com.ringcentral.platform.metrics.utils.ClassUtils.interfacesOf;
 
 public abstract class AbstractMetricContext implements MetricContext {
 
@@ -24,9 +25,9 @@ public abstract class AbstractMetricContext implements MetricContext {
             Class<?> type = value.getClass();
 
             Class<?> typeKey = typeKeys.computeIfAbsent(type, t -> {
-                for (Class<?> iface : getAllInterfaces(type)) {
-                    if (iface.isAnnotationPresent(MetricContextTypeKey.class)) {
-                        return iface;
+                for (Class<?> i : interfacesOf(type)) {
+                    if (i.isAnnotationPresent(MetricContextTypeKey.class)) {
+                        return i;
                     }
                 }
 

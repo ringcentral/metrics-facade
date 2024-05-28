@@ -1,16 +1,14 @@
 package com.ringcentral.platform.metrics.samples;
 
-import com.ringcentral.platform.metrics.labels.Label;
-import com.ringcentral.platform.metrics.labels.LabelUtils;
-import com.ringcentral.platform.metrics.labels.LabelValue;
+import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.names.MetricName;
 
 import java.util.List;
 import java.util.Map;
 
+import static com.ringcentral.platform.metrics.utils.StringUtils.*;
 import static java.lang.Boolean.*;
-import static java.util.Collections.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static java.util.Collections.emptyList;
 
 public class DefaultSampleSpec implements SampleSpec {
 
@@ -86,7 +84,7 @@ public class DefaultSampleSpec implements SampleSpec {
     }
 
     public DefaultSampleSpec noMeasurableName() {
-        return measurableName(EMPTY);
+        return measurableName(EMPTY_STRING);
     }
 
     public DefaultSampleSpec measurableName(String measurableName) {

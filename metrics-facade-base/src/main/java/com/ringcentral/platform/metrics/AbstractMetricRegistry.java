@@ -19,6 +19,7 @@ import com.ringcentral.platform.metrics.rate.configs.builders.RateConfigBuilder;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.timer.configs.TimerConfig;
 import com.ringcentral.platform.metrics.timer.configs.builders.TimerConfigBuilder;
+import com.ringcentral.platform.metrics.utils.BasicThreadFactory;
 import com.ringcentral.platform.metrics.utils.SystemTimeMsProvider;
 import com.ringcentral.platform.metrics.utils.TimeMsProvider;
 import com.ringcentral.platform.metrics.var.configs.CachingVarConfig;
@@ -47,7 +48,6 @@ import com.ringcentral.platform.metrics.var.stringVar.configs.CachingStringVarCo
 import com.ringcentral.platform.metrics.var.stringVar.configs.StringVarConfig;
 import com.ringcentral.platform.metrics.var.stringVar.configs.builders.CachingStringVarConfigBuilder;
 import com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -242,7 +242,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
     }
 
     public static ScheduledExecutorService makeDefaultExecutor() {
-        return newSingleThreadScheduledExecutor(new BasicThreadFactory.Builder().daemon(true).build());
+        return newSingleThreadScheduledExecutor(new BasicThreadFactory("metric-registry-executor-%d"));
     }
 
     public static PredicativeMetricNamedInfoProvider<MetricMod> makeDefaultModsProvider() {

@@ -9,7 +9,6 @@ import com.ringcentral.platform.metrics.var.doubleVar.*;
 import com.ringcentral.platform.metrics.var.longVar.*;
 import com.ringcentral.platform.metrics.var.objectVar.*;
 import com.ringcentral.platform.metrics.var.stringVar.*;
-import org.apache.commons.lang3.builder.*;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -74,17 +73,12 @@ public class TestMetricRegistryListener implements MetricRegistryListener {
             }
 
             MetricEntry that = (MetricEntry)other;
-
-            return new EqualsBuilder()
-                .append(metric, that.metric)
-                .isEquals();
+            return Objects.equals(metric, that.metric);
         }
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(17, 37)
-                .append(metric)
-                .toHashCode();
+            return Objects.hashCode(metric);
         }
     }
 

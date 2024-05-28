@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.infoProviders.PredicativeMetricNamedInfo
 import com.ringcentral.platform.metrics.measurables.MeasurableNameProvider;
 import com.ringcentral.platform.metrics.reporters.jmx.*;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static com.ringcentral.platform.metrics.utils.StringUtils.isNotBlank;
 
 public class MfJmxConfig {
 
@@ -50,7 +50,7 @@ public class MfJmxConfig {
     }
 
     public boolean hasDomainName() {
-        return !isBlank(domainName);
+        return isNotBlank(domainName);
     }
 
     public String domainName() {

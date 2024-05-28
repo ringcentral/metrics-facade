@@ -3,13 +3,13 @@ package com.ringcentral.platform.metrics.configs;
 import com.ringcentral.platform.metrics.MetricContext;
 import com.ringcentral.platform.metrics.labels.LabelValues;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static com.ringcentral.platform.metrics.utils.StringUtils.isNotBlank;
 
 public interface MetricConfig {
     boolean isEnabled();
 
     default boolean hasDescription() {
-        return !isBlank(description());
+        return isNotBlank(description());
     }
 
     String description();

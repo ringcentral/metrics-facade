@@ -10,74 +10,74 @@ public class LabelValueMaskTest {
 
     @Test
     public void multipleOptions() {
-        LabelValueMask pattern = LabelValueMask.of(
+        LabelValueMask mask = LabelValueMask.of(
             LABEL,
             "aaa|*bbb|ccc*|*ddd*|eee*fff|*ggg*hhh|iii*jjj*|*kkk*ooo*");
 
-        assertTrue(pattern.matches("aaa"));
-        assertFalse(pattern.matches("aa"));
-        assertFalse(pattern.matches("aaaa"));
+        assertTrue(mask.matches("aaa"));
+        assertFalse(mask.matches("aa"));
+        assertFalse(mask.matches("aaaa"));
 
-        assertTrue(pattern.matches("bbb"));
-        assertTrue(pattern.matches("bbbb"));
-        assertTrue(pattern.matches("abbb"));
-        assertFalse(pattern.matches("bb"));
-        assertFalse(pattern.matches("bbba"));
+        assertTrue(mask.matches("bbb"));
+        assertTrue(mask.matches("bbbb"));
+        assertTrue(mask.matches("abbb"));
+        assertFalse(mask.matches("bb"));
+        assertFalse(mask.matches("bbba"));
 
-        assertTrue(pattern.matches("ccc"));
-        assertTrue(pattern.matches("cccc"));
-        assertTrue(pattern.matches("cccb"));
-        assertFalse(pattern.matches("cc"));
-        assertFalse(pattern.matches("bccc"));
+        assertTrue(mask.matches("ccc"));
+        assertTrue(mask.matches("cccc"));
+        assertTrue(mask.matches("cccb"));
+        assertFalse(mask.matches("cc"));
+        assertFalse(mask.matches("bccc"));
 
-        assertTrue(pattern.matches("ddd"));
-        assertTrue(pattern.matches("dddd"));
-        assertTrue(pattern.matches("cddd"));
-        assertTrue(pattern.matches("dddc"));
-        assertFalse(pattern.matches("dd"));
+        assertTrue(mask.matches("ddd"));
+        assertTrue(mask.matches("dddd"));
+        assertTrue(mask.matches("cddd"));
+        assertTrue(mask.matches("dddc"));
+        assertFalse(mask.matches("dd"));
 
-        assertTrue(pattern.matches("eeefff"));
-        assertTrue(pattern.matches("eee fff"));
-        assertTrue(pattern.matches("eeedfff"));
-        assertTrue(pattern.matches("eeeeffff"));
-        assertFalse(pattern.matches("eefff"));
-        assertFalse(pattern.matches("eeeff"));
-        assertFalse(pattern.matches("eeefffd"));
-        assertFalse(pattern.matches("deeefff"));
+        assertTrue(mask.matches("eeefff"));
+        assertTrue(mask.matches("eee fff"));
+        assertTrue(mask.matches("eeedfff"));
+        assertTrue(mask.matches("eeeeffff"));
+        assertFalse(mask.matches("eefff"));
+        assertFalse(mask.matches("eeeff"));
+        assertFalse(mask.matches("eeefffd"));
+        assertFalse(mask.matches("deeefff"));
 
-        assertTrue(pattern.matches("ggghhh"));
-        assertTrue(pattern.matches("ggg hhh"));
-        assertTrue(pattern.matches("gggfhhh"));
-        assertTrue(pattern.matches("gggghhhh"));
-        assertTrue(pattern.matches("dggghhh"));
-        assertFalse(pattern.matches("gghhh"));
-        assertFalse(pattern.matches("ggghh"));
-        assertFalse(pattern.matches("ggghhhf"));
+        assertTrue(mask.matches("ggghhh"));
+        assertTrue(mask.matches("ggg hhh"));
+        assertTrue(mask.matches("gggfhhh"));
+        assertTrue(mask.matches("gggghhhh"));
+        assertTrue(mask.matches("dggghhh"));
+        assertFalse(mask.matches("gghhh"));
+        assertFalse(mask.matches("ggghh"));
+        assertFalse(mask.matches("ggghhhf"));
 
-        assertTrue(pattern.matches("iiijjj"));
-        assertTrue(pattern.matches("iii jjj"));
-        assertTrue(pattern.matches("iiihjjj"));
-        assertTrue(pattern.matches("iiiijjjj"));
-        assertTrue(pattern.matches("iiijjjh"));
-        assertFalse(pattern.matches("hiiijjj"));
-        assertFalse(pattern.matches("iijjj"));
-        assertFalse(pattern.matches("iiijj"));
+        assertTrue(mask.matches("iiijjj"));
+        assertTrue(mask.matches("iii jjj"));
+        assertTrue(mask.matches("iiihjjj"));
+        assertTrue(mask.matches("iiiijjjj"));
+        assertTrue(mask.matches("iiijjjh"));
+        assertFalse(mask.matches("hiiijjj"));
+        assertFalse(mask.matches("iijjj"));
+        assertFalse(mask.matches("iiijj"));
 
-        assertTrue(pattern.matches("kkkooo"));
-        assertTrue(pattern.matches("kkk ooo"));
-        assertTrue(pattern.matches("kkkjooo"));
-        assertTrue(pattern.matches("kkkkoooo"));
-        assertTrue(pattern.matches("kkkoooj"));
-        assertTrue(pattern.matches("jkkkooo"));
-        assertFalse(pattern.matches("kkooo"));
-        assertFalse(pattern.matches("kkkoo"));
+        assertTrue(mask.matches("kkkooo"));
+        assertTrue(mask.matches("kkk ooo"));
+        assertTrue(mask.matches("kkkjooo"));
+        assertTrue(mask.matches("kkkkoooo"));
+        assertTrue(mask.matches("kkkoooj"));
+        assertTrue(mask.matches("jkkkooo"));
+        assertFalse(mask.matches("kkooo"));
+        assertFalse(mask.matches("kkkoo"));
     }
 
     @Test
     public void matchingAny() {
-        LabelValueMask pattern = LabelValueMask.of(LABEL, "*");
-        assertTrue(pattern.matches(""));
-        assertTrue(pattern.matches("a"));
-        assertTrue(pattern.matches("ab"));
+        LabelValueMask mask = LabelValueMask.of(LABEL, "*");
+        assertTrue(mask.matches(""));
+        assertTrue(mask.matches("a"));
+        assertTrue(mask.matches("ab"));
     }
 }

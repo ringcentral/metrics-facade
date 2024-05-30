@@ -13,8 +13,8 @@ public class BasicThreadFactory implements ThreadFactory {
     private final boolean daemon;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
 
-    public BasicThreadFactory(String namePattern) {
-        this(Executors.defaultThreadFactory(), namePattern, true);
+    public BasicThreadFactory(String namePattern, boolean daemon) {
+        this(Executors.defaultThreadFactory(), namePattern, daemon);
     }
 
     public BasicThreadFactory(ThreadFactory parent, String namePattern, boolean daemon) {

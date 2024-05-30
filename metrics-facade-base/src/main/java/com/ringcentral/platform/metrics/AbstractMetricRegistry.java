@@ -242,7 +242,7 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
     }
 
     public static ScheduledExecutorService makeDefaultExecutor() {
-        return newSingleThreadScheduledExecutor(new BasicThreadFactory("metric-registry-executor-%d"));
+        return newSingleThreadScheduledExecutor(new BasicThreadFactory("metric-registry-executor-%d", true));
     }
 
     public static PredicativeMetricNamedInfoProvider<MetricMod> makeDefaultModsProvider() {

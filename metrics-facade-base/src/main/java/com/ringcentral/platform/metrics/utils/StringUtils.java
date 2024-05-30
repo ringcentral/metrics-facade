@@ -4,6 +4,10 @@ public class StringUtils {
 
     public static final String EMPTY_STRING = "";
 
+    public static boolean isNotBlank(final CharSequence cs) {
+        return !isBlank(cs);
+    }
+
     /**
      * Checks if a CharSequence is null, empty, or contains only whitespace characters (Character.isWhitespace(char) == true).
      *
@@ -33,10 +37,6 @@ public class StringUtils {
         }
 
         return true;
-    }
-
-    public static boolean isNotBlank(final CharSequence cs) {
-        return !isBlank(cs);
     }
 
     /**

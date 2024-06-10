@@ -14,6 +14,28 @@
 
     <artifactId>metrics-facade-spring-boot-sample-app</artifactId>
 
+    <properties>
+        <!-- We configure a different version of Spring here to demonstrate that you can override the version used in the library with one of your choice. -->
+        <!-- <app-specific-spring-boot.version>3.2.5</app-specific-spring-boot.version> -->
+        <app-specific-spring-boot.version>${spring-boot.version}</app-specific-spring-boot.version>
+
+        <!-- https://github.com/spring-projects/spring-boot/issues/34708 -->
+        <app-specific-slf4j-api.version>1.7.36</app-specific-slf4j-api.version>
+        <app-specific-logback.version>1.2.13</app-specific-logback.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${app-specific-spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -42,6 +64,24 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${app-specific-slf4j-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${app-specific-logback.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${app-specific-logback.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.ringcentral.platform.metrics</groupId>
             <artifactId>metrics-facade-spring-boot-starter</artifactId>
             <version>${project.version}</version>
@@ -59,7 +99,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
+                <version>${app-specific-spring-boot.version}</version>
 
                 <executions>
                     <execution>

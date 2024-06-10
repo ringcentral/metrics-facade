@@ -7,17 +7,13 @@ import com.ringcentral.platform.metrics.scale.Scale;
 import com.ringcentral.platform.metrics.scale.ScaleBuilder;
 
 import java.math.BigDecimal;
-import java.util.EnumMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.ringcentral.platform.metrics.labels.LabelValues.NO_LABEL_VALUES;
 import static com.ringcentral.platform.metrics.measurables.MeasurableType.*;
 import static com.ringcentral.platform.metrics.scale.ExpScaleBuilder.expScale;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
-import static com.ringcentral.platform.metrics.utils.ObjectUtils.hashCodeFor;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static com.ringcentral.platform.metrics.utils.TimeUnitUtils.convertTimeUnit;
 import static java.lang.Math.*;
@@ -155,7 +151,7 @@ public interface Histogram extends Meter {
             String afterPoint = this.quantileAsString.substring(this.quantileAsString.indexOf(".") + 1);
             this.quantileDecimalPartAsString = afterPoint.length() > 1 ? afterPoint : afterPoint + "0";
             this.percentile = min(max(BigDecimal.valueOf(quantile).multiply(BIG_DECIMAL_100).doubleValue(), 0.0), 100.0);
-            this.hashCode = hashCodeFor("Histogram.Percentile", quantile);
+            this.hashCode = Objects.hash("Histogram.Percentile", quantile);
         }
 
         public static Percentile of(double quantile) {
@@ -335,7 +331,7 @@ public interface Histogram extends Meter {
                 BigDecimal.valueOf(upperBoundInUnits).multiply(
                     BigDecimal.valueOf(resolvedUpperBoundUnit.toNanos(1L)).multiply(BigDecimal.valueOf(0.000000001))).doubleValue()));
 
-            this.hashCode = hashCodeFor("Histogram.Bucket", upperBoundInUnits, resolvedUpperBoundUnit);
+            this.hashCode = Objects.hash("Histogram.Bucket", upperBoundInUnits, resolvedUpperBoundUnit);
         }
 
         static String upperBoundAsString(double b) {
@@ -512,7 +508,7 @@ public interface Histogram extends Meter {
                 "buckets is null or empty");
 
             this.buckets = buckets;
-            this.hashCode = hashCodeFor("Histogram.Buckets", buckets);
+            this.hashCode = Objects.hash("Histogram.Buckets", buckets);
         }
 
         public static Buckets linear(long from, long step, long stepCount) {

@@ -90,35 +90,60 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
-        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
-        <prometheus.version>0.15.0</prometheus.version>
-        <dropwizard-metrics.version>4.1.17</dropwizard-metrics.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+        <prometheus.version>0.16.0</prometheus.version>
+        <dropwizard-metrics.version>4.2.25</dropwizard-metrics.version>
+        <HdrHistogram.version>2.2.1</HdrHistogram.version>
 
         <reflections.version>0.10.2</reflections.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
-        <jackson.version>2.13.3</jackson.version>
-        <slf4j-api.version>1.7.30</slf4j-api.version>
-        <logback-classic.version>1.2.3</logback-classic.version>
-        <junit.version>4.13.1</junit.version>
-        <mockito-core.version>3.11.2</mockito-core.version>
+        <jackson.version>2.17.1</jackson.version>
+        <guava.version>33.2.0-jre</guava.version>
+        <slf4j-api.version>2.0.13</slf4j-api.version>
+        <logback.version>1.5.6</logback.version>
+        <junit.version>4.13.2</junit.version>
+        <mockito-core.version>5.12.0</mockito-core.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>${reflections.version}</version>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_common</artifactId>
+                <version>${prometheus.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${commons-lang3.version}</version>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient</artifactId>
+                <version>${prometheus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_dropwizard</artifactId>
+                <version>${prometheus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${dropwizard-metrics.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-jvm</artifactId>
+                <version>${dropwizard-metrics.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
             </dependency>
 
             <dependency>
@@ -129,14 +154,20 @@
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
+                <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hdrhistogram</groupId>
+                <artifactId>HdrHistogram</artifactId>
+                <version>${HdrHistogram.version}</version>
             </dependency>
 
             <dependency>

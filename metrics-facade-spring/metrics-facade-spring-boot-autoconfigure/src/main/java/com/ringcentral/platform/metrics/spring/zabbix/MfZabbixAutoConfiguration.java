@@ -49,6 +49,7 @@ public class MfZabbixAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnAvailableEndpoint(endpoint = MfZabbixEndpoint.class)
+    @ConditionalOnProperty(prefix = MfZabbixProperties.PREFIX, name = "enabled")
     public static class ZabbixMetricsJsonEndpointConfiguration {
 
         @Bean

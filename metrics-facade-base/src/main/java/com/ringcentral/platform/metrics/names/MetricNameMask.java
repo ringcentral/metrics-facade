@@ -6,8 +6,8 @@ import java.util.*;
 
 import static com.ringcentral.platform.metrics.names.MetricNameMask.ItemType.*;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static com.ringcentral.platform.metrics.utils.StringUtils.splitByDot;
 import static java.util.Arrays.copyOfRange;
-import static org.apache.commons.lang3.StringUtils.split;
 
 public class MetricNameMask implements MetricNamedPredicate {
 
@@ -113,7 +113,7 @@ public class MetricNameMask implements MetricNamedPredicate {
     private static Item[] itemsOf(String s, Item... suffix) {
         List<Item> items = new ArrayList<>();
 
-        Arrays.stream(split(s, ".")).map(Item::of).forEach(item -> {
+        Arrays.stream(splitByDot(s)).map(Item::of).forEach(item -> {
             if (item.type() == FIXED_PART
                 || items.isEmpty()
                 || items.get(items.size() - 1).type() != ANY_PARTS) {

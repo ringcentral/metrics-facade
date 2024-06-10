@@ -1,6 +1,5 @@
 package com.ringcentral.platform.metrics.labels;
 
-import static com.ringcentral.platform.metrics.utils.ObjectUtils.*;
 import static java.util.Objects.*;
 
 public class LabelValue {
@@ -12,7 +11,7 @@ public class LabelValue {
     public LabelValue(Label label, String value) {
         this.label = requireNonNull(label);
         this.value = requireNonNull(value);
-        this.hashCode = hashCodeFor(label, value);
+        this.hashCode = hash(label, value);
     }
 
     public Label label() {

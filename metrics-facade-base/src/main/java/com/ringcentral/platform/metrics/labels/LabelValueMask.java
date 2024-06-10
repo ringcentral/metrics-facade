@@ -1,9 +1,10 @@
 package com.ringcentral.platform.metrics.labels;
 
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
-import static com.ringcentral.platform.metrics.utils.Preconditions.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
+import static com.ringcentral.platform.metrics.utils.StringUtils.isBlank;
 
 public class LabelValueMask implements LabelValuePredicate {
 
@@ -25,7 +26,7 @@ public class LabelValueMask implements LabelValuePredicate {
 
         return new LabelValueMask(
             label,
-            Arrays.stream(split(s, optionsDelimiter)).map(os -> Option.of(os, optionVarPart)).toArray(Option[]::new));
+            Arrays.stream(s.split(Pattern.quote(optionsDelimiter))).map(os -> Option.of(os, optionVarPart)).toArray(Option[]::new));
     }
 
     private LabelValueMask(Label label, Option[] options) {
@@ -74,7 +75,7 @@ public class LabelValueMask implements LabelValuePredicate {
             checkArgument(!isBlank(s), "Option is blank");
 
             return new Option(
-                split(s, varPart),
+                s.split(Pattern.quote(varPart)),
                 s.startsWith(varPart),
                 s.endsWith(varPart),
                 s.equals(varPart));

@@ -1,13 +1,11 @@
 package com.ringcentral.platform.metrics.reporters.zabbix;
 
-import com.fasterxml.jackson.annotation.*;
 import com.ringcentral.platform.metrics.MetricRegistry;
-import com.ringcentral.platform.metrics.reporters.*;
+import com.ringcentral.platform.metrics.reporters.MetricsJson;
+import com.ringcentral.platform.metrics.reporters.MetricsJsonExporter;
 import com.ringcentral.platform.metrics.samples.*;
 
 import java.util.*;
-
-import static java.util.Comparator.comparing;
 
 public class ZabbixMetricsJsonExporter implements MetricsJsonExporter {
 
@@ -28,51 +26,16 @@ public class ZabbixMetricsJsonExporter implements MetricsJsonExporter {
 
     @Override
     public MetricsJson exportMetrics() {
-        ZMetricsJson metricsJson = new ZMetricsJson();
-
-        instanceSamplesProvider.instanceSamples().forEach(is ->
-            is.samples().forEach(s -> metricsJson.putMetricJson(s.type(), new ZMetricJson(s.name(), s.value()))));
-
-        metricsJson.metricJsons.forEach((key, val) -> val.sort(comparing(ZMetricJson::name)));
-
+        ZabbixMetricsJson metricsJson = new ZabbixMetricsJson();
+        instanceSamplesProvider.instanceSamples().forEach(is -> is.samples().forEach(s -> metricsJson.putSample(s.type(), s.name(), s.value())));
+        metricsJson.forEach((key, val) -> val.sort(Map.Entry.comparingByKey()));
         return metricsJson;
     }
 
-    public static class ZMetricsJson implements MetricsJson {
+    public static class ZabbixMetricsJson extends LinkedHashMap<String, ArrayList<Map.Entry<String, Object>>> implements MetricsJson {
 
-        private final Map<String, ArrayList<ZMetricJson>> metricJsons = new LinkedHashMap<>();
-
-        @JsonAnySetter
-        public void putMetricJson(String type, ZMetricJson metricJson) {
-            metricJsons.computeIfAbsent(type, t -> new ArrayList<>()).add(metricJson);
-        }
-
-        @JsonAnyGetter
-        public Map<String, ArrayList<ZMetricJson>> metricJsons() {
-            return metricJsons;
-        }
-    }
-
-    public static class ZMetricJson {
-
-        private final Map<String, Object> props = new LinkedHashMap<>();
-
-        public ZMetricJson(String name, Object value) {
-            props.put(name, value);
-        }
-
-        public String name() {
-            return props.keySet().iterator().next();
-        }
-
-        @JsonAnySetter
-        public void putProperty(String name, Object property) {
-            props.put(name, property);
-        }
-
-        @JsonAnyGetter
-        public Map<String, Object> properties() {
-            return props;
+        public void putSample(String type, String name, Object value) {
+            computeIfAbsent(type, t -> new ArrayList<>()).add(Map.entry(name, value));
         }
     }
 }

@@ -2,7 +2,6 @@ package com.ringcentral.platform.metrics.reporters.zabbix;
 
 import java.util.List;
 
-import static com.ringcentral.platform.metrics.utils.ObjectUtils.*;
 import static java.util.Collections.*;
 import static java.util.Objects.*;
 
@@ -15,7 +14,7 @@ public class ZEntity {
     public ZEntity(String groupName, List<ZAttribute> attrs) {
         this.groupName = requireNonNull(groupName);
         this.attrs = attrs != null ? attrs : emptyList();
-        this.hashCode = hashCodeFor(groupName, this.attrs);
+        this.hashCode = hash(groupName, this.attrs);
     }
 
     public String groupName() {

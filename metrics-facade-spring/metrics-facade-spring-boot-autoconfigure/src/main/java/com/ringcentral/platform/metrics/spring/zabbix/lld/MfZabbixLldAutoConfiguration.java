@@ -1,6 +1,5 @@
 package com.ringcentral.platform.metrics.spring.zabbix.lld;
 
-import com.ringcentral.platform.metrics.MetricRegistry;
 import com.ringcentral.platform.metrics.spring.MfMetricsExportAutoConfiguration;
 import com.ringcentral.platform.metrics.reporters.zabbix.*;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;

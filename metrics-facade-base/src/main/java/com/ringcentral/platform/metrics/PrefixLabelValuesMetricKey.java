@@ -3,7 +3,8 @@ package com.ringcentral.platform.metrics;
 import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 
-import static com.ringcentral.platform.metrics.utils.ObjectUtils.hashCodeFor;
+import java.util.Objects;
+
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -33,7 +34,7 @@ public class PrefixLabelValuesMetricKey implements MetricKey {
             "labelValues is null or empty");
 
         this.labelValues = labelValues;
-        this.hashCode = hashCodeFor(name, labelValues);
+        this.hashCode = Objects.hash(name, labelValues);
     }
 
     @Override

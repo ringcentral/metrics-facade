@@ -15,7 +15,6 @@
     <artifactId>metrics-facade-default-impl</artifactId>
 
     <properties>
-        <HdrHistogram.version>2.1.12</HdrHistogram.version>
         <rolling-metrics.version>3.0.0</rolling-metrics.version>
     </properties>
 
@@ -29,7 +28,6 @@
         <dependency>
             <groupId>org.hdrhistogram</groupId>
             <artifactId>HdrHistogram</artifactId>
-            <version>${HdrHistogram.version}</version>
         </dependency>
 
         <dependency>

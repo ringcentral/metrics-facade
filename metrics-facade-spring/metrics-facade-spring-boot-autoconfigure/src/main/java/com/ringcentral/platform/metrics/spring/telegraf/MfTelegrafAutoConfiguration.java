@@ -54,6 +54,7 @@ public class MfTelegrafAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnAvailableEndpoint(endpoint = MfTelegrafEndpoint.class)
+    @ConditionalOnProperty(prefix = MfTelegrafProperties.PREFIX, name = "enabled")
     public static class MfTelegrafEndpointConfiguration {
 
         @Bean

@@ -3,22 +3,27 @@ package com.ringcentral.platform.metrics.reporters.jmx;
 import com.ringcentral.platform.metrics.AbstractMeter.MeasurableValueProvider;
 import com.ringcentral.platform.metrics.MetricListener;
 import com.ringcentral.platform.metrics.counter.Counter;
-import com.ringcentral.platform.metrics.labels.*;
 import com.ringcentral.platform.metrics.histogram.Histogram;
+import com.ringcentral.platform.metrics.labels.Label;
+import com.ringcentral.platform.metrics.labels.LabelValue;
 import com.ringcentral.platform.metrics.meter.*;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.utils.Ref;
 import com.ringcentral.platform.metrics.var.DefaultVarInstance;
-import com.ringcentral.platform.metrics.var.doubleVar.*;
-import com.ringcentral.platform.metrics.var.longVar.*;
-import com.ringcentral.platform.metrics.var.objectVar.*;
-import com.ringcentral.platform.metrics.var.stringVar.*;
-import org.apache.commons.lang3.tuple.Pair;
+import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
+import com.ringcentral.platform.metrics.var.doubleVar.DoubleVar;
+import com.ringcentral.platform.metrics.var.longVar.CachingLongVar;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
+import com.ringcentral.platform.metrics.var.objectVar.CachingObjectVar;
+import com.ringcentral.platform.metrics.var.objectVar.ObjectVar;
+import com.ringcentral.platform.metrics.var.stringVar.CachingStringVar;
+import com.ringcentral.platform.metrics.var.stringVar.StringVar;
 import org.junit.*;
 
 import javax.management.*;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
@@ -631,19 +636,19 @@ public class JmxMetricsReporterTest {
                 false,
                 true,
                 Map.ofEntries(
-                    Pair.of(COUNT, countProvider_2),
-                    Pair.of(Rate.MEAN_RATE, rateMeanProvider_2),
-                    Pair.of(Rate.ONE_MINUTE_RATE, rateMinute_1_provider_2),
-                    Pair.of(Rate.FIVE_MINUTES_RATE, rateMinute_5_provider_2),
-                    Pair.of(Rate.FIFTEEN_MINUTES_RATE, rateMinute_15_provider_2),
-                    Pair.of(Rate.RATE_UNIT, rateUnitProvider_2),
-                    Pair.of(Histogram.MIN, durationMinProvider_2),
-                    Pair.of(Histogram.MAX, durationMaxProvider_2),
-                    Pair.of(Histogram.MEAN, durationMeanProvider_2),
-                    Pair.of(Histogram.STANDARD_DEVIATION, durationStandardDeviationProvider_2),
-                    Pair.of(Histogram.PERCENTILE_50, durationPercentile_50_provider_2),
-                    Pair.of(Histogram.PERCENTILE_75, durationPercentile_75_provider_2),
-                    Pair.of(Timer.DURATION_UNIT, durationUnitProvider_2)),
+                    Map.entry(COUNT, countProvider_2),
+                    Map.entry(Rate.MEAN_RATE, rateMeanProvider_2),
+                    Map.entry(Rate.ONE_MINUTE_RATE, rateMinute_1_provider_2),
+                    Map.entry(Rate.FIVE_MINUTES_RATE, rateMinute_5_provider_2),
+                    Map.entry(Rate.FIFTEEN_MINUTES_RATE, rateMinute_15_provider_2),
+                    Map.entry(Rate.RATE_UNIT, rateUnitProvider_2),
+                    Map.entry(Histogram.MIN, durationMinProvider_2),
+                    Map.entry(Histogram.MAX, durationMaxProvider_2),
+                    Map.entry(Histogram.MEAN, durationMeanProvider_2),
+                    Map.entry(Histogram.STANDARD_DEVIATION, durationStandardDeviationProvider_2),
+                    Map.entry(Histogram.PERCENTILE_50, durationPercentile_50_provider_2),
+                    Map.entry(Histogram.PERCENTILE_75, durationPercentile_75_provider_2),
+                    Map.entry(Timer.DURATION_UNIT, durationUnitProvider_2)),
                 new TestTimerImpl());
 
             Ref<MetricListener> listenerRef = new Ref<>();

@@ -6,15 +6,12 @@ import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.producers.AbstractMemoryMetricsProducer;
 import com.ringcentral.platform.metrics.producers.Ratio;
 
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryPoolMXBean;
-import java.lang.management.MemoryUsage;
+import java.lang.management.*;
 import java.util.List;
 
 import static com.ringcentral.platform.metrics.names.MetricName.name;
-import static java.lang.management.ManagementFactory.getMemoryMXBean;
-import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
-import static org.apache.commons.lang3.StringUtils.split;
+import static com.ringcentral.platform.metrics.utils.StringUtils.splitByDot;
+import static java.lang.management.ManagementFactory.*;
 
 /**
  * Produces<br>
@@ -353,7 +350,7 @@ public class DefaultMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
         for (MemoryPoolMXBean pool : memoryPoolMxBeans) {
             MetricName namePrefix = nameWithSuffix(name(
                 name("pools"),
-                split(WHITESPACE_PATTERN.matcher(pool.getName()).replaceAll("-"), ".")));
+                splitByDot(WHITESPACE_PATTERN.matcher(pool.getName()).replaceAll("-"))));
 
             registry.doubleVar(
                 name(namePrefix, "usage"),

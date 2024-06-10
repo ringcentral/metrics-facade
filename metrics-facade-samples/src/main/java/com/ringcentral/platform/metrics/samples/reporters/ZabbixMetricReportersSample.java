@@ -31,7 +31,7 @@ import static com.ringcentral.platform.metrics.timer.configs.builders.TimerConfi
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @SuppressWarnings("ALL")
-public class ZabbixReportersSample extends AbstractSample {
+public class ZabbixMetricReportersSample extends AbstractSample {
 
     public static void main(String[] args) throws Exception {
         // MetricRegistry registry = new DropwizardMetricRegistry();

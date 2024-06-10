@@ -1,9 +1,7 @@
 package com.ringcentral.platform.metrics.samples.prometheus;
 
 import com.ringcentral.platform.metrics.counter.Counter.Count;
-import com.ringcentral.platform.metrics.histogram.Histogram.Bucket;
-import com.ringcentral.platform.metrics.histogram.Histogram.Percentile;
-import com.ringcentral.platform.metrics.histogram.Histogram.TotalSum;
+import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.samples.AbstractInstanceSample;
@@ -12,9 +10,9 @@ import io.prometheus.client.Collector;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ringcentral.platform.metrics.utils.StringUtils.isNotBlank;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusSample> {
 
@@ -45,7 +43,7 @@ public class PrometheusInstanceSample extends AbstractInstanceSample<PrometheusS
     }
 
     public boolean hasDescription() {
-        return !isBlank(description);
+        return isNotBlank(description);
     }
 
     public String description() {

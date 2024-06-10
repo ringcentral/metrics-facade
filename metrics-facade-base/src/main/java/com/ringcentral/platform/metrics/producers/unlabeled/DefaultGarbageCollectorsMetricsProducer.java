@@ -9,8 +9,8 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.util.Collection;
 
 import static com.ringcentral.platform.metrics.names.MetricName.name;
+import static com.ringcentral.platform.metrics.utils.StringUtils.splitByDot;
 import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
-import static org.apache.commons.lang3.StringUtils.split;
 
 /**
  * Produces<br>
@@ -72,9 +72,7 @@ public class DefaultGarbageCollectorsMetricsProducer extends AbstractGarbageColl
     @Override
     public void produceMetrics(MetricRegistry registry) {
         for (GarbageCollectorMXBean gcMxBean : gcMxBeans) {
-            MetricName namePrefix = nameWithSuffix(split(
-                WHITESPACE_PATTERN.matcher(gcMxBean.getName()).replaceAll("-"),
-                "."));
+            MetricName namePrefix = nameWithSuffix(splitByDot(WHITESPACE_PATTERN.matcher(gcMxBean.getName()).replaceAll("-")));
 
             registry.longVar(
                 name(namePrefix, "count"),

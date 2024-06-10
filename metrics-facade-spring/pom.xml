@@ -29,7 +29,9 @@
 
     <properties>
         <metrics-facade-version>4.0.0-SNAPSHOT</metrics-facade-version>
-        <spring-boot.version>2.5.4</spring-boot.version>
+
+        <!-- The latest version that does not require Java 17. -->
+        <spring-boot.version>2.7.18</spring-boot.version>
     </properties>
 
     <dependencyManagement>
@@ -43,4 +45,19 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+
+                <!-- This configuration is needed due to the changes detailed here: https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention -->
+                <configuration>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

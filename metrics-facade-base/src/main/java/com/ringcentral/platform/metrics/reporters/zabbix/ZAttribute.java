@@ -1,6 +1,5 @@
 package com.ringcentral.platform.metrics.reporters.zabbix;
 
-import static com.ringcentral.platform.metrics.utils.ObjectUtils.*;
 import static java.util.Objects.*;
 
 public class ZAttribute {
@@ -12,7 +11,7 @@ public class ZAttribute {
     public ZAttribute(String name, String value) {
         this.name = requireNonNull(name);
         this.value = requireNonNull(value);
-        this.hashCode = hashCodeFor(name, value);
+        this.hashCode = hash(name, value);
     }
 
     public String name() {

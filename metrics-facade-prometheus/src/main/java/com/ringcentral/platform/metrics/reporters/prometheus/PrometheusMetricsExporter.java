@@ -39,6 +39,10 @@ public class PrometheusMetricsExporter implements MetricsExporter<String> {
         Format(String contentType) {
             this.contentType = contentType;
         }
+
+        public String contentType() {
+            return contentType;
+        }
     }
 
     public static final Format DEFAULT_FORMAT = PROMETHEUS_TEXT_O_O_4;

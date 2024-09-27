@@ -95,10 +95,11 @@
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+
+        <spotbugs-annotations.version>4.8.6</spotbugs-annotations.version>
         <prometheus.version>0.16.0</prometheus.version>
         <dropwizard-metrics.version>4.2.25</dropwizard-metrics.version>
         <HdrHistogram.version>2.2.1</HdrHistogram.version>
-
         <reflections.version>0.10.2</reflections.version>
         <jackson.version>2.17.1</jackson.version>
         <guava.version>33.2.0-jre</guava.version>
@@ -110,6 +111,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${spotbugs-annotations.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_common</artifactId>

@@ -1,4 +1,6 @@
-package com.ringcentral.platform.metrics.utils;
+package com.ringcentral.platform.metrics.test.time;
+
+import com.ringcentral.platform.metrics.utils.TimeNanosProvider;
 
 import java.util.*;
 

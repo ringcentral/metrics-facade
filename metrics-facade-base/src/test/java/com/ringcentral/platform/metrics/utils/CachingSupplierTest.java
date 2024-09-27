@@ -1,5 +1,6 @@
 package com.ringcentral.platform.metrics.utils;
 
+import com.ringcentral.platform.metrics.test.time.TestTimeNanosProvider;
 import org.junit.Test;
 
 import java.time.Duration;

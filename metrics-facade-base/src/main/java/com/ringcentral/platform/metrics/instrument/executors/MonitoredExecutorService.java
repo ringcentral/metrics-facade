@@ -2,12 +2,15 @@ package com.ringcentral.platform.metrics.instrument.executors;
 
 import com.ringcentral.platform.metrics.MetricKey;
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
+import com.ringcentral.platform.metrics.rate.Rate;
+import com.ringcentral.platform.metrics.timer.Timer;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 import static com.ringcentral.platform.metrics.names.MetricName.name;
@@ -15,15 +18,27 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
 /**
  * An {@link ExecutorService} wrapper that provides the following metrics:
  * <ul>
- *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for submitted tasks, with the name {@code metricKeyProvider.apply(name("submitted"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.counter.Counter} for running tasks: {@code metricKeyProvider.apply(name("running"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for completed tasks: {@code metricKeyProvider.apply(name("completed"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} to measure the time between task submission and the start of its execution:
+ *   <li>{@link Rate} for submitted tasks, with the name {@code metricKeyProvider.apply(name("submitted"))}</li>
+ *   <li>{@link Counter} for running tasks: {@code metricKeyProvider.apply(name("running"))}</li>
+ *   <li>{@link Rate} for completed tasks: {@code metricKeyProvider.apply(name("completed"))}</li>
+ *   <li>{@link Timer} to measure the time between task submission and the start of its execution:
  *       {@code metricKeyProvider.apply(name("idle"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} for task execution time: {@code metricKeyProvider.apply(name("execution"))}</li>
+ *   <li>{@link Timer} for task execution time: {@code metricKeyProvider.apply(name("execution"))}</li>
  * </ul>
  *
- * If the underlying (parent) {@link ExecutorService} is a {@link ForkJoinPool}, it additionally provides the following {@link com.ringcentral.platform.metrics.var.longVar.LongVar} metrics:
+ * If the underlying (parent) {@link ExecutorService} is a {@link ThreadPoolExecutor},
+ * it additionally provides the following {@link LongVar} metrics:
+ * <ul>
+ *   <li>{@code metricKeyProvider.apply(name("pool", "size"))}: parent.getPoolSize()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("pool", "core"))}: parent.getCorePoolSize()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("pool", "max"))}: parent.getMaximumPoolSize()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "active"))}: parent.getActiveCount()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "completed"))}: parent.getCompletedTaskCount()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "queued"))}: parent.getQueue().size()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "capacity"))}: parent.getQueue().remainingCapacity()}</li>
+ * </ul>
+ *
+ * If the underlying (parent) {@link ExecutorService} is a {@link ForkJoinPool}, it additionally provides the following {@link LongVar} metrics:
  * <ul>
  *   <li>{@code metricKeyProvider.apply(name("tasks", "stolen"))}: parent.getStealCount()</li>
  *   <li>{@code metricKeyProvider.apply(name("tasks", "queued"))}: parent.getQueuedTaskCount()</li>

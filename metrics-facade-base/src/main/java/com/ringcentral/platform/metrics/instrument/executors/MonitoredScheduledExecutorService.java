@@ -2,11 +2,14 @@ package com.ringcentral.platform.metrics.instrument.executors;
 
 import com.ringcentral.platform.metrics.MetricKey;
 import com.ringcentral.platform.metrics.MetricRegistry;
+import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.labels.LabelValues;
 import com.ringcentral.platform.metrics.names.MetricName;
 import com.ringcentral.platform.metrics.rate.Rate;
 import com.ringcentral.platform.metrics.timer.Stopwatch;
+import com.ringcentral.platform.metrics.timer.Timer;
+import com.ringcentral.platform.metrics.var.longVar.LongVar;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.*;
@@ -17,21 +20,33 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
 /**
  * A {@link ScheduledExecutorService} wrapper that provides the following metrics for scheduled tasks:
  * <ul>
- *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for tasks scheduled to run once, with the name: {@code metricKeyProvider.apply(name("scheduled", "once"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for tasks scheduled to run repetitively: {@code metricKeyProvider.apply(name("scheduled", "repetitively"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for tasks that overrun their scheduled period: {@code metricKeyProvider.apply(name("scheduled", "overrun"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.histogram.Histogram} for the percentage of the scheduled period used by task execution:
+ *   <li>{@link Rate} for tasks scheduled to run once, with the name: {@code metricKeyProvider.apply(name("scheduled", "once"))}</li>
+ *   <li>{@link Rate} for tasks scheduled to run repetitively: {@code metricKeyProvider.apply(name("scheduled", "repetitively"))}</li>
+ *   <li>{@link Rate} for tasks that overrun their scheduled period: {@code metricKeyProvider.apply(name("scheduled", "overrun"))}</li>
+ *   <li>{@link Histogram} for the percentage of the scheduled period used by task execution:
  *       {@code metricKeyProvider.apply(name("scheduled", "period", "percent"))}</li>
  * </ul>
  *
  * This class also provides the core metrics available in {@link MonitoredExecutorService}:
  * <ul>
- *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for submitted tasks, with the name {@code metricKeyProvider.apply(name("submitted"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.counter.Counter} for running tasks: {@code metricKeyProvider.apply(name("running"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for completed tasks: {@code metricKeyProvider.apply(name("completed"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} to measure the time between task submission and the start of its execution:
+ *   <li>{@link Rate} for submitted tasks, with the name {@code metricKeyProvider.apply(name("submitted"))}</li>
+ *   <li>{@link Counter} for running tasks: {@code metricKeyProvider.apply(name("running"))}</li>
+ *   <li>{@link Rate} for completed tasks: {@code metricKeyProvider.apply(name("completed"))}</li>
+ *   <li>{@link Timer} to measure the time between task submission and the start of its execution:
  *       {@code metricKeyProvider.apply(name("idle"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} for task execution time: {@code metricKeyProvider.apply(name("execution"))}</li>
+ *   <li>{@link Timer} for task execution time: {@code metricKeyProvider.apply(name("execution"))}</li>
+ * </ul>
+ *
+ * If the underlying (parent) {@link ExecutorService} is a {@link ThreadPoolExecutor},
+ * it additionally provides the following {@link LongVar} metrics:
+ * <ul>
+ *   <li>{@code metricKeyProvider.apply(name("pool", "size"))}: parent.getPoolSize()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("pool", "core"))}: parent.getCorePoolSize()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("pool", "max"))}: parent.getMaximumPoolSize()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "active"))}: parent.getActiveCount()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "completed"))}: parent.getCompletedTaskCount()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "queued"))}: parent.getQueue().size()}</li>
+ *   <li>{@code metricKeyProvider.apply(name("tasks", "capacity"))}: parent.getQueue().remainingCapacity()}</li>
  * </ul>
  *
  * To create this wrapper, use the {@link MonitoredScheduledExecutorServiceBuilder}:

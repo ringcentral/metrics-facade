@@ -53,8 +53,7 @@ public abstract class AbstractMonitoredExecutorServiceBuilder<ES extends Executo
 
     /**
      * Sets the name of the executor service.
-     * The name will either be included as part of the metric names (when {@code nameAsLabel(false)} is used),
-     * or as the value of the "name" label (the default behavior with {@code nameAsLabel(true)}).
+     * See also {@link AbstractMonitoredExecutorServiceBuilder#nameAsLabel(boolean)}
      *
      * @param name the name to assign to the executor service
      * @return this builder

@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static com.ringcentral.platform.metrics.instrument.executors.AbstractMonitoredExecutorServiceBuilder.NAME;
+import static com.ringcentral.platform.metrics.instrument.executors.AbstractMonitoredExecutorServiceBuilder.*;
 import static com.ringcentral.platform.metrics.instrument.executors.MonitoredScheduledExecutorServiceBuilder.monitoredScheduledExecutorService;
 import static com.ringcentral.platform.metrics.labels.LabelValues.labelValues;
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -31,7 +31,9 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("unchecked")
 public class MonitoredScheduledExecutorServiceTest {
 
-    static final LabelValues LABEL_VALUES = labelValues(NAME.value("underTest"));
+    static final LabelValues LABEL_VALUES = labelValues(
+        CLASS.value(ScheduledExecutorServiceImpl.class.getSimpleName()),
+        NAME.value("underTest"));
 
     MetricRegistry registry = mock(MetricRegistry.class);
     TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
@@ -55,81 +57,7 @@ public class MonitoredScheduledExecutorServiceTest {
 
     @Before
     public void before() {
-        parent = new TestScheduledExecutorService(timeNanosProvider) {
-
-            @Override
-            public void execute(Runnable task) {
-                verify(submittedRate).mark(LABEL_VALUES);
-                verify(idleTimer).stopwatch(LABEL_VALUES);
-                verifyNoMoreMetricInteractions();
-
-                task.run();
-
-                verify(idleStopwatch).stop();
-                verify(executionTimer).stopwatch(LABEL_VALUES);
-                verify(runningCounter).inc(LABEL_VALUES);
-                verify(runningCounter).dec(LABEL_VALUES);
-                verify(completedRate).mark(LABEL_VALUES);
-                verify(executionStopwatch).stop();
-            }
-
-            @Override
-            @Nonnull
-            public <T> Future<T> submit(@Nonnull Callable<T> task) {
-                verify(submittedRate).mark(LABEL_VALUES);
-                verify(idleTimer).stopwatch(LABEL_VALUES);
-                verifyNoMoreMetricInteractions();
-
-                Future<T> future = completedFutureFor(task);
-
-                verify(idleStopwatch).stop();
-                verify(executionTimer).stopwatch(LABEL_VALUES);
-                verify(runningCounter).inc(LABEL_VALUES);
-                verify(runningCounter).dec(LABEL_VALUES);
-                verify(completedRate).mark(LABEL_VALUES);
-                verify(executionStopwatch).stop();
-
-                return future;
-            }
-
-            @Override
-            @Nonnull
-            public ScheduledFuture<?> schedule(@Nonnull Runnable command, long delay, @Nonnull TimeUnit timeUnit) {
-                verify(scheduledOnceRate).mark(LABEL_VALUES);
-                verify(idleTimer).stopwatch(LABEL_VALUES);
-                verifyNoMoreMetricInteractions();
-
-                return super.schedule(command, delay, timeUnit);
-            }
-
-            @Override
-            @Nonnull
-            public ScheduledFuture<?> scheduleAtFixedRate(@Nonnull Runnable command, long initialDelay, long delay, @Nonnull TimeUnit timeUnit) {
-                verify(scheduledRepetitivelyRate).mark(LABEL_VALUES);
-                verifyNoMoreMetricInteractions();
-
-                return super.scheduleWithFixedDelay(command, initialDelay, delay, timeUnit);
-            }
-
-            @Override
-            @Nonnull
-            public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks) {
-                verify(submittedRate).mark(2L, LABEL_VALUES);
-                verify(idleTimer, times(2)).stopwatch(LABEL_VALUES);
-                verifyNoMoreMetricInteractions();
-
-                List<Future<T>> collect = tasks.stream().map(MonitoredScheduledExecutorServiceTest::completedFutureFor).collect(toList());
-
-                verify(idleStopwatch, times(2)).stop();
-                verify(executionTimer, times(2)).stopwatch(LABEL_VALUES);
-                verify(runningCounter, times(2)).inc(LABEL_VALUES);
-                verify(runningCounter, times(2)).dec(LABEL_VALUES);
-                verify(completedRate, times(2)).mark(LABEL_VALUES);
-                verify(executionStopwatch, times(2)).stop();
-
-                return collect;
-            }
-        };
+        parent = new ScheduledExecutorServiceImpl();
 
         when(idleTimer.stopwatch(any())).thenReturn(idleStopwatch);
         when(executionTimer.stopwatch(any())).thenReturn(executionStopwatch);
@@ -198,7 +126,10 @@ public class MonitoredScheduledExecutorServiceTest {
             throw new IllegalArgumentException();
         });
 
-        monitoredExecutor = monitoredScheduledExecutorService(parent, registry).name("underTest").build();
+        monitoredExecutor = monitoredScheduledExecutorService(parent, registry)
+            .name("underTest")
+            .withExecutorServiceClass(true, true)
+            .build();
     }
 
     @Test
@@ -363,6 +294,86 @@ public class MonitoredScheduledExecutorServiceTest {
             return future.get();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    class ScheduledExecutorServiceImpl extends TestScheduledExecutorService {
+
+        public ScheduledExecutorServiceImpl() {
+            super(MonitoredScheduledExecutorServiceTest.this.timeNanosProvider);
+        }
+
+        @Override
+        public void execute(Runnable task) {
+            verify(submittedRate).mark(LABEL_VALUES);
+            verify(idleTimer).stopwatch(LABEL_VALUES);
+            verifyNoMoreMetricInteractions();
+
+            task.run();
+
+            verify(idleStopwatch).stop();
+            verify(executionTimer).stopwatch(LABEL_VALUES);
+            verify(runningCounter).inc(LABEL_VALUES);
+            verify(runningCounter).dec(LABEL_VALUES);
+            verify(completedRate).mark(LABEL_VALUES);
+            verify(executionStopwatch).stop();
+        }
+
+        @Override
+        @Nonnull
+        public <T> Future<T> submit(@Nonnull Callable<T> task) {
+            verify(submittedRate).mark(LABEL_VALUES);
+            verify(idleTimer).stopwatch(LABEL_VALUES);
+            verifyNoMoreMetricInteractions();
+
+            Future<T> future = completedFutureFor(task);
+
+            verify(idleStopwatch).stop();
+            verify(executionTimer).stopwatch(LABEL_VALUES);
+            verify(runningCounter).inc(LABEL_VALUES);
+            verify(runningCounter).dec(LABEL_VALUES);
+            verify(completedRate).mark(LABEL_VALUES);
+            verify(executionStopwatch).stop();
+
+            return future;
+        }
+
+        @Override
+        @Nonnull
+        public ScheduledFuture<?> schedule(@Nonnull Runnable command, long delay, @Nonnull TimeUnit timeUnit) {
+            verify(scheduledOnceRate).mark(LABEL_VALUES);
+            verify(idleTimer).stopwatch(LABEL_VALUES);
+            verifyNoMoreMetricInteractions();
+
+            return super.schedule(command, delay, timeUnit);
+        }
+
+        @Override
+        @Nonnull
+        public ScheduledFuture<?> scheduleAtFixedRate(@Nonnull Runnable command, long initialDelay, long delay, @Nonnull TimeUnit timeUnit) {
+            verify(scheduledRepetitivelyRate).mark(LABEL_VALUES);
+            verifyNoMoreMetricInteractions();
+
+            return super.scheduleWithFixedDelay(command, initialDelay, delay, timeUnit);
+        }
+
+        @Override
+        @Nonnull
+        public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks) {
+            verify(submittedRate).mark(2L, LABEL_VALUES);
+            verify(idleTimer, times(2)).stopwatch(LABEL_VALUES);
+            verifyNoMoreMetricInteractions();
+
+            List<Future<T>> collect = tasks.stream().map(MonitoredScheduledExecutorServiceTest::completedFutureFor).collect(toList());
+
+            verify(idleStopwatch, times(2)).stop();
+            verify(executionTimer, times(2)).stopwatch(LABEL_VALUES);
+            verify(runningCounter, times(2)).inc(LABEL_VALUES);
+            verify(runningCounter, times(2)).dec(LABEL_VALUES);
+            verify(completedRate, times(2)).mark(LABEL_VALUES);
+            verify(executionStopwatch, times(2)).stop();
+
+            return collect;
         }
     }
 }

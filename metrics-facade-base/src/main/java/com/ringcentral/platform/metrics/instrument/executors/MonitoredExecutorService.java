@@ -75,6 +75,14 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
  *   .additionalLabelValues(labelValues(SERVICE.value("myService")))
  *   .build();
  * }
+ *
+ * // Example 5: Include the executor class name as a "class" label
+ * // classLabel_submitted_total{class="FinalizableDelegatedExecutorService",name="classLabel",} 6.0
+ * monitoredExecutorService(executor, registry)
+ *   .name("classLabel")
+ *   .metricNamePrefix(name("classLabel"))
+ *   .withExecutorServiceClass(true, true)
+ *   .build();
  * </pre>
  *
  * For more details, see the relevant example in {@code MonitoredExecutorServiceSample} within the metrics-facade-samples submodule:

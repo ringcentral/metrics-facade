@@ -13,17 +13,21 @@ import java.util.function.Function;
 
 import static com.ringcentral.platform.metrics.PrefixLabelValuesMetricKey.prefixLabelValuesMetricKey;
 import static com.ringcentral.platform.metrics.labels.LabelValues.*;
-import static com.ringcentral.platform.metrics.names.MetricName.metricName;
+import static com.ringcentral.platform.metrics.names.MetricName.*;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 public abstract class AbstractMonitoredExecutorServiceBuilder<ES extends ExecutorService, B extends AbstractMonitoredExecutorServiceBuilder<ES, B>> {
 
     public static final MetricName DEFAULT_METRIC_NAME_PREFIX = metricName("executor", "service");
+
+    public static final Label CLASS = new Label("class");
     public static final Label NAME = new Label("name");
 
     private final ES parent;
     private final MetricRegistry registry;
+    private boolean withClass = false;
+    private boolean classAsLabel = true;
     private String name;
     private boolean nameAsLabel = true;
     private MetricName metricNamePrefix = DEFAULT_METRIC_NAME_PREFIX;
@@ -49,6 +53,24 @@ public abstract class AbstractMonitoredExecutorServiceBuilder<ES extends Executo
     public AbstractMonitoredExecutorServiceBuilder(@Nonnull ES parent, @Nonnull MetricRegistry registry) {
         this.parent = parent;
         this.registry = registry;
+    }
+
+    /**
+     * Configures whether the {@link Class#getSimpleName()} of the parent {@link ExecutorService} should be included,
+     * and if so, whether it should be part of the metric name or added as a "class" label.
+     *
+     * @param included if {@code true}, the {@link Class#getSimpleName()} of the {@link ExecutorService}
+     *                 will be included either in the metric name or as a label. If {@code false}, the
+     *                 class name will not be included.
+     * @param asLabel if {@code true}, the {@link Class#getSimpleName()} will be added as the "class" label.
+     *                If {@code false}, it will be included as part of the metric name, provided {@code included}
+     *                is {@code true}.
+     * @return this builder
+     */
+    public B withExecutorServiceClass(boolean included, boolean asLabel) {
+        this.withClass = included;
+        this.classAsLabel = asLabel;
+        return builder();
     }
 
     /**
@@ -113,7 +135,7 @@ public abstract class AbstractMonitoredExecutorServiceBuilder<ES extends Executo
     /**
      * Helper method to cast the current builder to the concrete builder type.
      *
-     * @return the concrete builder type
+     * @return this builder
      */
     @SuppressWarnings("unchecked")
     protected B builder() {
@@ -130,18 +152,44 @@ public abstract class AbstractMonitoredExecutorServiceBuilder<ES extends Executo
      */
     public ES build() {
         String resultName = name != null ? name : nextOrderNumAsString();
+        Function<MetricName, MetricKey> metricKeyProvider = varPart -> metricKey(makeMetricName(resultName, varPart));
+        LabelValues labelValues = makeLabelValues(resultName);
+        return build(parent, registry, metricKeyProvider, labelValues);
+    }
 
-        Function<MetricName, MetricKey> metricKeyProvider =
-            nameAsLabel ?
-            n -> metricKey(metricName(metricNamePrefix, n)) :
-            n -> metricKey(metricName(metricName(metricNamePrefix, resultName), n));
+    /**
+     * @param name the name of the parent executor service
+     * @param varPart the variable part, for example: name("pool", "size")
+     */
+    private MetricName makeMetricName(String name, MetricName varPart) {
+        MetricName result = metricNamePrefix;
 
+        if (withClass && !classAsLabel) {
+            result = result.withNewPart(parent.getClass().getSimpleName());
+        }
+
+        if (!nameAsLabel) {
+            result = result.withNewPart(name);
+        }
+
+        result = withName(result, varPart);
+        return result;
+    }
+
+    /**
+     * @param name the name of the parent executor service
+     */
+    private LabelValues makeLabelValues(String name) {
         LabelValues labelValues =
-            nameAsLabel ?
-            labelValues(additionalLabelValues, NAME.value(resultName)) :
+            withClass && classAsLabel ?
+            labelValues(additionalLabelValues, CLASS.value(parent.getClass().getSimpleName())) :
             additionalLabelValues;
 
-        return build(parent, registry, metricKeyProvider, labelValues);
+        if (nameAsLabel) {
+            labelValues = labelValues(labelValues, NAME.value(name));
+        }
+
+        return labelValues;
     }
 
     /**

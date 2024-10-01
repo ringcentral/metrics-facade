@@ -34,14 +34,6 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
  *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} for task execution time: {@code metricKeyProvider.apply(name("execution"))}</li>
  * </ul>
  *
- * If the underlying (parent) {@link ScheduledExecutorService} is a {@link ForkJoinPool}, it additionally provides the following {@link com.ringcentral.platform.metrics.var.longVar.LongVar} metrics:
- * <ul>
- *   <li>{@code metricKeyProvider.apply(name("tasks", "stolen"))}: parent.getStealCount()</li>
- *   <li>{@code metricKeyProvider.apply(name("tasks", "queued"))}: parent.getQueuedTaskCount()</li>
- *   <li>{@code metricKeyProvider.apply(name("threads", "active"))}: parent.getActiveThreadCount()</li>
- *   <li>{@code metricKeyProvider.apply(name("threads", "running"))}: parent.getRunningThreadCount()</li>
- * </ul>
- *
  * To create this wrapper, use the {@link MonitoredScheduledExecutorServiceBuilder}:
  * <pre>
  * {@code
@@ -76,7 +68,6 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
  * For more details, see the relevant example in {@code MonitoredScheduledExecutorServiceSample} within the metrics-facade-samples submodule:
  * <a href="https://github.com/ringcentral/metrics-facade/tree/master/metrics-facade-samples">https://github.com/ringcentral/metrics-facade/tree/master/metrics-facade-samples</a>
  */
-
 public class MonitoredScheduledExecutorService extends AbstractMonitoredExecutorService<ScheduledExecutorService> implements ScheduledExecutorService {
 
     private final Rate scheduledOnceRate;
@@ -84,6 +75,9 @@ public class MonitoredScheduledExecutorService extends AbstractMonitoredExecutor
     private final Rate scheduledOverrunRate;
     private final Histogram periodPercentHistogram;
 
+    /**
+     * See also {@link MonitoredScheduledExecutorServiceBuilder}
+     */
     public MonitoredScheduledExecutorService(
         @Nonnull ScheduledExecutorService parent,
         @Nonnull MetricRegistry registry,

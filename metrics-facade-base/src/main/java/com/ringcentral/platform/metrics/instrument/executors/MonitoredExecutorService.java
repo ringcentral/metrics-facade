@@ -67,6 +67,9 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
  */
 public class MonitoredExecutorService extends AbstractMonitoredExecutorService<ExecutorService> {
 
+    /**
+     * See also {@link MonitoredExecutorServiceBuilder}
+     */
     public MonitoredExecutorService(
         @Nonnull ExecutorService parent,
         @Nonnull MetricRegistry registry,

@@ -18,7 +18,7 @@ import static com.ringcentral.platform.metrics.names.MetricName.name;
  *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for submitted tasks, with the name {@code metricKeyProvider.apply(name("submitted"))}</li>
  *   <li>{@link com.ringcentral.platform.metrics.counter.Counter} for running tasks: {@code metricKeyProvider.apply(name("running"))}</li>
  *   <li>{@link com.ringcentral.platform.metrics.rate.Rate} for completed tasks: {@code metricKeyProvider.apply(name("completed"))}</li>
- *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} for task idleness, measuring the time between task submission and the start of execution:
+ *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} to measure the time between task submission and the start of its execution:
  *       {@code metricKeyProvider.apply(name("idle"))}</li>
  *   <li>{@link com.ringcentral.platform.metrics.timer.Timer} for task execution time: {@code metricKeyProvider.apply(name("execution"))}</li>
  * </ul>

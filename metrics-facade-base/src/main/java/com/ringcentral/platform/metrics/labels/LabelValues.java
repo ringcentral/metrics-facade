@@ -2,6 +2,8 @@ package com.ringcentral.platform.metrics.labels;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
+
 public class LabelValues {
 
     public static final LabelValues NO_LABEL_VALUES = labelValues();
@@ -53,6 +55,13 @@ public class LabelValues {
 
     public List<LabelValue> list() {
         return list;
+    }
+
+    /**
+     * @return list of the underlying {@link Label}s
+     */
+    public List<Label> labels() {
+        return list.stream().map(LabelValue::label).collect(toList());
     }
 
     public int size() {

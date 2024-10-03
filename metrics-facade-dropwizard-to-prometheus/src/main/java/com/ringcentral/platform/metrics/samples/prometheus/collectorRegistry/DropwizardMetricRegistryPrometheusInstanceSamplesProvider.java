@@ -11,9 +11,7 @@ import io.prometheus.client.dropwizard.DropwizardExports;
 
 import java.util.Set;
 
-public class DropwizardMetricRegistryPrometheusInstanceSamplesProvider implements InstanceSamplesProvider<
-        PrometheusSample,
-        PrometheusInstanceSample> {
+public class DropwizardMetricRegistryPrometheusInstanceSamplesProvider implements InstanceSamplesProvider<PrometheusSample, PrometheusInstanceSample> {
 
     private final InstanceSamplesProvider<PrometheusSample, PrometheusInstanceSample> provider;
 

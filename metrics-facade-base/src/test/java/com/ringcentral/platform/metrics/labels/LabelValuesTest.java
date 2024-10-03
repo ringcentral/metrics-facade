@@ -39,4 +39,13 @@ public class LabelValuesTest {
             labelValues.list(),
             is(List.of(LABEL_1.value("1"), LABEL_2.value("2"))));
     }
+
+    @Test
+    public void underlyingLabels() {
+        LabelValues labelValues = labelValues(
+            LABEL_1.value("1"), LABEL_2.value("2"),
+            LABEL_3.value("3"), LABEL_4.value("4"));
+
+        assertThat(labelValues.labels(), is(List.of(LABEL_1, LABEL_2, LABEL_3, LABEL_4)));
+    }
 }

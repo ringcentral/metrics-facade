@@ -210,8 +210,8 @@ public class LabeledMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
             () -> memoryMxBean.getHeapMemoryUsage().getInit() + memoryMxBean.getNonHeapMemoryUsage().getInit(),
             TOTAL_TYPE_LABEL_VALUES);
 
-        initialSize.register(memoryMxBean.getHeapMemoryUsage()::getInit, HEAP_TYPE_LABEL_VALUES);
-        initialSize.register(memoryMxBean.getNonHeapMemoryUsage()::getInit, NON_HEAP_TYPE_LABEL_VALUES);
+        initialSize.register(() -> memoryMxBean.getHeapMemoryUsage().getInit(), HEAP_TYPE_LABEL_VALUES);
+        initialSize.register(() -> memoryMxBean.getNonHeapMemoryUsage().getInit(), NON_HEAP_TYPE_LABEL_VALUES);
 
         final var usedSize = registry.longVar(
             nameWithSuffix("used"),
@@ -222,8 +222,8 @@ public class LabeledMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
             () -> memoryMxBean.getHeapMemoryUsage().getUsed() + memoryMxBean.getNonHeapMemoryUsage().getUsed(),
             TOTAL_TYPE_LABEL_VALUES);
 
-        usedSize.register(memoryMxBean.getHeapMemoryUsage()::getUsed, HEAP_TYPE_LABEL_VALUES);
-        usedSize.register(memoryMxBean.getNonHeapMemoryUsage()::getUsed, NON_HEAP_TYPE_LABEL_VALUES);
+        usedSize.register(() -> memoryMxBean.getHeapMemoryUsage().getUsed(), HEAP_TYPE_LABEL_VALUES);
+        usedSize.register(() -> memoryMxBean.getNonHeapMemoryUsage().getUsed(), NON_HEAP_TYPE_LABEL_VALUES);
 
         final var maxSize = registry.longVar(
             nameWithSuffix("max"),
@@ -232,8 +232,8 @@ public class LabeledMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
 
         maxSize.register(() -> memoryMxBean.getHeapMemoryUsage().getMax() + memoryMxBean.getNonHeapMemoryUsage().getMax(), TOTAL_TYPE_LABEL_VALUES);
 
-        maxSize.register(memoryMxBean.getHeapMemoryUsage()::getMax, HEAP_TYPE_LABEL_VALUES);
-        maxSize.register(memoryMxBean.getNonHeapMemoryUsage()::getMax, NON_HEAP_TYPE_LABEL_VALUES);
+        maxSize.register(() -> memoryMxBean.getHeapMemoryUsage().getMax(), HEAP_TYPE_LABEL_VALUES);
+        maxSize.register(() -> memoryMxBean.getNonHeapMemoryUsage().getMax(), NON_HEAP_TYPE_LABEL_VALUES);
 
         final var committedSize = registry.longVar(
             nameWithSuffix("committed"),
@@ -244,8 +244,8 @@ public class LabeledMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
             () -> memoryMxBean.getHeapMemoryUsage().getCommitted() + memoryMxBean.getNonHeapMemoryUsage().getCommitted(),
             TOTAL_TYPE_LABEL_VALUES);
 
-        committedSize.register(memoryMxBean.getHeapMemoryUsage()::getCommitted, HEAP_TYPE_LABEL_VALUES);
-        committedSize.register(memoryMxBean.getNonHeapMemoryUsage()::getCommitted, NON_HEAP_TYPE_LABEL_VALUES);
+        committedSize.register(() -> memoryMxBean.getHeapMemoryUsage().getCommitted(), HEAP_TYPE_LABEL_VALUES);
+        committedSize.register(() -> memoryMxBean.getNonHeapMemoryUsage().getCommitted(), NON_HEAP_TYPE_LABEL_VALUES);
 
         final var usageRatio = registry.doubleVar(
             nameWithSuffix("usage"),
@@ -298,10 +298,10 @@ public class LabeledMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
 
         for (MemoryPoolMXBean pool : memoryPoolMxBeans) {
             final var labelValues = labelValues(NAME_LABEL.value(pool.getName()));
-            initialPoolSize.register(pool.getUsage()::getInit, labelValues);
-            maxPoolSize.register(pool.getUsage()::getMax, labelValues);
-            committedPoolSize.register(pool.getUsage()::getCommitted, labelValues);
-            usedPoolSize.register(pool.getUsage()::getUsed, labelValues);
+            initialPoolSize.register(() -> pool.getUsage().getInit(), labelValues);
+            maxPoolSize.register(() -> pool.getUsage().getMax(), labelValues);
+            committedPoolSize.register(() -> pool.getUsage().getCommitted(), labelValues);
+            usedPoolSize.register(() -> pool.getUsage().getUsed(), labelValues);
 
             usagePoolRatio.register(
                 () -> {
@@ -313,7 +313,7 @@ public class LabeledMemoryMetricsProducer extends AbstractMemoryMetricsProducer 
                 labelValues);
 
             if (pool.getCollectionUsage() != null) {
-                usedAfterGcPoolRatio.register(pool.getCollectionUsage()::getUsed, labelValues);
+                usedAfterGcPoolRatio.register(() -> pool.getCollectionUsage().getUsed(), labelValues);
             }
         }
     }

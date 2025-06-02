@@ -5,6 +5,7 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramImpl;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -23,9 +24,17 @@ public class ConsistentTotalsHistogramImpl implements HistogramImpl {
     final AtomicLong updateCounter;
 
     public ConsistentTotalsHistogramImpl() {
-        this.counter = new AtomicLong();
-        this.totalSumAdder = new AtomicLong();
-        this.updateCounter = new AtomicLong();
+        this(new AtomicLong(), new AtomicLong(), new AtomicLong());
+    }
+
+    ConsistentTotalsHistogramImpl(
+        @Nonnull AtomicLong counter,
+        @Nonnull AtomicLong totalSumAdder,
+        @Nonnull AtomicLong updateCounter) {
+
+        this.counter = counter;
+        this.totalSumAdder = totalSumAdder;
+        this.updateCounter = updateCounter;
     }
 
     @Override

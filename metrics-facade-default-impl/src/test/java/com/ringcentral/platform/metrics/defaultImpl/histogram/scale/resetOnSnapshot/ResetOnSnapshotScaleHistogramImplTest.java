@@ -1,10 +1,15 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.resetOnSnapshot;
 
+import com.ringcentral.platform.metrics.defaultImpl.histogram.AbstractHistogramImplTest;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.TotalsMeasurementType;
+import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.scale.LinearScaleBuilder;
-import com.ringcentral.platform.metrics.test.time.*;
+import com.ringcentral.platform.metrics.test.time.TestScheduledExecutorService;
+import com.ringcentral.platform.metrics.test.time.TestTimeNanosProvider;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -17,11 +22,19 @@ import static java.lang.Math.sqrt;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ResetOnSnapshotScaleHistogramImplTest {
+public class ResetOnSnapshotScaleHistogramImplTest extends AbstractHistogramImplTest<ResetOnSnapshotScaleHistogramImpl> {
 
     static final LinearScaleBuilder SCALE_1 = linearScale().steps(1, 100);
     static final TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
     static final ScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
+
+    @Override
+    protected ResetOnSnapshotScaleHistogramImpl makeHistogramImpl(@Nonnull TotalsMeasurementType totalsMeasurementType, @Nonnull Measurable... measurables) {
+        return new ResetOnSnapshotScaleHistogramImpl(
+            scaleImpl().resetOnSnapshot().totals(totalsMeasurementType).build(),
+            Set.of(measurables),
+            executor);
+    }
 
     @Test
     public void scale_1_AllMeasurables_NeverResetBuckets() {

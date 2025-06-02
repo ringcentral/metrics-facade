@@ -1,9 +1,13 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.hdr.resetByChunks;
 
+import com.ringcentral.platform.metrics.defaultImpl.histogram.AbstractHistogramImplTest;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.TotalsMeasurementType;
+import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.test.time.*;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,7 +19,7 @@ import static java.lang.Math.sqrt;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ResetByChunksHdrHistogramImplTest {
+public class ResetByChunksHdrHistogramImplTest extends AbstractHistogramImplTest<ResetByChunksHdrHistogramImpl> {
 
     static final int CHUNK_COUNT = 5;
     static final int ALL_CHUNKS_RESET_PERIOD_MS = 1000 * CHUNK_COUNT;
@@ -23,6 +27,14 @@ public class ResetByChunksHdrHistogramImplTest {
     static final TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
     static final TestTimeMsProvider timeMsProvider = new TestTimeMsProvider(timeNanosProvider);
     static final ScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
+
+    @Override
+    protected ResetByChunksHdrHistogramImpl makeHistogramImpl(@Nonnull TotalsMeasurementType totalsMeasurementType, @Nonnull Measurable... measurables) {
+        return new ResetByChunksHdrHistogramImpl(
+            hdrImpl().resetByChunks().totals(totalsMeasurementType).build(),
+            Set.of(measurables),
+            executor);
+    }
 
     @Test
     public void allMeasurables_NeverResetBuckets() {

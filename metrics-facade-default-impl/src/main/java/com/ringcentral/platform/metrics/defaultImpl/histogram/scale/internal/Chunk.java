@@ -5,10 +5,9 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogramSn
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfig;
 
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE_DOUBLE;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.*;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.internal.ScaleTree.*;
 
 public abstract class Chunk {
@@ -32,7 +31,7 @@ public abstract class Chunk {
     protected final ScaleTree tree;
     private final long[] lazySubtreeUpdateCounts;
 
-    private final LongAdder sumAdder;
+    private final AtomicLong sumAdder;
     private volatile long snapshotSum = NO_SNAPSHOT_SUM;
 
     private final StandardDeviationCalculator standardDeviationCalculator;
@@ -71,7 +70,7 @@ public abstract class Chunk {
 
         this.sumAdder =
             (this.withTotalSum || this.withMean || this.withStandardDeviation) ?
-            new LongAdder() :
+            new AtomicLong() :
             null;
 
         this.standardDeviationCalculator = new StandardDeviationCalculator();
@@ -100,14 +99,14 @@ public abstract class Chunk {
     protected void updateSum(long value, boolean snapshotInProgress) {
         if (sumAdder != null) {
             if (snapshotInProgress && snapshotSum == NO_SNAPSHOT_SUM) {
-                long sum = sumAdder.sum();
+                long sum = sumAdder.get();
 
                 if (snapshotSum == NO_SNAPSHOT_SUM) {
                     snapshotSum = sum;
                 }
             }
 
-            sumAdder.add(value);
+            sumAdder.addAndGet(value);
         }
     }
 
@@ -211,7 +210,7 @@ public abstract class Chunk {
     }
 
     public long sum() {
-        long sum = sumAdder.sum();
+        long sum = sumAdder.get();
 
         if (snapshotSum != NO_SNAPSHOT_SUM) {
             sum = snapshotSum;
@@ -222,7 +221,7 @@ public abstract class Chunk {
 
     public void resetSum() {
         if (sumAdder != null) {
-            sumAdder.add(-sumAdder.sum());
+            sumAdder.set(0);
             resetSnapshotSum();
         }
     }

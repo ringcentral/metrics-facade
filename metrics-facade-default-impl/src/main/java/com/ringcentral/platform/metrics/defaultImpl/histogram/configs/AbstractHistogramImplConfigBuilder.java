@@ -1,10 +1,12 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.configs;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.configs.HistogramImplConfig.*;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.configs.TotalsMeasurementType.*;
 import static com.ringcentral.platform.metrics.utils.Preconditions.checkArgument;
 
 @SuppressWarnings({ "ConstantConditions", "OptionalUsedAsFieldOrParameterType", "unchecked" })
@@ -17,12 +19,15 @@ public abstract class AbstractHistogramImplConfigBuilder<
     protected Optional<Duration> snapshotTtl = Optional.ofNullable(DEFAULT_SNAPSHOT_TTL);
 
     public CB consistentTotals() {
-        this.totalsMeasurementType = TotalsMeasurementType.CONSISTENT;
-        return builder();
+        return totals(CONSISTENT);
     }
 
     public CB eventuallyConsistentTotals() {
-        this.totalsMeasurementType = TotalsMeasurementType.EVENTUALLY_CONSISTENT;
+        return totals(EVENTUALLY_CONSISTENT);
+    }
+
+    public CB totals(@Nonnull TotalsMeasurementType type) {
+        this.totalsMeasurementType = type;
         return builder();
     }
 

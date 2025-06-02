@@ -1,21 +1,22 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram.scale.resetByChunks;
 
+import com.ringcentral.platform.metrics.defaultImpl.histogram.AbstractHistogramImplTest;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.TotalsMeasurementType;
+import com.ringcentral.platform.metrics.measurables.Measurable;
 import com.ringcentral.platform.metrics.scale.LinearScaleBuilder;
 import com.ringcentral.platform.metrics.scale.Scale;
-import com.ringcentral.platform.metrics.test.time.TestScheduledExecutorService;
-import com.ringcentral.platform.metrics.test.time.TestTimeMsProvider;
-import com.ringcentral.platform.metrics.test.time.TestTimeNanosProvider;
+import com.ringcentral.platform.metrics.test.time.*;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static com.ringcentral.platform.metrics.counter.Counter.COUNT;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE;
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.NO_VALUE_DOUBLE;
+import static com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot.*;
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.scale.configs.ScaleHistogramImplConfigBuilder.scaleImpl;
 import static com.ringcentral.platform.metrics.histogram.Histogram.*;
 import static com.ringcentral.platform.metrics.scale.LinearScaleBuilder.linearScale;
@@ -26,7 +27,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ResetByChunksScaleHistogramImplTest {
+public class ResetByChunksScaleHistogramImplTest extends AbstractHistogramImplTest<ResetByChunksScaleHistogramImpl> {
 
     static final int CHUNK_COUNT = 5;
     public static final long CHUNK_RESET_PERIOD_MS = 1000L;
@@ -42,6 +43,14 @@ public class ResetByChunksScaleHistogramImplTest {
     static final TestTimeNanosProvider timeNanosProvider = new TestTimeNanosProvider();
     static final TestTimeMsProvider timeMsProvider = new TestTimeMsProvider(timeNanosProvider);
     static final ScheduledExecutorService executor = new TestScheduledExecutorService(timeNanosProvider);
+
+    @Override
+    protected ResetByChunksScaleHistogramImpl makeHistogramImpl(@Nonnull TotalsMeasurementType totalsMeasurementType, @Nonnull Measurable... measurables) {
+        return new ResetByChunksScaleHistogramImpl(
+            scaleImpl().resetByChunks().totals(totalsMeasurementType).build(),
+            Set.of(measurables),
+            executor);
+    }
 
     @Test
     public void scale_1_AllMeasurables_NeverResetBuckets() {

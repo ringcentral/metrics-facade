@@ -15,7 +15,7 @@ public class ScaleTreeNode {
     public int levelOrderIndex;
 
     public final AtomicLong updateEpoch;
-    public final LongAdder subtreeUpdateCount = new LongAdder();
+    public final AtomicLong subtreeUpdateCount = new AtomicLong();
 
     public final AtomicLong snapshotNum = new AtomicLong(INITIAL_SNAPSHOT_NUM);
     public volatile long snapshotSubtreeUpdateCount = Long.MIN_VALUE;

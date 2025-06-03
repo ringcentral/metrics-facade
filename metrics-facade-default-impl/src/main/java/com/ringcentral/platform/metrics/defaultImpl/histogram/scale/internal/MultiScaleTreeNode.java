@@ -9,11 +9,9 @@ public interface MultiScaleTreeNode {
     boolean isNull();
     long subtreeUpdateCount();
 
-    boolean hasLeft();
     void toLeft();
     long leftSubtreeUpdateCount();
 
-    boolean hasRight();
     void toRight();
     long rightSubtreeUpdateCount();
 }

@@ -41,15 +41,19 @@ public class ConsistentTotalsHistogramImpl implements HistogramImpl {
     public void update(long value) {
         // https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4.4:
         //   A synchronization order is a total order over all of the synchronization actions of an execution.
-        //   For each thread t, the synchronization order of the synchronization actions (§17.4.2) in t is consistent with the program order (§17.4.3) of t.
+        //   For each thread t, the synchronization order of the synchronization actions (§17.4.2) in t is consistent
+        //   with the program order (§17.4.3) of t.
         //
         // Therefore, the three writes below are guaranteed to happen in program order.
-        // Since snapshot() reads these fields in reverse order, we cannot observe a torn update if count == updateCount:
-        // after reading updateCount = updateCounter.get(), we must see all prior writes.
-        // At that point, count cannot be greater than updateCount (due to the total synchronization order).
-        // Every update always begins by incrementing the counter.
-        // Consequently, if we do not see a larger counter value in the loop's condition,
-        // the next update has not yet started, and it is safe to proceed with the current values.
+        // Since snapshot() reads these fields in reverse order, we cannot observe a torn update if the snapshot()'s
+        // loop condition breaks, i.e. if count == updateCount.
+        //
+        // Indeed, after reading updateCount = updateCounter.get(), we must see all prior complete updates and
+        // possibly some incomplete ones (those that haven't incremented updateCounter yet).
+        // The only interesting case is the one with incomplete updates.
+        // Every update always begins by incrementing the counter; prior to this step the update impacts nothing and
+        // shouldn't be considered. Consequently, if we do not see a larger counter value in the loop's condition,
+        // no new updates have been started yet, and it's safe to proceed with the current values.
 
         // We must write counter first to ensure the consistency of the totals.
         counter.incrementAndGet();

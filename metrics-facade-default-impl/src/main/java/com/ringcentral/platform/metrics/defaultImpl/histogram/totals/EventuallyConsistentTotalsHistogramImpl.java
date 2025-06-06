@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.LongAdder;
  * <p>
  * Uses {@link LongAdder} for both counting and summing to provide high throughput under contention.
  * The {@link #snapshot()} method returns the latest {@link Counter.Count} and {@link Histogram.TotalSum},
- * but under concurrent updates these two values may not reflect the exact same set of operations.
+ * but under concurrent updates these two values may not reflect the exact same set of operations (may differ).
  */
 public class EventuallyConsistentTotalsHistogramImpl implements HistogramImpl {
 

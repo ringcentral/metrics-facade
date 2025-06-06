@@ -36,7 +36,7 @@ public class ConsistentTotalsBasicConsistencyCheckBenchmark {
         }
     }
 
-    public static class SixteenThreads {
+    public static class Driver {
         public static void main(String[] args) {
             Options options = new OptionsBuilder()
                 .include(ConsistentTotalsBasicConsistencyCheckBenchmark.class.getSimpleName())

@@ -58,11 +58,6 @@ public class DoubleScaleTreeNode implements MultiScaleTreeNode {
     }
 
     @Override
-    public boolean hasLeft() {
-        return (node1 != null && node1.left != null) || (node2 != null && node2.left != null);
-    }
-
-    @Override
     public void toLeft() {
         if (node1 != null) {
             node1 = node1.left;
@@ -86,11 +81,6 @@ public class DoubleScaleTreeNode implements MultiScaleTreeNode {
         }
 
         return result;
-    }
-
-    @Override
-    public boolean hasRight() {
-        return (node1 != null && node1.right != null) || (node2 != null && node2.right != null);
     }
 
     @Override

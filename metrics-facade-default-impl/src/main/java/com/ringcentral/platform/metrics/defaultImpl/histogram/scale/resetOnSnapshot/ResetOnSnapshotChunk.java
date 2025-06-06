@@ -12,22 +12,22 @@ public class ResetOnSnapshotChunk extends Chunk {
 
     @Override
     protected void updateTree(ScaleTreeNode node, boolean snapshotInProgress, long snapshotNum) {
-        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.sum();
+        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.get();
         long nodeUpdateEpoch = node.updateEpoch.get();
         long treeUpdateEpoch = tree.updateEpoch;
 
         while (node != null) {
             if (treeUpdateEpoch == nodeUpdateEpoch || !node.updateEpoch.compareAndSet(nodeUpdateEpoch, treeUpdateEpoch)) {
-                node.subtreeUpdateCount.increment();
+                node.subtreeUpdateCount.incrementAndGet();
             } else {
-                node.subtreeUpdateCount.add(-nodeSubtreeUpdateCount + 1L);
+                node.subtreeUpdateCount.addAndGet(-nodeSubtreeUpdateCount + 1L);
             }
 
             if (node.level > upperLazyTreeLevel) {
                 node = node.parent;
 
                 if (node != null) {
-                    nodeSubtreeUpdateCount = node.subtreeUpdateCount.sum();
+                    nodeSubtreeUpdateCount = node.subtreeUpdateCount.get();
                     nodeUpdateEpoch = node.updateEpoch.get();
                 }
             } else {
@@ -45,6 +45,6 @@ public class ResetOnSnapshotChunk extends Chunk {
         return
             useLazy && node.level < upperLazyTreeLevel ?
             lazySubtreeUpdateCountFor(node) :
-            node.subtreeUpdateCount.sum();
+            node.subtreeUpdateCount.get();
     }
 }

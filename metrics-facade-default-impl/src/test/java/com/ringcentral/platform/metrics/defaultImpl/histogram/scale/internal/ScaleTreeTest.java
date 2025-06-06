@@ -50,7 +50,7 @@ public class ScaleTreeTest {
             true,
             0L);
 
-        SubtreeUpdateCountProvider subtreeUpdateCountProvider = node -> node.subtreeUpdateCount.sum();
+        SubtreeUpdateCountProvider subtreeUpdateCountProvider = node -> node.subtreeUpdateCount.get();
         long[] bucketSizes = tree.bucketSizes(bucketUpperBounds, subtreeUpdateCountProvider);
 
         for (long bucketSize : bucketSizes) {
@@ -58,14 +58,14 @@ public class ScaleTreeTest {
         }
 
         tree.traversePostOrder(node -> {
-            node.subtreeUpdateCount.increment();
+            node.subtreeUpdateCount.incrementAndGet();
 
             if (node.left != null) {
-                node.subtreeUpdateCount.add(node.left.subtreeUpdateCount.sum());
+                node.subtreeUpdateCount.addAndGet(node.left.subtreeUpdateCount.get());
             }
 
             if (node.right != null) {
-                node.subtreeUpdateCount.add(node.right.subtreeUpdateCount.sum());
+                node.subtreeUpdateCount.addAndGet(node.right.subtreeUpdateCount.get());
             }
         });
 
@@ -82,10 +82,10 @@ public class ScaleTreeTest {
         assertThat(bucketSizes[8], is(9L));
         assertThat(bucketSizes[9], is(10L));
         assertThat(bucketSizes[10], is(11L));
-        assertThat(tree.bucketSizes(new long[] { -1L }, node -> node.subtreeUpdateCount.sum())[0], is(0L));
-        assertThat(tree.bucketSizes(new long[] { 250L }, node -> node.subtreeUpdateCount.sum())[0], is(10L));
+        assertThat(tree.bucketSizes(new long[] { -1L }, node -> node.subtreeUpdateCount.get())[0], is(0L));
+        assertThat(tree.bucketSizes(new long[] { 250L }, node -> node.subtreeUpdateCount.get())[0], is(10L));
 
-        tree.traversePostOrder(node -> node.subtreeUpdateCount.reset());
+        tree.traversePostOrder(node -> node.subtreeUpdateCount.set(0));
         bucketSizes = tree.bucketSizes(bucketUpperBounds, subtreeUpdateCountProvider);
 
         for (long bucketSize : bucketSizes) {
@@ -103,21 +103,21 @@ public class ScaleTreeTest {
             0L);
 
         tree.traversePostOrder(node -> {
-            node.subtreeUpdateCount.increment();
+            node.subtreeUpdateCount.incrementAndGet();
 
             if (node.left != null) {
-                node.subtreeUpdateCount.add(node.left.subtreeUpdateCount.sum());
+                node.subtreeUpdateCount.addAndGet(node.left.subtreeUpdateCount.get());
             }
 
             if (node.right != null) {
-                node.subtreeUpdateCount.add(node.right.subtreeUpdateCount.sum());
+                node.subtreeUpdateCount.addAndGet(node.right.subtreeUpdateCount.get());
             }
         });
 
-        assertThat(tree.bucketSizes(new long[] { -1L }, node -> node.subtreeUpdateCount.sum())[0], is(0L));
-        assertThat(tree.bucketSizes(new long[] { 50L }, node -> node.subtreeUpdateCount.sum())[0], is(6L));
-        assertThat(tree.bucketSizes(new long[] { 90L }, node -> node.subtreeUpdateCount.sum())[0], is(10L));
-        assertThat(tree.bucketSizes(new long[] { 125L }, node -> node.subtreeUpdateCount.sum())[0], is(10L));
-        assertThat(tree.bucketSizes(new long[] { Long.MAX_VALUE }, node -> node.subtreeUpdateCount.sum())[0], is(10L));
+        assertThat(tree.bucketSizes(new long[] { -1L }, node -> node.subtreeUpdateCount.get())[0], is(0L));
+        assertThat(tree.bucketSizes(new long[] { 50L }, node -> node.subtreeUpdateCount.get())[0], is(6L));
+        assertThat(tree.bucketSizes(new long[] { 90L }, node -> node.subtreeUpdateCount.get())[0], is(10L));
+        assertThat(tree.bucketSizes(new long[] { 125L }, node -> node.subtreeUpdateCount.get())[0], is(10L));
+        assertThat(tree.bucketSizes(new long[] { Long.MAX_VALUE }, node -> node.subtreeUpdateCount.get())[0], is(10L));
     }
 }

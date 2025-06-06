@@ -2,14 +2,14 @@ package com.ringcentral.platform.metrics.defaultImpl.histogram;
 
 import com.ringcentral.platform.metrics.counter.Counter.Count;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.*;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.totals.*;
 import com.ringcentral.platform.metrics.histogram.Histogram.*;
 import com.ringcentral.platform.metrics.measurables.Measurable;
 
-import java.util.*;
+import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.LongAdder;
-
-import static com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogramSnapshot.NO_VALUE;
 
 public abstract class AbstractHistogramImpl implements HistogramImpl {
 
@@ -133,7 +133,7 @@ public abstract class AbstractHistogramImpl implements HistogramImpl {
     }
 
     private final HistogramImpl parent;
-    protected ScheduledExecutorService executor;
+    protected final ScheduledExecutorService executor;
 
     protected AbstractHistogramImpl(
         HistogramImplConfig config,
@@ -289,10 +289,18 @@ public abstract class AbstractHistogramImpl implements HistogramImpl {
     }
 
     private HistogramImpl makeTotalsImpl(HistogramImplConfig config, boolean withCount, boolean withTotalSum) {
-        return
-            config.totalsMeasurementType() == TotalsMeasurementType.CONSISTENT ?
-            new ConsistentTotalsImpl(withCount, withTotalSum) :
-            new EventuallyConsistentTotalsImpl(withCount, withTotalSum);
+        if (withCount && withTotalSum) {
+            return
+                config.totalsMeasurementType() == TotalsMeasurementType.CONSISTENT ?
+                new ConsistentTotalsHistogramImpl() :
+                new EventuallyConsistentTotalsHistogramImpl();
+        } else if (withCount) {
+            return new CountHistogramImpl();
+        } else if (withTotalSum) {
+            return new TotalSumHistogramImpl();
+        } else {
+            return NoOpHistogramImpl.INSTANCE;
+        }
     }
 
     @Override
@@ -313,109 +321,6 @@ public abstract class AbstractHistogramImpl implements HistogramImpl {
     @Override
     public void metricInstanceRemoved() {
         parent.metricInstanceRemoved();
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private static class ConsistentTotalsImpl implements HistogramImpl {
-
-        final LongAdder counter;
-        final LongAdder totalSumAdder;
-        final LongAdder updateCounter;
-
-        ConsistentTotalsImpl(boolean withCount, boolean withTotalSum) {
-            this.counter = withCount ? new LongAdder() : null;
-
-            if (withTotalSum) {
-                this.totalSumAdder = new LongAdder();
-                this.updateCounter = new LongAdder();
-            } else {
-                this.totalSumAdder = null;
-                this.updateCounter = null;
-            }
-        }
-
-        @Override
-        public void update(long value) {
-            if (counter != null) {
-                counter.increment();
-            }
-
-            if (totalSumAdder != null) {
-                totalSumAdder.add(value);
-                updateCounter.increment();
-            }
-        }
-
-        @Override
-        public HistogramSnapshot snapshot() {
-            long count = NO_VALUE;
-            long totalSum = NO_VALUE;
-
-            if (counter != null && totalSumAdder != null) {
-                long updateCount;
-
-                do {
-                    updateCount = updateCounter.sum();
-
-                    // We must read the counter last to ensure the consistency of the totals.
-                    totalSum = totalSumAdder.sum();
-                    count = counter.sum();
-                } while (count != updateCount);
-            } else if (counter != null) {
-                count = counter.sum();
-            } else if (totalSumAdder != null) {
-                totalSum = totalSumAdder.sum();
-            }
-
-            return new DefaultHistogramSnapshot(
-                count,
-                totalSum,
-                NO_VALUE,
-                NO_VALUE,
-                NO_VALUE,
-                NO_VALUE,
-                null,
-                null,
-                null,
-                null);
-        }
-    }
-
-    private static class EventuallyConsistentTotalsImpl implements HistogramImpl {
-
-        final LongAdder counter;
-        final LongAdder totalSumAdder;
-
-        EventuallyConsistentTotalsImpl(boolean withCount, boolean withTotalSum) {
-            this.counter = withCount ? new LongAdder() : null;
-            this.totalSumAdder = withTotalSum ? new LongAdder() : null;
-        }
-
-        @Override
-        public void update(long value) {
-            if (counter != null) {
-                counter.increment();
-            }
-
-            if (totalSumAdder != null) {
-                totalSumAdder.add(value);
-            }
-        }
-
-        @Override
-        public HistogramSnapshot snapshot() {
-            return new DefaultHistogramSnapshot(
-                counter != null ? counter.sum() : NO_VALUE,
-                totalSumAdder != null ? totalSumAdder.sum() : NO_VALUE,
-                NO_VALUE,
-                NO_VALUE,
-                NO_VALUE,
-                NO_VALUE,
-                null,
-                null,
-                null,
-                null);
-        }
     }
 
     private static class CombinedImpl implements HistogramImpl {
@@ -530,5 +435,13 @@ public abstract class AbstractHistogramImpl implements HistogramImpl {
                 return (bucketsFromBasic ? basicSnapshot : extendedSnapshot).bucketSize(bucket);
             }
         }
+    }
+
+    /**
+     * For unit tests.
+     */
+    @Nonnull
+    public HistogramImpl parent() {
+        return parent;
     }
 }

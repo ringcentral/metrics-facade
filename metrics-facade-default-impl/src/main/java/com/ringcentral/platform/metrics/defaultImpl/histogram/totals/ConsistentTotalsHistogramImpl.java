@@ -19,9 +19,21 @@ import java.util.concurrent.atomic.AtomicLong;
 @SuppressWarnings("ConstantConditions")
 public class ConsistentTotalsHistogramImpl implements HistogramImpl {
 
-    final AtomicLong counter;
-    final AtomicLong totalSumAdder;
-    final AtomicLong updateCounter;
+    /**
+     * Maximum number of iterations the {@link #snapshot()} loop will run.
+     *
+     * <p>If this limit is hit, we assume something has gone badly wrong
+     * (for example, writers stuck in livelock) and return the most recent
+     * values instead of spinning forever.
+     *
+     * <p>The cap - 250k iterations - is far above the expected worst case
+     * yet low enough to stop quickly if the system ever enters a pathological state.
+     */
+    public static final int SNAPSHOT_MAX_ITER_COUNT = 250_000;
+
+    private final AtomicLong counter;
+    private final AtomicLong totalSumAdder;
+    private final AtomicLong updateCounter;
 
     public ConsistentTotalsHistogramImpl() {
         this(new AtomicLong(), new AtomicLong(), new AtomicLong());
@@ -68,6 +80,7 @@ public class ConsistentTotalsHistogramImpl implements HistogramImpl {
         long count;
         long totalSum;
         long updateCount;
+        int retryCount = 0;
 
         do {
             // We must read updateCounter first.
@@ -76,8 +89,18 @@ public class ConsistentTotalsHistogramImpl implements HistogramImpl {
 
             // We must read counter last.
             count = counter.get();
-        } while (count != updateCount);
+
+            if (count != updateCount) {
+                // We will retry on the next loop pass.
+                ++retryCount;
+                onSpinWaitImpl();
+            }
+        } while (count != updateCount && retryCount < SNAPSHOT_MAX_ITER_COUNT);
 
         return new TotalsHistogramSnapshot(count, totalSum);
+    }
+
+    protected void onSpinWaitImpl() {
+        Thread.onSpinWait();
     }
 }

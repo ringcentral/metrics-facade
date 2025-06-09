@@ -1,10 +1,12 @@
 package com.ringcentral.platform.metrics.defaultImpl.histogram;
 
 import com.ringcentral.platform.metrics.defaultImpl.histogram.configs.TotalsMeasurementType;
+import com.ringcentral.platform.metrics.defaultImpl.histogram.totals.*;
 import com.ringcentral.platform.metrics.histogram.Histogram.Bucket;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 import static com.ringcentral.platform.metrics.defaultImpl.histogram.DefaultHistogramSnapshot.NO_VALUE;
 import static com.ringcentral.platform.metrics.utils.CollectionUtils.copyLongArray;
@@ -19,9 +21,7 @@ public class NeverResetBucketHistogramImpl implements HistogramImpl {
 
     private final long[] bucketUpperBounds;
     private final int bucketCount;
-    private final AtomicLong[] intervalCounters;
-    private final AtomicLong[] intervalSumAdders;
-    private final AtomicLong[] intervalUpdateCounters;
+    private final TotalsHistogramImpl[] totalsHistograms;
     private final long[] snapshotBucketSizes;
 
     public NeverResetBucketHistogramImpl(
@@ -49,48 +49,33 @@ public class NeverResetBucketHistogramImpl implements HistogramImpl {
 
         this.bucketUpperBounds = bounds;
         this.bucketCount = bounds.length;
-        this.intervalCounters = new AtomicLong[bucketCount];
+
+        Supplier<TotalsHistogramImpl> totalsHistogramSupplier = totalsHistogramSupplier(withTotalSum, totalsMeasurementType);
+        this.totalsHistograms = new TotalsHistogramImpl[bucketCount];
 
         for (int i = 0; i < bucketCount; ++i) {
-            this.intervalCounters[i] = new AtomicLong();
-        }
-
-        if (withTotalSum) {
-            this.intervalSumAdders = new AtomicLong[bucketCount];
-
-            for (int i = 0; i < bucketCount; ++i) {
-                this.intervalSumAdders[i] = new AtomicLong();
-            }
-
-            if (totalsMeasurementType == TotalsMeasurementType.CONSISTENT) {
-                this.intervalUpdateCounters = new AtomicLong[bucketCount];
-
-                for (int i = 0; i < bucketCount; ++i) {
-                    this.intervalUpdateCounters[i] = new AtomicLong();
-                }
-            } else {
-                this.intervalUpdateCounters = null;
-            }
-        } else {
-            this.intervalSumAdders = null;
-            this.intervalUpdateCounters = null;
+            this.totalsHistograms[i] = totalsHistogramSupplier.get();
         }
 
         this.snapshotBucketSizes = new long[bucketCount];
     }
 
+    @Nonnull
+    private static Supplier<TotalsHistogramImpl> totalsHistogramSupplier(boolean withTotalSum, @Nonnull TotalsMeasurementType totalsMeasurementType) {
+        if (withTotalSum) {
+            return
+                totalsMeasurementType == TotalsMeasurementType.CONSISTENT ?
+                ConsistentTotalsHistogramImpl::new :
+                EventuallyConsistentTotalsHistogramImpl::new;
+        } else {
+            return CountHistogramImpl::new;
+        }
+    }
+
     @Override
     public void update(long value) {
         int i = bucketCount > 1 ? bucketIndexFor(value) : 0;
-        intervalCounters[i].incrementAndGet();
-
-        if (intervalSumAdders != null) {
-            intervalSumAdders[i].addAndGet(value);
-
-            if (intervalUpdateCounters != null) {
-                intervalUpdateCounters[i].incrementAndGet();
-            }
-        }
+        totalsHistograms[i].update(value);
     }
 
     int bucketIndexFor(long value) {
@@ -112,6 +97,8 @@ public class NeverResetBucketHistogramImpl implements HistogramImpl {
         return low;
     }
 
+    private final MutableTotalsHistogramSnapshot intervalTotals = new MutableTotalsHistogramSnapshot();
+
     @Override
     @SuppressWarnings("ConstantConditions")
     public synchronized HistogramSnapshot snapshot() {
@@ -124,28 +111,19 @@ public class NeverResetBucketHistogramImpl implements HistogramImpl {
             long intervalSum;
 
             for (int i = 0; i < bucketCount; ++i) {
-                if (intervalUpdateCounters != null) {
-                    long intervalUpdateCount;
-
-                    do {
-                        // See ConsistentTotalsHistogramImpl for details of the algorithm.
-                        intervalUpdateCount = intervalUpdateCounters[i].get();
-                        intervalSum = intervalSumAdders[i].get();
-                        intervalCount = intervalCounters[i].get();
-                    } while (intervalCount != intervalUpdateCount);
-                } else {
-                    intervalCount = intervalCounters[i].get();
-                    intervalSum = intervalSumAdders[i].get();
-                }
-
+                totalsHistograms[i].fillSnapshot(intervalTotals);
+                intervalCount = intervalTotals.count();
+                intervalSum = intervalTotals.totalSum();
                 snapshotBucketSizes[i] = i > 0 ? snapshotBucketSizes[i - 1] + intervalCount : intervalCount;
                 totalSum += intervalSum;
             }
         } else {
-            snapshotBucketSizes[0] = intervalCounters[0].get();
+            totalsHistograms[0].fillSnapshot(intervalTotals);
+            snapshotBucketSizes[0] = intervalTotals.count();
 
             for (int i = 1; i < bucketCount; ++i) {
-                snapshotBucketSizes[i] = snapshotBucketSizes[i - 1] + intervalCounters[i].get();
+                totalsHistograms[i].fillSnapshot(intervalTotals);
+                snapshotBucketSizes[i] = snapshotBucketSizes[i - 1] + intervalTotals.count();
             }
         }
 

@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * will always correspond to the same set of updates, with no partial or missing data.
  */
 @SuppressWarnings("ConstantConditions")
-public class ConsistentTotalsHistogramImpl implements HistogramImpl {
+public class ConsistentTotalsHistogramImpl implements TotalsHistogramImpl {
 
     /**
      * Maximum number of iterations the {@link #snapshot()} loop will run.
@@ -77,6 +77,13 @@ public class ConsistentTotalsHistogramImpl implements HistogramImpl {
 
     @Override
     public HistogramSnapshot snapshot() {
+        MutableTotalsHistogramSnapshot snapshot = new MutableTotalsHistogramSnapshot();
+        fillSnapshot(snapshot);
+        return snapshot;
+    }
+
+    @Override
+    public void fillSnapshot(@Nonnull MutableTotalsHistogramSnapshot snapshot) {
         long count;
         long totalSum;
         long updateCount;
@@ -97,7 +104,8 @@ public class ConsistentTotalsHistogramImpl implements HistogramImpl {
             }
         } while (count != updateCount && retryCount < SNAPSHOT_MAX_ITER_COUNT);
 
-        return new TotalsHistogramSnapshot(count, totalSum);
+        snapshot.setCount(count);
+        snapshot.setTotalSum(totalSum);
     }
 
     protected void onSpinWaitImpl() {

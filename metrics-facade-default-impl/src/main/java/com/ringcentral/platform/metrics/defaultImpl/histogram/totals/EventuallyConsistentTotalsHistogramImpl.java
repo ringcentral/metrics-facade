@@ -5,6 +5,7 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramImpl;
 import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.LongAdder;
  * The {@link #snapshot()} method returns the latest {@link Counter.Count} and {@link Histogram.TotalSum},
  * but under concurrent updates these two values may not reflect the exact same set of operations (may differ).
  */
-public class EventuallyConsistentTotalsHistogramImpl implements HistogramImpl {
+public class EventuallyConsistentTotalsHistogramImpl implements TotalsHistogramImpl {
 
     private final LongAdder counter;
     private final LongAdder totalSumAdder;
@@ -34,5 +35,11 @@ public class EventuallyConsistentTotalsHistogramImpl implements HistogramImpl {
     @Override
     public HistogramSnapshot snapshot() {
         return new TotalsHistogramSnapshot(counter.sum(), totalSumAdder.sum());
+    }
+
+    @Override
+    public void fillSnapshot(@Nonnull MutableTotalsHistogramSnapshot snapshot) {
+        snapshot.setCount(counter.sum());
+        snapshot.setTotalSum(totalSumAdder.sum());
     }
 }

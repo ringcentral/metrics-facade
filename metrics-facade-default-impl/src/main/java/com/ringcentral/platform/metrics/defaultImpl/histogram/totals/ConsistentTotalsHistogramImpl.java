@@ -29,21 +29,28 @@ public class ConsistentTotalsHistogramImpl implements TotalsHistogramImpl {
      * <p>The cap - 250k iterations - is far above the expected worst case
      * yet low enough to stop quickly if the system ever enters a pathological state.
      */
-    public static final int SNAPSHOT_MAX_ITER_COUNT = 250_000;
+    public static final int DEFAULT_SNAPSHOT_MAX_ITER_COUNT = 250_000;
 
+    private final int snapshotMaxIterCount;
     private final AtomicLong counter;
     private final AtomicLong totalSumAdder;
     private final AtomicLong updateCounter;
 
     public ConsistentTotalsHistogramImpl() {
-        this(new AtomicLong(), new AtomicLong(), new AtomicLong());
+        this(DEFAULT_SNAPSHOT_MAX_ITER_COUNT);
+    }
+
+    public ConsistentTotalsHistogramImpl(int snapshotMaxIterCount) {
+        this(snapshotMaxIterCount, new AtomicLong(), new AtomicLong(), new AtomicLong());
     }
 
     ConsistentTotalsHistogramImpl(
+        int snapshotMaxIterCount,
         @Nonnull AtomicLong counter,
         @Nonnull AtomicLong totalSumAdder,
         @Nonnull AtomicLong updateCounter) {
 
+        this.snapshotMaxIterCount = snapshotMaxIterCount;
         this.counter = counter;
         this.totalSumAdder = totalSumAdder;
         this.updateCounter = updateCounter;
@@ -102,7 +109,7 @@ public class ConsistentTotalsHistogramImpl implements TotalsHistogramImpl {
                 ++retryCount;
                 onSpinWaitImpl();
             }
-        } while (count != updateCount && retryCount < SNAPSHOT_MAX_ITER_COUNT);
+        } while (count != updateCount && retryCount < snapshotMaxIterCount);
 
         snapshot.setCount(count);
         snapshot.setTotalSum(totalSum);

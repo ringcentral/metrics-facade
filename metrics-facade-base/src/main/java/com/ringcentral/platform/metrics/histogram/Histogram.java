@@ -6,6 +6,7 @@ import com.ringcentral.platform.metrics.measurables.MeasurableType;
 import com.ringcentral.platform.metrics.scale.Scale;
 import com.ringcentral.platform.metrics.scale.ScaleBuilder;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -441,7 +442,7 @@ public interface Histogram extends Meter {
         }
 
         @Override
-        public int compareTo(Bucket right) {
+        public int compareTo(@Nonnull Bucket right) {
             if (isInf()) {
                 return right.isInf() ? 0 : 1;
             }

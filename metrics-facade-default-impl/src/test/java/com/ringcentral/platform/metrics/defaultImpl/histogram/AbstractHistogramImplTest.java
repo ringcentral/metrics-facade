@@ -27,5 +27,8 @@ public abstract class AbstractHistogramImplTest<H extends AbstractHistogramImpl>
 
         assertThat(makeHistogramImpl(CONSISTENT, COUNT, TOTAL_SUM).parent(), is(instanceOf(ConsistentTotalsHistogramImpl.class)));
         assertThat(makeHistogramImpl(EVENTUALLY_CONSISTENT, COUNT, TOTAL_SUM).parent(), is(instanceOf(EventuallyConsistentTotalsHistogramImpl.class)));
+
+        // no Measurables
+        assertThat(makeHistogramImpl(EVENTUALLY_CONSISTENT).parent(), is(instanceOf(NoOpHistogramImpl.class)));
     }
 }

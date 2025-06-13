@@ -6,6 +6,7 @@ import com.ringcentral.platform.metrics.defaultImpl.histogram.HistogramSnapshot;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -84,13 +85,23 @@ public class ConsistentTotalsHistogramImpl implements TotalsHistogramImpl {
 
     @Override
     public HistogramSnapshot snapshot() {
-        MutableTotalsHistogramSnapshot snapshot = new MutableTotalsHistogramSnapshot();
-        fillSnapshot(snapshot);
-        return snapshot;
+        // Passing null means "create a new snapshot". We do this instead of
+        //
+        // MutableTotalsHistogramSnapshot snapshot = new MutableTotalsHistogramSnapshot();
+        // // fill
+        // return snapshot;
+        //
+        // so that we return an immutable snapshot whose fields are final.
+        return fillOrMakeSnapshot(null);
     }
 
     @Override
     public void fillSnapshot(@Nonnull MutableTotalsHistogramSnapshot snapshot) {
+        fillOrMakeSnapshot(snapshot);
+    }
+
+    @Nonnull
+    private HistogramSnapshot fillOrMakeSnapshot(@Nullable MutableTotalsHistogramSnapshot snapshot) {
         long count;
         long totalSum;
         long updateCount;
@@ -111,8 +122,13 @@ public class ConsistentTotalsHistogramImpl implements TotalsHistogramImpl {
             }
         } while (count != updateCount && retryCount < snapshotMaxIterCount);
 
-        snapshot.setCount(count);
-        snapshot.setTotalSum(totalSum);
+        if (snapshot != null) {
+            snapshot.setCount(count);
+            snapshot.setTotalSum(totalSum);
+            return snapshot;
+        } else {
+            return new TotalsHistogramSnapshot(count, totalSum);
+        }
     }
 
     protected void onSpinWaitImpl() {

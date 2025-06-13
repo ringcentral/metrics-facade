@@ -12,7 +12,7 @@ public class ResetByChunksChunk extends Chunk {
 
     @Override
     protected void updateTree(ScaleTreeNode node, boolean snapshotInProgress, long snapshotNum) {
-        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.sum();
+        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.get();
         long nodeUpdateEpoch = node.updateEpoch.get();
         long treeUpdateEpoch = tree.updateEpoch;
 
@@ -21,22 +21,22 @@ public class ResetByChunksChunk extends Chunk {
                 if (treeUpdateEpoch == nodeUpdateEpoch) {
                     node.snapshotSubtreeUpdateCount = nodeSubtreeUpdateCount;
                     node.snapshotNum.set(snapshotNum);
-                    node.subtreeUpdateCount.increment();
+                    node.subtreeUpdateCount.incrementAndGet();
                 } else {
                     node.snapshotSubtreeUpdateCount = 0L;
                     node.snapshotNum.set(snapshotNum);
 
                     if (node.updateEpoch.compareAndSet(nodeUpdateEpoch, treeUpdateEpoch)) {
-                        node.subtreeUpdateCount.add(-nodeSubtreeUpdateCount + 1L);
+                        node.subtreeUpdateCount.addAndGet(-nodeSubtreeUpdateCount + 1L);
                     } else {
-                        node.subtreeUpdateCount.increment();
+                        node.subtreeUpdateCount.incrementAndGet();
                     }
                 }
             } else {
                 if (treeUpdateEpoch == nodeUpdateEpoch || !node.updateEpoch.compareAndSet(nodeUpdateEpoch, treeUpdateEpoch)) {
-                    node.subtreeUpdateCount.increment();
+                    node.subtreeUpdateCount.incrementAndGet();
                 } else {
-                    node.subtreeUpdateCount.add(-nodeSubtreeUpdateCount + 1L);
+                    node.subtreeUpdateCount.addAndGet(-nodeSubtreeUpdateCount + 1L);
                 }
             }
 
@@ -44,7 +44,7 @@ public class ResetByChunksChunk extends Chunk {
                 node = node.parent;
 
                 if (node != null) {
-                    nodeSubtreeUpdateCount = node.subtreeUpdateCount.sum();
+                    nodeSubtreeUpdateCount = node.subtreeUpdateCount.get();
                     nodeUpdateEpoch = node.updateEpoch.get();
                 }
             } else {
@@ -67,7 +67,7 @@ public class ResetByChunksChunk extends Chunk {
             return 0L;
         }
 
-        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.sum();
+        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.get();
 
         return
             node.snapshotNum.get() < tree.snapshotNum ?

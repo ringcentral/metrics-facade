@@ -14,7 +14,7 @@ public class NeverResetChunk extends Chunk {
     protected void updateTree(ScaleTreeNode node, boolean snapshotInProgress, long snapshotNum) {
         while (node != null) {
             if (snapshotInProgress && node.snapshotNum.get() < snapshotNum) {
-                long subtreeUpdateCount = node.subtreeUpdateCount.sum();
+                long subtreeUpdateCount = node.subtreeUpdateCount.get();
 
                 if (node.snapshotNum.get() < snapshotNum) {
                     node.snapshotSubtreeUpdateCount = subtreeUpdateCount;
@@ -22,7 +22,7 @@ public class NeverResetChunk extends Chunk {
                 }
             }
 
-            node.subtreeUpdateCount.increment();
+            node.subtreeUpdateCount.incrementAndGet();
 
             if (node.level > upperLazyTreeLevel) {
                 node = node.parent;
@@ -42,7 +42,7 @@ public class NeverResetChunk extends Chunk {
             return lazySubtreeUpdateCountFor(node);
         }
 
-        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.sum();
+        long nodeSubtreeUpdateCount = node.subtreeUpdateCount.get();
         long nodeSnapshotNum = node.snapshotNum.get();
 
         return

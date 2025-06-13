@@ -54,17 +54,6 @@ public class DefaultMultiScaleTreeNode implements MultiScaleTreeNode {
     }
 
     @Override
-    public boolean hasLeft() {
-        for (int i = 0; i < chunkCount; ++i) {
-            if (nodes[i] != null && nodes[i].left != null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
     public void toLeft() {
         for (int i = 0; i < chunkCount; ++i) {
             if (nodes[i] != null) {
@@ -84,17 +73,6 @@ public class DefaultMultiScaleTreeNode implements MultiScaleTreeNode {
         }
 
         return result;
-    }
-
-    @Override
-    public boolean hasRight() {
-        for (int i = 0; i < chunkCount; ++i) {
-            if (nodes[i] != null && nodes[i].right != null) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override

@@ -13,6 +13,8 @@
     </parent>
 
     <artifactId>metrics-facade-spring-boot-starter</artifactId>
+    <name>Metrics Facade: Spring Boot Starter</name>
+    <description>Metrics Facade: Spring Boot starter</description>
 
     <dependencies>
         <dependency>

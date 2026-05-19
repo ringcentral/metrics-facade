@@ -13,6 +13,8 @@
     </parent>
 
     <artifactId>metrics-facade-dropwizard</artifactId>
+    <name>Metrics Facade: Dropwizard</name>
+    <description>Metrics Facade: Dropwizard integration</description>
 
     <dependencies>
         <dependency>

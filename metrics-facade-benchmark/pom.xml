@@ -13,6 +13,8 @@
     </parent>
 
     <artifactId>metrics-facade-benchmark</artifactId>
+    <name>Metrics Facade: Benchmark</name>
+    <description>Metrics Facade: Benchmarks</description>
 
     <properties>
         <benchmark.jar.name>benchmark</benchmark.jar.name>

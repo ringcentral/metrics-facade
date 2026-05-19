@@ -13,6 +13,8 @@
     </parent>
 
     <artifactId>metrics-facade-prometheus-spring-boot-autoconfigure</artifactId>
+    <name>Metrics Facade: Prometheus Spring Boot Autoconfigure</name>
+    <description>Metrics Facade: Prometheus Spring Boot autoconfigure</description>
 
     <dependencies>
         <dependency>

@@ -13,6 +13,8 @@
     </parent>
 
     <artifactId>metrics-facade-samples</artifactId>
+    <name>Metrics Facade: Samples</name>
+    <description>Metrics Facade: Samples</description>
 
     <properties>
         <micrometer-registry-metrics-facade.version>5.0.0-RELEASE</micrometer-registry-metrics-facade.version>

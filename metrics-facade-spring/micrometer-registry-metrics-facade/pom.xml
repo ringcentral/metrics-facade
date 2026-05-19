@@ -13,6 +13,8 @@
     </parent>
 
     <artifactId>micrometer-registry-metrics-facade</artifactId>
+    <name>Metrics Facade: Micrometer Registry</name>
+    <description>Metrics Facade: Micrometer registry implementation</description>
 
     <dependencies>
         <dependency>

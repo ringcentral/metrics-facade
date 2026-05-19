@@ -8,7 +8,7 @@
 
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade</artifactId>
-    <version>4.2.0-RELEASE</version>
+    <version>5.0.0-RELEASE</version>
 
     <name>RingCentral Metrics Facade</name>
     <url>https://github.com/ringcentral/metrics-facade</url>
@@ -88,25 +88,26 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+        <central-publishing-plugin.version>0.10.0</central-publishing-plugin.version>
 
-        <spotbugs-annotations.version>4.8.6</spotbugs-annotations.version>
+        <spotbugs-annotations.version>4.9.8</spotbugs-annotations.version>
         <prometheus.version>0.16.0</prometheus.version>
-        <dropwizard-metrics.version>4.2.25</dropwizard-metrics.version>
-        <HdrHistogram.version>2.2.1</HdrHistogram.version>
+        <dropwizard-metrics.version>4.2.38</dropwizard-metrics.version>
+        <HdrHistogram.version>2.2.2</HdrHistogram.version>
         <reflections.version>0.10.2</reflections.version>
-        <jackson.version>2.17.1</jackson.version>
-        <guava.version>33.2.0-jre</guava.version>
-        <slf4j-api.version>2.0.13</slf4j-api.version>
-        <logback.version>1.5.6</logback.version>
+        <jackson.version>2.21.3</jackson.version>
+        <guava.version>33.6.0-jre</guava.version>
+        <slf4j-api.version>2.0.18</slf4j-api.version>
+        <logback.version>1.5.32</logback.version>
         <junit.version>4.13.2</junit.version>
-        <mockito-core.version>5.12.0</mockito-core.version>
+        <mockito-core.version>5.23.0</mockito-core.version>
     </properties>
 
     <dependencyManagement>
@@ -274,20 +275,21 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-plugin.version}</version>
+                        <extensions>true</extensions>
+
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 </project>

@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsEx
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
-import org.springframework.boot.actuate.metrics.export.prometheus.TextOutputFormat;
+import org.springframework.boot.actuate.metrics.export.prometheus.PrometheusOutputFormat;
 
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.DEFAULT_FORMAT;
 
@@ -17,14 +17,14 @@ public class MfPrometheusEndpoint {
         this.exporter = exporter;
     }
 
-    @ReadOperation(producesFrom = TextOutputFormat.class)
-    public WebEndpointResponse<String> export(TextOutputFormat format) {
+    @ReadOperation(producesFrom = PrometheusOutputFormat.class)
+    public WebEndpointResponse<String> export(PrometheusOutputFormat format) {
         try {
             PrometheusMetricsExporter.Format exporterFormat = DEFAULT_FORMAT;
 
-            if (format == TextOutputFormat.CONTENT_TYPE_004) {
+            if (format == PrometheusOutputFormat.CONTENT_TYPE_004) {
                 exporterFormat = PrometheusMetricsExporter.Format.PROMETHEUS_TEXT_O_O_4;
-            } else if (format == TextOutputFormat.CONTENT_TYPE_OPENMETRICS_100) {
+            } else if (format == PrometheusOutputFormat.CONTENT_TYPE_OPENMETRICS_100) {
                 exporterFormat = PrometheusMetricsExporter.Format.OPENMETRICS_TEXT_1_0_0;
             }
 

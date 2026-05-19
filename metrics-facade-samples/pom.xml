@@ -9,14 +9,14 @@
     <parent>
         <groupId>com.ringcentral.platform.metrics</groupId>
         <artifactId>metrics-facade</artifactId>
-        <version>4.2.0-RELEASE</version>
+        <version>5.0.0-RELEASE</version>
     </parent>
 
     <artifactId>metrics-facade-samples</artifactId>
 
     <properties>
-        <micrometer-registry-metrics-facade.version>4.2.0-RELEASE</micrometer-registry-metrics-facade.version>
-        <micrometer.version>1.12.5</micrometer.version>
+        <micrometer-registry-metrics-facade.version>5.0.0-RELEASE</micrometer-registry-metrics-facade.version>
+        <micrometer.version>1.15.11</micrometer.version>
     </properties>
 
     <dependencies>

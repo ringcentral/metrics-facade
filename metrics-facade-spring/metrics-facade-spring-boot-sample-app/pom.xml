@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.ringcentral.platform.metrics</groupId>
         <artifactId>metrics-facade-spring</artifactId>
-        <version>4.2.0-RELEASE</version>
+        <version>5.0.0-RELEASE</version>
     </parent>
 
     <artifactId>metrics-facade-spring-boot-sample-app</artifactId>
@@ -20,8 +20,8 @@
         <app-specific-spring-boot.version>${spring-boot.version}</app-specific-spring-boot.version>
 
         <!-- https://github.com/spring-projects/spring-boot/issues/34708 -->
-        <app-specific-slf4j-api.version>1.7.36</app-specific-slf4j-api.version>
-        <app-specific-logback.version>1.2.13</app-specific-logback.version>
+        <app-specific-slf4j-api.version>2.0.18</app-specific-slf4j-api.version>
+        <app-specific-logback.version>1.5.32</app-specific-logback.version>
     </properties>
 
     <dependencyManagement>

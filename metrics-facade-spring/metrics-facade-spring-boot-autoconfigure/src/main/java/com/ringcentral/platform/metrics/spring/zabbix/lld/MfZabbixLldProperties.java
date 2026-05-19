@@ -3,7 +3,7 @@ package com.ringcentral.platform.metrics.spring.zabbix.lld;
 import com.ringcentral.platform.metrics.spring.MfProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 @ConfigurationProperties(prefix = MfZabbixLldProperties.PREFIX)
 public class MfZabbixLldProperties {

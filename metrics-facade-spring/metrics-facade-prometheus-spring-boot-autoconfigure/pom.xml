@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.ringcentral.platform.metrics</groupId>
         <artifactId>metrics-facade-spring</artifactId>
-        <version>5.0.0-RELEASE</version>
+        <version>5.1.0-RELEASE</version>
     </parent>
 
     <artifactId>metrics-facade-prometheus-spring-boot-autoconfigure</artifactId>
@@ -47,5 +47,18 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>

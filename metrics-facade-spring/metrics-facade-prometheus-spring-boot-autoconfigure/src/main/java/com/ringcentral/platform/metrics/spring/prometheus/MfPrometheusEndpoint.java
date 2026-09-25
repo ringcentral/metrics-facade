@@ -26,6 +26,8 @@ public class MfPrometheusEndpoint {
                 exporterFormat = PrometheusMetricsExporter.Format.PROMETHEUS_TEXT_O_O_4;
             } else if (format == PrometheusOutputFormat.CONTENT_TYPE_OPENMETRICS_100) {
                 exporterFormat = PrometheusMetricsExporter.Format.OPENMETRICS_TEXT_1_0_0;
+            } else {
+                format = PrometheusOutputFormat.CONTENT_TYPE_004;
             }
 
             return new WebEndpointResponse<>(exporter.exportMetrics(exporterFormat), format);

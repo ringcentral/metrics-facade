@@ -19,12 +19,7 @@ import java.util.List;
 @AutoConfigureAfter(MetricsAutoConfiguration.class)
 @ConditionalOnBean(Clock.class)
 @ConditionalOnClass(MfMeterRegistry.class)
-// Spring Boot native enable switch: management.mf.metrics.export.enabled (defaults to enabled).
 @ConditionalOnEnabledMetricsExport("mf")
-// Legacy/custom enable switch under the historical namespace:
-// management.metrics.export.mf.enabled (defaults to enabled via matchIfMissing).
-// Precedence: an explicit "false" on either switch disables Metrics Facade export ("disable wins").
-@ConditionalOnProperty(prefix = MfProperties.PREFIX, name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties(MfProperties.class)
 public class MfMetricsExportAutoConfiguration {
 

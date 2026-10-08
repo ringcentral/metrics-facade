@@ -32,8 +32,11 @@
     <properties>
         <metrics-facade-version>6.0.0-SNAPSHOT</metrics-facade-version>
 
-        <!-- The latest version that does not require Java 17. -->
-        <spring-boot.version>3.5.14</spring-boot.version>
+        <!--
+          Spring Boot 4.x (built on Spring Framework 7.x).
+          Boot 4.1.1 bundles Spring Framework 7.0.9 and keeps a Java 17 baseline.
+        -->
+        <spring-boot.version>4.1.1</spring-boot.version>
     </properties>
 
     <dependencyManagement>

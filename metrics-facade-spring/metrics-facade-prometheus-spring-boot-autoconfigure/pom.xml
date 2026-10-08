@@ -42,6 +42,28 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--
+          Spring Boot 4: PrometheusOutputFormat moved to
+          org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus
+          (artifact spring-boot-micrometer-metrics).
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-metrics</artifactId>
+        </dependency>
+
+        <!-- Actuator endpoint annotations (@WebEndpoint, @ReadOperation, WebEndpointResponse). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-actuator</artifactId>
+        </dependency>
+
+        <!-- @ConditionalOnAvailableEndpoint lives in actuator-autoconfigure. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-actuator-autoconfigure</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -59,6 +81,5 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 </project>

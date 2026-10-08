@@ -51,6 +51,25 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
 
+        <!--
+          Spring Boot 4 split observability auto-configuration out of
+          spring-boot-actuator-autoconfigure into spring-boot-micrometer-metrics
+          (package org.springframework.boot.micrometer.metrics.autoconfigure[.export]).
+          Provides MetricsAutoConfiguration, CompositeMeterRegistryAutoConfiguration,
+          SimpleMetricsExportAutoConfiguration and @ConditionalOnEnabledMetricsExport.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-metrics</artifactId>
+        </dependency>
+
+        <!-- Actuator endpoint annotations (@WebEndpoint, @ReadOperation, WebEndpointResponse). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-actuator</artifactId>
+        </dependency>
+
+        <!-- @ConditionalOnAvailableEndpoint lives in actuator-autoconfigure. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-actuator-autoconfigure</artifactId>

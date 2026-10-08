@@ -4,7 +4,7 @@ import com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsEx
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
-import org.springframework.boot.actuate.metrics.export.prometheus.PrometheusOutputFormat;
+import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusOutputFormat;
 
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporter.DEFAULT_FORMAT;
 

@@ -4,9 +4,9 @@ import com.ringcentral.platform.metrics.*;
 import com.ringcentral.platform.metrics.defaultImpl.DefaultMetricRegistry;
 import com.ringcentral.platform.metrics.micrometer.*;
 import io.micrometer.core.instrument.Clock;
-import org.springframework.boot.actuate.autoconfigure.metrics.*;
-import org.springframework.boot.actuate.autoconfigure.metrics.export.ConditionalOnEnabledMetricsExport;
-import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.SimpleMetricsExportAutoConfiguration;
+import org.springframework.boot.micrometer.metrics.autoconfigure.*;
+import org.springframework.boot.micrometer.metrics.autoconfigure.export.ConditionalOnEnabledMetricsExport;
+import org.springframework.boot.micrometer.metrics.autoconfigure.export.simple.SimpleMetricsExportAutoConfiguration;
 import org.springframework.boot.autoconfigure.*;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,7 +19,12 @@ import java.util.List;
 @AutoConfigureAfter(MetricsAutoConfiguration.class)
 @ConditionalOnBean(Clock.class)
 @ConditionalOnClass(MfMeterRegistry.class)
+// Spring Boot native enable switch: management.mf.metrics.export.enabled (defaults to enabled).
 @ConditionalOnEnabledMetricsExport("mf")
+// Legacy/custom enable switch under the historical namespace:
+// management.metrics.export.mf.enabled (defaults to enabled via matchIfMissing).
+// Precedence: an explicit "false" on either switch disables Metrics Facade export ("disable wins").
+@ConditionalOnProperty(prefix = MfProperties.PREFIX, name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties(MfProperties.class)
 public class MfMetricsExportAutoConfiguration {
 

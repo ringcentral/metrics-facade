@@ -7,6 +7,7 @@ designed to be generic and not tied to a specific implementation.*
 Table of Contents
 =================
 * [Main Features Overview](#main-features-overview)
+* [Spring Boot Integration and Compatibility](#spring-boot-integration-and-compatibility)
 * [Getting Started](#getting-started)
 * [Features](#features)
   * [Flexible Configuration](#flexible-configuration)
@@ -62,6 +63,81 @@ that is, for each labeled metric, it allows you to specify:
   if a combination has not been updated during this time, it will be automatically removed    
 
 See [Getting Started](#getting-started) for details and usage examples.      
+
+## Spring Boot Integration and Compatibility
+
+Starting with **6.0.0**, the Metrics Facade Spring starters target **Spring Boot 4** (built on
+**Spring Framework 7**). The reference build uses **Spring Boot 4.1.1 / Spring Framework 7.0.9 /
+Micrometer 1.17.1**. The **Java 17** baseline is unchanged.
+
+| Metrics Facade | Spring Boot | Spring Framework | Java |
+| -------------- | ----------- | ---------------- | ---- |
+| 6.0.x          | 4.x         | 7.x              | 17+  |
+| 5.x            | 3.x         | 6.x              | 17+  |
+
+Starters (all published at `6.0.0-SNAPSHOT` / `6.0.0-RELEASE`):
+```xml
+<dependency>
+    <groupId>com.ringcentral.platform.metrics</groupId>
+    <artifactId>metrics-facade-spring-boot-starter</artifactId>
+    <version>6.0.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+    <groupId>com.ringcentral.platform.metrics</groupId>
+    <artifactId>metrics-facade-prometheus-spring-boot-starter</artifactId>
+    <version>6.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+### Enabling and disabling the Metrics Facade export
+
+The Metrics Facade export auto-configuration honours **two** enable switches, both of which
+default to `true`:
+
+- the Spring Boot native switch `management.mf.metrics.export.enabled`
+  (read by `@ConditionalOnEnabledMetricsExport("mf")`);
+- the legacy/custom switch `management.metrics.export.mf.enabled`, kept for backward
+  compatibility with the historical `management.metrics.export.mf.*` settings namespace.
+
+Precedence is **"disable wins"**: if either switch is explicitly set to `false`, Metrics Facade
+export is disabled. When neither property is set the behaviour is unchanged from 5.x (enabled).
+
+All reporter-specific settings keep their existing `management.metrics.export.mf.*` prefixes, e.g.:
+```properties
+management.metrics.export.mf.prometheus.enabled = true
+management.metrics.export.mf.jmx.enabled = true
+management.metrics.export.mf.zabbix.enabled = true
+management.metrics.export.mf.telegraf.enabled = true
+```
+
+The actuator endpoints are exposed and path-mapped exactly as before, for example:
+```properties
+management.endpoints.web.exposure.include = mf-prometheus, mf-zabbix, mf-telegraf
+management.endpoints.web.path-mapping.mf-prometheus = prometheus
+```
+
+### Migrating from 5.x to 6.0
+
+- **Update your Spring Boot application to Spring Boot 4.x** (Spring Framework 7). The Metrics
+  Facade starters are built and verified against Spring Boot 4.1.1.
+- **No Metrics Facade property changes are required.** The `management.metrics.export.mf.*`
+  settings are preserved; `management.metrics.export.mf.enabled` continues to work as a disable
+  switch, and the Boot-native `management.mf.metrics.export.enabled` is also honoured.
+- **`spring-boot-starter-aop` was removed in Spring Boot 4.** If your application relied on it
+  transitively (for example to use Micrometer's `TimedAspect`), depend on
+  `org.springframework:spring-aspects` instead (version managed by the Spring Boot BOM).
+- **Moved Spring Boot auto-configuration packages.** Metrics-export and related types moved from
+  `org.springframework.boot.actuate.autoconfigure.metrics[.export...]` to
+  `org.springframework.boot.micrometer.metrics.autoconfigure[.export...]` (artifact
+  `spring-boot-micrometer-metrics`). This only matters if you referenced those Spring Boot types
+  directly (for example `MeterRegistryCustomizer` or `PrometheusOutputFormat`).
+- **Jackson 3.** Spring Boot 4 manages Jackson 3 (`tools.jackson.*`) on the application runtime
+  classpath. Metrics Facade itself depends on Jackson only at test scope and does not put Jackson
+  on your runtime classpath.
+- **Tests.** Spring Boot 4's `spring-boot-starter-test` ships only JUnit Jupiter. Modules that mix
+  JUnit 4 tests with `spring-boot-starter-test` add `org.junit.vintage:junit-vintage-engine`
+  (test scope) so the JUnit Platform still runs the JUnit 4 tests.
 
 ## Getting Started
 

@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.config.NamingConvention;
 import io.micrometer.core.instrument.distribution.*;
 import io.micrometer.core.instrument.distribution.pause.PauseDetector;
-import io.micrometer.core.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.*;

@@ -22,7 +22,7 @@ import com.ringcentral.platform.metrics.spring.zabbix.ZabbixMetricsJsonExporterC
 import com.ringcentral.platform.metrics.spring.zabbix.lld.MfZabbixLldConfigBuilder;
 import com.ringcentral.platform.metrics.spring.zabbix.lld.ZGroupMBeansExporterCustomizer;
 import com.ringcentral.platform.metrics.spring.zabbix.lld.ZabbixLldMetricsReporterCustomizer;
-import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
+import org.springframework.boot.micrometer.metrics.autoconfigure.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

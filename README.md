@@ -75,18 +75,18 @@ Starting with **6.0.0**, the Metrics Facade Spring starters target **Spring Boot
 | 6.0.x          | 4.x         | 7.x              | 17+  |
 | 5.x            | 3.x         | 6.x              | 17+  |
 
-Starter coordinates for version `6.0.0-RELEASE` (choose the ones your application needs):
+Starter coordinates for version `6.1.0-SNAPSHOT` (choose the ones your application needs):
 ```xml
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-spring-boot-starter</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus-spring-boot-starter</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -438,7 +438,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -447,7 +447,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-default-impl</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -456,7 +456,7 @@ Metrics reporter(s) (for example, ```PrometheusMetricsExporter```):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -781,7 +781,7 @@ You can find the complete sample ```GettingStartedSample.java``` in the followin
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-samples</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -1811,7 +1811,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -2002,7 +2002,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -2356,7 +2356,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -2452,7 +2452,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-RELEASE</version>
+    <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -2620,7 +2620,7 @@ Required dependency:
 <dependency>
   <groupId>com.ringcentral.platform.metrics</groupId>
   <artifactId>metrics-facade-dropwizard</artifactId>
-  <version>6.0.0-RELEASE</version>
+  <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -2695,7 +2695,7 @@ Required dependency:
 <dependency>
   <groupId>com.ringcentral.platform.metrics</groupId>
   <artifactId>metrics-facade-dropwizard-to-prometheus</artifactId>
-  <version>6.0.0-RELEASE</version>
+  <version>6.1.0-SNAPSHOT</version>
 </dependency>
 ```
 

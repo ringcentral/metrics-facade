@@ -21,6 +21,18 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
+      # Maven 3.10.0 adds maven-metadata-local.xml to the Central plugin's bundle.
+      - name: Set up Maven 3.9.16
+        run: |
+          set -euo pipefail
+          version=3.9.16
+          sha512=831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
+          url="https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${version}/apache-maven-${version}-bin.tar.gz"
+          curl -fsSL "$url" -o /tmp/apache-maven.tar.gz
+          echo "$sha512  /tmp/apache-maven.tar.gz" | sha512sum -c -
+          tar -xzf /tmp/apache-maven.tar.gz -C "$HOME"
+          echo "$HOME/apache-maven-${version}/bin" >> "$GITHUB_PATH"
+
       - name: Deploy to Maven Central
         run: mvn -B clean deploy -Pdeploy-to-maven-central
         env:

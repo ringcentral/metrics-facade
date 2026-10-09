@@ -7,6 +7,7 @@ designed to be generic and not tied to a specific implementation.*
 Table of Contents
 =================
 * [Main Features Overview](#main-features-overview)
+* [Spring Boot Integration and Compatibility](#spring-boot-integration-and-compatibility)
 * [Getting Started](#getting-started)
 * [Features](#features)
   * [Flexible Configuration](#flexible-configuration)
@@ -62,6 +63,72 @@ that is, for each labeled metric, it allows you to specify:
   if a combination has not been updated during this time, it will be automatically removed    
 
 See [Getting Started](#getting-started) for details and usage examples.      
+
+## Spring Boot Integration and Compatibility
+
+Starting with **6.0.0**, the Metrics Facade Spring starters target **Spring Boot 4** (built on
+**Spring Framework 7**). The Spring modules build against **Spring Boot 4.1.1**, which manages
+**Spring Framework 7.0.9** and **Micrometer 1.17.1**. The **Java 17** baseline is unchanged.
+
+| Metrics Facade | Spring Boot | Spring Framework | Java |
+| -------------- | ----------- | ---------------- | ---- |
+| 6.0.x          | 4.x         | 7.x              | 17+  |
+| 5.x            | 3.x         | 6.x              | 17+  |
+
+Starter coordinates for version `6.0.0-RELEASE` (choose the ones your application needs):
+```xml
+<dependency>
+    <groupId>com.ringcentral.platform.metrics</groupId>
+    <artifactId>metrics-facade-spring-boot-starter</artifactId>
+    <version>6.0.0-RELEASE</version>
+</dependency>
+
+<dependency>
+    <groupId>com.ringcentral.platform.metrics</groupId>
+    <artifactId>metrics-facade-prometheus-spring-boot-starter</artifactId>
+    <version>6.0.0-RELEASE</version>
+</dependency>
+```
+
+### Configuring the Metrics Facade registry and reporters
+
+`management.mf.metrics.export.enabled` controls whether Metrics Facade auto-configuration
+creates its `MetricRegistry` and `MfMeterRegistry` beans. When unset, it follows
+`management.defaults.metrics.export.enabled`, which defaults to `true`.
+It does not disable application-defined registry beans or reporter auto-configurations.
+If a reporter needs a `MetricRegistry`, disable that reporter separately or provide a registry bean.
+
+Reporter-specific settings use the `management.metrics.export.mf.*` prefix, e.g.:
+```properties
+management.metrics.export.mf.prometheus.enabled = true
+management.metrics.export.mf.jmx.enabled = true
+management.metrics.export.mf.zabbix.enabled = true
+management.metrics.export.mf.telegraf.enabled = true
+```
+
+For example, expose the actuator endpoints over HTTP and map their paths with:
+```properties
+management.endpoints.web.exposure.include = mf-prometheus, mf-zabbix, mf-telegraf
+management.endpoints.web.path-mapping.mf-prometheus = prometheus
+```
+
+### Migrating from 5.x to 6.0
+
+- **Update your Spring Boot application to Spring Boot 4.x** (Spring Framework 7). The Metrics
+  Facade Spring modules build against Spring Boot 4.1.1. See the
+  [Spring Boot 4 migration guide](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide)
+  for application-level changes.
+- **Registry and reporter switches keep their 5.x names.** Use
+  `management.mf.metrics.export.enabled` for the auto-configured registries and each reporter's
+  own switch, such as `management.metrics.export.mf.prometheus.enabled`, for that reporter.
+- **Review AspectJ use.** Spring Boot 4 renamed `spring-boot-starter-aop` to
+  `spring-boot-starter-aspectj`. Use the new starter if your application needs AspectJ
+  (for example for Micrometer's `TimedAspect`).
+- **Moved Spring Boot auto-configuration packages.** Metrics-export and related types moved from
+  `org.springframework.boot.actuate.autoconfigure.metrics[.export...]` to
+  `org.springframework.boot.micrometer.metrics.autoconfigure[.export...]` (artifact
+  `spring-boot-micrometer-metrics`). This only matters if you referenced those Spring Boot types
+  directly (for example `MeterRegistryCustomizer` or `PrometheusOutputFormat`).
 
 ## Getting Started
 
@@ -371,7 +438,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -380,7 +447,7 @@ Base (Core):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-default-impl</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -389,7 +456,7 @@ Metrics reporter(s) (for example, ```PrometheusMetricsExporter```):
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -714,7 +781,7 @@ You can find the complete sample ```GettingStartedSample.java``` in the followin
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-samples</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -1744,7 +1811,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-prometheus</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -1935,7 +2002,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2289,7 +2356,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2385,7 +2452,7 @@ Dependencies:
 <dependency>
     <groupId>com.ringcentral.platform.metrics</groupId>
     <artifactId>metrics-facade-base</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2553,7 +2620,7 @@ Required dependency:
 <dependency>
   <groupId>com.ringcentral.platform.metrics</groupId>
   <artifactId>metrics-facade-dropwizard</artifactId>
-  <version>6.0.0-SNAPSHOT</version>
+  <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 
@@ -2628,7 +2695,7 @@ Required dependency:
 <dependency>
   <groupId>com.ringcentral.platform.metrics</groupId>
   <artifactId>metrics-facade-dropwizard-to-prometheus</artifactId>
-  <version>6.0.0-SNAPSHOT</version>
+  <version>6.0.0-RELEASE</version>
 </dependency>
 ```
 

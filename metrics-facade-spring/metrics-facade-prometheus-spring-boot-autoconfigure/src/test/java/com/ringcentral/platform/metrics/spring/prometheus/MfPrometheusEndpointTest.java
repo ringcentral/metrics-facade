@@ -6,7 +6,7 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import org.junit.Test;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
-import org.springframework.boot.actuate.metrics.export.prometheus.PrometheusOutputFormat;
+import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusOutputFormat;
 
 import static com.ringcentral.platform.metrics.reporters.prometheus.PrometheusMetricsExporterBuilder.prometheusMetricsExporter;
 import static org.junit.Assert.assertEquals;

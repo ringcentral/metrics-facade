@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.ringcentral.platform.metrics</groupId>
         <artifactId>metrics-facade-spring</artifactId>
-        <version>5.1.0-RELEASE</version>
+        <version>6.0.0-RELEASE</version>
     </parent>
 
     <artifactId>metrics-facade-spring-boot-sample-app</artifactId>
@@ -21,9 +21,14 @@
         <!-- <app-specific-spring-boot.version>3.2.5</app-specific-spring-boot.version> -->
         <app-specific-spring-boot.version>${spring-boot.version}</app-specific-spring-boot.version>
 
-        <!-- https://github.com/spring-projects/spring-boot/issues/34708 -->
+        <!--
+          Explicit logging overrides for the sample app. Aligned with the versions
+          managed by Spring Boot 4.1.1 (SLF4J 2.0.18, Logback 1.5.38) so the sample
+          does not accidentally downgrade the Boot-managed logging stack.
+          Background: https://github.com/spring-projects/spring-boot/issues/34708
+        -->
         <app-specific-slf4j-api.version>2.0.18</app-specific-slf4j-api.version>
-        <app-specific-logback.version>1.5.32</app-specific-logback.version>
+        <app-specific-logback.version>1.5.38</app-specific-logback.version>
     </properties>
 
     <dependencyManagement>
@@ -44,9 +49,15 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!--
+          Spring Boot 4 removed spring-boot-starter-aop. The sample app registers a
+          Micrometer TimedAspect @Aspect bean, so it needs AspectJ weaving support,
+          provided here by spring-aspects (which pulls in aspectjweaver). Versions are
+          managed by the Spring Boot 4.x BOM.
+        -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
         </dependency>
 
         <dependency>

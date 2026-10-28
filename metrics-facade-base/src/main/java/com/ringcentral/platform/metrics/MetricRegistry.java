@@ -19,6 +19,7 @@ import com.ringcentral.platform.metrics.var.objectVar.configs.*;
 import com.ringcentral.platform.metrics.var.stringVar.*;
 import com.ringcentral.platform.metrics.var.stringVar.configs.*;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -27,6 +28,19 @@ public interface MetricRegistry {
 
     Map<MetricKey, Metric> metrics();
     void remove(MetricKey key);
+
+    /**
+     * Atomically removes the metric registered under {@code key} only if it is the same instance
+     * as {@code expectedMetric}. Comparison uses object identity ({@code ==}), not {@code equals}.
+     * On success, calls {@link Metric#metricRemoved()} and notifies registry listeners, as
+     * {@link #remove(MetricKey)} does. If the key is absent or refers to another instance, does nothing.
+     * <p>
+     * This protects replacement metrics, but does not distinguish callers sharing the same metric instance.
+     *
+     * @return true if {@code expectedMetric} was removed; false otherwise
+     * @throws NullPointerException if {@code key} or {@code expectedMetric} is null
+     */
+    boolean remove(@Nonnull MetricKey key, @Nonnull Metric expectedMetric);
 
     default void preConfigure(MetricNamedPredicateBuilder<?> predicateBuilder, MetricModBuilder modBuilder) {
         preConfigure(predicateBuilder.build(), modBuilder);

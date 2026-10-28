@@ -50,6 +50,7 @@ import com.ringcentral.platform.metrics.var.stringVar.configs.builders.CachingSt
 import com.ringcentral.platform.metrics.var.stringVar.configs.builders.StringVarConfigBuilder;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -267,6 +268,20 @@ public abstract class AbstractMetricRegistry implements MetricRegistry {
         if (removedMetric != null) {
             notifyMetricRemoved(key, removedMetric);
         }
+    }
+
+    @Override
+    public synchronized boolean remove(@Nonnull MetricKey key, @Nonnull Metric expectedMetric) {
+        requireNonNull(expectedMetric, "expectedMetric");
+        Metric currentMetric = metrics.get(key);
+
+        if (currentMetric != expectedMetric) {
+            return false;
+        }
+
+        metrics.remove(key);
+        notifyMetricRemoved(key, currentMetric);
+        return true;
     }
 
     @Override

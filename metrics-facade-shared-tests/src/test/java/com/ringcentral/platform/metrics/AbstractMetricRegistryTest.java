@@ -4,6 +4,7 @@ import com.ringcentral.platform.metrics.counter.Counter;
 import com.ringcentral.platform.metrics.histogram.Histogram;
 import com.ringcentral.platform.metrics.labels.Label;
 import com.ringcentral.platform.metrics.rate.Rate;
+import com.ringcentral.platform.metrics.stub.StubLongVar;
 import com.ringcentral.platform.metrics.timer.Timer;
 import com.ringcentral.platform.metrics.var.doubleVar.CachingDoubleVar;
 import com.ringcentral.platform.metrics.var.doubleVar.DoubleVar;
@@ -16,7 +17,9 @@ import com.ringcentral.platform.metrics.var.stringVar.StringVar;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static com.ringcentral.platform.metrics.MetricModBuilder.modifying;
 import static com.ringcentral.platform.metrics.PrefixLabelValuesMetricKey.withKey;
@@ -56,6 +59,7 @@ import static com.ringcentral.platform.metrics.var.stringVar.configs.builders.St
 import static junit.framework.TestCase.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
@@ -76,6 +80,189 @@ public abstract class AbstractMetricRegistryTest<R extends MetricRegistry> {
     @Before
     public void before() {
         registry.addListener(listener);
+    }
+
+    /* Removal by identity */
+
+    @Test
+    public void removeByIdentity_MatchingInstance() {
+        // given
+        MetricKey key = name("matchingInstance");
+        LongVar metric = mock(LongVar.class);
+        ((AbstractMetricRegistry)registry).getOrAddMetric(key, LongVar.class, () -> metric);
+        clearInvocations(listener, metric);
+
+        // when
+        boolean removed = registry.remove(key, metric);
+
+        // then
+        assertTrue(removed);
+        assertFalse(registry.metrics().containsKey(key));
+        verify(metric).metricRemoved();
+        verify(listener).longVarRemoved(metric);
+        verifyNoMoreInteractions(listener, metric);
+
+        // when
+        removed = registry.remove(key, metric);
+
+        // then
+        assertFalse(removed);
+        verifyNoMoreInteractions(listener, metric);
+    }
+
+    @Test
+    public void removeByIdentity_AbsentKey() {
+        // given
+        MetricKey key = name("missing");
+        Metric metric = mock(Metric.class);
+
+        // when
+        boolean removed = registry.remove(key, metric);
+
+        // then
+        assertFalse(removed);
+        assertTrue(registry.metrics().isEmpty());
+        verifyNoInteractions(listener, metric);
+    }
+
+    @Test
+    public void removeByIdentity_NullKey() {
+        // given
+        MetricKey key = name("registered");
+        LongVar metric = registry.newLongVar(key, () -> 1L);
+        clearInvocations(listener);
+
+        // when
+        assertThrows(NullPointerException.class, () -> registry.remove(null, metric));
+
+        // then
+        assertSame(metric, registry.metrics().get(key));
+        verifyNoInteractions(listener);
+    }
+
+    @Test
+    public void removeByIdentity_NullExpectedMetric_AbsentKey() {
+        // given
+        MetricKey key = name("missing");
+
+        // when
+        NullPointerException e = assertThrows(NullPointerException.class, () -> registry.remove(key, null));
+
+        // then
+        assertEquals("expectedMetric", e.getMessage());
+        assertTrue(registry.metrics().isEmpty());
+        verifyNoInteractions(listener);
+    }
+
+    @Test
+    public void removeByIdentity_NullExpectedMetric_RegisteredKey() {
+        // given
+        MetricKey key = name("registered");
+        LongVar metric = registry.newLongVar(key, () -> 1L);
+        clearInvocations(listener);
+
+        // when
+        NullPointerException e = assertThrows(NullPointerException.class, () -> registry.remove(key, null));
+
+        // then
+        assertEquals("expectedMetric", e.getMessage());
+        assertSame(metric, registry.metrics().get(key));
+        verifyNoInteractions(listener);
+    }
+
+    @Test
+    public void removeByIdentity_ReplacedInstance() {
+        // given
+        MetricKey key = name("replacement");
+        LongVar oldMetric = mock(LongVar.class);
+        LongVar replacementMetric = mock(LongVar.class);
+        ((AbstractMetricRegistry)registry).getOrAddMetric(key, LongVar.class, () -> oldMetric);
+        ((AbstractMetricRegistry)registry).replaceOrAddMetric(key, LongVar.class, replacementMetric);
+        clearInvocations(listener, oldMetric, replacementMetric);
+
+        // when
+        boolean removed = registry.remove(key, oldMetric);
+
+        // then
+        assertFalse(removed);
+        assertSame(replacementMetric, registry.metrics().get(key));
+        verifyNoInteractions(listener, oldMetric, replacementMetric);
+
+        // when
+        removed = registry.remove(key, replacementMetric);
+
+        // then
+        assertTrue(removed);
+        assertFalse(registry.metrics().containsKey(key));
+        verify(replacementMetric).metricRemoved();
+        verify(listener).longVarRemoved(replacementMetric);
+        verifyNoMoreInteractions(listener, oldMetric, replacementMetric);
+    }
+
+    @Test
+    public void removeByIdentity_PrefixLabelValuesKey() {
+        // given
+        MetricKey firstKey = withKey(name("labeledRemoval"), labelValues(LABEL_1.value("first")));
+        MetricKey secondKey = withKey(name("labeledRemoval"), labelValues(LABEL_1.value("second")));
+        LongVar firstMetric = registry.newLongVar(firstKey, () -> 1L);
+        LongVar secondMetric = registry.newLongVar(secondKey, () -> 2L);
+        clearInvocations(listener);
+
+        // when
+        boolean removed = registry.remove(firstKey, firstMetric);
+
+        // then
+        assertTrue(removed);
+        assertFalse(registry.metrics().containsKey(firstKey));
+        assertSame(secondMetric, registry.metrics().get(secondKey));
+        verify(listener).longVarRemoved(firstMetric);
+        verifyNoMoreInteractions(listener);
+    }
+
+    @Test
+    public void removeByIdentity_EqualButDistinctInstance() {
+        // given
+        MetricKey key = name("equalMetrics");
+
+        class EqualLongVar extends StubLongVar {
+            EqualLongVar() {
+                super(key.name(), withLongVar().disable().build(), () -> 1L, mock(ScheduledExecutorService.class));
+            }
+
+            @Override
+            public boolean equals(@Nullable Object other) {
+                return other != null && other.getClass() == getClass();
+            }
+
+            @Override
+            public int hashCode() {
+                return 1;
+            }
+        }
+
+        LongVar currentMetric = new EqualLongVar();
+        LongVar equalMetric = new EqualLongVar();
+        ((AbstractMetricRegistry)registry).getOrAddMetric(key, LongVar.class, () -> currentMetric);
+        clearInvocations(listener);
+        assertNotSame(currentMetric, equalMetric);
+        assertEquals(currentMetric, equalMetric);
+
+        // when
+        boolean removed = registry.remove(key, equalMetric);
+
+        // then
+        assertFalse(removed);
+        assertSame(currentMetric, registry.metrics().get(key));
+        verifyNoInteractions(listener);
+
+        // when
+        removed = registry.remove(key, currentMetric);
+
+        // then
+        assertTrue(removed);
+        assertFalse(registry.metrics().containsKey(key));
+        verify(listener).longVarRemoved(currentMetric);
+        verifyNoMoreInteractions(listener);
     }
 
     /* Object var */
